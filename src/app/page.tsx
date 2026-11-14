@@ -19,48 +19,73 @@ import {
   BarChart3,
   Layers,
   ArrowRight,
+  Flame,
+  ChevronDown,
+  Menu,
+  X,
+  Target,
+  Sparkles,
+  Info,
 } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
 
-// Refined House Metadata with subtle championship accents
+// Refined House Metadata with signature identity
 const HOUSE_METADATA: Record<
   string,
   {
     code: string;
     name: string;
     accentColor: string;
+    darkAccent: string;
+    lightBg: string;
     motto: string;
+    tagline: string;
   }
 > = {
   ALP: {
     code: 'ALP',
     name: 'Alpha',
-    accentColor: '#38BDF8',
+    accentColor: '#0284C7', // Deep Cyan/Sky
+    darkAccent: '#0C4A6E',
+    lightBg: '#F0F9FF',
     motto: 'The First & The Fierce',
+    tagline: 'Precision and speed across all tournament arenas',
   },
   CRW: {
     code: 'CRW',
     name: 'Crown Crushers',
-    accentColor: '#C5A04A',
+    accentColor: '#C6A04A', // Championship Gold
+    darkAccent: '#785A1D',
+    lightBg: '#FEFCE8',
     motto: 'Royalty in Every Arena',
+    tagline: 'Reigning power in team tactics and individual showdowns',
   },
   DOM: {
     code: 'DOM',
     name: 'Dominator',
-    accentColor: '#F87171',
+    accentColor: '#DC2626', // Crimson Ruby
+    darkAccent: '#7F1D1D',
+    lightBg: '#FEF2F2',
     motto: 'Unstoppable Force',
+    tagline: 'Relentless drive, unyielding defense, and aggressive grit',
   },
   MAV: {
     code: 'MAV',
     name: 'Mavericks',
-    accentColor: '#34D399',
+    accentColor: '#059669', // Emerald Jade
+    darkAccent: '#064E3B',
+    lightBg: '#ECFDF5',
     motto: 'Defying Every Limit',
+    tagline: 'Tactical agility and strategic depth across every sport',
   },
   RYL: {
     code: 'RYL',
     name: 'Royal Force',
-    accentColor: '#A78BFA',
+    accentColor: '#7C3AED', // Royal Violet
+    darkAccent: '#4C1D95',
+    lightBg: '#F5F3FF',
     motto: 'Power, Precision, Pride',
+    tagline: 'Regal spirit built on decades of sportsmanship',
   },
 };
 
@@ -73,24 +98,24 @@ const INITIAL_HOUSES = [
 ];
 
 const INITIAL_SPORTS = [
-  { id: 'sport-bgmi', name: 'BGMI', category: 'Esports', sportType: 'SQUAD', tournamentFormat: 'Battle Royale', numRounds: 3, allowsMixedClubs: true },
-  { id: 'sport-cricket', name: 'Cricket', category: 'Outdoor Team', sportType: 'TEAM', tournamentFormat: 'T20 Knockout', numRounds: 4, allowsMixedClubs: false },
-  { id: 'sport-football', name: 'Football', category: 'Outdoor Team', sportType: 'TEAM', tournamentFormat: 'League + Knockout', numRounds: 4, allowsMixedClubs: false },
-  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', sportType: 'SINGLES_DOUBLES', tournamentFormat: 'Best of 3 Sets', numRounds: 5, allowsMixedClubs: false },
-  { id: 'sport-chess', name: 'Chess', category: 'Strategy', sportType: 'INDIVIDUAL', tournamentFormat: 'Rapid Swiss System', numRounds: 5, allowsMixedClubs: false },
-  { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', sportType: 'SINGLES_DOUBLES', tournamentFormat: 'Single Elimination', numRounds: 5, allowsMixedClubs: false },
-  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor Precision', sportType: 'SINGLES_DOUBLES', tournamentFormat: 'Point Board Format', numRounds: 4, allowsMixedClubs: false },
+  { id: 'sport-cricket', name: 'Cricket', category: 'Outdoor Team', sportType: 'TEAM', tournamentFormat: 'T20 Knockout', numRounds: 4, allowsMixedClubs: false, maxPoints: 120, highlight: '10 House Franchises Clashing' },
+  { id: 'sport-football', name: 'Football', category: 'Outdoor Team', sportType: 'TEAM', tournamentFormat: 'League + Knockout', numRounds: 4, allowsMixedClubs: false, maxPoints: 100, highlight: 'Full Pitch 11v11 Tournament' },
+  { id: 'sport-bgmi', name: 'BGMI', category: 'Esports', sportType: 'SQUAD', tournamentFormat: 'Battle Royale', numRounds: 3, allowsMixedClubs: true, maxPoints: 100, highlight: 'Erangel & Miramar Multi-Squad' },
+  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', sportType: 'SINGLES_DOUBLES', tournamentFormat: 'Best of 3 Sets', numRounds: 5, allowsMixedClubs: false, maxPoints: 80, highlight: 'Indoor Court Singles & Doubles' },
+  { id: 'sport-chess', name: 'Chess', category: 'Strategy', sportType: 'INDIVIDUAL', tournamentFormat: 'Rapid Swiss System', numRounds: 5, allowsMixedClubs: false, maxPoints: 70, highlight: 'Grandmaster Time Controls' },
+  { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', sportType: 'SINGLES_DOUBLES', tournamentFormat: 'Single Elimination', numRounds: 5, allowsMixedClubs: false, maxPoints: 60, highlight: 'Rapid Pace Spin & Reflexes' },
+  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor Precision', sportType: 'SINGLES_DOUBLES', tournamentFormat: 'Point Board Format', numRounds: 4, allowsMixedClubs: false, maxPoints: 50, highlight: 'Precision Striker Showdowns' },
 ];
 
 export default function PublicViewerPortal() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'standings' | 'houses' | 'sports' | 'schedule' | 'results'>('standings');
   const [standingsView, setStandingsView] = useState<'podium' | 'table' | 'matrix'>('podium');
   const [sportFilter, setSportFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchPublicOverview();
@@ -116,6 +141,23 @@ export default function PublicViewerPortal() {
     setRefreshing(true);
     fetchPublicOverview();
     setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  };
+
+  const scrollToSection = (id: string) => {
+    setMobileMenuOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 80;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   };
 
   const championship = data?.championship;
@@ -147,14 +189,14 @@ export default function PublicViewerPortal() {
     : upcomingMatches;
 
   return (
-    <div className="min-h-screen bg-[#080B10] text-[#F1EFE8] flex flex-col selection:bg-[#C5A04A] selection:text-[#080B10] antialiased">
+    <div className="min-h-screen bg-[#080A0E] text-[#F4F1E9] flex flex-col selection:bg-[#C6A04A] selection:text-[#080A0E] antialiased">
       {/* ========================================================= */}
-      {/* 1. PUBLIC HEADER (CLEAN, SOPHISTICATED NAVIGATION)        */}
+      {/* TOP NAVIGATION BAR                                        */}
       {/* ========================================================= */}
-      <header className="sticky top-0 z-50 bg-[#080B10]/95 backdrop-blur-md border-b border-[#252B34] px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
-        {/* Brand Showcase */}
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#10151D] border border-[#252B34] p-1 flex items-center justify-center shrink-0">
+      <header className="sticky top-0 z-50 bg-[#080A0E]/95 backdrop-blur-md border-b border-[#252B34] px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
+        {/* Brand Identity */}
+        <div className="flex items-center gap-3.5 cursor-pointer" onClick={() => scrollToSection('hero')}>
+          <div className="w-11 h-11 rounded-xl bg-[#141820] border border-[#C6A04A]/40 p-1 flex items-center justify-center shrink-0 shadow-sm">
             <img
               src="/logo.png"
               alt="APL Season 9 Logo"
@@ -163,215 +205,271 @@ export default function PublicViewerPortal() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#F1EFE8]">
-                APL <span className="text-[#C5A04A]">Season 9</span>
+              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-white">
+                APL <span className="text-[#C6A04A]">Season 9</span>
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#141820] text-[#C6A04A] border border-[#C6A04A]/30">
                 Championship
               </span>
             </div>
-            <p className="text-[11px] text-[#9299A5] hidden sm:block">
-              Inter-Club House Championship • 5 Houses • 10 Cricket Teams • 7 Sports
+            <p className="text-[11px] text-[#A4A8B0] hidden sm:block">
+              Official Inter-Club Public Portal • 5 Houses • 10 Cricket Teams • 7 Sports
             </p>
           </div>
         </div>
 
-        {/* Desktop Navigation Tabs */}
-        <nav className="hidden lg:flex items-center gap-1 bg-[#10151D] p-1 rounded-xl border border-[#252B34]">
+        {/* Section Quick Jump Navigation (Desktop) */}
+        <nav className="hidden lg:flex items-center gap-1.5 bg-[#141820] p-1.5 rounded-xl border border-[#252B34]">
           <button
-            onClick={() => setActiveTab('standings')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'standings'
-                ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold shadow-xs'
-                : 'text-[#9299A5] hover:text-[#F1EFE8] hover:bg-white/[0.02]'
-            }`}
+            onClick={() => scrollToSection('overview')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-white/[0.04] transition"
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => scrollToSection('leaderboard')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#C6A04A] bg-[#080A0E] border border-[#C6A04A]/30 transition shadow-xs"
           >
             Leaderboard
           </button>
           <button
-            onClick={() => setActiveTab('houses')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'houses'
-                ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold shadow-xs'
-                : 'text-[#9299A5] hover:text-[#F1EFE8] hover:bg-white/[0.02]'
-            }`}
+            onClick={() => scrollToSection('houses')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-white/[0.04] transition"
           >
             The 5 Houses
           </button>
           <button
-            onClick={() => setActiveTab('sports')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'sports'
-                ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold shadow-xs'
-                : 'text-[#9299A5] hover:text-[#F1EFE8] hover:bg-white/[0.02]'
-            }`}
+            onClick={() => scrollToSection('sports')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-white/[0.04] transition"
           >
-            7 Sports
+            7 Sports Arena
           </button>
           <button
-            onClick={() => setActiveTab('schedule')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'schedule'
-                ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold shadow-xs'
-                : 'text-[#9299A5] hover:text-[#F1EFE8] hover:bg-white/[0.02]'
-            }`}
+            onClick={() => scrollToSection('matches')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-white/[0.04] transition"
           >
             Match Radar
           </button>
           <button
-            onClick={() => setActiveTab('results')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'results'
-                ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold shadow-xs'
-                : 'text-[#9299A5] hover:text-[#F1EFE8] hover:bg-white/[0.02]'
-            }`}
+            onClick={() => scrollToSection('results')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-white/[0.04] transition"
           >
-            Approved Scores
+            Results
+          </button>
+          <button
+            onClick={() => scrollToSection('points-system')}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-white/[0.04] transition"
+          >
+            Points Engine
           </button>
         </nav>
 
-        {/* Live Status and Refresh */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#10151D] border border-[#252B34] text-[#9299A5] text-xs">
+        {/* Live Refresh & Mobile Menu Toggle */}
+        <div className="flex items-center gap-2.5">
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141820] border border-[#252B34] text-[#A4A8B0] text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span>Live Standings</span>
           </div>
 
           <button
             onClick={handleRefresh}
-            className="p-2 text-[#9299A5] hover:text-[#F1EFE8] hover:bg-[#10151D] rounded-lg transition border border-[#252B34] active:scale-95"
+            className="p-2 text-[#A4A8B0] hover:text-white hover:bg-[#141820] rounded-lg transition border border-[#252B34] active:scale-95"
             title={`Last refreshed at ${lastRefreshed}`}
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#C5A04A]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#C6A04A]' : ''}`} />
+          </button>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 text-[#A4A8B0] hover:text-white bg-[#141820] border border-[#252B34] rounded-lg transition"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </header>
 
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden sticky top-[69px] z-40 bg-[#080A0E] border-b border-[#252B34] p-4 space-y-2">
+          <button
+            onClick={() => scrollToSection('overview')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-[#141820]"
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => scrollToSection('leaderboard')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#C6A04A] bg-[#141820]"
+          >
+            Leaderboard
+          </button>
+          <button
+            onClick={() => scrollToSection('houses')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-[#141820]"
+          >
+            The 5 Houses
+          </button>
+          <button
+            onClick={() => scrollToSection('sports')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-[#141820]"
+          >
+            7 Sports Arena
+          </button>
+          <button
+            onClick={() => scrollToSection('matches')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-[#141820]"
+          >
+            Match Radar
+          </button>
+          <button
+            onClick={() => scrollToSection('results')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-[#141820]"
+          >
+            Approved Scores
+          </button>
+          <button
+            onClick={() => scrollToSection('points-system')}
+            className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-semibold text-[#A4A8B0] hover:text-white hover:bg-[#141820]"
+          >
+            Points Division Engine
+          </button>
+        </div>
+      )}
+
       {/* ========================================================= */}
-      {/* 2. REFINED HERO SECTION (EDITORIAL CHAMPIONSHIP FEEL)     */}
+      {/* SECTION A: CHAMPIONSHIP HERO (DARK & BOLD)                */}
       {/* ========================================================= */}
-      <section className="relative pt-10 pb-14 px-4 sm:px-8 border-b border-[#252B34] bg-gradient-to-b from-[#0D1117] via-[#090C12] to-[#080B10]">
-        <div className="max-w-7xl mx-auto">
+      <section id="hero" className="relative pt-12 pb-20 px-4 sm:px-8 border-b border-[#252B34] bg-gradient-to-b from-[#080A0E] via-[#0E121A] to-[#080A0E] overflow-hidden">
+        {/* Subtle Geometric Graphic Accent */}
+        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-[#C6A04A]/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
           {isClosed && championClub ? (
-            /* CONCLUDED CHAMPIONSHIP SUMMARY */
-            <div className="rounded-2xl bg-[#10151D] border border-[#C5A04A]/40 p-8 sm:p-12 text-[#F1EFE8]">
+            /* OFFICIAL CONCLUDED CHAMPION BANNER */
+            <div className="rounded-3xl bg-[#141820] border-2 border-[#C6A04A] p-8 sm:p-14 text-white relative overflow-hidden shadow-2xl">
               <div className="max-w-2xl space-y-4">
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#C5A04A] uppercase tracking-wider">
-                  <Crown className="w-4 h-4 text-[#C5A04A]" />
-                  Championship Concluded
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080A0E] border border-[#C6A04A]/40 text-[#C6A04A] text-xs font-bold uppercase tracking-wider">
+                  <Crown className="w-4 h-4 text-[#C6A04A]" />
+                  Tournament Champions Declared
                 </span>
-                <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-[#F1EFE8]">
-                  {championClub.name} crowned <span className="text-[#C5A04A]">Champions</span>
+                <h1 className="font-serif text-4xl sm:text-6xl font-bold tracking-tight text-white">
+                  {championClub.name} <span className="text-[#C6A04A]">Victorious</span>
                 </h1>
-                <p className="text-sm sm:text-base text-[#9299A5] leading-relaxed">
-                  The APL Season 9 Inter-Club House Championship has officially drawn to a close. Demonstrating elite consistency across all 7 sports, {championClub.name} finishes atop the leaderboard with {Number(championClub.totalPoints).toFixed(2)} total points.
+                <p className="text-sm sm:text-base text-[#A4A8B0] leading-relaxed">
+                  The APL Season 9 Inter-Club House Championship has officially completed. Through exceptional teamwork across all 7 sports, {championClub.name} claims the championship trophy with a total of {Number(championClub.totalPoints).toFixed(2)} points!
                 </p>
                 <button
-                  onClick={() => setActiveTab('standings')}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-[#C5A04A] hover:bg-[#B38F3A] text-[#080B10] font-semibold text-xs tracking-wide transition flex items-center gap-2"
+                  onClick={() => scrollToSection('leaderboard')}
+                  className="mt-2 px-6 py-3 rounded-xl bg-[#C6A04A] hover:bg-[#94712B] text-[#080A0E] font-bold text-xs uppercase tracking-wider transition flex items-center gap-2"
                 >
-                  <Trophy className="w-3.5 h-3.5 text-[#080B10]" />
-                  <span>View Full Table</span>
+                  <Trophy className="w-4 h-4" />
+                  <span>View Full Standings</span>
                 </button>
               </div>
             </div>
           ) : (
-            /* ACTIVE TOURNAMENT HERO */
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              {/* Left Column: Prestigious Typography & Statistics */}
+            /* ACTIVE TOURNAMENT HERO COMPOSITION */
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              {/* Left Column: Expressive Headline & Details */}
               <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#10151D] border border-[#252B34] text-xs text-[#C5A04A] font-semibold tracking-wide">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C5A04A]" />
-                  <span>APL SEASON 9 • MAIN ARENA • NOV 25 – 28, 2026</span>
+                {/* Official Tagline Badge */}
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#141820] border border-[#C6A04A]/30 text-xs text-[#C6A04A] font-semibold tracking-wider uppercase">
+                  <span className="w-2 h-2 rounded-full bg-[#C6A04A]" />
+                  <span>OFFICIAL INTER-CLUB TOURNAMENT • NOV 25 – 28, 2026</span>
                 </div>
 
+                {/* Main Headline */}
                 <div className="space-y-3">
-                  <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.12] text-[#F1EFE8]">
-                    Inter-Club <span className="text-[#C5A04A]">House Championship</span>
+                  <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white">
+                    Inter-Club <br />
+                    <span className="text-[#C6A04A]">House Championship</span>
                   </h1>
-                  <p className="text-sm sm:text-base text-[#9299A5] max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                    Official tournament standings and multi-sport leaderboard across 5 houses and 10 cricket teams, calculated using the certified unique-club equal division system.
+                  <div className="w-24 h-1 bg-[#C6A04A] mx-auto lg:mx-0 my-3" />
+                  <p className="text-base sm:text-lg text-[#A4A8B0] max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                    Follow real-time house standings across 7 sports and 10 cricket teams. Built on certified unique-club equal division scoring.
                   </p>
                 </div>
 
-                {/* 4 Statistics Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                  <div className="p-3.5 rounded-xl bg-[#10151D] border border-[#252B34] text-left">
-                    <span className="text-[10px] font-semibold uppercase text-[#9E813E] tracking-wider block">Houses</span>
-                    <span className="font-serif text-2xl font-bold text-[#F1EFE8] mt-0.5 block">5</span>
-                    <p className="text-[11px] text-[#9299A5] mt-0.5">Alpha to Royal</p>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-[#10151D] border border-[#252B34] text-left">
-                    <span className="text-[10px] font-semibold uppercase text-[#9E813E] tracking-wider block">Cricket</span>
-                    <span className="font-serif text-2xl font-bold text-[#F1EFE8] mt-0.5 block">10</span>
-                    <p className="text-[11px] text-[#9299A5] mt-0.5">A & B Squads</p>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-[#10151D] border border-[#252B34] text-left">
-                    <span className="text-[10px] font-semibold uppercase text-[#9E813E] tracking-wider block">Sports</span>
-                    <span className="font-serif text-2xl font-bold text-[#F1EFE8] mt-0.5 block">7</span>
-                    <p className="text-[11px] text-[#9299A5] mt-0.5">Multi-Discipline</p>
-                  </div>
-                  <div className="p-3.5 rounded-xl bg-[#10151D] border border-[#252B34] text-left">
-                    <span className="text-[10px] font-semibold uppercase text-[#9E813E] tracking-wider block">System</span>
-                    <span className="font-serif text-lg font-bold text-[#F1EFE8] mt-1 block">Equal Split</span>
-                    <p className="text-[11px] text-[#9299A5] mt-0.5">Unique-Club</p>
-                  </div>
+                {/* Key Venue & Date Line */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-[#A4A8B0] pt-1">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Calendar className="w-4 h-4 text-[#C6A04A]" />
+                    November 25 – 28, 2026
+                  </span>
+                  <span className="hidden sm:inline text-[#252B34]">•</span>
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <MapPin className="w-4 h-4 text-[#C6A04A]" />
+                    Main Sports Complex Arena
+                  </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-3">
                   <button
-                    onClick={() => setActiveTab('standings')}
-                    className="px-5 py-2.5 rounded-xl bg-[#C5A04A] hover:bg-[#B38F3A] text-[#080B10] font-semibold text-xs tracking-wide transition flex items-center gap-2 active:scale-95"
+                    onClick={() => scrollToSection('leaderboard')}
+                    className="px-6 py-3.5 rounded-xl bg-[#C6A04A] hover:bg-[#94712B] text-[#080A0E] font-bold text-xs uppercase tracking-wider transition flex items-center gap-2 shadow-sm active:scale-95"
                   >
-                    <Trophy className="w-3.5 h-3.5 text-[#080B10]" />
+                    <Trophy className="w-4 h-4 text-[#080A0E]" />
                     <span>View Live Leaderboard</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#080B10]" />
+                    <ArrowRight className="w-4 h-4 text-[#080A0E]" />
                   </button>
                   <button
-                    onClick={() => setActiveTab('houses')}
-                    className="px-4 py-2.5 rounded-xl bg-[#141A23] hover:bg-[#1A222E] border border-[#252B34] text-[#F1EFE8] font-medium text-xs tracking-wide transition active:scale-95"
+                    onClick={() => scrollToSection('houses')}
+                    className="px-5 py-3.5 rounded-xl bg-[#141820] hover:bg-[#1C222E] border border-[#C6A04A]/40 text-[#F4F1E9] font-bold text-xs uppercase tracking-wider transition active:scale-95"
                   >
                     Explore The 5 Houses
                   </button>
                 </div>
               </div>
 
-              {/* Right Column: Clean Trophy Showcase & Leading House Card */}
+              {/* Right Column: Layered Trophy Card & Tournament Leader */}
               <div className="lg:col-span-5 flex flex-col items-center justify-center">
-                <div className="w-full max-w-sm rounded-2xl bg-[#10151D] border border-[#252B34] p-6 text-center space-y-5 shadow-sm">
-                  {/* Trophy Image Display without glow */}
-                  <div className="relative py-2 flex items-center justify-center">
+                <div className="w-full max-w-md rounded-3xl bg-[#141820] border border-[#252B34] p-7 text-center space-y-6 shadow-2xl relative">
+                  {/* Subtle Corner Accent */}
+                  <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#080A0E] border border-[#C6A04A]/30 text-[10px] font-bold text-[#C6A04A] uppercase tracking-wider">
+                    APL Season 9
+                  </div>
+
+                  {/* Trophy Visual */}
+                  <div className="relative py-4 flex items-center justify-center">
                     <img
                       src="/logo.png"
-                      alt="Official APL Golden Trophy"
-                      className="w-44 h-44 object-contain select-none"
+                      alt="APL Championship Trophy"
+                      className="w-48 h-48 sm:w-56 sm:h-56 object-contain select-none"
                     />
                   </div>
 
-                  {/* Clean Ranking Card */}
-                  <div className="p-4 rounded-xl bg-[#141A23] border border-[#252B34] text-left">
+                  {/* Leading Club Highlight Card */}
+                  <div className="p-4 rounded-2xl bg-[#080A0E] border border-[#C6A04A]/30 text-left">
                     <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9E813E]">
-                        Tournament Leader
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#C6A04A] flex items-center gap-1.5">
+                        <Flame className="w-3.5 h-3.5 text-[#C6A04A]" />
+                        Current Tournament Leader
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#10151D] text-[#C5A04A] border border-[#C5A04A]/30">
-                        Seed #1
+                      <span className="px-2 py-0.5 rounded text-[10px] font-black bg-[#C6A04A] text-[#080A0E]">
+                        RANK #1
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between pt-1">
-                      <div>
-                        <h4 className="font-serif font-bold text-[#F1EFE8] text-lg">
-                          {leadingHouse?.name || 'Alpha'}
-                        </h4>
-                        <span className="text-xs text-[#9299A5]">
-                          Captain: {leadingHouse?.captainName || 'Ethan Hunt'}
-                        </span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#141820] border border-[#C6A04A]/40 flex items-center justify-center font-serif font-black text-[#C6A04A] text-sm">
+                          {leadingHouse?.code || 'ALP'}
+                        </div>
+                        <div>
+                          <h4 className="font-serif font-bold text-white text-lg">
+                            {leadingHouse?.name || 'Alpha'}
+                          </h4>
+                          <span className="text-xs text-[#A4A8B0]">
+                            Captain: {leadingHouse?.captainName || 'Ethan Hunt'}
+                          </span>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] text-[#9299A5] block uppercase">Points</span>
-                        <span className="font-mono font-bold text-lg text-[#C5A04A]">
+                        <span className="text-[10px] text-[#A4A8B0] block uppercase font-medium">Points</span>
+                        <span className="font-mono font-black text-xl text-[#C6A04A]">
                           {leadingHouse ? `${Number(leadingHouse.totalPoints).toFixed(2)}` : '0.00'}
                         </span>
                       </div>
@@ -385,704 +483,871 @@ export default function PublicViewerPortal() {
       </section>
 
       {/* ========================================================= */}
-      {/* 3. MOBILE NAVIGATION TABS (TOUCH-FRIENDLY PILLS)          */}
+      {/* SECTION B: CHAMPIONSHIP OVERVIEW (IVORY / LIGHT CONTRAST) */}
       {/* ========================================================= */}
-      <div className="lg:hidden sticky top-[65px] z-40 bg-[#080B10] border-b border-[#252B34] px-4 py-2.5 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-        <button
-          onClick={() => setActiveTab('standings')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-            activeTab === 'standings' ? 'bg-[#C5A04A] text-[#080B10] font-semibold' : 'text-[#9299A5] bg-[#10151D]'
-          }`}
-        >
-          Leaderboard
-        </button>
-        <button
-          onClick={() => setActiveTab('houses')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-            activeTab === 'houses' ? 'bg-[#C5A04A] text-[#080B10] font-semibold' : 'text-[#9299A5] bg-[#10151D]'
-          }`}
-        >
-          The 5 Houses
-        </button>
-        <button
-          onClick={() => setActiveTab('sports')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-            activeTab === 'sports' ? 'bg-[#C5A04A] text-[#080B10] font-semibold' : 'text-[#9299A5] bg-[#10151D]'
-          }`}
-        >
-          7 Sports
-        </button>
-        <button
-          onClick={() => setActiveTab('schedule')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-            activeTab === 'schedule' ? 'bg-[#C5A04A] text-[#080B10] font-semibold' : 'text-[#9299A5] bg-[#10151D]'
-          }`}
-        >
-          Match Radar
-        </button>
-        <button
-          onClick={() => setActiveTab('results')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-            activeTab === 'results' ? 'bg-[#C5A04A] text-[#080B10] font-semibold' : 'text-[#9299A5] bg-[#10151D]'
-          }`}
-        >
-          Approved Scores
-        </button>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 4. MAIN CONTENT ARENA                                     */}
-      {/* ========================================================= */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
-        {/* ======================================================= */}
-        {/* TAB 1: LIVE STANDINGS & REFINED PODIUM MATRIX          */}
-        {/* ======================================================= */}
-        {activeTab === 'standings' && (
-          <div className="space-y-8">
-            {/* View Switcher and Search */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-[#10151D] border border-[#252B34]">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-[#9299A5] ml-1">View Format:</span>
-                <div className="flex items-center bg-[#080B10] p-1 rounded-lg border border-[#252B34]">
-                  <button
-                    onClick={() => setStandingsView('podium')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 ${
-                      standingsView === 'podium'
-                        ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold'
-                        : 'text-[#9299A5] hover:text-[#F1EFE8]'
-                    }`}
-                  >
-                    <Trophy className="w-3.5 h-3.5 text-[#C5A04A]" />
-                    <span>Podium & Cards</span>
-                  </button>
-                  <button
-                    onClick={() => setStandingsView('table')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 ${
-                      standingsView === 'table'
-                        ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold'
-                        : 'text-[#9299A5] hover:text-[#F1EFE8]'
-                    }`}
-                  >
-                    <BarChart3 className="w-3.5 h-3.5 text-[#9299A5]" />
-                    <span>Full Standings</span>
-                  </button>
-                  <button
-                    onClick={() => setStandingsView('matrix')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 ${
-                      standingsView === 'matrix'
-                        ? 'bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30 font-semibold'
-                        : 'text-[#9299A5] hover:text-[#F1EFE8]'
-                    }`}
-                  >
-                    <Layers className="w-3.5 h-3.5 text-[#9299A5]" />
-                    <span>7-Sport Matrix</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Clean Search Input */}
-              <div className="relative w-full sm:w-64">
-                <Search className="w-3.5 h-3.5 text-[#9299A5] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by house or captain..."
-                  className="w-full pl-9 pr-3 py-1.5 bg-[#080B10] border border-[#252B34] rounded-lg text-xs text-[#F1EFE8] placeholder-[#9299A5] focus:outline-none focus:border-[#C5A04A] transition"
-                />
-              </div>
-            </div>
-
-            {/* REFINED 3D PODIUM & CARDS */}
-            {standingsView === 'podium' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-end pt-2">
-                  {/* 2nd Place: Silver Runner-Up */}
-                  {rawStandings[1] && (
-                    <article className="order-2 md:order-1 rounded-2xl bg-[#10151D] border border-[#252B34] p-5 text-center">
-                      <div className="w-9 h-9 rounded-lg bg-[#141A23] border border-[#252B34] text-[#F1EFE8] font-serif font-bold text-sm flex items-center justify-center mx-auto mb-2.5">
-                        2
-                      </div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9299A5]">
-                        Second Place
-                      </span>
-                      <h3 className="font-serif text-xl font-bold text-[#F1EFE8] mt-0.5">{rawStandings[1].name}</h3>
-                      <p className="text-xs text-[#9299A5]">Captain: {rawStandings[1].captainName || 'Senior Captain'}</p>
-
-                      <div className="flex items-center justify-center gap-1.5 my-3 flex-wrap">
-                        {rawStandings[1].cricketTeams?.map((ct: any) => (
-                          <span key={ct.id} className="px-2 py-0.5 rounded bg-[#141A23] border border-[#252B34] text-[10px] text-[#9299A5]">
-                            {ct.name}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="pt-3 border-t border-[#252B34] flex items-center justify-between text-xs">
-                        <span className="text-[#9299A5] uppercase font-medium">Total Points</span>
-                        <span className="font-mono font-bold text-base text-[#F1EFE8]">
-                          {Number(rawStandings[1].totalPoints).toFixed(2)} pts
-                        </span>
-                      </div>
-                    </article>
-                  )}
-
-                  {/* 1st Place: Gold Leader (Featured) */}
-                  {rawStandings[0] && (
-                    <article className="order-1 md:order-2 rounded-2xl bg-[#10151D] border-2 border-[#C5A04A]/60 p-6 text-center md:-translate-y-2">
-                      <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#141A23] border border-[#C5A04A]/40 text-[#C5A04A] text-[10px] font-semibold uppercase tracking-wider mb-2">
-                        <Crown className="w-3 h-3 text-[#C5A04A]" />
-                        <span>Leader</span>
-                      </div>
-
-                      <div className="w-11 h-11 rounded-xl bg-[#141A23] border border-[#C5A04A] text-[#C5A04A] font-serif font-bold text-lg flex items-center justify-center mx-auto mb-2">
-                        1
-                      </div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9E813E]">
-                        Tournament Leader
-                      </span>
-                      <h3 className="font-serif text-2xl font-bold text-[#F1EFE8] mt-0.5">{rawStandings[0].name}</h3>
-                      <p className="text-xs text-[#9299A5]">Senior Captain: {rawStandings[0].captainName || 'Ethan Hunt'}</p>
-
-                      <div className="flex items-center justify-center gap-1.5 my-3.5 flex-wrap">
-                        {rawStandings[0].cricketTeams?.map((ct: any) => (
-                          <span key={ct.id} className="px-2.5 py-0.5 rounded bg-[#141A23] border border-[#C5A04A]/30 text-[10px] text-[#C5A04A]">
-                            {ct.name}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="pt-3.5 border-t border-[#252B34] flex items-center justify-between text-xs">
-                        <span className="text-[#9299A5] uppercase font-medium">Championship Points</span>
-                        <span className="font-mono font-bold text-xl text-[#C5A04A]">
-                          {Number(rawStandings[0].totalPoints).toFixed(2)} pts
-                        </span>
-                      </div>
-                    </article>
-                  )}
-
-                  {/* 3rd Place: Bronze Contender */}
-                  {rawStandings[2] && (
-                    <article className="order-3 rounded-2xl bg-[#10151D] border border-[#252B34] p-5 text-center">
-                      <div className="w-9 h-9 rounded-lg bg-[#141A23] border border-[#252B34] text-[#9E813E] font-serif font-bold text-sm flex items-center justify-center mx-auto mb-2.5">
-                        3
-                      </div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9299A5]">
-                        Third Place
-                      </span>
-                      <h3 className="font-serif text-xl font-bold text-[#F1EFE8] mt-0.5">{rawStandings[2].name}</h3>
-                      <p className="text-xs text-[#9299A5]">Captain: {rawStandings[2].captainName || 'Senior Captain'}</p>
-
-                      <div className="flex items-center justify-center gap-1.5 my-3 flex-wrap">
-                        {rawStandings[2].cricketTeams?.map((ct: any) => (
-                          <span key={ct.id} className="px-2 py-0.5 rounded bg-[#141A23] border border-[#252B34] text-[10px] text-[#9299A5]">
-                            {ct.name}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="pt-3 border-t border-[#252B34] flex items-center justify-between text-xs">
-                        <span className="text-[#9299A5] uppercase font-medium">Total Points</span>
-                        <span className="font-mono font-bold text-base text-[#F1EFE8]">
-                          {Number(rawStandings[2].totalPoints).toFixed(2)} pts
-                        </span>
-                      </div>
-                    </article>
-                  )}
-                </div>
-
-                {/* Remaining Houses (4th & 5th) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {rawStandings.slice(3).map((club: any) => (
-                    <div
-                      key={club.id}
-                      className="p-4 rounded-xl bg-[#10151D] border border-[#252B34] flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-[#141A23] border border-[#252B34] flex items-center justify-center font-serif font-bold text-sm text-[#9299A5]">
-                          #{club.rank}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-serif font-bold text-[#F1EFE8] text-base">{club.name}</h4>
-                            <span className="text-[11px] font-mono text-[#9299A5]">({club.code})</span>
-                          </div>
-                          <p className="text-xs text-[#9299A5]">Captain: {club.captainName || 'Senior Captain'}</p>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="text-[10px] font-medium text-[#9299A5] block uppercase">Points</span>
-                        <span className="font-mono font-bold text-base text-[#F1EFE8]">
-                          {Number(club.totalPoints).toFixed(2)} pts
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* FULL OFFICIAL TABLE VIEW */}
-            {standingsView === 'table' && (
-              <div className="rounded-2xl bg-[#10151D] border border-[#252B34] overflow-hidden">
-                <div className="p-5 border-b border-[#252B34] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h2 className="font-serif text-xl font-bold text-[#F1EFE8]">Championship Standings Table</h2>
-                    <p className="text-xs text-[#9299A5] mt-0.5">Cumulative points across all approved tournament results</p>
-                  </div>
-                  <span className="text-xs text-[#9299A5] font-medium">5 Houses Participating</span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-[#141A23] text-[10px] font-semibold uppercase tracking-wider text-[#9299A5] border-b border-[#252B34]">
-                      <tr>
-                        <th className="py-3 px-5 text-center">Rank</th>
-                        <th className="py-3 px-5">House</th>
-                        <th className="py-3 px-5">Senior Captain</th>
-                        <th className="py-3 px-5">Sponsored Cricket Teams</th>
-                        <th className="py-3 px-5 text-right">Cumulative Points</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#252B34]">
-                      {filteredStandings.map((club: any) => {
-                        const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
-                        return (
-                          <tr key={club.id} className="hover:bg-[#141A23]/50 transition">
-                            <td className="py-3.5 px-5 text-center font-mono font-bold text-sm text-[#F1EFE8]">
-                              {club.rank === 1 ? (
-                                <span className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-[#141A23] text-[#C5A04A] border border-[#C5A04A]/30">
-                                  #1
-                                </span>
-                              ) : (
-                                `#${club.rank}`
-                              )}
-                            </td>
-                            <td className="py-3.5 px-5">
-                              <div className="flex items-center gap-2.5">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.accentColor }} />
-                                <div>
-                                  <span className="font-serif font-bold text-sm text-[#F1EFE8] block">{club.name}</span>
-                                  <span className="text-[10px] text-[#9299A5]">{meta.motto}</span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-5 text-[#9299A5]">
-                              {club.captainName || 'Senior Captain'}
-                            </td>
-                            <td className="py-3.5 px-5">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {club.cricketTeams?.map((ct: any) => (
-                                  <span
-                                    key={ct.id}
-                                    className="px-2 py-0.5 rounded bg-[#141A23] border border-[#252B34] text-[10px] text-[#9299A5]"
-                                  >
-                                    {ct.name}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-5 text-right font-mono font-bold text-base text-[#C5A04A]">
-                              {Number(club.totalPoints).toFixed(2)} pts
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* 7-SPORT POINTS MATRIX VIEW */}
-            {standingsView === 'matrix' && (
-              <div className="rounded-2xl bg-[#10151D] border border-[#252B34] overflow-hidden">
-                <div className="p-5 border-b border-[#252B34]">
-                  <h2 className="font-serif text-xl font-bold text-[#F1EFE8]">7-Sport Points Matrix Breakdown</h2>
-                  <p className="text-xs text-[#9299A5] mt-0.5">Points earned by each house across the 7 championship disciplines</p>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-[#141A23] text-[10px] font-semibold uppercase tracking-wider text-[#9299A5] border-b border-[#252B34]">
-                      <tr>
-                        <th className="py-3 px-5">House</th>
-                        {sports.map((sp: any) => (
-                          <th key={sp.id} className="py-3 px-3 text-center">
-                            <span className="block font-medium">{sp.name}</span>
-                          </th>
-                        ))}
-                        <th className="py-3 px-5 text-right">Total Points</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#252B34] font-mono">
-                      {filteredStandings.map((club: any) => {
-                        const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
-                        return (
-                          <tr key={club.id} className="hover:bg-[#141A23]/50 transition">
-                            <td className="py-3.5 px-5 font-sans font-bold text-[#F1EFE8] flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: meta.accentColor }} />
-                              {club.name}
-                            </td>
-                            {sports.map((sp: any) => {
-                              const score = club.sportBreakdown?.[sp.id] ?? club.sportBreakdown?.[sp.name] ?? 0;
-                              return (
-                                <td key={sp.id} className="py-3.5 px-3 text-center">
-                                  {score > 0 ? (
-                                    <span className="px-2 py-0.5 rounded bg-[#141A23] text-[#C5A04A] font-semibold border border-[#C5A04A]/30">
-                                      {score.toFixed(2)}
-                                    </span>
-                                  ) : (
-                                    <span className="text-[#9299A5]/40">—</span>
-                                  )}
-                                </td>
-                              );
-                            })}
-                            <td className="py-3.5 px-5 text-right font-bold text-sm text-[#C5A04A]">
-                              {Number(club.totalPoints).toFixed(2)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ======================================================= */}
-        {/* TAB 2: THE 5 HOUSES SHOWCASE                           */}
-        {/* ======================================================= */}
-        {activeTab === 'houses' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-[#10151D] border border-[#252B34]">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#9E813E]">
-                Championship Franchises
+      <section id="overview" className="py-16 px-4 sm:px-8 bg-[#F4F1E9] text-[#080A0E] border-b border-[#E2DEC9]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E2DEC9] pb-6">
+            <div>
+              <span className="text-xs font-black uppercase tracking-widest text-[#94712B] block">
+                Tournament Structure
               </span>
-              <h2 className="font-serif text-2xl font-bold text-[#F1EFE8] mt-1">
-                The 5 Participating Houses
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#080A0E] mt-1">
+                Championship Architecture
               </h2>
-              <p className="text-xs text-[#9299A5] mt-1.5 max-w-2xl leading-relaxed">
-                Each house fields participants across all 7 sports, and sponsors 2 distinct cricket teams (Team A and Team B) whose earned points roll directly up to the parent house.
+            </div>
+            <p className="text-sm text-[#4A4E57] max-w-lg leading-relaxed">
+              Designed to test all-around athletics and sportsmanship through house point accumulation and certified equal division.
+            </p>
+          </div>
+
+          {/* 4 Feature Stat Tiles in Light High-Contrast Style */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="p-6 rounded-2xl bg-white border border-[#E2DEC9] shadow-sm hover:border-[#C6A04A] transition">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#94712B]">01 • Houses</span>
+                <Shield className="w-5 h-5 text-[#94712B]" />
+              </div>
+              <div className="font-serif text-4xl font-bold text-[#080A0E]">5 Houses</div>
+              <p className="text-xs text-[#5E636E] mt-2 leading-relaxed">
+                Alpha, Crown Crushers, Dominator, Mavericks, and Royal Force battling for the cup.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {rawStandings.map((club: any) => {
-                const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
-                return (
-                  <article
-                    key={club.id}
-                    className="rounded-2xl bg-[#10151D] border border-[#252B34] p-5 space-y-4 hover:border-[#3B4350] transition"
-                  >
+            <div className="p-6 rounded-2xl bg-white border border-[#E2DEC9] shadow-sm hover:border-[#C6A04A] transition">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#94712B]">02 • Cricket</span>
+                <Trophy className="w-5 h-5 text-[#94712B]" />
+              </div>
+              <div className="font-serif text-4xl font-bold text-[#080A0E]">10 Teams</div>
+              <p className="text-xs text-[#5E636E] mt-2 leading-relaxed">
+                Each house fields 2 independent cricket franchises (Team A and Team B squads).
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white border border-[#E2DEC9] shadow-sm hover:border-[#C6A04A] transition">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#94712B]">03 • Disciplines</span>
+                <Zap className="w-5 h-5 text-[#94712B]" />
+              </div>
+              <div className="font-serif text-4xl font-bold text-[#080A0E]">7 Sports</div>
+              <p className="text-xs text-[#5E636E] mt-2 leading-relaxed">
+                Competitions across BGMI, Carrom, Badminton, Chess, Table Tennis, Cricket, and Football.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white border border-[#E2DEC9] shadow-sm hover:border-[#C6A04A] transition">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#94712B]">04 • System</span>
+                <Target className="w-5 h-5 text-[#94712B]" />
+              </div>
+              <div className="font-serif text-4xl font-bold text-[#080A0E]">Equal Split</div>
+              <p className="text-xs text-[#5E636E] mt-2 leading-relaxed">
+                Mixed-house squads receive exactly equal division among unique houses represented.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* SECTION C: THE FIVE HOUSES ("WAR ROOM" - DARK SECTION)    */}
+      {/* ========================================================= */}
+      <section id="houses" className="py-20 px-4 sm:px-8 bg-[#080A0E] text-white border-b border-[#252B34]">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#252B34] pb-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#C6A04A] block">
+                Participating Franchises
+              </span>
+              <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-white mt-1">
+                The 5 Competing Houses
+              </h2>
+            </div>
+            <p className="text-sm text-[#A4A8B0] max-w-md leading-relaxed">
+              Every house fields athletes across all 7 sports, and sponsors 2 distinct cricket teams whose points roll up to the parent house.
+            </p>
+          </div>
+
+          {/* 5 Distinct House Cards with Creative Architectural Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rawStandings.map((club: any) => {
+              const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
+              return (
+                <article
+                  key={club.id}
+                  className="rounded-3xl bg-[#141820] border border-[#252B34] p-6 space-y-5 hover:border-[#C6A04A]/60 transition duration-300 relative group flex flex-col justify-between shadow-lg"
+                >
+                  <div className="space-y-4">
+                    {/* Header with Crest and Rank */}
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3.5">
                         <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center font-serif font-bold text-base text-[#080B10]"
+                          className="w-12 h-12 rounded-2xl flex items-center justify-center font-serif font-black text-xl text-white shadow-md"
                           style={{ backgroundColor: meta.accentColor }}
                         >
                           {club.code}
                         </div>
                         <div>
-                          <h3 className="font-serif text-lg font-bold text-[#F1EFE8]">{club.name}</h3>
-                          <span className="text-[11px] text-[#9299A5]">{meta.motto}</span>
+                          <h3 className="font-serif text-2xl font-bold text-white leading-tight">
+                            {club.name}
+                          </h3>
+                          <span className="text-[11px] font-semibold text-[#C6A04A]">
+                            {meta.motto}
+                          </span>
                         </div>
                       </div>
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#141A23] border border-[#252B34] text-[#C5A04A]">
+                      <span className="font-mono text-xs font-black px-2.5 py-1 rounded-full bg-[#080A0E] border border-[#252B34] text-[#C6A04A]">
                         Rank #{club.rank}
                       </span>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#141A23] border border-[#252B34] text-xs space-y-1.5">
+                    <p className="text-xs text-[#A4A8B0] italic leading-relaxed border-l-2 pl-3" style={{ borderColor: meta.accentColor }}>
+                      "{meta.tagline}"
+                    </p>
+
+                    {/* House Details Panel */}
+                    <div className="p-3.5 rounded-xl bg-[#080A0E] border border-[#252B34] text-xs space-y-1.5">
                       <div className="flex justify-between">
-                        <span className="text-[#9299A5]">Senior Captain:</span>
-                        <span className="font-medium text-[#F1EFE8]">{club.captainName || 'Senior Captain'}</span>
+                        <span className="text-[#A4A8B0]">Senior House Captain:</span>
+                        <span className="font-medium text-white">{club.captainName || 'Senior Captain'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#9299A5]">Championship Points:</span>
-                        <span className="font-mono font-bold text-[#C5A04A]">{Number(club.totalPoints).toFixed(2)} pts</span>
+                        <span className="text-[#A4A8B0]">Cumulative Points:</span>
+                        <span className="font-mono font-bold text-[#C6A04A]">{Number(club.totalPoints).toFixed(2)} pts</span>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9299A5] block">
-                        Sponsored Cricket Teams (2):
+                    {/* 2 Cricket Teams */}
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#A4A8B0] block">
+                        Sponsored Cricket Franchises (2):
                       </span>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {club.cricketTeams?.map((ct: any) => (
                           <div
                             key={ct.id}
-                            className="p-2.5 rounded-lg bg-[#141A23] border border-[#252B34] text-center font-medium text-[#F1EFE8]"
+                            className="p-2.5 rounded-xl bg-[#080A0E] border border-[#252B34] text-center font-semibold text-white"
                           >
-                            {ct.name}
+                            <span>🏏 {ct.name}</span>
                           </div>
                         ))}
                       </div>
-                      <span className="text-[10px] text-[#9299A5] italic block text-center pt-1">
-                        Points earned by Team A & B roll directly into {club.name}.
-                      </span>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================= */}
-        {/* TAB 3: 7 SPORTS ARENA SHOWCASE                         */}
-        {/* ======================================================= */}
-        {activeTab === 'sports' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-[#10151D] border border-[#252B34]">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#9E813E]">
-                Official Disciplines
-              </span>
-              <h2 className="font-serif text-2xl font-bold text-[#F1EFE8] mt-1">
-                The 7 Championship Sports
-              </h2>
-              <p className="text-xs text-[#9299A5] mt-1.5 max-w-2xl leading-relaxed">
-                Matches are regulated under official competition standards with automated unique-club point division for mixed-club squads.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {sports.map((sp: any) => (
-                <article
-                  key={sp.id}
-                  className="rounded-2xl bg-[#10151D] border border-[#252B34] p-5 space-y-3.5 hover:border-[#3B4350] transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#141A23] border border-[#252B34] flex items-center justify-center text-[#C5A04A]">
-                      <SportIcon name={sp.name} className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-serif text-base font-bold text-[#F1EFE8]">{sp.name}</h3>
-                      <span className="text-[10px] text-[#9299A5] uppercase font-semibold">
-                        {sp.category} • {sp.sportType}
-                      </span>
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-[#141A23] border border-[#252B34] text-xs space-y-1.5 text-[#9299A5]">
-                    <div className="flex items-center justify-between">
-                      <span>Format:</span>
-                      <span className="font-medium text-[#F1EFE8]">{sp.tournamentFormat}</span>
+                  <span className="text-[10px] text-[#A4A8B0] italic block text-center pt-3 border-t border-[#252B34]">
+                    Points from Team A and B roll up directly into {club.name}.
+                  </span>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* SECTION D: 7 SPORTS ARENA (IVORY / LIGHT CONTRAST)        */}
+      {/* ========================================================= */}
+      <section id="sports" className="py-20 px-4 sm:px-8 bg-[#F4F1E9] text-[#080A0E] border-b border-[#E2DEC9]">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E2DEC9] pb-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#94712B] block">
+                Multi-Sport Disciplines
+              </span>
+              <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-[#080A0E] mt-1">
+                Seven Sports Arena
+              </h2>
+            </div>
+            <p className="text-sm text-[#4A4E57] max-w-md leading-relaxed">
+              Points are competed for across outdoor stadiums, racquet courts, esports arenas, and indoor board disciplines.
+            </p>
+          </div>
+
+          {/* Creative Asymmetric Sports Grid (Featured Top 2 + 5 Sub Disciplines) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sports.map((sp: any, idx: number) => {
+              const isLarge = idx === 0 || idx === 1;
+              return (
+                <article
+                  key={sp.id}
+                  className={`rounded-3xl bg-white border border-[#E2DEC9] p-6 space-y-4 shadow-sm hover:border-[#C6A04A] transition duration-200 ${
+                    isLarge ? 'md:col-span-1 lg:col-span-1 ring-1 ring-[#C6A04A]/20' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-2xl bg-[#F4F1E9] border border-[#E2DEC9] flex items-center justify-center text-[#94712B]">
+                      <SportIcon name={sp.name} className="w-6 h-6" />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Rounds:</span>
-                      <span className="font-medium text-[#F1EFE8]">{sp.numRounds} rounds</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#F4F1E9] text-[#94712B] border border-[#E2DEC9]">
+                      {sp.category}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-serif text-2xl font-bold text-[#080A0E]">{sp.name}</h3>
+                    <p className="text-xs text-[#6B7280] font-medium mt-0.5">{sp.highlight || `${sp.numRounds} rounds of competitive tournament`}</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-[#F9F8F5] border border-[#E2DEC9] text-xs space-y-1.5 text-[#4B5563]">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#6B7280]">Tournament Format:</span>
+                      <span className="font-semibold text-[#080A0E]">{sp.tournamentFormat}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Point Division:</span>
-                      <span className="text-[#C5A04A] font-semibold">Equal Unique-Club</span>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#6B7280]">Structure:</span>
+                      <span className="font-semibold text-[#080A0E]">{sp.sportType}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Mixed Squads:</span>
-                      <span className={`font-medium ${sp.allowsMixedClubs ? 'text-emerald-400' : 'text-[#9299A5]'}`}>
-                        {sp.allowsMixedClubs ? 'Allowed (Divided Evenly)' : 'Single Club'}
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#6B7280]">Points Division:</span>
+                      <span className="font-semibold text-[#94712B]">Equal Unique-Club</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-[#6B7280]">Mixed Clubs:</span>
+                      <span className={`font-semibold ${sp.allowsMixedClubs ? 'text-emerald-700' : 'text-[#6B7280]'}`}>
+                        {sp.allowsMixedClubs ? 'Allowed (Divided Evenly)' : 'Single Club Only'}
                       </span>
                     </div>
                   </div>
                 </article>
-              ))}
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* SECTION E: CHAMPIONSHIP LEADERBOARD (DARK SECTION)        */}
+      {/* ========================================================= */}
+      <section id="leaderboard" className="py-20 px-4 sm:px-8 bg-[#080A0E] text-white border-b border-[#252B34]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#252B34] pb-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#C6A04A] block">
+                Official Points Table
+              </span>
+              <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-white mt-1">
+                Championship Leaderboard
+              </h2>
+            </div>
+            <p className="text-sm text-[#A4A8B0] max-w-md leading-relaxed">
+              Updated live as referees submit official match scores and results are certified by the tournament director.
+            </p>
+          </div>
+
+          {/* View Modes Switcher & Filter Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#141820] border border-[#252B34]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-[#A4A8B0] ml-1">Display Format:</span>
+              <div className="flex items-center bg-[#080A0E] p-1 rounded-xl border border-[#252B34]">
+                <button
+                  onClick={() => setStandingsView('podium')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                    standingsView === 'podium'
+                      ? 'bg-[#C6A04A] text-[#080A0E] shadow-sm'
+                      : 'text-[#A4A8B0] hover:text-white'
+                  }`}
+                >
+                  <Trophy className="w-3.5 h-3.5" />
+                  <span>Podium & Cards</span>
+                </button>
+                <button
+                  onClick={() => setStandingsView('table')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                    standingsView === 'table'
+                      ? 'bg-[#C6A04A] text-[#080A0E] shadow-sm'
+                      : 'text-[#A4A8B0] hover:text-white'
+                  }`}
+                >
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Full Table</span>
+                </button>
+                <button
+                  onClick={() => setStandingsView('matrix')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                    standingsView === 'matrix'
+                      ? 'bg-[#C6A04A] text-[#080A0E] shadow-sm'
+                      : 'text-[#A4A8B0] hover:text-white'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>7-Sport Matrix</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Live Filter Input */}
+            <div className="relative w-full sm:w-72">
+              <Search className="w-3.5 h-3.5 text-[#A4A8B0] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search house or captain..."
+                className="w-full pl-9 pr-3 py-2 bg-[#080A0E] border border-[#252B34] rounded-xl text-xs text-white placeholder-[#A4A8B0] focus:outline-none focus:border-[#C6A04A] transition"
+              />
             </div>
           </div>
-        )}
 
-        {/* ======================================================= */}
-        {/* TAB 4: MATCH RADAR & FIXTURES                          */}
-        {/* ======================================================= */}
-        {activeTab === 'schedule' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#10151D] border border-[#252B34]">
-              <div>
-                <h2 className="font-serif text-xl font-bold text-[#F1EFE8]">Upcoming Competition Radar</h2>
-                <p className="text-xs text-[#9299A5] mt-0.5">Scheduled fixtures across tournament days (Nov 25 – 28, 2026)</p>
-              </div>
-
-              {/* Clean Sport Filter */}
-              <select
-                value={sportFilter}
-                onChange={(e) => setSportFilter(e.target.value)}
-                className="px-3.5 py-1.5 bg-[#080B10] border border-[#252B34] rounded-lg text-xs font-medium text-[#F1EFE8] outline-none focus:border-[#C5A04A]"
-              >
-                <option value="">All 7 Sports</option>
-                {sports.map((sp: any) => (
-                  <option key={sp.id} value={sp.id}>{sp.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {filteredUpcomingMatches.length === 0 ? (
-              <div className="p-12 rounded-2xl bg-[#10151D] border border-[#252B34] text-center text-[#9299A5]">
-                <Calendar className="w-10 h-10 text-[#252B34] mx-auto mb-2" />
-                <h4 className="text-sm font-semibold text-[#F1EFE8]">No upcoming fixtures scheduled for this selection.</h4>
-                <p className="text-xs text-[#9299A5] mt-0.5">Official fixtures will appear as match assignments are released.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {filteredUpcomingMatches.map((m: any) => (
-                  <article
-                    key={m.id}
-                    className="p-5 rounded-2xl bg-[#10151D] border border-[#252B34] space-y-3.5 hover:border-[#3B4350] transition"
-                  >
-                    <div className="flex items-center justify-between border-b border-[#252B34] pb-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#141A23] flex items-center justify-center text-[#C5A04A]">
-                          <SportIcon name={m.sport?.name} className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="font-bold text-sm text-[#F1EFE8] block">{m.sport?.name}</span>
-                          <span className="text-[10px] text-[#9299A5] font-mono">{m.matchCode} • {m.round}</span>
-                        </div>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-[#141A23] text-[#9299A5] border border-[#252B34]">
-                        Scheduled
+          {/* VIEW MODE 1: 3D PODIUM & CARDS */}
+          {standingsView === 'podium' && (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end pt-4">
+                {/* 2nd Place: Silver Runner-Up */}
+                {rawStandings[1] && (
+                  <article className="order-2 md:order-1 rounded-3xl bg-[#141820] border border-[#252B34] p-6 text-center space-y-4 hover:border-slate-400 transition">
+                    <div className="w-10 h-10 rounded-xl bg-[#080A0E] border border-slate-400/50 text-slate-200 font-serif font-black text-sm flex items-center justify-center mx-auto">
+                      🥈 2
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Second Place
                       </span>
+                      <h3 className="font-serif text-2xl font-bold text-white mt-0.5">{rawStandings[1].name}</h3>
+                      <p className="text-xs text-[#A4A8B0]">Senior Captain: {rawStandings[1].captainName || 'Senior Captain'}</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-[#141A23] border border-[#252B34] text-center">
-                      <span className="text-xs font-semibold text-[#F1EFE8]">
-                        {m.participants?.[0]?.teamName || m.participants?.[0]?.cricketTeam?.name || m.participants?.[0]?.club?.name || 'Competing Squad'}
-                      </span>
-                      {m.participants?.length > 1 && (
-                        <div className="my-1.5 text-xs font-bold text-[#C5A04A]">VS</div>
-                      )}
-                      <span className="text-xs font-semibold text-[#F1EFE8]">
-                        {m.participants?.[1]?.teamName || m.participants?.[1]?.cricketTeam?.name || m.participants?.[1]?.club?.name || ''}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-[#9299A5] pt-1">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#9299A5]" />
-                        {m.venue?.name || 'Main Court'}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-[#9299A5]" />
-                        {new Date(m.matchDate).toLocaleDateString()} at {m.matchTime || '14:00'}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ======================================================= */}
-        {/* TAB 5: OFFICIALLY APPROVED RESULTS                      */}
-        {/* ======================================================= */}
-        {activeTab === 'results' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#10151D] border border-[#252B34]">
-              <div>
-                <h2 className="font-serif text-xl font-bold text-[#F1EFE8]">Approved Competition Scores</h2>
-                <p className="text-xs text-[#9299A5] mt-0.5">Officially certified and approved by tournament referees</p>
-              </div>
-
-              <select
-                value={sportFilter}
-                onChange={(e) => setSportFilter(e.target.value)}
-                className="px-3.5 py-1.5 bg-[#080B10] border border-[#252B34] rounded-lg text-xs font-medium text-[#F1EFE8] outline-none focus:border-[#C5A04A]"
-              >
-                <option value="">All 7 Sports</option>
-                {sports.map((sp: any) => (
-                  <option key={sp.id} value={sp.id}>{sp.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {filteredApprovedMatches.length === 0 ? (
-              <div className="p-12 rounded-2xl bg-[#10151D] border border-[#252B34] text-center text-[#9299A5]">
-                <CheckCircle2 className="w-10 h-10 text-[#252B34] mx-auto mb-2" />
-                <h4 className="text-sm font-semibold text-[#F1EFE8]">No approved results recorded yet.</h4>
-                <p className="text-xs text-[#9299A5] mt-0.5">Verified scores will appear here after referees submit points.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {filteredApprovedMatches.map((m: any) => (
-                  <article
-                    key={m.id}
-                    className="p-5 rounded-2xl bg-[#10151D] border border-[#252B34] space-y-3.5 hover:border-[#3B4350] transition"
-                  >
-                    <div className="flex items-center justify-between border-b border-[#252B34] pb-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#141A23] flex items-center justify-center text-[#C5A04A]">
-                          <SportIcon name={m.sport?.name} className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <span className="font-bold text-sm text-[#F1EFE8] block">{m.sport?.name}</span>
-                          <span className="text-[10px] text-[#9299A5] font-mono">{m.matchCode} • {m.round}</span>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-[#141A23] text-emerald-400 border border-emerald-500/30">
-                        Approved
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      {m.participants?.map((p: any) => (
-                        <div key={p.id} className="p-2.5 rounded-lg bg-[#141A23] border border-[#252B34] flex items-center justify-between">
-                          <div>
-                            <span className="font-bold text-[#F1EFE8] block text-sm">
-                              {p.cricketTeam?.name || p.teamName || p.club?.name}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="font-mono font-bold text-[#C5A04A] text-sm">{p.score ?? 0} pts</span>
-                            {p.rank && (
-                              <span className="text-[10px] text-[#9299A5] block">
-                                Rank #{p.rank}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                    <div className="flex items-center justify-center gap-1.5 my-3 flex-wrap">
+                      {rawStandings[1].cricketTeams?.map((ct: any) => (
+                        <span key={ct.id} className="px-2.5 py-1 rounded-lg bg-[#080A0E] border border-[#252B34] text-[10px] text-slate-300 font-medium">
+                          🏏 {ct.name}
+                        </span>
                       ))}
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-[#9299A5] pt-1">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#9299A5]" />
-                        {m.venue?.name || 'Main Arena'}
+                    <div className="pt-4 border-t border-[#252B34] flex items-center justify-between text-xs">
+                      <span className="text-[#A4A8B0] uppercase font-semibold">Total Points</span>
+                      <span className="font-mono font-black text-xl text-white">
+                        {Number(rawStandings[1].totalPoints).toFixed(2)} pts
                       </span>
-                      <span>{new Date(m.matchDate).toLocaleDateString()}</span>
                     </div>
                   </article>
+                )}
+
+                {/* 1st Place: Gold Leader (Elevated Podium Center) */}
+                {rawStandings[0] && (
+                  <article className="order-1 md:order-2 rounded-3xl bg-[#141820] border-2 border-[#C6A04A] p-8 text-center space-y-4 md:-translate-y-4 shadow-2xl relative">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#080A0E] border border-[#C6A04A]/60 text-[#C6A04A] text-xs font-black uppercase tracking-wider">
+                      <Crown className="w-3.5 h-3.5 text-[#C6A04A]" />
+                      <span>Tournament Leader #1</span>
+                    </div>
+
+                    <div className="w-14 h-14 rounded-2xl bg-[#080A0E] border-2 border-[#C6A04A] text-[#C6A04A] font-serif font-black text-2xl flex items-center justify-center mx-auto shadow-md">
+                      🥇 1
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#C6A04A]">
+                        Current Champion Seed
+                      </span>
+                      <h3 className="font-serif text-3xl font-black text-white mt-0.5">{rawStandings[0].name}</h3>
+                      <p className="text-xs text-[#A4A8B0]">Senior Captain: {rawStandings[0].captainName || 'Ethan Hunt'}</p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-2 my-4 flex-wrap">
+                      {rawStandings[0].cricketTeams?.map((ct: any) => (
+                        <span key={ct.id} className="px-3 py-1 rounded-xl bg-[#080A0E] border border-[#C6A04A]/40 text-[11px] text-[#C6A04A] font-bold">
+                          🏏 {ct.name}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="pt-4 border-t border-[#C6A04A]/40 flex items-center justify-between text-xs">
+                      <span className="text-[#C6A04A] uppercase font-bold">Championship Points</span>
+                      <span className="font-mono font-black text-2xl text-[#C6A04A]">
+                        {Number(rawStandings[0].totalPoints).toFixed(2)} pts
+                      </span>
+                    </div>
+                  </article>
+                )}
+
+                {/* 3rd Place: Bronze Contender */}
+                {rawStandings[2] && (
+                  <article className="order-3 rounded-3xl bg-[#141820] border border-[#252B34] p-6 text-center space-y-4 hover:border-amber-700 transition">
+                    <div className="w-10 h-10 rounded-xl bg-[#080A0E] border border-amber-700/50 text-amber-500 font-serif font-black text-sm flex items-center justify-center mx-auto">
+                      🥉 3
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">
+                        Third Place
+                      </span>
+                      <h3 className="font-serif text-2xl font-bold text-white mt-0.5">{rawStandings[2].name}</h3>
+                      <p className="text-xs text-[#A4A8B0]">Senior Captain: {rawStandings[2].captainName || 'Senior Captain'}</p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-1.5 my-3 flex-wrap">
+                      {rawStandings[2].cricketTeams?.map((ct: any) => (
+                        <span key={ct.id} className="px-2.5 py-1 rounded-lg bg-[#080A0E] border border-[#252B34] text-[10px] text-slate-300 font-medium">
+                          🏏 {ct.name}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="pt-4 border-t border-[#252B34] flex items-center justify-between text-xs">
+                      <span className="text-[#A4A8B0] uppercase font-semibold">Total Points</span>
+                      <span className="font-mono font-black text-xl text-amber-500">
+                        {Number(rawStandings[2].totalPoints).toFixed(2)} pts
+                      </span>
+                    </div>
+                  </article>
+                )}
+              </div>
+
+              {/* Remaining Houses (4th & 5th) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {rawStandings.slice(3).map((club: any) => (
+                  <div
+                    key={club.id}
+                    className="p-5 rounded-2xl bg-[#141820] border border-[#252B34] flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-[#080A0E] border border-[#252B34] flex items-center justify-center font-serif font-black text-sm text-[#A4A8B0]">
+                        #{club.rank}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-serif font-bold text-white text-base">{club.name}</h4>
+                          <span className="text-xs font-mono text-[#A4A8B0]">({club.code})</span>
+                        </div>
+                        <p className="text-xs text-[#A4A8B0]">Captain: {club.captainName || 'Senior Captain'}</p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[10px] font-semibold text-[#A4A8B0] block uppercase">Points</span>
+                      <span className="font-mono font-black text-lg text-white">
+                        {Number(club.totalPoints).toFixed(2)} pts
+                      </span>
+                    </div>
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-      </main>
+            </div>
+          )}
+
+          {/* VIEW MODE 2: FULL STANDINGS TABLE */}
+          {standingsView === 'table' && (
+            <div className="rounded-3xl bg-[#141820] border border-[#252B34] overflow-hidden">
+              <div className="p-6 border-b border-[#252B34] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-serif text-2xl font-bold text-white">Championship Standings Table</h3>
+                  <p className="text-xs text-[#A4A8B0] mt-0.5">Cumulative points across all approved tournament results</p>
+                </div>
+                <span className="text-xs text-[#C6A04A] font-semibold">5 Houses Participating</span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-[#080A0E] text-[11px] font-bold uppercase tracking-wider text-[#A4A8B0] border-b border-[#252B34]">
+                    <tr>
+                      <th className="py-4 px-6 text-center">Rank</th>
+                      <th className="py-4 px-6">House</th>
+                      <th className="py-4 px-6">Senior Captain</th>
+                      <th className="py-4 px-6">Sponsored Cricket Teams</th>
+                      <th className="py-4 px-6 text-right">Total Points</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#252B34]">
+                    {filteredStandings.map((club: any) => {
+                      const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
+                      return (
+                        <tr key={club.id} className="hover:bg-[#080A0E]/50 transition">
+                          <td className="py-4 px-6 text-center font-mono font-black text-base text-white">
+                            {club.rank === 1 ? (
+                              <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-[#C6A04A] text-[#080A0E] font-black text-xs shadow-sm">
+                                🥇 #1
+                              </span>
+                            ) : (
+                              `#${club.rank}`
+                            )}
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: meta.accentColor }} />
+                              <div>
+                                <span className="font-serif font-bold text-base text-white block">{club.name}</span>
+                                <span className="text-[10px] text-[#A4A8B0]">{meta.motto}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-[#A4A8B0] font-medium">
+                            {club.captainName || 'Senior Captain'}
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {club.cricketTeams?.map((ct: any) => (
+                                <span
+                                  key={ct.id}
+                                  className="px-2.5 py-1 rounded-lg bg-[#080A0E] border border-[#252B34] text-[10px] text-slate-300 font-semibold"
+                                >
+                                  🏏 {ct.name}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-right font-mono font-black text-lg text-[#C6A04A]">
+                            {Number(club.totalPoints).toFixed(2)} pts
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW MODE 3: 7-SPORT MATRIX VIEW */}
+          {standingsView === 'matrix' && (
+            <div className="rounded-3xl bg-[#141820] border border-[#252B34] overflow-hidden">
+              <div className="p-6 border-b border-[#252B34]">
+                <h3 className="font-serif text-2xl font-bold text-white">7-Sport Points Matrix Breakdown</h3>
+                <p className="text-xs text-[#A4A8B0] mt-0.5">Points earned by each house across the 7 sports</p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-[#080A0E] text-[10px] font-bold uppercase tracking-wider text-[#A4A8B0] border-b border-[#252B34]">
+                    <tr>
+                      <th className="py-4 px-6">House</th>
+                      {sports.map((sp: any) => (
+                        <th key={sp.id} className="py-4 px-3 text-center">
+                          <span className="block font-bold">{sp.name}</span>
+                        </th>
+                      ))}
+                      <th className="py-4 px-6 text-right">Cumulative Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#252B34] font-mono">
+                    {filteredStandings.map((club: any) => {
+                      const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
+                      return (
+                        <tr key={club.id} className="hover:bg-[#080A0E]/50 transition">
+                          <td className="py-4 px-6 font-sans font-bold text-white flex items-center gap-2.5">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.accentColor }} />
+                            {club.name}
+                          </td>
+                          {sports.map((sp: any) => {
+                            const score = club.sportBreakdown?.[sp.id] ?? club.sportBreakdown?.[sp.name] ?? 0;
+                            return (
+                              <td key={sp.id} className="py-4 px-3 text-center">
+                                {score > 0 ? (
+                                  <span className="px-2 py-0.5 rounded bg-[#080A0E] text-[#C6A04A] font-bold border border-[#C6A04A]/30">
+                                    {score.toFixed(2)}
+                                  </span>
+                                ) : (
+                                  <span className="text-[#252B34]">—</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                          <td className="py-4 px-6 text-right font-black text-base text-[#C6A04A]">
+                            {Number(club.totalPoints).toFixed(2)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ========================================================= */}
-      {/* 5. REFINED FOOTER                                         */}
+      {/* SECTION F: MATCH RADAR (IVORY / LIGHT CONTRAST)           */}
       {/* ========================================================= */}
-      <footer className="bg-[#080B10] border-t border-[#252B34] py-8 px-4 sm:px-8 mt-12 text-xs text-[#9299A5]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-[#10151D] p-1 border border-[#252B34] flex items-center justify-center">
-              <img src="/logo.png" alt="APL Logo" className="w-full h-full object-contain" />
-            </div>
+      <section id="matches" className="py-20 px-4 sm:px-8 bg-[#F4F1E9] text-[#080A0E] border-b border-[#E2DEC9]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E2DEC9] pb-6">
             <div>
-              <span className="font-serif font-bold text-[#F1EFE8] text-sm block">
-                APL Season 9 House Championship
+              <span className="text-xs font-bold uppercase tracking-widest text-[#94712B] block">
+                Competition Schedule
               </span>
-              <span className="text-[10px] text-[#9299A5]">Inter-Club Sports League • Official Public Portal</span>
+              <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-[#080A0E] mt-1">
+                Match Radar & Fixtures
+              </h2>
+            </div>
+
+            {/* Sport Filter Dropdown */}
+            <select
+              value={sportFilter}
+              onChange={(e) => setSportFilter(e.target.value)}
+              className="px-4 py-2 bg-white border border-[#E2DEC9] rounded-xl text-xs font-bold text-[#080A0E] outline-none focus:border-[#C6A04A]"
+            >
+              <option value="">All 7 Disciplines</option>
+              {sports.map((sp: any) => (
+                <option key={sp.id} value={sp.id}>{sp.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {filteredUpcomingMatches.length === 0 ? (
+            <div className="p-14 rounded-3xl bg-white border border-[#E2DEC9] text-center text-[#5E636E]">
+              <Calendar className="w-12 h-12 text-[#94712B]/40 mx-auto mb-3" />
+              <h4 className="text-base font-bold text-[#080A0E]">No scheduled fixtures match your current filter.</h4>
+              <p className="text-xs text-[#5E636E] mt-1">Official fixtures will appear as tournament directors release the daily rosters.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredUpcomingMatches.map((m: any) => (
+                <article
+                  key={m.id}
+                  className="p-6 rounded-3xl bg-white border border-[#E2DEC9] space-y-4 hover:border-[#C6A04A] transition shadow-sm"
+                >
+                  <div className="flex items-center justify-between border-b border-[#E2DEC9] pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#F4F1E9] flex items-center justify-center text-[#94712B]">
+                        <SportIcon name={m.sport?.name} className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm text-[#080A0E] block">{m.sport?.name}</span>
+                        <span className="text-[11px] text-[#5E636E] font-mono">{m.matchCode} • {m.round}</span>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#F4F1E9] text-[#94712B] border border-[#E2DEC9]">
+                      Scheduled
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#F9F8F5] border border-[#E2DEC9] text-center">
+                    <span className="text-sm font-bold text-[#080A0E]">
+                      {m.participants?.[0]?.teamName || m.participants?.[0]?.cricketTeam?.name || m.participants?.[0]?.club?.name || 'Competing Squad'}
+                    </span>
+                    {m.participants?.length > 1 && (
+                      <div className="my-1.5 text-xs font-black text-[#94712B]">VS</div>
+                    )}
+                    <span className="text-sm font-bold text-[#080A0E]">
+                      {m.participants?.[1]?.teamName || m.participants?.[1]?.cricketTeam?.name || m.participants?.[1]?.club?.name || ''}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-[#5E636E] pt-1">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#94712B]" />
+                      {m.venue?.name || 'Main Court'}
+                    </span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Calendar className="w-3.5 h-3.5 text-[#94712B]" />
+                      {new Date(m.matchDate).toLocaleDateString()} at {m.matchTime || '14:00'}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* SECTION G: APPROVED SCORES (DARK SECTION)                 */}
+      {/* ========================================================= */}
+      <section id="results" className="py-20 px-4 sm:px-8 bg-[#080A0E] text-white border-b border-[#252B34]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#252B34] pb-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#C6A04A] block">
+                Verified Match Ledger
+              </span>
+              <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-white mt-1">
+                Approved Competition Scores
+              </h2>
+            </div>
+
+            <select
+              value={sportFilter}
+              onChange={(e) => setSportFilter(e.target.value)}
+              className="px-4 py-2 bg-[#141820] border border-[#252B34] rounded-xl text-xs font-bold text-white outline-none focus:border-[#C6A04A]"
+            >
+              <option value="">All 7 Sports</option>
+              {sports.map((sp: any) => (
+                <option key={sp.id} value={sp.id}>{sp.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {filteredApprovedMatches.length === 0 ? (
+            <div className="p-14 rounded-3xl bg-[#141820] border border-[#252B34] text-center text-[#A4A8B0]">
+              <CheckCircle2 className="w-12 h-12 text-[#252B34] mx-auto mb-3" />
+              <h4 className="text-base font-bold text-white">No approved results recorded yet.</h4>
+              <p className="text-xs text-[#A4A8B0] mt-1">Scores will appear here live once referees submit official competition points.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredApprovedMatches.map((m: any) => (
+                <article
+                  key={m.id}
+                  className="p-6 rounded-3xl bg-[#141820] border border-[#252B34] space-y-4 hover:border-[#C6A04A]/60 transition shadow-lg"
+                >
+                  <div className="flex items-center justify-between border-b border-[#252B34] pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#080A0E] flex items-center justify-center text-[#C6A04A]">
+                        <SportIcon name={m.sport?.name} className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm text-white block">{m.sport?.name}</span>
+                        <span className="text-[11px] text-[#A4A8B0] font-mono">{m.matchCode} • {m.round}</span>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      Approved Result
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    {m.participants?.map((p: any) => (
+                      <div key={p.id} className="p-3 rounded-2xl bg-[#080A0E] border border-[#252B34] flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-white block text-sm">
+                            {p.cricketTeam?.name || p.teamName || p.club?.name}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-mono font-black text-[#C6A04A] text-base">{p.score ?? 0} pts</span>
+                          {p.rank && (
+                            <span className="text-[10px] text-[#A4A8B0] block">
+                              Rank #{p.rank}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-[#A4A8B0] pt-1">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#A4A8B0]" />
+                      {m.venue?.name || 'Main Arena'}
+                    </span>
+                    <span>{new Date(m.matchDate).toLocaleDateString()}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* SECTION H: CHAMPIONSHIP POINTS SYSTEM (EXPLANATION ENGINE) */}
+      {/* ========================================================= */}
+      <section id="points-system" className="py-20 px-4 sm:px-8 bg-[#141820] text-white border-b border-[#252B34]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="border-b border-[#252B34] pb-6">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#C6A04A] block">
+              Automated Integrity Protocol
+            </span>
+            <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-white mt-1">
+              Unique-Club Equal Division Engine
+            </h2>
+            <p className="text-sm text-[#A4A8B0] max-w-2xl mt-2 leading-relaxed">
+              In mixed-squad disciplines (such as BGMI Squads), earned points are distributed strictly and equally among the unique houses represented by squad members.
+            </p>
+          </div>
+
+          {/* Visual Formula Diagram */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-2xl bg-[#080A0E] border border-[#252B34] space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A]">Rule 1 • Squad Identification</span>
+              <h3 className="font-serif text-xl font-bold text-white">Unique House Detection</h3>
+              <p className="text-xs text-[#A4A8B0] leading-relaxed">
+                If a 4-player BGMI squad consists of 2 Mavericks players, 1 Dominator player, and 1 Alpha player, the algorithm recognizes exactly <strong>3 unique houses</strong> (Mavericks, Dominator, Alpha).
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#080A0E] border border-[#252B34] space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A]">Rule 2 • Equal Division</span>
+              <h3 className="font-serif text-xl font-bold text-white">Equal Point Allocation</h3>
+              <p className="text-xs text-[#A4A8B0] leading-relaxed">
+                If the squad earns 1st Place (100 points), the points are divided equally among the 3 unique houses: <br />
+                <code className="text-[#C6A04A] font-mono text-sm block mt-1.5">100 / 3 = 33.33 pts each</code>
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#080A0E] border border-[#252B34] space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A]">Rule 3 • Deterministic Remainder</span>
+              <h3 className="font-serif text-xl font-bold text-white">Fair Remainder Rotation</h3>
+              <p className="text-xs text-[#A4A8B0] leading-relaxed">
+                Any fractional cent remainder (+0.01) is rotated deterministically to ensure the sum of points allocated strictly equals the total points awarded: <br />
+                <code className="text-emerald-400 font-mono text-sm block mt-1.5">33.33 + 33.33 + 33.34 = 100.00</code>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* SECTION I: COMPREHENSIVE CHAMPIONSHIP FOOTER              */}
+      {/* ========================================================= */}
+      <footer className="bg-[#080A0E] py-14 px-4 sm:px-8 text-xs text-[#A4A8B0]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#252B34]">
+            {/* Column 1: Brand & Championship Statement */}
+            <div className="space-y-3 md:col-span-1">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#141820] border border-[#C6A04A]/40 p-1 flex items-center justify-center">
+                  <img src="/logo.png" alt="APL Logo" className="w-full h-full object-contain" />
+                </div>
+                <span className="font-serif font-bold text-white text-base">
+                  APL Season 9
+                </span>
+              </div>
+              <p className="text-[11px] text-[#A4A8B0] leading-relaxed">
+                Inter-Club Sports Championship. The annual tournament uniting five historical houses across seven athletic disciplines.
+              </p>
+            </div>
+
+            {/* Column 2: Navigation Links */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white block mb-1">
+                Portal Sections
+              </span>
+              <ul className="space-y-1.5 text-[11px]">
+                <li><button onClick={() => scrollToSection('overview')} className="hover:text-[#C6A04A] transition">Championship Overview</button></li>
+                <li><button onClick={() => scrollToSection('leaderboard')} className="hover:text-[#C6A04A] transition">Live Leaderboard</button></li>
+                <li><button onClick={() => scrollToSection('houses')} className="hover:text-[#C6A04A] transition">The 5 Houses</button></li>
+                <li><button onClick={() => scrollToSection('sports')} className="hover:text-[#C6A04A] transition">7 Sports Arena</button></li>
+                <li><button onClick={() => scrollToSection('matches')} className="hover:text-[#C6A04A] transition">Match Radar & Fixtures</button></li>
+              </ul>
+            </div>
+
+            {/* Column 3: The 5 Houses */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white block mb-1">
+                Competing Houses
+              </span>
+              <ul className="space-y-1.5 text-[11px]">
+                <li>Alpha (ALP) • Ethan Hunt</li>
+                <li>Crown Crushers (CRW) • Zane Malik</li>
+                <li>Dominator (DOM) • Leo Vance</li>
+                <li>Mavericks (MAV) • Alex Rivera</li>
+                <li>Royal Force (RYL) • Carlos Vega</li>
+              </ul>
+            </div>
+
+            {/* Column 4: Disciplines */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-white block mb-1">
+                7 Sports Disciplines
+              </span>
+              <p className="text-[11px] text-[#A4A8B0] leading-relaxed">
+                Cricket (10 Teams) • Football • BGMI Squads • Badminton • Chess • Table Tennis • Carrom
+              </p>
+              <div className="pt-2">
+                <span className="inline-block px-2.5 py-1 rounded bg-[#141820] text-[#C6A04A] border border-[#252B34] text-[10px] font-mono">
+                  Engine: Unique-Club Equal Split
+                </span>
+              </div>
             </div>
           </div>
 
-          <p className="text-[11px] text-[#9299A5]">
-            Public viewer portal. Administrative and referee operations are managed in isolated portals.
-          </p>
-
-          <span className="text-[11px] text-[#9299A5] font-mono">
-            Season 2026
-          </span>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#A4A8B0]">
+            <p>© 2026 APL Season 9 Inter-Club House Championship. All rights reserved.</p>
+            <p className="font-mono text-[10px] text-[#6B7280]">
+              Spectator Public Edition • No Authentication Required
+            </p>
+          </div>
         </div>
       </footer>
     </div>
