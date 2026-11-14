@@ -182,36 +182,7 @@ export default function PublicViewerPortal() {
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-600/8 rounded-full blur-[160px] pointer-events-none" />
 
       {/* ========================================================= */}
-      {/* 1. HIGH-VOLTAGE LIVE CHAMPIONSHIP TICKER                  */}
-      {/* ========================================================= */}
-      <div className="relative z-40 bg-gradient-to-r from-[#0B1728] via-[#0E2038] to-[#0B1728] border-b border-white/[0.08] overflow-hidden py-1.5 px-4">
-        <div className="animate-marquee items-center gap-8 text-[11px] font-bold tracking-wider text-slate-300 uppercase">
-          <span className="flex items-center gap-2 text-amber-400">
-            <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-            APL SEASON 9 LIVE
-          </span>
-          <span className="text-slate-400">•</span>
-          <span>5 HOUSES: ALPHA • CROWN CRUSHERS • DOMINATOR • MAVERICKS • ROYAL FORCE</span>
-          <span className="text-slate-400">•</span>
-          <span className="text-cyan-400">10 CRICKET TEAMS (A & B SQUADS)</span>
-          <span className="text-slate-400">•</span>
-          <span className="text-amber-300">7 SPORTS: BGMI • CARROM • BADMINTON • CHESS • TABLE TENNIS • CRICKET • FOOTBALL</span>
-          <span className="text-slate-400">•</span>
-          <span className="text-emerald-400">AUTOMATED UNIQUE-CLUB EQUAL DIVISION ENGINE</span>
-          <span className="text-slate-400">•</span>
-          <span className="flex items-center gap-2 text-amber-400">
-            <Trophy className="w-3.5 h-3.5" />
-            APL TROPHY SHOWDOWN
-          </span>
-          <span className="text-slate-400">•</span>
-          <span>5 HOUSES: ALPHA • CROWN CRUSHERS • DOMINATOR • MAVERICKS • ROYAL FORCE</span>
-          <span className="text-slate-400">•</span>
-          <span className="text-cyan-400">10 CRICKET TEAMS (A & B SQUADS)</span>
-        </div>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 2. PUBLIC HEADER (STRICTLY SPECTATOR ONLY - NO LOGIN BTN) */}
+      {/* PUBLIC HEADER (STRICTLY SPECTATOR ONLY - NO LOGIN BTN)    */}
       {/* ========================================================= */}
       <header className="sticky top-0 z-50 bg-[#060D17]/90 backdrop-blur-xl border-b border-white/[0.08] px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-2xl">
         {/* Brand Showcase */}
