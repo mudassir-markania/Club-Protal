@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { History, Search, Shield, Eye, Clock, UserCheck, RefreshCw, X } from 'lucide-react';
 
 export default function AuditLogsPage() {
@@ -35,7 +35,7 @@ export default function AuditLogsPage() {
   );
 
   return (
-    <AppLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -190,7 +190,7 @@ export default function AuditLogsPage() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </AdminLayout>
   );
 }
 

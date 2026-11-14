@@ -12,6 +12,9 @@ import {
   Target,
   Flag,
   CircleDot,
+  Gamepad2,
+  Swords,
+  Sparkles,
 } from 'lucide-react';
 
 interface IconProps {
@@ -161,6 +164,15 @@ export function SportIcon({
   }
   if (lower.includes('basketball')) {
     return <BasketballIcon className={className} />;
+  }
+  if (lower.includes('bgmi') || lower.includes('esport') || lower.includes('game') || lower.includes('pubg')) {
+    return <Gamepad2 className={className} />;
+  }
+  if (lower.includes('chess')) {
+    return <Crown className={className} />;
+  }
+  if (lower.includes('carrom')) {
+    return <Target className={className} />;
   }
   return <Medal className={className} />;
 }

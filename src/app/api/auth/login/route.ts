@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { comparePassword, signToken } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -11,8 +11,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    const cleanInput = (email || '').toLowerCase().trim();
+    const cleanPassword = typeof password === 'string' ? password.trim() : password;
+
+    // Support both direct email and common username aliases
+    const searchEmails = [cleanInput];
+    if (['admin', 'director', 'superadmin', 'administrator'].includes(cleanInput)) {
+      searchEmails.push('admin@sportsportal.com');
+    } else if (['marcus', 'ref.marcus', 'referee.marcus'].includes(cleanInput)) {
+      searchEmails.push('ref.marcus@sportsportal.com');
+    } else if (['sarah', 'ref.sarah', 'referee.sarah'].includes(cleanInput)) {
+      searchEmails.push('ref.sarah@sportsportal.com');
+    } else if (['david', 'ref.david', 'referee.david'].includes(cleanInput)) {
+      searchEmails.push('ref.david@sportsportal.com');
+    }
+
+    const user = await db.user.findFirst({
+      where: { email: { in: searchEmails } },
       include: { role: true, referee: true },
     });
 
@@ -20,7 +35,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
-    const isValid = await comparePassword(password, user.passwordHash);
+    const isValid = await comparePassword(cleanPassword, user.passwordHash);
     if (!isValid) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }

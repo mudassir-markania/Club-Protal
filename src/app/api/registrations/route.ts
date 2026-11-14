@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -22,19 +22,19 @@ export async function GET(req: Request) {
       ];
     }
 
-    const registrations = await prisma.registration.findMany({
+    const registrations = await db.registration.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });
 
     // Compute stats
-    const totalCount = await prisma.registration.count();
-    const approvedCount = await prisma.registration.count({ where: { status: 'APPROVED' } });
-    const pendingCount = await prisma.registration.count({ where: { status: 'PENDING' } });
-    const rejectedCount = await prisma.registration.count({ where: { status: 'REJECTED' } });
-    const duplicateCount = await prisma.registration.count({ where: { status: 'DUPLICATE' } });
+    const totalCount = await db.registration.count();
+    const approvedCount = await db.registration.count({ where: { status: 'APPROVED' } });
+    const pendingCount = await db.registration.count({ where: { status: 'PENDING' } });
+    const rejectedCount = await db.registration.count({ where: { status: 'REJECTED' } });
+    const duplicateCount = await db.registration.count({ where: { status: 'DUPLICATE' } });
 
-    const integration = await prisma.googleIntegration.findFirst({
+    const integration = await db.googleIntegration.findFirst({
       include: {
         syncLogs: {
           orderBy: { createdAt: 'desc' },
@@ -84,18 +84,18 @@ export async function POST(req: Request) {
     const cleanEmail = email.toLowerCase().trim();
 
     // Duplicate detection strategy
-    const existingRegistration = await prisma.registration.findFirst({
+    const existingRegistration = await db.registration.findFirst({
       where: { email: cleanEmail },
     });
 
-    const existingPlayer = await prisma.player.findFirst({
+    const existingPlayer = await db.player.findFirst({
       where: { email: cleanEmail },
     });
 
     const isDuplicate = Boolean(existingRegistration || existingPlayer);
     const submissionId = `GF-SUB-${Date.now().toString().slice(-6)}`;
 
-    const registration = await prisma.registration.create({
+    const registration = await db.registration.create({
       data: {
         submissionId,
         fullName,
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
     });
 
     // Create notification
-    await prisma.notification.create({
+    await db.notification.create({
       data: {
         recipientRole: 'ADMIN',
         title: isDuplicate ? 'Duplicate Registration Detected' : 'New Form Registration Received',

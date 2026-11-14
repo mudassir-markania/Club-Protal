@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { db } from './db';
 import { AuthUser } from './auth';
 
 export async function createAuditLog({
@@ -19,7 +19,7 @@ export async function createAuditLog({
   ipAddress?: string;
 }) {
   try {
-    await prisma.auditLog.create({
+    await db.auditLog.create({
       data: {
         userId: user?.id || null,
         userName: user?.name || 'System / Anonymous',

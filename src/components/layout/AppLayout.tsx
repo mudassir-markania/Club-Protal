@@ -59,7 +59,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       if (data.authenticated) {
         setUser(data.user);
       } else {
-        // Fallback for seamless demo: default to Super Admin
+        // Fallback for seamless demo
+        if (pathname?.startsWith('/referee')) {
+          setUser({
+            id: 'ref-marcus-default',
+            name: 'Marcus Sterling',
+            email: 'ref.marcus@sportsportal.com',
+            role: 'REFEREE',
+            refereeId: 'ca701ecb-f512-45a3-b651-600b4d45f965',
+            referee: { refereeCode: 'REF-001', name: 'Marcus Sterling' },
+          });
+        } else {
+          setUser({
+            id: 'admin-default',
+            name: 'Tournament Director',
+            email: 'admin@sportsportal.com',
+            role: 'SUPER_ADMIN',
+          });
+        }
+      }
+    } catch (err) {
+      if (pathname?.startsWith('/referee')) {
+        setUser({
+          id: 'ref-marcus-default',
+          name: 'Marcus Sterling',
+          email: 'ref.marcus@sportsportal.com',
+          role: 'REFEREE',
+          refereeId: 'ca701ecb-f512-45a3-b651-600b4d45f965',
+          referee: { refereeCode: 'REF-001', name: 'Marcus Sterling' },
+        });
+      } else {
         setUser({
           id: 'admin-default',
           name: 'Tournament Director',
@@ -67,13 +96,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           role: 'SUPER_ADMIN',
         });
       }
-    } catch (err) {
-      setUser({
-        id: 'admin-default',
-        name: 'Tournament Director',
-        email: 'admin@sportsportal.com',
-        role: 'SUPER_ADMIN',
-      });
     } finally {
       setLoading(false);
     }
@@ -99,9 +121,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     } catch (err) {}
   };
 
-  const switchRole = async (roleType: 'ADMIN' | 'REFEREE') => {
+  const switchRole = async (roleType: 'ADMIN' | 'REFEREE', customEmail?: string) => {
     try {
-      const email = roleType === 'ADMIN' ? 'admin@sportsportal.com' : 'ref.marcus@sportsportal.com';
+      const email =
+        roleType === 'ADMIN'
+          ? 'admin@sportsportal.com'
+          : customEmail || 'ref.marcus@sportsportal.com';
       const password = roleType === 'ADMIN' ? 'admin123' : 'referee123';
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -127,7 +152,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+  const isRefereeMode = pathname?.startsWith('/referee') || user?.role === 'REFEREE';
+  const isAdmin = !isRefereeMode && (user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN');
 
   const adminNav = [
     { name: 'Admin Dashboard', href: '/admin/dashboard', icon: BarChart3 },
@@ -136,16 +162,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     { name: 'Player Roster', href: '/admin/players', icon: Users },
     { name: 'Referee Management', href: '/admin/referees', icon: UserCheck },
     { name: 'Matches & Fixtures', href: '/admin/matches', icon: Calendar },
-    { name: 'Google Forms / Sync', href: '/admin/registrations', icon: FileSpreadsheet },
-    { name: 'Leaderboard Rankings', href: '/admin/leaderboard', icon: Trophy },
+    { name: 'Points History', href: '/admin/points-history', icon: History },
+    { name: 'House Leaderboard', href: '/admin/leaderboard', icon: Trophy },
     { name: 'Reports & Exports', href: '/admin/reports', icon: FileText },
-    { name: 'Audit Logs', href: '/admin/audit-logs', icon: History },
+    { name: 'Audit Logs', href: '/admin/audit-logs', icon: ClipboardList },
   ];
 
   const refereeNav = [
-    { name: 'Referee Dashboard', href: '/referee/dashboard', icon: BarChart3 },
-    { name: 'My Assigned Matches', href: '/referee/matches', icon: Swords },
-    { name: 'Tournament Leaderboard', href: '/admin/leaderboard', icon: Trophy },
+    { name: 'Referee Console', href: '/referee/dashboard', icon: BarChart3 },
+    { name: 'Assigned Competitions', href: '/referee/matches', icon: Swords },
+    { name: 'House Leaderboard', href: '/admin/leaderboard', icon: Trophy },
   ];
 
   const navItems = isAdmin ? adminNav : refereeNav;
@@ -167,14 +193,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-navy-800 bg-navy-950/60">
-          <Link href={isAdmin ? '/admin/dashboard' : '/referee/dashboard'} className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 font-bold">
-              <Trophy className="w-5 h-5 text-white" />
+        <div className="h-16 px-4 flex items-center justify-between border-b border-navy-800 bg-navy-950/60">
+          <Link href={isAdmin ? '/admin/dashboard' : '/referee/dashboard'} className="flex items-center gap-2.5 group min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-navy-800/90 border border-amber-400/40 flex items-center justify-center p-1 shadow-md shadow-amber-500/10 group-hover:scale-105 transition-transform shrink-0">
+              <img src="/logo.png" alt="APL Season 9" className="w-full h-full object-contain filter drop-shadow" />
             </div>
-            <div>
-              <span className="font-bold text-base tracking-tight text-white block">ApexArena</span>
-              <span className="text-[10px] text-blue-300 font-medium tracking-wider uppercase">Championship 2026</span>
+            <div className="min-w-0">
+              <span className="font-black text-sm tracking-tight text-white block truncate">APL Season 9</span>
+              <span className="text-[10px] text-amber-400 font-bold tracking-wider uppercase block truncate">House Championship</span>
             </div>
           </Link>
           <button
@@ -235,25 +261,67 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => switchRole('ADMIN')}
-                className={`text-[11px] py-1 px-2 rounded font-medium border text-center transition-all ${
+                className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border text-center transition-all ${
                   isAdmin
-                    ? 'bg-blue-600 text-white border-blue-500'
-                    : 'bg-navy-900 text-navy-300 border-navy-700 hover:text-white'
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
+                    : 'bg-navy-900 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-800'
                 }`}
               >
                 Admin Panel
               </button>
               <button
                 onClick={() => switchRole('REFEREE')}
-                className={`text-[11px] py-1 px-2 rounded font-medium border text-center transition-all ${
-                  !isAdmin
-                    ? 'bg-amber-600 text-white border-amber-500'
-                    : 'bg-navy-900 text-navy-300 border-navy-700 hover:text-white'
+                className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border text-center transition-all ${
+                  isRefereeMode
+                    ? 'bg-amber-600 text-white border-amber-500 shadow-xs'
+                    : 'bg-navy-900 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-800'
                 }`}
               >
                 Referee Panel
               </button>
             </div>
+            {isRefereeMode && (
+              <div className="mt-2 pt-2 border-t border-navy-800/80">
+                <span className="text-[9px] text-navy-400 uppercase tracking-wider block mb-1">
+                  Active Official Persona:
+                </span>
+                <div className="grid grid-cols-3 gap-1 text-[10px]">
+                  <button
+                    onClick={() => switchRole('REFEREE', 'ref.marcus@sportsportal.com')}
+                    title="Football & Cricket (REF-001)"
+                    className={`py-1 px-1 rounded text-center truncate font-medium border ${
+                      user?.email === 'ref.marcus@sportsportal.com'
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
+                        : 'bg-navy-900/60 text-navy-400 border-navy-800 hover:text-navy-200'
+                    }`}
+                  >
+                    Marcus
+                  </button>
+                  <button
+                    onClick={() => switchRole('REFEREE', 'ref.sarah@sportsportal.com')}
+                    title="Badminton & TT (REF-002)"
+                    className={`py-1 px-1 rounded text-center truncate font-medium border ${
+                      user?.email === 'ref.sarah@sportsportal.com'
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
+                        : 'bg-navy-900/60 text-navy-400 border-navy-800 hover:text-navy-200'
+                    }`}
+                  >
+                    Sarah
+                  </button>
+                  <button
+                    onClick={() => switchRole('REFEREE', 'ref.david@sportsportal.com')}
+                    title="Basketball & Football (REF-003)"
+                    className={`py-1 px-1 rounded text-center truncate font-medium border ${
+                      user?.email === 'ref.david@sportsportal.com'
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
+                        : 'bg-navy-900/60 text-navy-400 border-navy-800 hover:text-navy-200'
+                    }`}
+                  >
+                    David
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between px-2 py-1">
@@ -291,24 +359,43 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
+              <Link href={isAdmin ? '/admin/dashboard' : '/referee/dashboard'} className="flex items-center gap-2 lg:hidden">
+                <img src="/logo.png" alt="APL Logo" className="w-8 h-8 object-contain" />
+                <span className="font-bold text-xs text-navy-950">APL 9</span>
+              </Link>
               <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">
                 <Calendar className="w-3.5 h-3.5 text-blue-700" />
                 <span>Nov 25 - 28, 2026</span>
               </span>
-              <span className="text-xs font-medium text-slate-500 hidden md:inline">
-                Inter-Club Sports Championship
+              <span className="text-xs font-semibold text-slate-700 hidden md:inline">
+                APL Season 9 • House Championship
               </span>
             </div>
           </div>
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-3">
-            {/* Quick Panel Indicator */}
-            <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full border border-slate-200 text-xs font-medium">
-              <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-blue-600' : 'bg-amber-600'}`}></span>
-              <span className="text-slate-700 font-semibold">{isAdmin ? 'Admin View' : 'Referee View'}</span>
-            </div>
+            {/* Quick Panel Switcher matching attachment styling */}
+            {isAdmin ? (
+              <button
+                onClick={() => switchRole('REFEREE')}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0B1528] text-white border border-[#243552] hover:bg-[#13233f] hover:border-amber-500/50 shadow-sm transition-all group"
+                title="Switch to Referee Console"
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span>Referee Panel</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => switchRole('ADMIN')}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0B1528] text-white border border-[#243552] hover:bg-[#13233f] hover:border-blue-500/50 shadow-sm transition-all group"
+                title="Switch to Tournament Admin Panel"
+              >
+                <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                <span>Admin Panel</span>
+              </button>
+            )}
 
             {/* Notification Bell */}
             <div className="relative">

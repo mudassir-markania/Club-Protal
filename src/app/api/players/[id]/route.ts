@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const player = await prisma.player.findUnique({
+    const player = await db.player.findUnique({
       where: { id: params.id },
       include: {
         club: true,
@@ -42,7 +42,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json();
 
-    const existing = await prisma.player.findUnique({
+    const existing = await db.player.findUnique({
       where: { id: params.id },
       include: { sports: true },
     });
@@ -65,7 +65,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       sportIds,
     } = body;
 
-    const updated = await prisma.player.update({
+    const updated = await db.player.update({
       where: { id: params.id },
       data: {
         name: name !== undefined ? name : existing.name,
@@ -83,12 +83,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     // Update sports if provided
     if (sportIds && Array.isArray(sportIds)) {
-      await prisma.playerSport.deleteMany({
+      await db.playerSport.deleteMany({
         where: { playerId: params.id },
       });
 
       for (const sId of sportIds) {
-        await prisma.playerSport.create({
+        await db.playerSport.create({
           data: {
             playerId: params.id,
             sportId: sId,
@@ -97,7 +97,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       }
     }
 
-    const result = await prisma.player.findUnique({
+    const result = await db.player.findUnique({
       where: { id: params.id },
       include: { club: true, sports: { include: { sport: true } } },
     });
@@ -124,7 +124,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
 
-    const player = await prisma.player.findUnique({
+    const player = await db.player.findUnique({
       where: { id: params.id },
     });
 
@@ -132,7 +132,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ error: 'Player not found' }, { status: 404 });
     }
 
-    await prisma.player.delete({
+    await db.player.delete({
       where: { id: params.id },
     });
 

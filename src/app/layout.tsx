@@ -2,8 +2,12 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ApexArena | Sports Tournament Management Portal',
-  description: 'Centralized management portal for sports tournaments, clubs, referees, and leaderboards.',
+  title: 'APL Season 9 | House Championship Portal',
+  description: 'Centralized management portal for APL Season 9 House Championship: clubs, cricket teams, sports, referees, and leaderboards.',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({
@@ -19,4 +23,3 @@ export default function RootLayout({
     </html>
   );
 }
-

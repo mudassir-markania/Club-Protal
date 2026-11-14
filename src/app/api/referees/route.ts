@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { hashPassword, requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET() {
   try {
-    const referees = await prisma.referee.findMany({
+    const referees = await db.referee.findMany({
       orderBy: { name: 'asc' },
       include: {
         sports: {
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
     const code = refereeCode || `REF-${Math.floor(100 + Math.random() * 900)}`;
 
-    const existingRef = await prisma.referee.findFirst({
+    const existingRef = await db.referee.findFirst({
       where: {
         OR: [{ email: email.toLowerCase().trim() }, { refereeCode: code }],
       },
@@ -68,17 +68,17 @@ export async function POST(req: Request) {
     }
 
     // Find Referee Role
-    let refRole = await prisma.role.findUnique({
+    let refRole = await db.role.findUnique({
       where: { name: 'REFEREE' },
     });
 
     if (!refRole) {
-      refRole = await prisma.role.create({
+      refRole = await db.role.create({
         data: { name: 'REFEREE', description: 'Match referee' },
       });
     }
 
-    const referee = await prisma.referee.create({
+    const referee = await db.referee.create({
       data: {
         refereeCode: code,
         name,
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
 
     // Create user login account for referee
     const pwdHash = await hashPassword(password || 'referee123');
-    await prisma.user.create({
+    await db.user.create({
       data: {
         name,
         email: email.toLowerCase().trim(),
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     // Assign sports
     if (sportIds && Array.isArray(sportIds)) {
       for (const sId of sportIds) {
-        await prisma.refereeSport.create({
+        await db.refereeSport.create({
           data: {
             refereeId: referee.id,
             sportId: sId,
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const created = await prisma.referee.findUnique({
+    const created = await db.referee.findUnique({
       where: { id: referee.id },
       include: {
         sports: { include: { sport: true } },

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: Request) {
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     if (entity) where.entity = entity;
     if (action) where.action = action;
 
-    const logs = await prisma.auditLog.findMany({
+    const logs = await db.auditLog.findMany({
       where,
       orderBy: { timestamp: 'desc' },
       take: 100,

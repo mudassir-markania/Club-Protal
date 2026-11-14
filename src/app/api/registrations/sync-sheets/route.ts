@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -9,11 +9,11 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
 
     // Find or update Google integration config
-    let integration = await prisma.googleIntegration.findFirst();
+    let integration = await db.googleIntegration.findFirst();
 
     if (body.sheetId) {
       if (integration) {
-        integration = await prisma.googleIntegration.update({
+        integration = await db.googleIntegration.update({
           where: { id: integration.id },
           data: {
             sheetId: body.sheetId,
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
           },
         });
       } else {
-        integration = await prisma.googleIntegration.create({
+        integration = await db.googleIntegration.create({
           data: {
             sheetId: body.sheetId,
             sheetName: body.sheetName || 'Sheet1',
@@ -151,11 +151,11 @@ export async function POST(req: Request) {
         }
 
         // Check if already registered
-        const existingReg = await prisma.registration.findFirst({
+        const existingReg = await db.registration.findFirst({
           where: { email },
         });
 
-        const existingPlayer = await prisma.player.findFirst({
+        const existingPlayer = await db.player.findFirst({
           where: { email },
         });
 
@@ -163,7 +163,7 @@ export async function POST(req: Request) {
 
         const subId = `GF-SUB-${Date.now().toString().slice(-4)}${Math.floor(10 + Math.random() * 90)}`;
 
-        await prisma.registration.create({
+        await db.registration.create({
           data: {
             submissionId: subId,
             fullName,
@@ -191,7 +191,7 @@ export async function POST(req: Request) {
     }
 
     // Update integration lastSyncAt
-    await prisma.googleIntegration.update({
+    await db.googleIntegration.update({
       where: { id: integration.id },
       data: {
         lastSyncAt: new Date(),
@@ -201,7 +201,7 @@ export async function POST(req: Request) {
     });
 
     // Record Synchronization Log
-    const syncLog = await prisma.synchronizationLog.create({
+    const syncLog = await db.synchronizationLog.create({
       data: {
         integrationId: integration.id,
         syncType: 'GOOGLE_SHEETS',
@@ -221,7 +221,7 @@ export async function POST(req: Request) {
     });
 
     // Notify admins
-    await prisma.notification.create({
+    await db.notification.create({
       data: {
         recipientRole: 'ADMIN',
         title: 'Google Sheets Synchronized',

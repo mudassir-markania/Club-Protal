@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET() {
   try {
-    const settings = await prisma.tournamentSetting.findMany();
+    const settings = await db.tournamentSetting.findMany();
     const settingsMap: Record<string, string> = {};
     settings.forEach((s) => {
       settingsMap[s.key] = s.value;
@@ -26,7 +26,7 @@ export async function PUT(req: Request) {
 
     if (Array.isArray(body)) {
       for (const item of body) {
-        const s = await prisma.tournamentSetting.upsert({
+        const s = await db.tournamentSetting.upsert({
           where: { key: item.key },
           update: { value: item.value, description: item.description },
           create: { key: item.key, value: item.value, description: item.description },
@@ -35,7 +35,7 @@ export async function PUT(req: Request) {
       }
     } else {
       for (const [key, value] of Object.entries(body)) {
-        const s = await prisma.tournamentSetting.upsert({
+        const s = await db.tournamentSetting.upsert({
           where: { key },
           update: { value: String(value) },
           create: { key, value: String(value) },

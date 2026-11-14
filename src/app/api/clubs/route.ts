@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET() {
   try {
-    const clubs = await prisma.club.findMany({
+    const clubs = await db.club.findMany({
       orderBy: { currentRank: 'asc' },
       include: {
         _count: {
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Club Name and Code are required' }, { status: 400 });
     }
 
-    const existing = await prisma.club.findFirst({
+    const existing = await db.club.findFirst({
       where: {
         OR: [{ name: { equals: name } }, { code: { equals: code.toUpperCase() } }],
       },
@@ -44,9 +44,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Club with this name or code already exists' }, { status: 409 });
     }
 
-    const clubCount = await prisma.club.count();
+    const clubCount = await db.club.count();
 
-    const club = await prisma.club.create({
+    const club = await db.club.create({
       data: {
         name,
         code: code.toUpperCase(),

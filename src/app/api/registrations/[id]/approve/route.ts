@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -8,7 +8,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json().catch(() => ({}));
 
-    const registration = await prisma.registration.findUnique({
+    const registration = await db.registration.findUnique({
       where: { id: params.id },
     });
 
@@ -23,10 +23,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     // 1. Resolve Club: check if user passed assignedClubId or match by clubPreference
     let club = null;
     if (body.clubId) {
-      club = await prisma.club.findUnique({ where: { id: body.clubId } });
+      club = await db.club.findUnique({ where: { id: body.clubId } });
     }
     if (!club && registration.clubPreference) {
-      club = await prisma.club.findFirst({
+      club = await db.club.findFirst({
         where: {
           OR: [
             { name: { contains: registration.clubPreference } },
@@ -36,7 +36,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       });
     }
     if (!club) {
-      club = await prisma.club.findFirst();
+      club = await db.club.findFirst();
     }
 
     if (!club) {
@@ -44,11 +44,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     // 2. Generate unique Registration ID
-    const count = await prisma.player.count();
+    const count = await db.player.count();
     const regCode = `REG-${club.code}-${(count + 1).toString().padStart(3, '0')}`;
 
     // 3. Create Player
-    const player = await prisma.player.create({
+    const player = await db.player.create({
       data: {
         registrationId: regCode,
         name: registration.fullName,
@@ -64,7 +64,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
 
     // 4. Resolve Sports & Create PlayerSport records
-    const allSports = await prisma.sport.findMany();
+    const allSports = await db.sport.findMany();
     const selectedSportsList = (registration.sportsSelected || '')
       .split(',')
       .map((s) => s.trim().toLowerCase());
@@ -76,7 +76,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       );
 
       if (isSelected) {
-        await prisma.playerSport.create({
+        await db.playerSport.create({
           data: {
             playerId: player.id,
             sportId: sport.id,
@@ -86,7 +86,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     // 5. Update Registration status
-    await prisma.registration.update({
+    await db.registration.update({
       where: { id: registration.id },
       data: { status: 'APPROVED' },
     });

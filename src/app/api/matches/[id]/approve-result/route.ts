@@ -1,25 +1,38 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
+import { calculateClubPointsDistribution } from '@/lib/points-distribution';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json();
 
-    const { action, resultId, rejectionReason, overridePoints } = body; // action: "APPROVE" | "REJECT"
+    const { action, resultId, rejectionReason, corrections } = body;
+    // action: "APPROVE" | "REJECT" | "CORRECT"
 
-    const match = await prisma.match.findFirst({
+    const match = await db.match.findFirst({
       where: {
         OR: [{ id: params.id }, { matchCode: params.id }],
       },
       include: {
         sport: true,
-        participants: { include: { club: true } },
+        participants: {
+          include: {
+            club: true,
+            cricketTeam: true,
+            players: { include: { player: true, club: true } },
+          },
+        },
         results: { orderBy: { createdAt: 'desc' } },
-        referees: true,
+        distributions: {
+          include: {
+            allocations: { include: { club: true } },
+          },
+        },
+        referees: { include: { referee: true } },
       },
     });
 
@@ -31,74 +44,152 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       ? match.results.find((r) => r.id === resultId)
       : match.results[0];
 
-    if (!targetResult) {
+    if (!targetResult && action !== 'CORRECT') {
       return NextResponse.json({ error: 'No submitted result found for this match' }, { status: 404 });
     }
 
+    // 1. APPROVE ACTION
     if (action === 'APPROVE') {
-      // 1. Mark Match Result as APPROVED
-      await prisma.matchResult.update({
-        where: { id: targetResult.id },
-        data: {
-          status: 'APPROVED',
-          approvedByUserId: user.id,
-          approvedAt: new Date(),
-        },
-      });
-
-      // 2. Mark Match as COMPLETED
-      await prisma.match.update({
-        where: { id: match.id },
-        data: {
-          status: 'COMPLETED',
-        },
-      });
-
-      // 3. Prevent duplicate point allocation for this match
-      await prisma.pointsHistory.deleteMany({
-        where: { matchId: match.id },
-      });
-
-      // Determine points to award
-      let pointsToAward = 3;
-      try {
-        if (match.sport.scoringConfig) {
-          const cfg = JSON.parse(match.sport.scoringConfig);
-          pointsToAward = cfg.win || 3;
-        }
-      } catch (e) {}
-
-      if (overridePoints !== undefined && !isNaN(parseInt(overridePoints))) {
-        pointsToAward = parseInt(overridePoints);
+      // Prevent duplicate approval if already approved
+      if (targetResult && targetResult.status === 'APPROVED' && match.status === 'COMPLETED') {
+        return NextResponse.json({ error: 'This result has already been approved' }, { status: 400 });
       }
 
-      // Check winner club
-      const winnerClubId = targetResult.winnerClubId || match.participants.find((p) => p.isWinner)?.clubId;
+      // Execute approval atomically
+      await db.$transaction(async (tx) => {
+        // Mark MatchResult as APPROVED
+        if (targetResult) {
+          await tx.matchResult.update({
+            where: { id: targetResult.id },
+            data: {
+              status: 'APPROVED',
+              approvedByUserId: user.id,
+              approvedAt: new Date(),
+            },
+          });
+        }
 
-      if (winnerClubId) {
-        await prisma.pointsHistory.create({
+        // Mark Match as COMPLETED
+        await tx.match.update({
+          where: { id: match.id },
+          data: { status: 'COMPLETED' },
+        });
+
+        // Clear any prior PointsHistory for this match to prevent duplicate allocation
+        await tx.pointsHistory.deleteMany({
+          where: { matchId: match.id },
+        });
+
+        // Approve all points distributions and create PointsHistory records
+        const distributions = await tx.pointsDistribution.findMany({
+          where: { matchId: match.id },
+          include: {
+            allocations: { include: { club: true } },
+            participant: true,
+          },
+        });
+
+        for (const dist of distributions) {
+          await tx.pointsDistribution.update({
+            where: { id: dist.id },
+            data: {
+              status: 'APPROVED',
+              approvedByUserId: user.id,
+              approvedAt: new Date(),
+            },
+          });
+
+          // Create PointsHistory entry for each allocated club
+          for (const alloc of dist.allocations) {
+            const squadName = dist.participant?.teamName || alloc.club.name;
+            const reason = `${match.sport.name} - ${squadName} (${alloc.points.toFixed(2)} pts of ${dist.originalPoints.toFixed(2)} pts across ${dist.uniqueClubCount} unique club${dist.uniqueClubCount === 1 ? '' : 's'})`;
+
+            await tx.pointsHistory.create({
+              data: {
+                clubId: alloc.clubId,
+                sportId: match.sportId,
+                matchId: match.id,
+                distributionId: dist.id,
+                points: alloc.points,
+                reason,
+                recordedByUserId: user.id,
+              },
+            });
+          }
+        }
+      });
+
+      // Recalculate dynamic leaderboards
+      await recalculateAllLeaderboards();
+
+      // Notify referees
+      for (const mr of match.referees) {
+        await db.notification.create({
           data: {
-            clubId: winnerClubId,
-            sportId: match.sportId,
-            matchId: match.id,
-            points: pointsToAward,
-            reason: `${match.sport.name} Win (${match.matchCode} - ${match.round})`,
-            recordedByUserId: user.id,
+            recipientRole: 'REFEREE',
+            recipientUserId: mr.refereeId,
+            title: `Result Approved: ${match.matchCode}`,
+            message: `Admin approved results for ${match.matchCode}. Points have been credited to participating clubs.`,
+            type: 'RESULT_APPROVED',
           },
         });
       }
 
-      // 4. Trigger automatic leaderboard recalculation
-      await recalculateAllLeaderboards();
+      await createAuditLog({
+        user,
+        action: 'APPROVE_RESULT',
+        entity: 'MatchResult',
+        recordId: targetResult?.id || match.id,
+        updatedValue: { matchCode: match.matchCode, status: 'APPROVED' },
+      });
 
-      // 5. Notify referee
-      for (const r of match.referees) {
-        await prisma.notification.create({
+      return NextResponse.json({
+        success: true,
+        message: 'Result approved. Club points credited and leaderboard updated.',
+      });
+    }
+
+    // 2. REJECT ACTION
+    if (action === 'REJECT') {
+      if (!rejectionReason) {
+        return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 });
+      }
+
+      await db.$transaction(async (tx) => {
+        if (targetResult) {
+          await tx.matchResult.update({
+            where: { id: targetResult.id },
+            data: {
+              status: 'REJECTED',
+              rejectionReason,
+            },
+          });
+        }
+
+        await tx.pointsDistribution.updateMany({
+          where: { matchId: match.id },
+          data: {
+            status: 'REJECTED',
+            rejectionReason,
+          },
+        });
+
+        await tx.match.update({
+          where: { id: match.id },
+          data: {
+            status: 'AWAITING_RESULT',
+            notes: `${match.notes || ''}\n[Rejected by Admin]: ${rejectionReason}`,
+          },
+        });
+      });
+
+      for (const mr of match.referees) {
+        await db.notification.create({
           data: {
             recipientRole: 'REFEREE',
-            recipientUserId: null,
-            title: `Result Approved: ${match.matchCode}`,
-            message: `Your submitted result for ${match.sport.name} (${match.matchCode}) has been verified and approved by the Tournament Director.`,
+            recipientUserId: mr.refereeId,
+            title: `Result Rejected: ${match.matchCode}`,
+            message: `Result for ${match.matchCode} was rejected by Admin. Reason: "${rejectionReason}". Please review and resubmit.`,
             type: 'RESULT_SUBMITTED',
             link: `/referee/matches/${match.matchCode}`,
           },
@@ -107,67 +198,156 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
       await createAuditLog({
         user,
-        action: 'APPROVE_MATCH_RESULT',
+        action: 'REJECT_RESULT',
         entity: 'MatchResult',
-        recordId: targetResult.id,
-        updatedValue: { status: 'APPROVED', pointsAwarded: pointsToAward, winnerClubId },
+        recordId: targetResult?.id || match.id,
+        updatedValue: { rejectionReason, status: 'REJECTED' },
       });
 
       return NextResponse.json({
         success: true,
-        message: 'Match result approved, points awarded, and leaderboards updated!',
+        message: 'Result rejected. Referee notified for correction.',
       });
-    } else if (action === 'REJECT') {
-      // Reject result and ask referee for correction
-      await prisma.matchResult.update({
-        where: { id: targetResult.id },
-        data: {
-          status: 'REJECTED',
-          disputeReason: rejectionReason || 'Result rejected by tournament director for review.',
-        },
-      });
+    }
 
-      await prisma.match.update({
-        where: { id: match.id },
-        data: {
-          status: 'AWAITING_RESULT',
-          notes: rejectionReason ? `[Admin Rejection]: ${rejectionReason}` : 'Awaiting revised submission',
-        },
-      });
-
-      for (const r of match.referees) {
-        await prisma.notification.create({
-          data: {
-            recipientRole: 'REFEREE',
-            recipientUserId: null,
-            title: `Result Needs Revision: ${match.matchCode}`,
-            message: `Result submission was rejected. Reason: ${rejectionReason || 'Please review scores and resubmit'}.`,
-            type: 'DISPUTE',
-            link: `/referee/matches/${match.matchCode}`,
-          },
-        });
+    // 3. CORRECT ACTION (Audited correction process)
+    if (action === 'CORRECT') {
+      if (!corrections || !Array.isArray(corrections)) {
+        return NextResponse.json({ error: 'Corrections array required' }, { status: 400 });
       }
+
+      const previousState = {
+        distributions: match.distributions,
+        participants: match.participants.map((p) => ({ id: p.id, score: p.score })),
+      };
+
+      await db.$transaction(async (tx) => {
+        // Clear old allocations & distributions
+        for (const dist of match.distributions) {
+          await tx.clubPointAllocation.deleteMany({ where: { distributionId: dist.id } });
+        }
+        await tx.pointsDistribution.deleteMany({ where: { matchId: match.id } });
+        await tx.pointsHistory.deleteMany({ where: { matchId: match.id } });
+
+        // Apply corrected entries
+        for (const c of corrections) {
+          const participant = match.participants.find((p) => p.id === c.participantId);
+          if (!participant) continue;
+
+          const pointsEarned = Math.max(0, parseFloat(c.pointsEarned) || 0);
+
+          await tx.matchParticipant.update({
+            where: { id: participant.id },
+            data: { score: pointsEarned, rank: c.rank ? parseInt(c.rank, 10) : participant.rank },
+          });
+
+          const playerContributions: Array<{
+            playerId: string;
+            playerName?: string;
+            clubId: string;
+            clubName: string;
+            clubCode?: string;
+          }> = [];
+
+          if (participant.players && participant.players.length > 0) {
+            for (const mpp of participant.players) {
+              playerContributions.push({
+                playerId: mpp.playerId,
+                playerName: mpp.player.name,
+                clubId: mpp.clubId,
+                clubName: mpp.club.name,
+                clubCode: mpp.club.code,
+              });
+            }
+          } else if (participant.clubId && participant.club) {
+            playerContributions.push({
+              playerId: participant.playerId || 'team-entry',
+              playerName: participant.teamName || participant.club.name,
+              clubId: participant.clubId,
+              clubName: participant.club.name,
+              clubCode: participant.club.code,
+            });
+          }
+
+          const distCalc = calculateClubPointsDistribution(pointsEarned, playerContributions, 0);
+
+          const newDist = await tx.pointsDistribution.create({
+            data: {
+              matchId: match.id,
+              participantId: participant.id,
+              sportId: match.sportId,
+              originalPoints: pointsEarned,
+              uniqueClubCount: distCalc.uniqueClubCount,
+              calculationNote: `[Admin Corrected]: ${distCalc.explanation}`,
+              status: 'APPROVED',
+              approvedByUserId: user.id,
+              approvedAt: new Date(),
+            },
+          });
+
+          for (const alloc of distCalc.allocations) {
+            await tx.clubPointAllocation.create({
+              data: {
+                distributionId: newDist.id,
+                clubId: alloc.clubId,
+                points: alloc.points,
+                playersContributed: alloc.playersContributed,
+                isRemainderWinner: alloc.isRemainderWinner,
+              },
+            });
+
+            await tx.pointsHistory.create({
+              data: {
+                clubId: alloc.clubId,
+                sportId: match.sportId,
+                matchId: match.id,
+                distributionId: newDist.id,
+                points: alloc.points,
+                reason: `[Corrected] ${match.sport.name} - ${participant.teamName || alloc.clubName} (${alloc.points.toFixed(2)} pts)`,
+                recordedByUserId: user.id,
+              },
+            });
+          }
+        }
+
+        await tx.match.update({
+          where: { id: match.id },
+          data: { status: 'COMPLETED' },
+        });
+
+        if (targetResult) {
+          await tx.matchResult.update({
+            where: { id: targetResult.id },
+            data: {
+              status: 'APPROVED',
+              scoresSummary: `[Corrected by Admin] ${match.matchCode}`,
+              approvedByUserId: user.id,
+              approvedAt: new Date(),
+            },
+          });
+        }
+      });
+
+      await recalculateAllLeaderboards();
 
       await createAuditLog({
         user,
-        action: 'REJECT_MATCH_RESULT',
+        action: 'CORRECT_RESULT',
         entity: 'MatchResult',
-        recordId: targetResult.id,
-        updatedValue: { status: 'REJECTED', rejectionReason },
+        recordId: match.id,
+        previousValue: previousState,
+        updatedValue: corrections,
       });
 
       return NextResponse.json({
         success: true,
-        message: 'Match result marked for revision. Referee notified.',
+        message: 'Match results successfully corrected and re-distributed with full audit trail.',
       });
-    } else {
-      return NextResponse.json({ error: 'Invalid action. Must be APPROVE or REJECT' }, { status: 400 });
     }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error: any) {
-    if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
+    console.error('Approve result error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

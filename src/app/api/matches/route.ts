@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -27,14 +27,13 @@ export async function GET(req: Request) {
     }
 
     if (clubId) {
-      where.participants = {
-        some: {
-          clubId,
-        },
-      };
+      where.OR = [
+        { participants: { some: { clubId } } },
+        { participants: { some: { players: { some: { clubId } } } } },
+      ];
     }
 
-    const matches = await prisma.match.findMany({
+    const matches = await db.match.findMany({
       where,
       orderBy: [{ matchDate: 'asc' }, { matchTime: 'asc' }],
       include: {
@@ -44,6 +43,13 @@ export async function GET(req: Request) {
           include: {
             club: true,
             player: true,
+            cricketTeam: true,
+            players: {
+              include: {
+                player: true,
+                club: true,
+              },
+            },
           },
         },
         referees: {
@@ -54,6 +60,16 @@ export async function GET(req: Request) {
         results: {
           include: {
             referee: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        distributions: {
+          include: {
+            allocations: {
+              include: {
+                club: true,
+              },
+            },
           },
         },
       },
@@ -78,7 +94,7 @@ export async function POST(req: Request) {
       matchTime,
       venueId,
       notes,
-      participants, // Array of { clubId?, playerId?, teamName? }
+      participants, // Array of { clubId?, playerId?, cricketTeamId?, teamName?, playerIds?: string[] }
       refereeIds,   // Array of refereeId strings
     } = body;
 
@@ -89,16 +105,22 @@ export async function POST(req: Request) {
       );
     }
 
-    // Auto generate match code
-    const count = await prisma.match.count();
-    const matchCode = `M-${round.slice(0, 2).toUpperCase()}-${(count + 1).toString().padStart(3, '0')}`;
+    const sport = await db.sport.findUnique({ where: { id: sportId } });
+    if (!sport) {
+      return NextResponse.json({ error: 'Sport not found' }, { status: 404 });
+    }
 
-    const match = await prisma.match.create({
+    // Auto generate match code
+    const count = await db.match.count();
+    const prefix = sport.name.slice(0, 2).toUpperCase();
+    const matchCode = `M-${prefix}-${(count + 1).toString().padStart(3, '0')}`;
+
+    const match = await db.match.create({
       data: {
         matchCode,
         sportId,
         round,
-        stageName: stageName || null,
+        stageName: stageName || 'Championship Stage',
         matchDate,
         matchTime,
         venueId: venueId || null,
@@ -107,69 +129,87 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create participants
+    // Add participants
     if (participants && Array.isArray(participants)) {
-      for (const p of participants) {
-        await prisma.matchParticipant.create({
+      for (let i = 0; i < participants.length; i++) {
+        const p = participants[i];
+        let assignedClubId = p.clubId || null;
+
+        // If cricket team, assign parent club
+        if (p.cricketTeamId && !assignedClubId) {
+          const cTeam = await db.cricketTeam.findUnique({ where: { id: p.cricketTeamId } });
+          if (cTeam) assignedClubId = cTeam.clubId;
+        }
+
+        const participant = await db.matchParticipant.create({
           data: {
             matchId: match.id,
-            clubId: p.clubId || null,
+            clubId: assignedClubId,
             playerId: p.playerId || null,
-            teamName: p.teamName || null,
+            cricketTeamId: p.cricketTeamId || null,
+            teamName: p.teamName || (p.cricketTeamId ? undefined : `Entry ${i + 1}`),
             score: 0,
+            rank: null,
           },
         });
+
+        // If playerIds provided (squad roster)
+        if (p.playerIds && Array.isArray(p.playerIds)) {
+          for (const plId of p.playerIds) {
+            const playerRecord = await db.player.findUnique({ where: { id: plId } });
+            if (playerRecord) {
+              await db.matchParticipantPlayer.create({
+                data: {
+                  participantId: participant.id,
+                  playerId: playerRecord.id,
+                  clubId: playerRecord.clubId,
+                },
+              });
+            }
+          }
+        }
       }
     }
 
-    // Assign referees & create notifications
+    // Add referee assignments
     if (refereeIds && Array.isArray(refereeIds)) {
       for (const refId of refereeIds) {
-        await prisma.matchReferee.create({
+        await db.matchReferee.create({
           data: {
             matchId: match.id,
             refereeId: refId,
           },
         });
-
-        // Referee notification
-        await prisma.notification.create({
-          data: {
-            recipientRole: 'REFEREE',
-            recipientUserId: null,
-            title: 'New Match Assignment',
-            message: `You are assigned to match ${matchCode} (${round}) on ${matchDate} at ${matchTime}.`,
-            type: 'ASSIGNMENT',
-            link: `/referee/matches/${matchCode}`,
-          },
-        });
       }
     }
-
-    const created = await prisma.match.findUnique({
-      where: { id: match.id },
-      include: {
-        sport: true,
-        venue: true,
-        participants: { include: { club: true, player: true } },
-        referees: { include: { referee: true } },
-      },
-    });
 
     await createAuditLog({
       user,
       action: 'CREATE_MATCH',
       entity: 'Match',
       recordId: match.id,
-      updatedValue: created,
+      updatedValue: { matchCode, sportId, matchDate, round },
     });
 
-    return NextResponse.json(created, { status: 201 });
+    const fullMatch = await db.match.findUnique({
+      where: { id: match.id },
+      include: {
+        sport: true,
+        venue: true,
+        participants: {
+          include: {
+            club: true,
+            cricketTeam: true,
+            players: { include: { player: true, club: true } },
+          },
+        },
+        referees: { include: { referee: true } },
+      },
+    });
+
+    return NextResponse.json(fullMatch, { status: 201 });
   } catch (error: any) {
-    if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
+    console.error('Error creating match:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const sport = await prisma.sport.findUnique({
+    const sport = await db.sport.findUnique({
       where: { id: params.id },
       include: {
         referees: {
@@ -52,7 +52,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json();
 
-    const existing = await prisma.sport.findUnique({
+    const existing = await db.sport.findUnique({
       where: { id: params.id },
     });
 
@@ -75,7 +75,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       assignedRefereeIds,
     } = body;
 
-    const updated = await prisma.sport.update({
+    const updated = await db.sport.update({
       where: { id: params.id },
       data: {
         name: name !== undefined ? name : existing.name,
@@ -93,12 +93,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     });
 
     if (assignedRefereeIds && Array.isArray(assignedRefereeIds)) {
-      await prisma.refereeSport.deleteMany({
+      await db.refereeSport.deleteMany({
         where: { sportId: params.id },
       });
 
       for (const rId of assignedRefereeIds) {
-        await prisma.refereeSport.create({
+        await db.refereeSport.create({
           data: {
             refereeId: rId,
             sportId: params.id,
@@ -129,7 +129,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
 
-    const sport = await prisma.sport.findUnique({
+    const sport = await db.sport.findUnique({
       where: { id: params.id },
       include: {
         _count: {
@@ -151,7 +151,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       );
     }
 
-    await prisma.sport.delete({
+    await db.sport.delete({
       where: { id: params.id },
     });
 

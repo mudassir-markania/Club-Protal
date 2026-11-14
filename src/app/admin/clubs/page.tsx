@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import {
   Shield,
   Plus,
@@ -16,11 +16,14 @@ import {
   AlertTriangle,
   X,
   Medal,
+  Sparkles,
 } from 'lucide-react';
 import { ClubBadge } from '@/components/ui/icons';
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState<any[]>([]);
+  const [cricketTeams, setCricketTeams] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'HOUSES' | 'CRICKET'>('HOUSES');
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,15 +44,22 @@ export default function ClubsPage() {
   });
 
   useEffect(() => {
-    fetchClubs();
+    fetchData();
   }, []);
 
-  const fetchClubs = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/clubs');
-      const data = await res.json();
-      setClubs(Array.isArray(data) ? data : []);
+      const [clubsRes, crickRes] = await Promise.all([
+        fetch('/api/clubs'),
+        fetch('/api/cricket-teams'),
+      ]);
+      const [clubsData, crickData] = await Promise.all([
+        clubsRes.json(),
+        crickRes.json(),
+      ]);
+      setClubs(Array.isArray(clubsData) ? clubsData : []);
+      setCricketTeams(Array.isArray(crickData) ? crickData : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -118,14 +128,14 @@ export default function ClubsPage() {
 
       setSuccess(selectedClub ? 'Club updated successfully!' : 'New club created successfully!');
       setIsModalOpen(false);
-      fetchClubs();
+      fetchData();
     } catch (err: any) {
       setError(err.message);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? This action requires dependency checks.`)) {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
       return;
     }
 
@@ -137,7 +147,7 @@ export default function ClubsPage() {
         return;
       }
       setSuccess('Club deleted successfully');
-      fetchClubs();
+      fetchData();
     } catch (err: any) {
       alert(err.message);
     }
@@ -150,29 +160,36 @@ export default function ClubsPage() {
       (c.captainName && c.captainName.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const filteredCricketTeams = cricketTeams.filter(
+    (ct) =>
+      ct.name.toLowerCase().includes(search.toLowerCase()) ||
+      (ct.club?.name && ct.club.name.toLowerCase().includes(search.toLowerCase())) ||
+      (ct.captainName && ct.captainName.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
-    <AppLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold tracking-tight text-navy-950">Club Management</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-navy-950">Houses & Cricket Teams</h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                {clubs.length} Registered Clubs
+                5 Houses • 10 Cricket Teams
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Manage participating clubs, team captains, member rosters, and cumulative point histories.
+              Manage the 5 participating houses and their respective A & B cricket teams. Points earned by cricket teams roll up directly to their parent house.
             </p>
           </div>
 
           <button
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-navy-950 hover:bg-navy-900 text-white text-xs font-bold rounded-xl shadow-sm transition"
           >
             <Plus className="w-4 h-4" />
-            Add New Club
+            Add New House
           </button>
         </div>
 
@@ -189,372 +206,290 @@ export default function ClubsPage() {
           </div>
         )}
 
-        {/* Filters & Search */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
+        {/* Tab & Search Bar */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab('HOUSES')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition ${
+                activeTab === 'HOUSES'
+                  ? 'bg-navy-950 text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              The 5 Houses ({clubs.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('CRICKET')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition ${
+                activeTab === 'CRICKET'
+                  ? 'bg-navy-950 text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Cricket Teams ({cricketTeams.length} Teams)
+            </button>
+          </div>
+
+          <div className="relative flex-1 max-w-xs w-full">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search club name, code, or captain..."
+              placeholder="Search house, code, or captain..."
               className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white"
             />
           </div>
-          <span className="text-xs text-slate-500 font-medium">
-            Showing {filteredClubs.length} of {clubs.length} clubs
-          </span>
         </div>
 
-        {/* Clubs Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="py-3 px-4">Rank</th>
-                  <th className="py-3 px-4">Club</th>
-                  <th className="py-3 px-4">Code</th>
-                  <th className="py-3 px-4">Captain / Vice</th>
-                  <th className="py-3 px-4 text-center">Players</th>
-                  <th className="py-3 px-4 text-center">Total Points</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredClubs.length === 0 ? (
+        {/* Tab 1: The 5 Houses */}
+        {activeTab === 'HOUSES' && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-400 text-xs">
-                      No clubs found. Click "Add New Club" to register one.
-                    </td>
+                    <th className="py-3 px-4">Rank</th>
+                    <th className="py-3 px-4">House Name</th>
+                    <th className="py-3 px-4">Code</th>
+                    <th className="py-3 px-4">Captain / Vice</th>
+                    <th className="py-3 px-4 text-center">Cricket Teams</th>
+                    <th className="py-3 px-4 text-right">Total Points</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
-                ) : (
-                  filteredClubs.map((club) => (
-                    <tr key={club.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-3.5 px-4 font-bold text-slate-700">
-                        <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs">
-                          {club.currentRank}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
-                            <ClubBadge code={club.code} name={club.name} className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-slate-900 block text-sm">{club.name}</span>
-                            <span className="text-[11px] text-slate-400">Created {new Date(club.createdAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-blue-600">
-                        {club.code}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-800">{club.captainName || 'Not assigned'}</div>
-                        <div className="text-[11px] text-slate-400">Vice: {club.viceCaptainName || 'None'}</div>
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-700">
-                        {club._count?.players || 0}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="text-sm font-extrabold text-navy-950 bg-slate-100 px-2.5 py-1 rounded-md">
-                          {club.totalPoints}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                            club.status === 'ACTIVE'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border border-slate-200'
-                          }`}
-                        >
-                          {club.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => handleOpenView(club)}
-                            title="View Club Profile & Roster"
-                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenEdit(club)}
-                            title="Edit Club"
-                            className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(club.id, club.name)}
-                            title="Delete Club"
-                            className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredClubs.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-slate-400 text-xs">
+                        No houses found.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredClubs.map((club, idx) => (
+                      <tr key={club.id} className="hover:bg-slate-50/80 transition">
+                        <td className="py-3.5 px-4 font-bold text-slate-700">
+                          <span
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              idx === 0
+                                ? 'bg-amber-400 text-navy-950 font-black'
+                                : idx === 1
+                                ? 'bg-slate-200 text-slate-800'
+                                : idx === 2
+                                ? 'bg-amber-100 text-amber-900'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            #{idx + 1}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                              <ClubBadge code={club.code} name={club.name} className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-900 block text-sm">{club.name}</span>
+                              <span className="text-[11px] text-slate-400">House Official</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-blue-600">
+                          {club.code}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-semibold text-slate-800">{club.captainName || 'Not assigned'}</div>
+                          <div className="text-[11px] text-slate-400">Vice: {club.viceCaptainName || 'None'}</div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center font-bold text-slate-700">
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] border border-blue-200">
+                            {club.name} A & B (2 Teams)
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <span className="text-sm font-black text-navy-950 font-mono bg-slate-100 px-2.5 py-1 rounded-md">
+                            {Number(club.totalPoints || 0).toFixed(2)} pts
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {club.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleOpenView(club)}
+                              title="View House Profile"
+                              className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleOpenEdit(club)}
+                              title="Edit House"
+                              className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Add/Edit Club Modal */}
+        {/* Tab 2: 10 Cricket Teams */}
+        {activeTab === 'CRICKET' && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-navy-950 uppercase tracking-wider block">
+                  The 10 Official Cricket Teams (2 Per House)
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Each cricket team participates separately in fixtures, but points earned credit the parent house.
+                </span>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="py-3 px-4">Cricket Team Name</th>
+                    <th className="py-3 px-4">Parent House</th>
+                    <th className="py-3 px-4">Captain</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Points Rollup Target</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredCricketTeams.map((ct) => (
+                    <tr key={ct.id} className="hover:bg-slate-50/80 transition">
+                      <td className="py-3 px-4 font-bold text-slate-900 text-sm">
+                        {ct.name}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <ClubBadge code={ct.club?.code} name={ct.club?.name} className="w-4 h-4" />
+                          <span className="font-extrabold text-blue-700">{ct.club?.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 font-medium">
+                        {ct.captainName || 'Assigned per fixture'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {ct.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right text-[11px] text-slate-500">
+                        Credits <strong>{ct.club?.name}</strong> Leaderboard
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* House Creation / Edit Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
-              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-navy-900 text-white">
+          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in">
+              <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
                 <h3 className="font-bold text-sm">
-                  {selectedClub ? `Edit Club: ${selectedClub.name}` : 'Register New Club'}
+                  {selectedClub ? `Edit House: ${selectedClub.name}` : 'Create New House'}
                 </h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-1 text-slate-300 hover:text-white rounded"
-                >
+                <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-white rounded">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {error && (
-                <div className="m-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
-                  {error}
-                </div>
-              )}
-
               <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Club Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Apex Predators"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{error}</span>
                   </div>
+                )}
+
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Mavericks"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Club Code (Unique) *
-                    </label>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Code *</label>
                     <input
                       type="text"
                       required
-                      maxLength={5}
+                      maxLength={4}
                       value={formData.code}
                       onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                      placeholder="e.g. APX"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono uppercase focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Club Crest Icon / Logo
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.logoUrl}
-                      onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
-                      placeholder="Icon identifier or image URL"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-600 outline-none"
+                      placeholder="e.g. MAV"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg font-mono uppercase outline-none focus:ring-2 focus:ring-blue-600"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Status
-                    </label>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
                     <select
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-600 outline-none bg-white"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
                     >
-                      <option value="ACTIVE">ACTIVE</option>
-                      <option value="INACTIVE">INACTIVE</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="INACTIVE">Inactive</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Captain Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.captainName}
-                      onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
-                      placeholder="e.g. Alex Rivera"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Vice Captain Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.viceCaptainName}
-                      onChange={(e) => setFormData({ ...formData, viceCaptainName: e.target.value })}
-                      placeholder="e.g. David Miller"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Captain</label>
+                  <input
+                    type="text"
+                    value={formData.captainName}
+                    onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
+                    placeholder="e.g. Alex Rivera"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                  />
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"
+                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-bold"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-navy-900 text-white font-bold rounded-lg hover:bg-navy-800 shadow-sm"
+                    className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
                   >
-                    {selectedClub ? 'Save Changes' : 'Create Club'}
+                    {selectedClub ? 'Save Changes' : 'Create House'}
                   </button>
                 </div>
               </form>
             </div>
           </div>
         )}
-
-        {/* View Club Profile Modal */}
-        {isViewModalOpen && clubDetails && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
-              {/* Header */}
-              <div className="p-6 bg-navy-900 text-white flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center">
-                    <ClubBadge code={clubDetails.code} name={clubDetails.name} className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-bold">{clubDetails.name}</h2>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-600 text-white">
-                        {clubDetails.code}
-                      </span>
-                    </div>
-                    <p className="text-xs text-blue-300">
-                      Captain: {clubDetails.captainName || 'N/A'} • Vice: {clubDetails.viceCaptainName || 'N/A'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="p-1.5 text-slate-300 hover:text-white rounded"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 overflow-y-auto space-y-6 text-xs flex-1">
-                {/* Stats row */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Current Rank</span>
-                    <span className="text-2xl font-extrabold text-navy-900">#{clubDetails.currentRank}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Total Points</span>
-                    <span className="text-2xl font-extrabold text-blue-600">{clubDetails.totalPoints}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Registered Players</span>
-                    <span className="text-2xl font-extrabold text-emerald-600">{clubDetails.players?.length || 0}</span>
-                  </div>
-                </div>
-
-                {/* Player Roster */}
-                <div>
-                  <h4 className="font-bold text-navy-950 uppercase tracking-wider text-xs mb-3 flex items-center justify-between">
-                    <span>Registered Player Roster ({clubDetails.players?.length || 0})</span>
-                  </h4>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
-                        <tr>
-                          <th className="py-2 px-3">Reg ID</th>
-                          <th className="py-2 px-3">Name</th>
-                          <th className="py-2 px-3">Email</th>
-                          <th className="py-2 px-3">Assigned Sports</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {clubDetails.players?.map((p: any) => (
-                          <tr key={p.id} className="hover:bg-slate-50">
-                            <td className="py-2 px-3 font-mono font-medium">{p.registrationId}</td>
-                            <td className="py-2 px-3 font-bold text-slate-800">{p.name}</td>
-                            <td className="py-2 px-3 text-slate-500">{p.email}</td>
-                            <td className="py-2 px-3 text-blue-600">
-                              {p.sports?.map((s: any) => s.sport.name).join(', ') || 'None'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Points Awarded History */}
-                <div>
-                  <h4 className="font-bold text-navy-950 uppercase tracking-wider text-xs mb-3">
-                    Points Allocation Trail ({clubDetails.pointsHistory?.length || 0})
-                  </h4>
-                  <div className="space-y-2">
-                    {clubDetails.pointsHistory?.length === 0 ? (
-                      <p className="text-slate-400 italic">No points history recorded yet.</p>
-                    ) : (
-                      clubDetails.pointsHistory?.map((ph: any) => (
-                        <div key={ph.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
-                          <div>
-                            <span className="font-bold text-slate-800">{ph.reason}</span>
-                            <span className="text-[10px] text-slate-400 block mt-0.5">
-                              {new Date(ph.recordedAt).toLocaleString()} • {ph.sport?.name}
-                            </span>
-                          </div>
-                          <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            +{ph.points} pts
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="p-4 bg-slate-50 border-t border-slate-200 text-right">
-                <button
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="px-4 py-2 bg-navy-900 text-white font-bold rounded-lg hover:bg-navy-800 text-xs"
-                >
-                  Close Profile
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-    </AppLayout>
+    </AdminLayout>
   );
 }
-

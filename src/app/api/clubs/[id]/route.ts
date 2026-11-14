@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const club = await prisma.club.findUnique({
+    const club = await db.club.findUnique({
       where: { id: params.id },
       include: {
         players: {
@@ -42,7 +42,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json();
 
-    const existing = await prisma.club.findUnique({
+    const existing = await db.club.findUnique({
       where: { id: params.id },
     });
 
@@ -52,7 +52,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     const { name, code, logoUrl, captainName, viceCaptainName, status } = body;
 
-    const updated = await prisma.club.update({
+    const updated = await db.club.update({
       where: { id: params.id },
       data: {
         name: name !== undefined ? name : existing.name,
@@ -86,7 +86,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
 
-    const club = await prisma.club.findUnique({
+    const club = await db.club.findUnique({
       where: { id: params.id },
       include: {
         _count: {
@@ -110,7 +110,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       );
     }
 
-    await prisma.club.delete({
+    await db.club.delete({
       where: { id: params.id },
     });
 

@@ -1,21 +1,32 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
-import { recalculateAllLeaderboards } from '@/lib/scoring';
+import { calculateClubPointsDistribution } from '@/lib/points-distribution';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth();
     const body = await req.json();
 
-    const match = await prisma.match.findFirst({
+    const match = await db.match.findFirst({
       where: {
         OR: [{ id: params.id }, { matchCode: params.id }],
       },
       include: {
         sport: true,
-        participants: { include: { club: true } },
+        participants: {
+          include: {
+            club: true,
+            cricketTeam: true,
+            players: {
+              include: {
+                player: true,
+                club: true,
+              },
+            },
+          },
+        },
         referees: true,
       },
     });
@@ -31,119 +42,193 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         return NextResponse.json({ error: 'You are not assigned as referee for this match' }, { status: 403 });
       }
     } else if (!refereeId) {
-      // If admin submitting directly, use first assigned referee or create virtual referee
       refereeId = match.referees[0]?.refereeId;
       if (!refereeId) {
-        const anyRef = await prisma.referee.findFirst();
+        const anyRef = await db.referee.findFirst();
         refereeId = anyRef?.id || 'admin-ref';
       }
     }
 
     const {
-      scores,               // Array of { participantId, score, scoreDetail, isWinner }
-      winnerParticipantId,  // Winner participant ID
-      winnerClubId,         // Winner club ID
-      scoresSummary,        // Text summary e.g. "Apex 3 - 1 Titan"
-      refereeNotes,         // Observations/notes
+      entryResults, // Array of { participantId, pointsEarned, rank?, isWinner? }
+      scoresSummary,
+      refereeNotes,
     } = body;
 
-    // Update participants with final scores & winner flag
-    if (scores && Array.isArray(scores)) {
-      for (const s of scores) {
-        await prisma.matchParticipant.update({
-          where: { id: s.participantId },
+    if (!entryResults || !Array.isArray(entryResults) || entryResults.length === 0) {
+      return NextResponse.json({ error: 'At least one participant result is required' }, { status: 400 });
+    }
+
+    // Fetch current fair rotation index
+    const rotationSetting = await db.tournamentSetting.findUnique({
+      where: { key: 'REMAINDER_ROTATION_INDEX' },
+    });
+    let currentRotation = parseInt(rotationSetting?.value || '0', 10);
+    if (isNaN(currentRotation)) currentRotation = 0;
+
+    // Remove any previously pending distributions for this match if referee is resubmitting
+    const pendingDistributions = await db.pointsDistribution.findMany({
+      where: { matchId: match.id, status: 'PENDING_APPROVAL' },
+    });
+    for (const pd of pendingDistributions) {
+      await db.clubPointAllocation.deleteMany({ where: { distributionId: pd.id } });
+      await db.pointsDistribution.delete({ where: { id: pd.id } });
+    }
+
+    const createdDistributions = [];
+    const summaryParts: string[] = [];
+
+    // Process each participating entry
+    for (const res of entryResults) {
+      const participant = match.participants.find((p) => p.id === res.participantId);
+      if (!participant) continue;
+
+      const pointsEarned = Math.max(0, parseFloat(res.pointsEarned) || 0);
+
+      // Update participant's score and rank
+      await db.matchParticipant.update({
+        where: { id: participant.id },
+        data: {
+          score: pointsEarned,
+          rank: res.rank ? parseInt(res.rank, 10) : null,
+          isWinner: Boolean(res.isWinner),
+        },
+      });
+
+      // Assemble player contributions to extract unique clubs
+      const playerContributions: Array<{
+        playerId: string;
+        playerName?: string;
+        clubId: string;
+        clubName: string;
+        clubCode?: string;
+      }> = [];
+
+      if (participant.players && participant.players.length > 0) {
+        // Multi-player squad or pair
+        for (const mpp of participant.players) {
+          playerContributions.push({
+            playerId: mpp.playerId,
+            playerName: mpp.player.name,
+            clubId: mpp.clubId,
+            clubName: mpp.club.name,
+            clubCode: mpp.club.code,
+          });
+        }
+      } else if (participant.clubId && participant.club) {
+        // Single club team or cricket team
+        playerContributions.push({
+          playerId: participant.playerId || 'team-entry',
+          playerName: participant.teamName || participant.club.name,
+          clubId: participant.clubId,
+          clubName: participant.club.name,
+          clubCode: participant.club.code,
+        });
+      }
+
+      // Calculate fair points distribution across unique clubs
+      const distCalc = calculateClubPointsDistribution(pointsEarned, playerContributions, currentRotation);
+      currentRotation += 1;
+
+      // Create PointsDistribution record
+      const distribution = await db.pointsDistribution.create({
+        data: {
+          matchId: match.id,
+          participantId: participant.id,
+          sportId: match.sportId,
+          originalPoints: pointsEarned,
+          uniqueClubCount: distCalc.uniqueClubCount,
+          calculationNote: distCalc.explanation,
+          status: 'PENDING_APPROVAL',
+          submittedByRefereeId: refereeId,
+        },
+      });
+
+      // Create ClubPointAllocation records
+      for (const alloc of distCalc.allocations) {
+        await db.clubPointAllocation.create({
           data: {
-            score: s.score !== undefined ? parseInt(s.score) : 0,
-            scoreDetail: s.scoreDetail ? (typeof s.scoreDetail === 'string' ? s.scoreDetail : JSON.stringify(s.scoreDetail)) : undefined,
-            isWinner: s.participantId === winnerParticipantId || Boolean(s.isWinner),
-            rank: s.rank ? parseInt(s.rank) : (s.participantId === winnerParticipantId ? 1 : 2),
+            distributionId: distribution.id,
+            clubId: alloc.clubId,
+            points: alloc.points,
+            playersContributed: alloc.playersContributed,
+            isRemainderWinner: alloc.isRemainderWinner,
           },
         });
       }
+
+      createdDistributions.push({
+        ...distribution,
+        allocations: distCalc.allocations,
+      });
+
+      summaryParts.push(
+        `${participant.teamName || participant.club?.name || 'Entry'} (${pointsEarned} pts -> ${distCalc.uniqueClubCount} unique clubs)`
+      );
     }
 
-    // Determine auto-approval setting
-    const autoApproveSetting = await prisma.tournamentSetting.findUnique({
-      where: { key: 'AUTO_APPROVE_RESULTS' },
+    // Persist incremented rotation index
+    await db.tournamentSetting.upsert({
+      where: { key: 'REMAINDER_ROTATION_INDEX' },
+      update: { value: currentRotation.toString() },
+      create: {
+        key: 'REMAINDER_ROTATION_INDEX',
+        value: currentRotation.toString(),
+        description: 'Fair rotation index for remainder point distribution',
+      },
     });
-    const autoApprove = autoApproveSetting?.value === 'TRUE';
+
+    const fullSummary = scoresSummary || summaryParts.join(' | ');
 
     // Create MatchResult record
-    const matchResult = await prisma.matchResult.create({
+    const matchResult = await db.matchResult.create({
       data: {
         matchId: match.id,
         submittedByRefereeId: refereeId,
-        winnerParticipantId: winnerParticipantId || null,
-        winnerClubId: winnerClubId || null,
-        scoresSummary: scoresSummary || `${match.matchCode} Completed`,
+        scoresSummary: fullSummary,
         refereeNotes: refereeNotes || null,
-        status: autoApprove ? 'APPROVED' : 'PENDING_APPROVAL',
-        approvedAt: autoApprove ? new Date() : null,
+        status: 'PENDING_APPROVAL',
       },
     });
 
     // Update Match status
-    await prisma.match.update({
+    await db.match.update({
       where: { id: match.id },
       data: {
-        status: autoApprove ? 'COMPLETED' : 'SUBMITTED',
-        notes: refereeNotes ? (match.notes ? `${match.notes}\n[Referee Note]: ${refereeNotes}` : refereeNotes) : match.notes,
+        status: 'SUBMITTED',
+        notes: refereeNotes
+          ? `${match.notes || ''}\n[Referee Submission]: ${refereeNotes}`
+          : match.notes,
       },
     });
 
-    // Create Notification for Admins
-    await prisma.notification.create({
+    // Notify admins
+    await db.notification.create({
       data: {
         recipientRole: 'ADMIN',
-        title: `Match Result Submitted: ${match.matchCode}`,
-        message: `Referee submitted final scores for ${match.sport.name} (${scoresSummary}). Status: ${autoApprove ? 'Approved' : 'Awaiting Approval'}.`,
+        title: `Results Submitted: ${match.matchCode} (${match.sport.name})`,
+        message: `Referee ${user.name} submitted results with points distribution across unique clubs. Awaiting Admin verification.`,
         type: 'RESULT_SUBMITTED',
-        link: `/admin/matches/${match.matchCode}`,
+        link: `/admin/matches`,
       },
     });
-
-    // If auto approved, allocate points and recalculate leaderboards
-    if (autoApprove && winnerClubId) {
-      let scoringConfig = { win: 3, draw: 1, loss: 0 };
-      try {
-        if (match.sport.scoringConfig) scoringConfig = JSON.parse(match.sport.scoringConfig);
-      } catch (e) {}
-
-      await prisma.pointsHistory.create({
-        data: {
-          clubId: winnerClubId,
-          sportId: match.sportId,
-          matchId: match.id,
-          points: scoringConfig.win || 3,
-          reason: `Match Win (${match.matchCode} - ${match.round})`,
-        },
-      });
-
-      await recalculateAllLeaderboards();
-    }
 
     await createAuditLog({
       user,
-      action: 'SUBMIT_MATCH_RESULT',
+      action: 'SUBMIT_RESULT',
       entity: 'MatchResult',
       recordId: matchResult.id,
-      updatedValue: { matchResult, scores },
+      updatedValue: { matchCode: match.matchCode, fullSummary, createdDistributions },
     });
 
     return NextResponse.json({
       success: true,
+      message: 'Match results submitted for admin verification and approval.',
       matchResult,
-      status: autoApprove ? 'COMPLETED' : 'SUBMITTED',
-      message: autoApprove
-        ? 'Result submitted and automatically approved!'
-        : 'Result submitted successfully. Awaiting tournament director review.',
+      distributions: createdDistributions,
     });
   } catch (error: any) {
     console.error('Submit result error:', error);
-    if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

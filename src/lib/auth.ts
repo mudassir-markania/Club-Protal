@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { cookies, headers } from 'next/headers';
-import { prisma } from './prisma';
+import { db } from './db';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sports-portal-default-secret-2026';
 

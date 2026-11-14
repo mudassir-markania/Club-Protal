@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: Request) {
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     let rows: any[] = [];
 
     if (reportType === 'overall_leaderboard') {
-      const entries = await prisma.leaderboardEntry.findMany({
+      const entries = await db.leaderboardEntry.findMany({
         where: { sportId: 'OVERALL' },
         include: { club: true },
         orderBy: { rank: 'asc' },
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
         e.scoreDifference,
       ]);
     } else if (reportType === 'players') {
-      const players = await prisma.player.findMany({
+      const players = await db.player.findMany({
         include: { club: true, sports: { include: { sport: true } } },
         orderBy: [{ club: { name: 'asc' } }, { name: 'asc' }],
       });
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
         p.status,
       ]);
     } else if (reportType === 'matches') {
-      const matches = await prisma.match.findMany({
+      const matches = await db.match.findMany({
         include: {
           sport: true,
           venue: true,
@@ -85,7 +85,7 @@ export async function GET(req: Request) {
         ];
       });
     } else if (reportType === 'registrations') {
-      const registrations = await prisma.registration.findMany({
+      const registrations = await db.registration.findMany({
         orderBy: { createdAt: 'desc' },
       });
       filename = `Google_Forms_Registrations`;
@@ -104,7 +104,7 @@ export async function GET(req: Request) {
         new Date(r.createdAt).toISOString().slice(0, 10),
       ]);
     } else if (reportType === 'referees') {
-      const referees = await prisma.referee.findMany({
+      const referees = await db.referee.findMany({
         include: { sports: { include: { sport: true } }, matches: { include: { match: true } } },
       });
       filename = `Referee_Assignments`;
@@ -119,7 +119,7 @@ export async function GET(req: Request) {
         r.matches.length,
       ]);
     } else if (reportType === 'points_history') {
-      const history = await prisma.pointsHistory.findMany({
+      const history = await db.pointsHistory.findMany({
         include: { club: true, sport: true, match: true },
         orderBy: { recordedAt: 'desc' },
       });

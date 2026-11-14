@@ -32,10 +32,10 @@ A modern, production-grade, database-driven **Sports Tournament Management Porta
 - npm or pnpm
 
 ### 1. Database Initialization
-The SQLite database (`prisma/dev.db`) is already created and seeded with tournament data.
+The database runs on **MongoDB Atlas** with Mongoose ODM schemas (`src/models/index.ts`).
 To re-seed fresh demo data at any time:
 ```bash
-npm run db:seed
+node scripts/seed-mongo.js
 ```
 
 ### 2. Start the Development Server
@@ -59,35 +59,23 @@ The portal features a **1-Click Quick Demo Login** on the login page (`/login`) 
 | Role | Email | Password | Access / Capabilities |
 |------|-------|----------|-----------------------|
 | **Super Admin** | `admin@sportsportal.com` | `admin123` | Complete Tournament Oversight, Approvals, Leaderboards, Settings |
-| **Operations Admin** | `manager@sportsportal.com` | `admin123` | Fixtures, Registrations, Club & Sport Management |
-| **Referee 1 (Football & Cricket)** | `ref.marcus@sportsportal.com` | `referee123` | Code: `REF-001`, Match scoring & result submission |
-| **Referee 2 (Badminton & TT)** | `ref.sarah@sportsportal.com` | `referee123` | Code: `REF-002`, Match scoring & result submission |
-| **Referee 3 (Basketball)** | `ref.david@sportsportal.com` | `referee123` | Code: `REF-003`, Match scoring & result submission |
+| **Referee 1 (Marcus)** | `ref.marcus@sportsportal.com` | `referee123` | Code: `REF-001`, Match result submission, points calculation |
+| **Referee 2 (Sarah)** | `ref.sarah@sportsportal.com` | `referee123` | Code: `REF-002`, Match result submission, points calculation |
+| **Referee 3 (David)** | `ref.david@sportsportal.com` | `referee123` | Code: `REF-003`, Match result submission, points calculation |
 
 ---
 
 ## Database Architecture
 
-The relational schema is configured in `prisma/schema.prisma`:
+The system is powered by **MongoDB Atlas** using structured Mongoose schemas in `src/models/index.ts`:
 
-- `roles`: `SUPER_ADMIN`, `ADMIN`, `REFEREE`
-- `users`: User authentication, hashed passwords, role linkage
-- `clubs`: Clubs (Apex Predators, Titan Warriors, Velocity Strikers, Phoenix Hawks), captains, points, rank
-- `sports`: Disciplines (Football, Cricket T10, Badminton Doubles, Table Tennis Singles, Basketball), formats, scoring configs
-- `players`: Participant roster, unique registration IDs, club assignment, eligibility status
-- `player_sports`: Multi-sport linkage per player
-- `referees`: Field officials, availability, referee codes
-- `referee_sports`: Authorized sports per referee
-- `venues`: Main Arena Field A, Olympic Indoor Court 1, Basketball Dome, etc.
-- `matches`: Fixtures, tournament dates (Nov 25-28, 2026), rounds, statuses (`SCHEDULED`, `UPCOMING`, `IN_PROGRESS`, `SUBMITTED`, `COMPLETED`, `DISPUTED`)
-- `match_participants`: Competing clubs or players, scores, set details, winner flags
-- `match_referees`: Assigned referees per fixture
-- `match_results`: Submitted outcomes by referee, approval workflow state, notes
-- `score_entries`: Live set-by-set or half-by-half score entries
-- `points_history`: Full audit trail of awarded points per club, sport, and match
-- `leaderboard_entries`: Cached/derived standings for overall and sport-specific leaderboards
-- `registrations`: Inbound Google Forms and CSV submissions, duplicate flags
-- `google_integrations`: Spreadsheet ID, sheet name, column mappings, auto-sync settings
+- `clubs`: The 5 Houses (Mavericks, Dominators, Alphas, Spartans, Phoenix) with live points and rank
+- `cricket_teams`: 10 Cricket Teams (2 per House: Team A & Team B) rolling points up to parent houses
+- `sports`: The 7 Sports (BGMI, Carrom, Badminton, Chess, Table Tennis, Cricket, Football)
+- `matches`: Event fixtures, rounds, assigned referees, status lifecycle (`SCHEDULED`, `SUBMITTED`, `COMPLETED`, `DISPUTED`)
+- `match_participants`: Competing squads/athletes with club affiliations, points, rank, and distribution preview
+- `points_history`: Full audit trail of awarded points per club, sport, match, and referee with 2-decimal precision
+- `leaderboard_entries`: Cached house standings across sports and overall championship
 - `synchronization_logs`: Sync metrics (total found, imported, duplicates, failed)
 - `notifications`: Centralized alert center
 - `audit_logs`: Detailed change logs with previous & updated values

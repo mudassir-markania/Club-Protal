@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET() {
   try {
-    const sports = await prisma.sport.findMany({
+    const sports = await db.sport.findMany({
       orderBy: { name: 'asc' },
       include: {
         referees: {
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Name, Category, and Sport Type are required' }, { status: 400 });
     }
 
-    const existing = await prisma.sport.findUnique({
+    const existing = await db.sport.findUnique({
       where: { name },
     });
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Sport with this name already exists' }, { status: 409 });
     }
 
-    const sport = await prisma.sport.create({
+    const sport = await db.sport.create({
       data: {
         name,
         category,
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     // Assign referees if provided
     if (assignedRefereeIds && Array.isArray(assignedRefereeIds)) {
       for (const refId of assignedRefereeIds) {
-        await prisma.refereeSport.create({
+        await db.refereeSport.create({
           data: {
             refereeId: refId,
             sportId: sport.id,

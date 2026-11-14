@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -8,7 +8,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const user = await requireAuth();
     const body = await req.json();
 
-    const match = await prisma.match.findFirst({
+    const match = await db.match.findFirst({
       where: {
         OR: [{ id: params.id }, { matchCode: params.id }],
       },
@@ -39,7 +39,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     // Update participant scores
     if (scores && Array.isArray(scores)) {
       for (const s of scores) {
-        await prisma.matchParticipant.update({
+        await db.matchParticipant.update({
           where: { id: s.participantId },
           data: {
             score: s.score !== undefined ? parseInt(s.score) : undefined,
@@ -51,7 +51,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     // Insert score entry if provided
     if (scoreEntry && scoreEntry.participantId) {
-      await prisma.scoreEntry.create({
+      await db.scoreEntry.create({
         data: {
           matchId: match.id,
           participantId: scoreEntry.participantId,
@@ -64,13 +64,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     // Optionally update status
     if (status) {
-      await prisma.match.update({
+      await db.match.update({
         where: { id: match.id },
         data: { status },
       });
     }
 
-    const updatedMatch = await prisma.match.findUnique({
+    const updatedMatch = await db.match.findUnique({
       where: { id: match.id },
       include: {
         participants: { include: { club: true, player: true } },

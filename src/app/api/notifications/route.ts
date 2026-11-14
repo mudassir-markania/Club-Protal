@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 
 export async function GET() {
@@ -26,13 +26,13 @@ export async function GET() {
       }
     }
 
-    const notifications = await prisma.notification.findMany({
+    const notifications = await db.notification.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       take: 20,
     });
 
-    const unreadCount = await prisma.notification.count({
+    const unreadCount = await db.notification.count({
       where: { ...where, isRead: false },
     });
 
@@ -47,12 +47,12 @@ export async function PUT(req: Request) {
     const body = await req.json().catch(() => ({}));
 
     if (body.notificationId) {
-      await prisma.notification.update({
+      await db.notification.update({
         where: { id: body.notificationId },
         data: { isRead: true },
       });
     } else {
-      await prisma.notification.updateMany({
+      await db.notification.updateMany({
         where: { isRead: false },
         data: { isRead: true },
       });

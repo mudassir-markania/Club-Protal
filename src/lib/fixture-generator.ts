@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { db } from './db';
 
 interface FixtureOptions {
   sportId: string;
@@ -22,7 +22,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
     refereeIds = [],
   } = options;
 
-  const sport = await prisma.sport.findUnique({
+  const sport = await db.sport.findUnique({
     where: { id: sportId },
   });
 
@@ -35,19 +35,19 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
   // Fetch venues and referees if not provided
   let allVenues = venueIds;
   if (allVenues.length === 0) {
-    const venues = await prisma.venue.findMany({ select: { id: true } });
+    const venues = await db.venue.findMany({ select: { id: true } });
     allVenues = venues.map((v) => v.id);
   }
 
   let allReferees = refereeIds;
   if (allReferees.length === 0) {
-    const refSports = await prisma.refereeSport.findMany({
+    const refSports = await db.refereeSport.findMany({
       where: { sportId },
       select: { refereeId: true },
     });
     allReferees = refSports.map((r) => r.refereeId);
     if (allReferees.length === 0) {
-      const allRefs = await prisma.referee.findMany({ select: { id: true } });
+      const allRefs = await db.referee.findMany({ select: { id: true } });
       allReferees = allRefs.map((r) => r.id);
     }
   }
@@ -80,7 +80,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
     return { date, time, venueId, refereeId };
   }
 
-  const existingCount = await prisma.match.count();
+  const existingCount = await db.match.count();
   let matchSeq = existingCount + 1;
 
   if (format === 'ROUND_ROBIN' || format === 'LEAGUE') {
@@ -103,7 +103,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
           const matchCode = `M-${sport.name.slice(0, 2).toUpperCase()}-${matchSeq.toString().padStart(3, '0')}`;
           matchSeq++;
 
-          const match = await prisma.match.create({
+          const match = await db.match.create({
             data: {
               matchCode,
               sportId,
@@ -123,7 +123,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
           });
 
           if (slot.refereeId) {
-            await prisma.matchReferee.create({
+            await db.matchReferee.create({
               data: { matchId: match.id, refereeId: slot.refereeId },
             });
           }
@@ -152,7 +152,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
         const matchCode = `M-${sport.name.slice(0, 2).toUpperCase()}-${matchSeq.toString().padStart(3, '0')}`;
         matchSeq++;
 
-        const match = await prisma.match.create({
+        const match = await db.match.create({
           data: {
             matchCode,
             sportId,
@@ -172,7 +172,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
         });
 
         if (slot.refereeId) {
-          await prisma.matchReferee.create({
+          await db.matchReferee.create({
             data: { matchId: match.id, refereeId: slot.refereeId },
           });
         }
@@ -183,7 +183,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
       const finalCode = `M-${sport.name.slice(0, 2).toUpperCase()}-${matchSeq.toString().padStart(3, '0')}`;
       matchSeq++;
 
-      const finalMatch = await prisma.match.create({
+      const finalMatch = await db.match.create({
         data: {
           matchCode: finalCode,
           sportId,
@@ -204,7 +204,7 @@ export async function generateTournamentFixtures(options: FixtureOptions) {
       });
 
       if (allReferees[0]) {
-        await prisma.matchReferee.create({
+        await db.matchReferee.create({
           data: { matchId: finalMatch.id, refereeId: allReferees[0] },
         });
       }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -8,7 +8,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json().catch(() => ({}));
 
-    const registration = await prisma.registration.findUnique({
+    const registration = await db.registration.findUnique({
       where: { id: params.id },
     });
 
@@ -16,7 +16,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       return NextResponse.json({ error: 'Registration not found' }, { status: 404 });
     }
 
-    const updated = await prisma.registration.update({
+    const updated = await db.registration.update({
       where: { id: params.id },
       data: {
         status: 'REJECTED',

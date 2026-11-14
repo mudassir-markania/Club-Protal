@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const venues = await prisma.venue.findMany({
+    const venues = await db.venue.findMany({
       orderBy: { name: 'asc' },
     });
     return NextResponse.json(venues);
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Venue name and location are required' }, { status: 400 });
     }
 
-    const venue = await prisma.venue.create({
+    const venue = await db.venue.create({
       data: {
         name,
         location,

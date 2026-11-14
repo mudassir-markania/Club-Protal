@@ -1,19 +1,18 @@
-import { prisma } from './prisma';
+import { db } from './db';
 
 /**
  * Recalculates both sport-specific and overall club leaderboards based on
- * all approved match results and points history entries.
+ * all approved points distributions and points history entries.
  */
 export async function recalculateAllLeaderboards() {
-  const clubs = await prisma.club.findMany();
-  const sports = await prisma.sport.findMany();
+  const sports = await db.sport.findMany({ where: { status: 'ACTIVE' } });
 
   // 1. Recalculate sport-wise standings for each sport
   for (const sport of sports) {
     await recalculateSportLeaderboard(sport.id);
   }
 
-  // 2. Recalculate overall standings
+  // 2. Recalculate overall championship standings
   await recalculateOverallLeaderboard();
 }
 
@@ -21,22 +20,14 @@ export async function recalculateAllLeaderboards() {
  * Recalculate sport-specific leaderboard for a given sport
  */
 export async function recalculateSportLeaderboard(sportId: string) {
-  const sport = await prisma.sport.findUnique({
+  const sport = await db.sport.findUnique({
     where: { id: sportId },
     include: { matches: { include: { participants: true, results: true } } },
   });
 
   if (!sport) return;
 
-  const clubs = await prisma.club.findMany();
-  let scoringConfig = { win: 3, draw: 1, loss: 0, bonus: 0 };
-  try {
-    if (sport.scoringConfig) {
-      scoringConfig = JSON.parse(sport.scoringConfig);
-    }
-  } catch (e) {
-    // fallback
-  }
+  const clubs = await db.club.findMany();
 
   // Aggregate stats per club for this sport
   const clubStats: Record<
@@ -55,79 +46,45 @@ export async function recalculateSportLeaderboard(sportId: string) {
     clubStats[club.id] = { played: 0, won: 0, drawn: 0, lost: 0, points: 0, scoreDiff: 0 };
   }
 
-  // Look at completed matches for this sport
+  // 1. Count events/matches played by clubs in this sport
   const completedMatches = sport.matches.filter(
     (m) => m.status === 'COMPLETED' || m.status === 'APPROVED'
   );
 
   for (const match of completedMatches) {
     const parts = match.participants;
-    if (parts.length >= 2) {
-      const p1 = parts[0];
-      const p2 = parts[1];
-
-      if (p1.clubId && clubStats[p1.clubId]) clubStats[p1.clubId].played += 1;
-      if (p2.clubId && clubStats[p2.clubId]) clubStats[p2.clubId].played += 1;
-
-      const diff1 = (p1.score || 0) - (p2.score || 0);
-      if (p1.clubId && clubStats[p1.clubId]) clubStats[p1.clubId].scoreDiff += diff1;
-      if (p2.clubId && clubStats[p2.clubId]) clubStats[p2.clubId].scoreDiff -= diff1;
-
-      if (p1.isWinner) {
-        if (p1.clubId && clubStats[p1.clubId]) {
-          clubStats[p1.clubId].won += 1;
-          clubStats[p1.clubId].points += scoringConfig.win || 3;
-        }
-        if (p2.clubId && clubStats[p2.clubId]) {
-          clubStats[p2.clubId].lost += 1;
-          clubStats[p2.clubId].points += scoringConfig.loss || 0;
-        }
-      } else if (p2.isWinner) {
-        if (p2.clubId && clubStats[p2.clubId]) {
-          clubStats[p2.clubId].won += 1;
-          clubStats[p2.clubId].points += scoringConfig.win || 3;
-        }
-        if (p1.clubId && clubStats[p1.clubId]) {
-          clubStats[p1.clubId].lost += 1;
-          clubStats[p1.clubId].points += scoringConfig.loss || 0;
-        }
-      } else {
-        // Draw
-        if (p1.clubId && clubStats[p1.clubId]) {
-          clubStats[p1.clubId].drawn += 1;
-          clubStats[p1.clubId].points += scoringConfig.draw || 1;
-        }
-        if (p2.clubId && clubStats[p2.clubId]) {
-          clubStats[p2.clubId].drawn += 1;
-          clubStats[p2.clubId].points += scoringConfig.draw || 1;
-        }
+    for (const p of parts) {
+      if (p.clubId && clubStats[p.clubId]) {
+        clubStats[p.clubId].played += 1;
+        if (p.isWinner) clubStats[p.clubId].won += 1;
       }
     }
   }
 
-  // Also include manual or tournament bonus points from PointsHistory for this sport
-  const historyEntries = await prisma.pointsHistory.findMany({
+  // 2. Sum points directly from approved PointsHistory entries for this sport
+  const historyEntries = await db.pointsHistory.findMany({
     where: { sportId },
   });
-  // Check if matches already covered them or if they are tournament placement points
-  // PointsHistory is the ultimate single source of truth for allocated tournament points
+
   for (const h of historyEntries) {
-    if (!h.matchId && clubStats[h.clubId]) {
-      clubStats[h.clubId].points += h.points;
+    if (clubStats[h.clubId]) {
+      clubStats[h.clubId].points = Number(
+        (clubStats[h.clubId].points + Number(h.points)).toFixed(2)
+      );
     }
   }
 
-  // Sort by points desc, then scoreDiff desc
+  // Sort by points desc, then won desc
   const sorted = Object.entries(clubStats).sort((a, b) => {
     if (b[1].points !== a[1].points) return b[1].points - a[1].points;
-    return b[1].scoreDiff - a[1].scoreDiff;
+    return b[1].won - a[1].won;
   });
 
-  // Upsert leaderboard entries
+  // Upsert sport leaderboard entries
   let currentRank = 1;
   for (let i = 0; i < sorted.length; i++) {
     const [clubId, stats] = sorted[i];
-    await prisma.leaderboardEntry.upsert({
+    await db.leaderboardEntry.upsert({
       where: {
         clubId_sportId: { clubId, sportId },
       },
@@ -157,12 +114,11 @@ export async function recalculateSportLeaderboard(sportId: string) {
 }
 
 /**
- * Recalculate the overall tournament club leaderboard
+ * Recalculate the overall House Championship leaderboard across all 7 sports
  */
 export async function recalculateOverallLeaderboard() {
-  const clubs = await prisma.club.findMany();
+  const clubs = await db.club.findMany();
 
-  // Aggregate points from PointsHistory
   const aggregated: Record<
     string,
     {
@@ -192,60 +148,53 @@ export async function recalculateOverallLeaderboard() {
     };
   }
 
-  // 1. Sum up all approved points from PointsHistory
-  const allPointsHistory = await prisma.pointsHistory.findMany();
+  // 1. Sum up all approved points from PointsHistory (Single Source of Truth)
+  const allPointsHistory = await db.pointsHistory.findMany();
   for (const ph of allPointsHistory) {
     if (aggregated[ph.clubId]) {
-      aggregated[ph.clubId].points += ph.points;
-      if (ph.reason.toLowerCase().includes('gold')) aggregated[ph.clubId].gold += 1;
-      if (ph.reason.toLowerCase().includes('silver')) aggregated[ph.clubId].silver += 1;
-      if (ph.reason.toLowerCase().includes('bronze')) aggregated[ph.clubId].bronze += 1;
+      aggregated[ph.clubId].points = Number(
+        (aggregated[ph.clubId].points + Number(ph.points)).toFixed(2)
+      );
+      const lower = ph.reason.toLowerCase();
+      if (lower.includes('1st') || lower.includes('gold') || lower.includes('winner')) {
+        aggregated[ph.clubId].gold += 1;
+      } else if (lower.includes('2nd') || lower.includes('silver') || lower.includes('runner')) {
+        aggregated[ph.clubId].silver += 1;
+      } else if (lower.includes('3rd') || lower.includes('bronze')) {
+        aggregated[ph.clubId].bronze += 1;
+      }
     }
   }
 
-  // 2. Sum up match records from all completed matches
-  const completedMatches = await prisma.match.findMany({
-    where: { status: 'COMPLETED' },
+  // 2. Count matches participated and won across completed matches
+  const completedMatches = await db.match.findMany({
+    where: { status: { in: ['COMPLETED', 'APPROVED'] } },
     include: { participants: true },
   });
 
   for (const match of completedMatches) {
-    const parts = match.participants;
-    if (parts.length >= 2) {
-      const p1 = parts[0];
-      const p2 = parts[1];
-
-      if (p1.clubId && aggregated[p1.clubId]) {
-        aggregated[p1.clubId].played += 1;
-        aggregated[p1.clubId].scoreDiff += (p1.score || 0) - (p2.score || 0);
-        if (p1.isWinner) aggregated[p1.clubId].won += 1;
-        else if (!p2.isWinner) aggregated[p1.clubId].drawn += 1;
-        else aggregated[p1.clubId].lost += 1;
-      }
-
-      if (p2.clubId && aggregated[p2.clubId]) {
-        aggregated[p2.clubId].played += 1;
-        aggregated[p2.clubId].scoreDiff += (p2.score || 0) - (p1.score || 0);
-        if (p2.isWinner) aggregated[p2.clubId].won += 1;
-        else if (!p1.isWinner) aggregated[p2.clubId].drawn += 1;
-        else aggregated[p2.clubId].lost += 1;
+    for (const p of match.participants) {
+      if (p.clubId && aggregated[p.clubId]) {
+        aggregated[p.clubId].played += 1;
+        if (p.isWinner) aggregated[p.clubId].won += 1;
       }
     }
   }
 
-  // Sort overall standings: Points desc -> Gold desc -> Silver desc -> Wins desc -> ScoreDiff desc
+  // 3. Sort overall standings by Points desc -> Gold desc -> Silver desc -> Won desc
   const sortedOverall = Object.entries(aggregated).sort((a, b) => {
     if (b[1].points !== a[1].points) return b[1].points - a[1].points;
     if (b[1].gold !== a[1].gold) return b[1].gold - a[1].gold;
     if (b[1].silver !== a[1].silver) return b[1].silver - a[1].silver;
-    if (b[1].won !== a[1].won) return b[1].won - a[1].won;
-    return b[1].scoreDiff - a[1].scoreDiff;
+    return b[1].won - a[1].won;
   });
 
   let rank = 1;
+  let leaderClubId = sortedOverall[0]?.[0] || null;
+
   for (const [clubId, stats] of sortedOverall) {
     // Update club record
-    await prisma.club.update({
+    await db.club.update({
       where: { id: clubId },
       data: {
         totalPoints: stats.points,
@@ -254,7 +203,7 @@ export async function recalculateOverallLeaderboard() {
     });
 
     // Update overall leaderboard entry
-    await prisma.leaderboardEntry.upsert({
+    await db.leaderboardEntry.upsert({
       where: {
         clubId_sportId: { clubId, sportId: 'OVERALL' },
       },
@@ -288,5 +237,19 @@ export async function recalculateOverallLeaderboard() {
 
     rank++;
   }
-}
 
+  // Update Championship Leader setting
+  if (leaderClubId) {
+    await db.tournamentSetting.upsert({
+      where: { key: 'CURRENT_LEADER_CLUB_ID' },
+      update: { value: leaderClubId },
+      create: {
+        key: 'CURRENT_LEADER_CLUB_ID',
+        value: leaderClubId,
+        description: 'Current 1st place club in House Championship',
+      },
+    });
+  }
+
+  return { leaderClubId, sortedOverall };
+}

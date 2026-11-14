@@ -1,54 +1,89 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth';
+import { db } from '@/lib/db';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get('type') || 'overall'; // 'overall' | 'sport' | 'individual' | 'doubles'
+    const type = searchParams.get('type') || 'overall';
     const sportId = searchParams.get('sportId');
 
+    const sports = await db.sport.findMany({
+      where: { status: 'ACTIVE' },
+      orderBy: { name: 'asc' },
+    });
+
+    const statusSetting = await db.tournamentSetting.findUnique({
+      where: { key: 'CHAMPIONSHIP_STATUS' },
+    });
+    const championshipStatus = statusSetting?.value || 'ACTIVE';
+
+    const championSetting = await db.tournamentSetting.findUnique({
+      where: { key: 'HOUSE_CHAMPION_CLUB_ID' },
+    });
+    let championClub = null;
+    if (championSetting?.value) {
+      championClub = await db.club.findUnique({ where: { id: championSetting.value } });
+    }
+
     if (type === 'overall') {
-      const entries = await prisma.leaderboardEntry.findMany({
-        where: { sportId: 'OVERALL' },
-        orderBy: [{ rank: 'asc' }, { points: 'desc' }],
-        include: {
-          club: true,
-        },
+      const clubs = await db.club.findMany({
+        orderBy: [{ totalPoints: 'desc' }, { name: 'asc' }],
+      });
+
+      // Fetch all points history to compute sport-wise points matrix
+      const allPointsHistory = await db.pointsHistory.findMany({
+        include: { sport: true },
+      });
+
+      // Build sport-wise matrix per club
+      const standings = clubs.map((club, idx) => {
+        const clubHistory = allPointsHistory.filter((h) => h.clubId === club.id);
+        const sportBreakdown: Record<string, number> = {};
+
+        for (const sp of sports) {
+          const spPts = clubHistory
+            .filter((h) => h.sportId === sp.id)
+            .reduce((sum, h) => sum + Number(h.points), 0);
+          sportBreakdown[sp.id] = Number(spPts.toFixed(2));
+          sportBreakdown[sp.name] = Number(spPts.toFixed(2));
+        }
+
+        return {
+          id: club.id,
+          clubId: club.id,
+          club,
+          rank: idx + 1,
+          totalPoints: Number(club.totalPoints.toFixed(2)),
+          points: Number(club.totalPoints.toFixed(2)),
+          sportBreakdown,
+          transactionsCount: clubHistory.length,
+        };
+      });
+
+      const leadingClub = standings[0]?.club || null;
+
+      // Recent 10 approved points transactions
+      const recentPoints = await db.pointsHistory.findMany({
+        take: 10,
+        orderBy: { recordedAt: 'desc' },
+        include: { club: true, sport: true, match: true },
       });
 
       return NextResponse.json({
         type: 'overall',
-        standings: entries,
+        championshipStatus,
+        championClub,
+        leadingClub,
+        standings,
+        sports,
+        recentPoints,
       });
     }
 
-    if (type === 'sport') {
-      if (!sportId) {
-        // Return sport leaderboards for all active sports
-        const allSports = await prisma.sport.findMany();
-        const results = await Promise.all(
-          allSports.map(async (sport) => {
-            const entries = await prisma.leaderboardEntry.findMany({
-              where: { sportId: sport.id },
-              orderBy: [{ rank: 'asc' }, { points: 'desc' }],
-              include: { club: true },
-            });
-            return {
-              sport,
-              standings: entries,
-            };
-          })
-        );
-        return NextResponse.json({ type: 'sport_all', data: results });
-      }
-
-      const sport = await prisma.sport.findUnique({
-        where: { id: sportId },
-      });
-
-      const entries = await prisma.leaderboardEntry.findMany({
+    if (type === 'sport' && sportId) {
+      const sport = await db.sport.findUnique({ where: { id: sportId } });
+      const entries = await db.leaderboardEntry.findMany({
         where: { sportId },
         orderBy: [{ rank: 'asc' }, { points: 'desc' }],
         include: { club: true },
@@ -61,149 +96,28 @@ export async function GET(req: Request) {
       });
     }
 
-    if (type === 'individual') {
-      // Find individual matches and aggregate player stats
-      const individualSports = await prisma.sport.findMany({
-        where: { sportType: 'INDIVIDUAL' },
-      });
+    // Default fallback
+    const allEntries = await db.leaderboardEntry.findMany({
+      where: { sportId: 'OVERALL' },
+      orderBy: [{ rank: 'asc' }, { points: 'desc' }],
+      include: { club: true },
+    });
 
-      const sportIds = individualSports.map((s) => s.id);
-
-      const players = await prisma.player.findMany({
-        where: {
-          sports: {
-            some: {
-              sportId: { in: sportIds },
-            },
-          },
-        },
-        include: {
-          club: true,
-          matchParticipants: {
-            include: {
-              match: {
-                include: {
-                  sport: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const playerStandings = players.map((p) => {
-        let played = 0;
-        let won = 0;
-        let points = 0;
-
-        for (const mp of p.matchParticipants) {
-          if (mp.match.status === 'COMPLETED') {
-            played++;
-            if (mp.isWinner) {
-              won++;
-              points += 2; // individual win points
-            }
-          }
-        }
-
-        return {
-          id: p.id,
-          registrationId: p.registrationId,
-          name: p.name,
-          club: p.club,
-          played,
-          won,
-          lost: played - won,
-          points,
-        };
-      });
-
-      playerStandings.sort((a, b) => b.points - a.points || b.won - a.won);
-
-      return NextResponse.json({
-        type: 'individual',
-        standings: playerStandings.map((p, idx) => ({ ...p, rank: idx + 1 })),
-      });
-    }
-
-    if (type === 'doubles') {
-      // Find doubles matches and aggregate pair stats
-      const doublesSports = await prisma.sport.findMany({
-        where: { sportType: 'DOUBLES' },
-      });
-
-      const doublesMatches = await prisma.match.findMany({
-        where: {
-          sportId: { in: doublesSports.map((s) => s.id) },
-          status: 'COMPLETED',
-        },
-        include: {
-          sport: true,
-          participants: {
-            include: {
-              club: true,
-            },
-          },
-        },
-      });
-
-      const pairStats: Record<
-        string,
-        {
-          teamName: string;
-          club: any;
-          sportName: string;
-          played: number;
-          won: number;
-          points: number;
-        }
-      > = {};
-
-      for (const m of doublesMatches) {
-        for (const p of m.participants) {
-          const key = p.teamName || (p.club ? `${p.club.name} Pair` : 'Unnamed Pair');
-          if (!pairStats[key]) {
-            pairStats[key] = {
-              teamName: key,
-              club: p.club,
-              sportName: m.sport.name,
-              played: 0,
-              won: 0,
-              points: 0,
-            };
-          }
-          pairStats[key].played++;
-          if (p.isWinner) {
-            pairStats[key].won++;
-            pairStats[key].points += 2;
-          }
-        }
-      }
-
-      const pairs = Object.values(pairStats).sort((a, b) => b.points - a.points);
-
-      return NextResponse.json({
-        type: 'doubles',
-        standings: pairs.map((pair, idx) => ({ ...pair, rank: idx + 1 })),
-      });
-    }
-
-    return NextResponse.json({ error: 'Invalid leaderboard type' }, { status: 400 });
+    return NextResponse.json({
+      type: 'overall',
+      standings: allEntries,
+      sports,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
-    await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     await recalculateAllLeaderboards();
-    return NextResponse.json({ success: true, message: 'All leaderboards recalculated successfully' });
+    return NextResponse.json({ success: true, message: 'All leaderboards recalculated' });
   } catch (error: any) {
-    if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

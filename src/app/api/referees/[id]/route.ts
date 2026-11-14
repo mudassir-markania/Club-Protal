@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { hashPassword, requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const referee = await prisma.referee.findUnique({
+    const referee = await db.referee.findUnique({
       where: { id: params.id },
       include: {
         sports: {
@@ -58,7 +58,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json();
 
-    const existing = await prisma.referee.findUnique({
+    const existing = await db.referee.findUnique({
       where: { id: params.id },
       include: { user: true },
     });
@@ -78,7 +78,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       sportIds,
     } = body;
 
-    const updated = await prisma.referee.update({
+    const updated = await db.referee.update({
       where: { id: params.id },
       data: {
         name: name !== undefined ? name : existing.name,
@@ -102,7 +102,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         userDataToUpdate.passwordHash = await hashPassword(password);
       }
 
-      await prisma.user.update({
+      await db.user.update({
         where: { id: existing.user.id },
         data: userDataToUpdate,
       });
@@ -110,12 +110,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     // Update sports
     if (sportIds && Array.isArray(sportIds)) {
-      await prisma.refereeSport.deleteMany({
+      await db.refereeSport.deleteMany({
         where: { refereeId: params.id },
       });
 
       for (const sId of sportIds) {
-        await prisma.refereeSport.create({
+        await db.refereeSport.create({
           data: {
             refereeId: params.id,
             sportId: sId,
@@ -124,7 +124,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       }
     }
 
-    const result = await prisma.referee.findUnique({
+    const result = await db.referee.findUnique({
       where: { id: params.id },
       include: {
         sports: { include: { sport: true } },
@@ -154,7 +154,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
 
-    const referee = await prisma.referee.findUnique({
+    const referee = await db.referee.findUnique({
       where: { id: params.id },
       include: {
         user: true,
@@ -171,12 +171,12 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     }
 
     if (referee.user) {
-      await prisma.user.delete({
+      await db.user.delete({
         where: { id: referee.user.id },
       });
     }
 
-    await prisma.referee.delete({
+    await db.referee.delete({
       where: { id: params.id },
     });
 

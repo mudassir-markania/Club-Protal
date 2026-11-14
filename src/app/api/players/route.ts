@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
       };
     }
 
-    const players = await prisma.player.findMany({
+    const players = await db.player.findMany({
       where,
       orderBy: { name: 'asc' },
       include: {
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     const regId = registrationId || `REG-${Date.now().toString().slice(-6)}`;
 
     // Check duplicate
-    const existing = await prisma.player.findFirst({
+    const existing = await db.player.findFirst({
       where: {
         OR: [{ registrationId: regId }, { email: email.toLowerCase().trim() }],
       },
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const player = await prisma.player.create({
+    const player = await db.player.create({
       data: {
         name,
         registrationId: regId,
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
     // Assign sports
     if (sportIds && Array.isArray(sportIds)) {
       for (const sId of sportIds) {
-        await prisma.playerSport.create({
+        await db.playerSport.create({
           data: {
             playerId: player.id,
             sportId: sId,
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const created = await prisma.player.findUnique({
+    const created = await db.player.findUnique({
       where: { id: player.id },
       include: {
         club: true,

@@ -3,26 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import AppLayout from '@/components/layout/AppLayout';
+import RefereeLayout from '@/components/layout/RefereeLayout';
 import {
-  Play,
+  ArrowLeft,
   CheckCircle2,
   AlertTriangle,
   Clock,
-  ArrowLeft,
   Trophy,
-  Save,
   Send,
   Flag,
   X,
-  Plus,
-  Minus,
+  Users,
+  Shield,
   Sparkles,
   Check,
   Calendar,
   MapPin,
+  HelpCircle,
+  FileText,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
+import { calculateClubPointsDistribution } from '@/lib/points-distribution';
 
 export default function RefereeMatchSheetPage() {
   const params = useParams();
@@ -31,18 +32,19 @@ export default function RefereeMatchSheetPage() {
 
   const [match, setMatch] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [savingScore, setSavingScore] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Live Score Sheet State
-  const [score1, setScore1] = useState(0);
-  const [score2, setScore2] = useState(0);
-  const [winnerParticipantId, setWinnerParticipantId] = useState<string>('');
+  // Form states per participant: { [participantId]: { pointsEarned: number, rank?: number, isWinner: boolean } }
+  const [entryResults, setEntryResults] = useState<
+    Record<string, { pointsEarned: number; rank?: number; isWinner: boolean }>
+  >({});
   const [refereeNotes, setRefereeNotes] = useState('');
 
   // Modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
+  const [disputeCategory, setDisputeCategory] = useState('RULES_DISAGREEMENT');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -58,19 +60,18 @@ export default function RefereeMatchSheetPage() {
 
       setMatch(data);
 
-      const p1 = data.participants?.[0];
-      const p2 = data.participants?.[1];
-
-      setScore1(p1?.score ?? 0);
-      setScore2(p2?.score ?? 0);
-
-      const winningP = data.participants?.find((p: any) => p.isWinner);
-      if (winningP) {
-        setWinnerParticipantId(winningP.id);
-      } else if (p1 && p2) {
-        if (p1.score > p2.score) setWinnerParticipantId(p1.id);
-        else if (p2.score > p1.score) setWinnerParticipantId(p2.id);
+      // Initialize results mapping from participants
+      const initialMap: Record<string, { pointsEarned: number; rank?: number; isWinner: boolean }> = {};
+      if (data.participants && Array.isArray(data.participants)) {
+        data.participants.forEach((p: any) => {
+          initialMap[p.id] = {
+            pointsEarned: p.score || 0,
+            rank: p.rank || undefined,
+            isWinner: p.isWinner || false,
+          };
+        });
       }
+      setEntryResults(initialMap);
 
       if (data.notes) setRefereeNotes(data.notes);
     } catch (err: any) {
@@ -81,74 +82,48 @@ export default function RefereeMatchSheetPage() {
     }
   };
 
-  const handleStartMatch = async () => {
-    try {
-      const res = await fetch(`/api/matches/${match.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'IN_PROGRESS' }),
-      });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Match marked as IN PROGRESS. Live score tracking active.' });
-        fetchMatchDetails();
-      }
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const updateParticipantPoints = (participantId: string, points: number) => {
+    setEntryResults((prev) => ({
+      ...prev,
+      [participantId]: {
+        ...(prev[participantId] || { isWinner: false }),
+        pointsEarned: Math.max(0, points),
+      },
+    }));
   };
 
-  const handleSaveLiveScore = async () => {
-    setSavingScore(true);
-    try {
-      const p1 = match.participants?.[0];
-      const p2 = match.participants?.[1];
-
-      const res = await fetch(`/api/matches/${match.id}/scores`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scores: [
-            { participantId: p1.id, score: score1 },
-            { participantId: p2.id, score: score2 },
-          ],
-        }),
-      });
-
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Live scores saved!' });
-        fetchMatchDetails();
-      }
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setSavingScore(false);
+  const updateParticipantRank = (participantId: string, rankNum: number, positionPointsMap?: Record<string, number>) => {
+    let autoPoints = entryResults[participantId]?.pointsEarned ?? 0;
+    if (positionPointsMap && positionPointsMap[rankNum.toString()] !== undefined) {
+      autoPoints = positionPointsMap[rankNum.toString()];
     }
+
+    setEntryResults((prev) => ({
+      ...prev,
+      [participantId]: {
+        ...(prev[participantId] || { isWinner: false }),
+        rank: rankNum,
+        pointsEarned: autoPoints,
+        isWinner: rankNum === 1,
+      },
+    }));
   };
 
   const handleSubmitResult = async () => {
-    if (!winnerParticipantId && score1 !== score2) {
-      alert('Please select the winning participant / club');
-      return;
-    }
-
-    const p1 = match.participants?.[0];
-    const p2 = match.participants?.[1];
-
-    const winnerP = match.participants?.find((p: any) => p.id === winnerParticipantId);
-    const summary = `${p1?.club?.name || 'T1'} (${score1}) - (${score2}) ${p2?.club?.name || 'T2'}`;
-
+    setSubmitting(true);
     try {
+      const formattedResults = Object.entries(entryResults).map(([pId, val]) => ({
+        participantId: pId,
+        pointsEarned: val.pointsEarned,
+        rank: val.rank,
+        isWinner: val.isWinner,
+      }));
+
       const res = await fetch(`/api/matches/${match.id}/submit-result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          scores: [
-            { participantId: p1.id, score: score1, isWinner: p1.id === winnerParticipantId },
-            { participantId: p2.id, score: score2, isWinner: p2.id === winnerParticipantId },
-          ],
-          winnerParticipantId: winnerParticipantId || null,
-          winnerClubId: winnerP?.clubId || null,
-          scoresSummary: summary,
+          entryResults: formattedResults,
           refereeNotes,
         }),
       });
@@ -161,12 +136,14 @@ export default function RefereeMatchSheetPage() {
       fetchMatchDetails();
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleReportDispute = async () => {
     if (!disputeReason) {
-      alert('Please state the nature of dispute or technical issue');
+      alert('Please state the nature of dispute or issue');
       return;
     }
 
@@ -174,12 +151,15 @@ export default function RefereeMatchSheetPage() {
       const res = await fetch(`/api/matches/${match.id}/dispute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ disputeReason }),
+        body: JSON.stringify({
+          disputeReason: `[${disputeCategory}] ${disputeReason}`,
+        }),
       });
 
       if (res.ok) {
         setIsDisputeModalOpen(false);
-        setMessage({ type: 'success', text: 'Dispute report logged. Tournament director notified.' });
+        setDisputeReason('');
+        setMessage({ type: 'success', text: 'Dispute recorded. Tournament committee alerted.' });
         fetchMatchDetails();
       }
     } catch (err: any) {
@@ -189,22 +169,32 @@ export default function RefereeMatchSheetPage() {
 
   if (loading || !match) {
     return (
-      <AppLayout>
-        <div className="py-24 text-center text-slate-400 text-xs">
-          Loading match control sheet...
+      <RefereeLayout>
+        <div className="py-24 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-3">
+          <Clock className="w-8 h-8 animate-spin text-slate-300" />
+          <span>Loading official match details...</span>
         </div>
-      </AppLayout>
+      </RefereeLayout>
     );
   }
 
-  const p1 = match.participants?.[0];
-  const p2 = match.participants?.[1];
+  // Parse sport configuration
+  let positionPointsMap: Record<string, number> | undefined;
+  try {
+    if (match.sport?.positionPoints) {
+      positionPointsMap = JSON.parse(match.sport.positionPoints);
+    }
+  } catch (e) {}
+
+  const isSubmitted = match.status === 'SUBMITTED';
+  const isCompleted = match.status === 'COMPLETED';
+  const isReadOnly = isSubmitted || isCompleted;
 
   return (
-    <AppLayout>
-      <div className="space-y-6 max-w-4xl mx-auto">
-        {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between">
+    <RefereeLayout>
+      <div className="space-y-6 max-w-5xl mx-auto">
+        {/* Navigation Breadcrumbs & Actions */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <Link
             href="/referee/matches"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-navy-950 transition"
@@ -213,16 +203,18 @@ export default function RefereeMatchSheetPage() {
             Back to Assigned Matches
           </Link>
 
-          <button
-            onClick={() => setIsDisputeModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 text-red-700 hover:bg-red-50 text-xs font-bold rounded-lg transition"
-          >
-            <Flag className="w-3.5 h-3.5" />
-            Report Issue / Dispute
-          </button>
+          {!isCompleted && (
+            <button
+              onClick={() => setIsDisputeModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 text-red-700 bg-red-50/50 hover:bg-red-100 text-xs font-bold rounded-lg transition"
+            >
+              <Flag className="w-3.5 h-3.5 text-red-600" />
+              Report Issue / Dispute
+            </button>
+          )}
         </div>
 
-        {/* Status Message */}
+        {/* Status Alerts */}
         {message && (
           <div
             className={`p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-between ${
@@ -232,295 +224,350 @@ export default function RefereeMatchSheetPage() {
             }`}
           >
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{message.text}</span>
             </div>
-            <button onClick={() => setMessage(null)} className="p-1 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-200/50">
+            <button onClick={() => setMessage(null)} className="p-1 rounded text-slate-500 hover:text-slate-800">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        {/* Match Header Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+        {/* Match Header Overview */}
+        <div className="bg-navy-950 text-white rounded-2xl p-6 border border-navy-800 shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-navy-800 pb-4">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-navy-900 text-white">
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <span className="font-mono text-xs font-extrabold px-2.5 py-0.5 rounded bg-blue-600 text-white">
                   {match.matchCode}
                 </span>
-                <span className="text-sm font-bold text-navy-950 flex items-center gap-1.5">
-                  <SportIcon name={match.sport?.name} className="w-4 h-4 text-navy-800" />
+                <span className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                  <SportIcon name={match.sport?.name} className="w-4 h-4 text-amber-400" />
                   <span>{match.sport?.name}</span>
                 </span>
-                <span className="text-xs text-slate-400">• {match.round}</span>
+                <span className="text-xs text-navy-400">• {match.round}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+
+              <div className="flex items-center gap-3 text-xs text-navy-300">
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <Calendar className="w-3.5 h-3.5 text-navy-400" />
                   {match.matchDate} at {match.matchTime}
                 </span>
-                <span className="text-slate-300">•</span>
+                <span className="text-navy-600">•</span>
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                  {match.venue?.name || 'Grand Arena'}
+                  <MapPin className="w-3.5 h-3.5 text-navy-400" />
+                  {match.venue?.name || 'Olympic Arena'}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                  match.status === 'IN_PROGRESS'
-                    ? 'bg-rose-50 text-rose-700 border border-rose-200 animate-pulse'
-                    : match.status === 'SUBMITTED'
-                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold uppercase tracking-wider border ${
+                  match.status === 'SUBMITTED'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                     : match.status === 'COMPLETED'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-blue-50 text-blue-700 border border-blue-200'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                 }`}
               >
                 {match.status}
               </span>
-
-              {match.status === 'SCHEDULED' && (
-                <button
-                  onClick={handleStartMatch}
-                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1.5 transition"
-                >
-                  <Play className="w-3.5 h-3.5" />
-                  Start Match
-                </button>
-              )}
             </div>
           </div>
 
-          {/* Big Interactive Live Scoreboard */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 my-6">
-            {/* Competitor 1 */}
-            <div
-              className={`p-6 rounded-2xl border transition text-center ${
-                winnerParticipantId === p1?.id
-                  ? 'bg-blue-50/50 border-blue-500 shadow-md ring-2 ring-blue-500/20'
-                  : 'bg-slate-50 border-slate-200'
-              }`}
-            >
-              <div className="w-14 h-14 rounded-2xl bg-white/90 border border-slate-200 flex items-center justify-center mx-auto mb-2 shadow-xs">
-                <ClubBadge code={p1?.club?.code} name={p1?.club?.name} className="w-8 h-8" />
-              </div>
-              <h3 className="font-extrabold text-base text-navy-950 truncate">
-                {p1?.club?.name || p1?.player?.name || 'Competitor 1'}
-              </h3>
-              <span className="text-xs font-mono font-bold text-slate-400 block mb-4">
-                {p1?.club?.code || 'P1'}
-              </span>
+          <div className="mt-4 text-xs text-navy-300 flex items-center justify-between flex-wrap gap-2">
+            <span>
+              <strong>Note:</strong> Live scoring is completed on the scoring platform. Record final points or positions earned below.
+            </span>
+            <span className="text-[11px] text-amber-400 font-medium">
+              Points will be automatically distributed equally among unique participating clubs.
+            </span>
+          </div>
+        </div>
 
-              {/* Big Score Counter */}
-              <div className="flex items-center justify-center gap-4 my-4">
-                <button
-                  type="button"
-                  disabled={match.status === 'COMPLETED'}
-                  onClick={() => setScore1(Math.max(0, score1 - 1))}
-                  className="w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-700 font-bold text-lg flex items-center justify-center shadow-2xs hover:bg-slate-100 disabled:opacity-40"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-
-                <span className="font-mono text-5xl font-black text-navy-950 w-24 text-center">
-                  {score1}
-                </span>
-
-                <button
-                  type="button"
-                  disabled={match.status === 'COMPLETED'}
-                  onClick={() => setScore1(score1 + 1)}
-                  className="w-10 h-10 rounded-full bg-navy-900 text-white font-bold text-lg flex items-center justify-center shadow-sm hover:bg-navy-800 disabled:opacity-40"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Winner Selector */}
-              {match.status !== 'COMPLETED' && (
-                <button
-                  type="button"
-                  onClick={() => setWinnerParticipantId(p1?.id)}
-                  className={`mt-2 w-full py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                    winnerParticipantId === p1?.id
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <Trophy className="w-3.5 h-3.5" />
-                  {winnerParticipantId === p1?.id ? 'Designated Winner' : 'Mark as Winner'}
-                </button>
-              )}
-            </div>
-
-            {/* Competitor 2 */}
-            <div
-              className={`p-6 rounded-2xl border transition text-center ${
-                winnerParticipantId === p2?.id
-                  ? 'bg-blue-50/50 border-blue-500 shadow-md ring-2 ring-blue-500/20'
-                  : 'bg-slate-50 border-slate-200'
-              }`}
-            >
-              <div className="w-14 h-14 rounded-2xl bg-white/90 border border-slate-200 flex items-center justify-center mx-auto mb-2 shadow-xs">
-                <ClubBadge code={p2?.club?.code} name={p2?.club?.name} className="w-8 h-8" />
-              </div>
-              <h3 className="font-extrabold text-base text-navy-950 truncate">
-                {p2?.club?.name || p2?.player?.name || 'Competitor 2'}
-              </h3>
-              <span className="text-xs font-mono font-bold text-slate-400 block mb-4">
-                {p2?.club?.code || 'P2'}
-              </span>
-
-              {/* Big Score Counter */}
-              <div className="flex items-center justify-center gap-4 my-4">
-                <button
-                  type="button"
-                  disabled={match.status === 'COMPLETED'}
-                  onClick={() => setScore2(Math.max(0, score2 - 1))}
-                  className="w-10 h-10 rounded-full bg-white border border-slate-300 text-slate-700 font-bold text-lg flex items-center justify-center shadow-2xs hover:bg-slate-100 disabled:opacity-40"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-
-                <span className="font-mono text-5xl font-black text-navy-950 w-24 text-center">
-                  {score2}
-                </span>
-
-                <button
-                  type="button"
-                  disabled={match.status === 'COMPLETED'}
-                  onClick={() => setScore2(score2 + 1)}
-                  className="w-10 h-10 rounded-full bg-navy-900 text-white font-bold text-lg flex items-center justify-center shadow-sm hover:bg-navy-800 disabled:opacity-40"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Winner Selector */}
-              {match.status !== 'COMPLETED' && (
-                <button
-                  type="button"
-                  onClick={() => setWinnerParticipantId(p2?.id)}
-                  className={`mt-2 w-full py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                    winnerParticipantId === p2?.id
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <Trophy className="w-3.5 h-3.5" />
-                  {winnerParticipantId === p2?.id ? 'Designated Winner' : 'Mark as Winner'}
-                </button>
-              )}
-            </div>
+        {/* Participating Entries & Unique-Club Points Distribution */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-extrabold text-navy-950 tracking-tight flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-amber-600" />
+              <span>Participating Squads & Final Points Earned</span>
+            </h2>
+            <span className="text-xs text-slate-500">
+              {match.participants?.length || 0} Participating Entry/Entries
+            </span>
           </div>
 
-          {/* Quick Score Save / Live updates */}
-          {match.status !== 'COMPLETED' && (
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-              <span className="text-xs text-slate-600 font-medium">
-                Live match scoring: Sync current interim goals/points to database spectators
-              </span>
-              <button
-                type="button"
-                disabled={savingScore}
-                onClick={handleSaveLiveScore}
-                className="px-3.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 transition"
+          {match.participants?.map((participant: any, index: number) => {
+            const resultState = entryResults[participant.id] || { pointsEarned: 0, rank: undefined, isWinner: false };
+            const pointsEarned = resultState.pointsEarned || 0;
+
+            // Extract players and their club affiliations
+            const players = (participant.players || []).map((mpp: any) => ({
+              playerId: mpp.playerId,
+              playerName: mpp.player?.name,
+              clubId: mpp.clubId,
+              clubName: mpp.club?.name || 'Club',
+              clubCode: mpp.club?.code,
+            }));
+
+            // Fallback for single club team or cricket team
+            if (players.length === 0 && participant.club) {
+              players.push({
+                playerId: participant.playerId || 'team',
+                playerName: participant.teamName || participant.club.name,
+                clubId: participant.clubId,
+                clubName: participant.club.name,
+                clubCode: participant.club.code,
+              });
+            }
+
+            // Real-time calculation using the reusable distribution engine
+            const dist = calculateClubPointsDistribution(pointsEarned, players, index);
+
+            return (
+              <div
+                key={participant.id}
+                className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5"
               >
-                <Save className="w-3.5 h-3.5" />
-                {savingScore ? 'Saving...' : 'Save Live Scores'}
-              </button>
-            </div>
-          )}
+                {/* Entry Title & Roster Breakdown */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center font-black text-sm text-slate-700">
+                      {participant.rank ? `#${participant.rank}` : `E${index + 1}`}
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-base text-navy-950 flex items-center gap-2">
+                        <span>{participant.teamName || participant.club?.name || `Entry ${index + 1}`}</span>
+                        {participant.cricketTeam && (
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                            Parent Club: {participant.club?.name}
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        {players.length} participating athlete{players.length === 1 ? '' : 's'} •{' '}
+                        <strong className="text-slate-700">{dist.uniqueClubCount} unique club{dist.uniqueClubCount === 1 ? '' : 's'}</strong>
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Referee Match Observations */}
-          <div className="mt-6">
+                  {/* Points Input Control */}
+                  <div className="flex items-center gap-3 self-end sm:self-auto">
+                    {positionPointsMap && (
+                      <div className="flex items-center gap-1 text-xs">
+                        <span className="font-bold text-slate-500">Position:</span>
+                        <select
+                          disabled={isReadOnly}
+                          value={resultState.rank || ''}
+                          onChange={(e) =>
+                            updateParticipantRank(
+                              participant.id,
+                              parseInt(e.target.value, 10),
+                              positionPointsMap
+                            )
+                          }
+                          className="px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-800 font-bold text-xs outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-60"
+                        >
+                          <option value="">Select Rank</option>
+                          {Object.keys(positionPointsMap).map((pos) => (
+                            <option key={pos} value={pos}>
+                              #{pos} ({positionPointsMap[pos]} pts)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                        Points Earned:
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        disabled={isReadOnly}
+                        value={pointsEarned}
+                        onChange={(e) =>
+                          updateParticipantPoints(participant.id, parseFloat(e.target.value) || 0)
+                        }
+                        className="w-28 px-3 py-1.5 border border-slate-200 rounded-lg text-navy-950 font-mono font-black text-right text-base outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-60 bg-slate-50"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Participating Players with Club Affiliations */}
+                {participant.players && participant.players.length > 0 && (
+                  <div>
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
+                      Participating Players & Respective Club Affiliations:
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                      {participant.players.map((mpp: any) => (
+                        <div
+                          key={mpp.id}
+                          className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs"
+                        >
+                          <span className="font-bold text-slate-800 truncate mr-2">
+                            {mpp.player?.name}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-white border border-slate-200 text-slate-700 shrink-0">
+                            {mpp.club?.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* AUTOMATIC CLUB-WISE POINTS DISTRIBUTION PREVIEW TABLE */}
+                <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-navy-950 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Automatic Unique-Club Points Distribution Calculation:</span>
+                    </span>
+                    <span className="font-mono text-xs font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                      Formula: {pointsEarned.toFixed(2)} pts ÷ {dist.uniqueClubCount} unique club{dist.uniqueClubCount === 1 ? '' : 's'}
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                      <thead className="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-200">
+                        <tr>
+                          <th className="py-1.5 px-3">Unique Club</th>
+                          <th className="py-1.5 px-3 text-center">Players Contributed</th>
+                          <th className="py-1.5 px-3 text-right">Distributed Points</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {dist.allocations.map((alloc) => (
+                          <tr key={alloc.clubId} className="hover:bg-white/60">
+                            <td className="py-2 px-3 font-bold text-slate-800 flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                              <span>{alloc.clubName}</span>
+                            </td>
+                            <td className="py-2 px-3 text-center font-mono text-slate-600">
+                              {alloc.playersContributed} athlete{alloc.playersContributed === 1 ? '' : 's'}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono font-black text-navy-950">
+                              {alloc.pointsFormatted} pts
+                              {alloc.isRemainderWinner && (
+                                <span className="ml-1 text-[10px] text-amber-600 font-bold" title="Fair remainder cent (+0.01)">
+                                  (+0.01 rot)
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="border-t border-slate-200 font-extrabold text-navy-950">
+                          <td className="py-2 px-3">Sum Total Distributed:</td>
+                          <td className="py-2 px-3 text-center font-mono">{dist.totalPlayers} total</td>
+                          <td className="py-2 px-3 text-right font-mono text-emerald-600">
+                            {dist.totalDistributed.toFixed(2)} pts
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 italic">{dist.explanation}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Referee Official Observations & Submit Bar */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
+          <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Referee Match Observations & Disciplinary Notes
+              Referee Official Notes & Match Summary
             </label>
             <textarea
               rows={3}
-              disabled={match.status === 'COMPLETED'}
+              disabled={isReadOnly}
               value={refereeNotes}
               onChange={(e) => setRefereeNotes(e.target.value)}
-              placeholder="e.g. Fair play maintained. High tempo match. 1 yellow card issued in 65th minute."
-              className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 outline-none"
+              placeholder="e.g. Competition conducted under official house championship rules. No technical infractions."
+              className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 outline-none disabled:bg-slate-50"
             />
           </div>
 
-          {/* Submit Action Bar */}
-          {match.status !== 'COMPLETED' && (
-            <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
+          {!isReadOnly && (
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
               <span className="text-xs text-slate-400">
-                Official Result Submission requires confirmation before locking.
+                Submitted results will be queued for Administrator verification before leaderboard commit.
               </span>
 
               <button
                 type="button"
                 onClick={() => setIsConfirmModalOpen(true)}
-                className="px-6 py-2.5 bg-navy-900 hover:bg-navy-800 text-white font-extrabold text-xs rounded-xl shadow-md shadow-navy-900/20 flex items-center gap-2 transition"
+                className="px-6 py-2.5 bg-navy-950 hover:bg-navy-900 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-2 transition"
               >
                 <Send className="w-4 h-4 text-emerald-400" />
-                Submit Final Certified Result
+                <span>Submit Result for Admin Approval</span>
               </button>
+            </div>
+          )}
+
+          {isSubmitted && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Result submitted. Currently awaiting Administrator review and approval.</span>
+            </div>
+          )}
+
+          {isCompleted && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Result certified and approved by Administrator. Points have been officially committed.</span>
             </div>
           )}
         </div>
 
-        {/* Modal: Confirmation Screen Before Final Submission (Requirement 5.C) */}
+        {/* Confirmation Modal */}
         {isConfirmModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
-              <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
+              <div className="p-5 bg-navy-950 text-white flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <h3 className="font-bold text-sm">Confirm Official Result Submission</h3>
+                  <h3 className="font-bold text-sm">Confirm Result Submission</h3>
                 </div>
-                <button
-                  onClick={() => setIsConfirmModalOpen(false)}
-                  className="p-1 text-slate-300 hover:text-white rounded"
-                >
+                <button onClick={() => setIsConfirmModalOpen(false)} className="text-slate-300 hover:text-white p-1">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="p-6 space-y-4 text-xs">
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">
-                    Certified Scoreline
+                <p className="text-slate-600 leading-relaxed">
+                  Are you ready to submit the final points for <strong>{match.matchCode} ({match.sport?.name})</strong>?
+                </p>
+
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                  {Object.entries(entryResults).map(([pId, val]) => {
+                    const part = match.participants?.find((p: any) => p.id === pId);
+                    return (
+                      <div key={pId} className="flex items-center justify-between">
+                        <span className="font-medium text-slate-700">{part?.teamName || part?.club?.name}</span>
+                        <span className="font-mono font-bold text-navy-950">{val.pointsEarned.toFixed(2)} pts</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    Points will be automatically distributed across unique clubs. An Administrator must verify and approve this submission before it appears on the official leaderboard.
                   </span>
-                  <div className="text-xl font-extrabold text-navy-950 my-1">
-                    {p1?.club?.name} ({score1}) - ({score2}) {p2?.club?.name}
-                  </div>
-                  <div className="text-xs font-bold text-blue-600 mt-2">
-                    Winner: {match.participants?.find((p: any) => p.id === winnerParticipantId)?.club?.name || 'Draw / Tie'}
-                  </div>
                 </div>
-
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] space-y-1">
-                  <p className="font-bold flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>Submission Policy Warning:</span>
-                  </p>
-                  <p>
-                    Once submitted, this result is officially filed to the tournament committee.
-                    Standings will be updated upon tournament director approval.
-                  </p>
-                </div>
-
-                {refereeNotes && (
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">
-                      Attached Notes:
-                    </span>
-                    <p className="text-slate-700 italic bg-slate-50 p-2 rounded border border-slate-100">
-                      "{refereeNotes}"
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
@@ -529,55 +576,60 @@ export default function RefereeMatchSheetPage() {
                   onClick={() => setIsConfirmModalOpen(false)}
                   className="px-4 py-2 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 text-xs"
                 >
-                  Back to Review
+                  Back to Edit
                 </button>
                 <button
                   type="button"
+                  disabled={submitting}
                   onClick={handleSubmitResult}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs shadow-sm flex items-center gap-1.5 disabled:opacity-60"
                 >
                   <Check className="w-4 h-4" />
-                  Confirm & Submit
+                  {submitting ? 'Submitting...' : 'Confirm & Submit'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Modal: Report Match Dispute */}
+        {/* Dispute Reporting Modal */}
         {isDisputeModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
-              <div className="p-5 bg-red-900 text-white flex items-center justify-between">
+              <div className="p-5 bg-red-950 text-white flex items-center justify-between border-b border-red-900">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-amber-300" />
-                  <h3 className="font-bold text-sm">Report Match Incident / Dispute</h3>
+                  <Flag className="w-5 h-5 text-red-400" />
+                  <h3 className="font-bold text-sm">Report Match Issue / Dispute</h3>
                 </div>
-                <button
-                  onClick={() => setIsDisputeModalOpen(false)}
-                  className="p-1 text-slate-300 hover:text-white rounded"
-                >
+                <button onClick={() => setIsDisputeModalOpen(false)} className="text-slate-300 hover:text-white p-1">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="p-6 space-y-4 text-xs">
-                <p className="text-slate-600">
-                  Report any refereeing conflict, player misconduct, weather stoppage, or score protest.
-                  This flags the match as <strong>DISPUTED</strong> for tournament committee review.
-                </p>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Issue Classification:</label>
+                  <select
+                    value={disputeCategory}
+                    onChange={(e) => setDisputeCategory(e.target.value)}
+                    className="w-full p-2 border border-slate-200 rounded-lg text-xs font-medium"
+                  >
+                    <option value="RULES_DISAGREEMENT">Rules Disagreement / Rule Challenge</option>
+                    <option value="UNSPORTSMANLIKE_CONDUCT">Unsportsmanlike Conduct</option>
+                    <option value="TECHNICAL_INCIDENT">Technical / Network Glitch (Esports)</option>
+                    <option value="EQUIPMENT_FAILURE">Equipment or Venue Issue</option>
+                    <option value="ELIGIBILITY_PROTEST">Player Eligibility Protest</option>
+                  </select>
+                </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Incident Details *
-                  </label>
+                  <label className="block font-bold text-slate-700 mb-1">Incident Details:</label>
                   <textarea
                     rows={4}
-                    required
                     value={disputeReason}
                     onChange={(e) => setDisputeReason(e.target.value)}
-                    placeholder="Describe incident, timing, involved players/clubs, and referee decision..."
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-red-600 text-xs"
+                    placeholder="Provide details about the incident, teams involved, and actions taken..."
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-600"
                   />
                 </div>
               </div>
@@ -586,23 +638,23 @@ export default function RefereeMatchSheetPage() {
                 <button
                   type="button"
                   onClick={() => setIsDisputeModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-100 text-xs"
+                  className="px-4 py-2 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleReportDispute}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs shadow-sm"
+                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-lg text-xs shadow-sm flex items-center gap-1.5"
                 >
-                  File Official Dispute
+                  <Flag className="w-4 h-4" />
+                  Submit Report
                 </button>
               </div>
             </div>
           </div>
         )}
       </div>
-    </AppLayout>
+    </RefereeLayout>
   );
 }
-

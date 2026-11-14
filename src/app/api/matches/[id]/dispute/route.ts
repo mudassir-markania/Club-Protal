@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
@@ -10,7 +10,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     const { disputeReason } = body;
 
-    const match = await prisma.match.findFirst({
+    const match = await db.match.findFirst({
       where: {
         OR: [{ id: params.id }, { matchCode: params.id }],
       },
@@ -20,7 +20,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
-    const updated = await prisma.match.update({
+    const updated = await db.match.update({
       where: { id: match.id },
       data: {
         status: 'DISPUTED',
@@ -29,7 +29,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
 
     // Notify admins
-    await prisma.notification.create({
+    await db.notification.create({
       data: {
         recipientRole: 'ADMIN',
         title: `Match Dispute Reported: ${match.matchCode}`,
