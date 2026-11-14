@@ -22,92 +22,36 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #060D17;
+  background: #080B10;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E3E62;
+  background: #252B34;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2563EB;
+  background: #3B4350;
 }
 
-/* Animations for CRAZY High-Voltage Sports Atmosphere */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-  }
-  50% {
-    transform: translateY(-8px) scale(1.02);
-  }
+/* Subtle transitions & typography helpers */
+.text-gold {
+  color: #C5A04A;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.08);
-  }
+.text-gold-muted {
+  color: #9E813E;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+.bg-gold {
+  background-color: #C5A04A;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+.border-gold {
+  border-color: #C5A04A;
 }
 
-.animate-float {
-  animation: float 5s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 4s ease-in-out infinite;
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 30s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
-.gold-gradient-text {
-  background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 50%, #B45309 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.cyan-gradient-text {
-  background: linear-gradient(135deg, #A5F3FC 0%, #06B6D4 50%, #0284C7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.radial-glow-gold {
-  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.05) 50%, transparent 75%);
-}
-
-.radial-glow-blue {
-  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.28) 0%, rgba(37, 99, 235, 0.08) 50%, transparent 75%);
+.border-gold-subtle {
+  border-color: rgba(197, 160, 74, 0.35);
 }
 
