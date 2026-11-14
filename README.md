@@ -1,10 +1,10 @@
-# 🏆 ApexArena - Sports Tournament Management Portal
+# ApexArena - Sports Tournament Management Portal
 
 A modern, production-grade, database-driven **Sports Tournament Management Portal** built for operating multi-sport tournaments (Nov 25th - 28th, 2026).
 
 ---
 
-## 🌟 Key Highlights & Capabilities
+## Key Highlights & Capabilities
 
 1. **Role-Based Separation**:
    - **ADMIN PANEL**: Full tournament oversight, clubs, sports, players, referee assignments, fixture scheduling, Google Forms synchronization, match approval, point allocations, and leaderboard recalculations.
@@ -25,7 +25,7 @@ A modern, production-grade, database-driven **Sports Tournament Management Porta
 
 ---
 
-## 🚀 Quick Start & Running the Portal
+## Quick Start & Running the Portal
 
 ### Prerequisites
 - Node.js (v18+)
@@ -52,7 +52,7 @@ npm start
 
 ---
 
-## 🔑 Demo Access Credentials
+## Demo Access Credentials
 
 The portal features a **1-Click Quick Demo Login** on the login page (`/login`) as well as an instant **Role Switcher** directly in the sidebar for rapid evaluation:
 
@@ -66,7 +66,7 @@ The portal features a **1-Click Quick Demo Login** on the login page (`/login`) 
 
 ---
 
-## 🗄️ Database Architecture
+## Database Architecture
 
 The relational schema is configured in `prisma/schema.prisma`:
 
@@ -95,7 +95,7 @@ The relational schema is configured in `prisma/schema.prisma`:
 
 ---
 
-## 📱 Navigation & URL Map
+## Navigation & URL Map
 
 ### Public / Authentication
 - `/login` – Portal Sign In with quick 1-click test buttons
@@ -119,12 +119,12 @@ The relational schema is configured in `prisma/schema.prisma`:
 
 ---
 
-## 📋 Technology Stack
+## Technology Stack
 - **Framework**: Next.js 14 (App Router, Server Actions & API Routes)
 - **Language**: TypeScript
 - **Database & ORM**: SQLite via Prisma Client (self-contained, zero-config)
 - **Styling**: Tailwind CSS (Deep navy `#0B192C`, white/light surfaces, status indicators)
-- **Icons**: Lucide React
+- **Icons**: Lucide React & Custom SVG Badges
 - **Data Visualizations**: Recharts
 - **Security**: bcryptjs password hashing, JWT session cookies, audit logs
 

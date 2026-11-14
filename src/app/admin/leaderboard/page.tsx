@@ -13,6 +13,8 @@ import {
   ChevronDown,
   Sparkles,
   Download,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 import {
   ClubBadge,

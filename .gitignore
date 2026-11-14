@@ -9,6 +9,7 @@
 /out/
 /build/
 /dist/
+*.tsbuildinfo
 
 # Caches and Temporary Folders
 /.cache/
