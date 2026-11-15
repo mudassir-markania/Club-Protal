@@ -102,133 +102,145 @@ export default function PublicViewerPortal() {
         activeOverride="home"
       />
 
-      {/* 2. PROPORTIONAL HERO SECTION */}
-      <section className="py-12 sm:py-16 px-4 sm:px-8 border-b border-white/[0.08] bg-[#0A0D14]">
-        <div className="max-w-6xl mx-auto">
+      {/* 2. CINEMATIC CHAMPIONSHIP HERO BANNER */}
+      <section className="relative overflow-hidden border-b border-[#C6A04A]/30 bg-[#080A0E] text-white">
+        {/* Cinematic Backdrop Image with Rich Layered Lighting */}
+        <div
+          className="absolute inset-0 bg-cover bg-right lg:bg-center z-0 opacity-80"
+          style={{ backgroundImage: "url('/hero-bg.jpg')" }}
+        />
+
+        {/* Ambient Gradient Overlays for Readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#080A0E] via-[#080A0E]/90 via-45% to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080A0E] via-[#080A0E]/40 to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0D14]/90 via-transparent to-transparent z-10 pointer-events-none" />
+
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16 lg:py-20 flex flex-col justify-between min-h-[560px] lg:min-h-[640px]">
           {isClosed && championClub ? (
-            <div className="rounded-2xl bg-[#141822] border border-[#C6A04A]/40 p-6 sm:p-10 text-white space-y-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#C6A04A] flex items-center gap-1.5">
+            <div className="max-w-2xl rounded-2xl bg-[#141822]/90 backdrop-blur-md border border-[#C6A04A] p-6 sm:p-10 text-white space-y-4 shadow-2xl my-auto">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] flex items-center gap-2">
                 <Crown className="w-4 h-4 text-[#C6A04A]" />
                 Tournament Concluded
               </span>
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white">
-                {championClub.name} are Champions
+              <h1 className="font-serif text-3xl sm:text-5xl font-bold text-white">
+                {championClub.name} are Champions!
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 Congratulations to {championClub.name}! With outstanding performance across all 7 sports, they take the APL Season 9 Trophy with {Number(championClub.totalPoints).toFixed(2)} total points.
               </p>
               <Link
                 href="/leaderboard"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#C6A04A] text-slate-950 font-bold text-xs hover:bg-[#B38F3A] transition"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#C6A04A] text-slate-950 font-bold text-xs uppercase tracking-wider hover:bg-[#B38F3A] transition shadow-lg"
               >
                 <span>View Final Standings</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              {/* Left Column: Balanced Typography */}
-              <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-[#C6A04A]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C6A04A]" />
-                  <span>Inter-Club Championship • Nov 25 – 28, 2026</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1">
+              {/* Left Column: Bold 3D Championship Typography */}
+              <div className="lg:col-span-8 space-y-5 text-left max-w-2xl">
+                {/* Inter-Club Crown Pill */}
+                <div className="inline-flex items-center gap-2.5 select-none">
+                  <div className="h-[1px] w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#C6A04A]" />
+                  <Crown className="w-3.5 h-3.5 text-[#C6A04A]" />
+                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.3em] text-[#C6A04A]">
+                    INTER - CLUB
+                  </span>
+                  <div className="h-[1px] w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#C6A04A]" />
                 </div>
 
-                <div className="space-y-2">
-                  <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
-                    Inter-Club <span className="text-[#C6A04A]">House Championship</span>
+                {/* Main Dual-Tone Metallic Headline */}
+                <div className="space-y-0 select-none">
+                  <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-[#F0F2F5] to-[#B0B7C3] drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] italic font-sans">
+                    HOUSE
                   </h1>
-                  <p className="text-sm text-slate-300 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                    Follow real-time house standings across 7 sports and 10 cricket teams. Built on certified unique-club equal division scoring.
-                  </p>
+                  <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF2B2] via-[#DFB85C] to-[#8C6D23] drop-shadow-[0_4px_24px_rgba(198,160,74,0.45)] italic font-sans -mt-1 sm:-mt-2">
+                    CHAMPIONSHIP
+                  </h2>
                 </div>
 
-                {/* Key Venue & Date */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#C6A04A]" />
-                    <span>Nov 25 – 28, 2026</span>
+                {/* Subtitle & Season Tag */}
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="h-[1px] w-6 bg-[#C6A04A]/60" />
+                  <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-[#C6A04A]">
+                    APL SEASON 9
                   </span>
-                  <span className="text-slate-600">•</span>
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#C6A04A]" />
-                    <span>Main Sports Complex Arena</span>
-                  </span>
+                  <div className="h-[1px] w-6 bg-[#C6A04A]/60" />
                 </div>
+
+                {/* Tagline */}
+                <p className="text-xs sm:text-sm font-bold tracking-widest text-slate-200 uppercase pt-1">
+                  5 HOUSES. 7 SPORTS. 10 CRICKET TEAMS. ONE CHAMPION.
+                </p>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                <div className="flex flex-wrap items-center gap-3.5 pt-3">
                   <Link
                     href="/leaderboard"
-                    className="px-5 py-2.5 rounded-lg bg-[#C6A04A] hover:bg-[#B38F3A] text-slate-950 font-bold text-xs tracking-wide transition flex items-center gap-2 shadow-sm"
+                    className="px-6 py-3 rounded-full bg-gradient-to-r from-[#DFB85C] via-[#C6A04A] to-[#B38F3A] hover:from-[#EDC96F] hover:to-[#C6A04A] text-slate-950 font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-[#C6A04A]/25 hover:shadow-[#C6A04A]/50 flex items-center gap-2 group"
                   >
-                    <Trophy className="w-3.5 h-3.5" />
-                    <span>View Live Leaderboard</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>VIEW LIVE LEADERBOARD</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
+
                   <Link
                     href="/houses"
-                    className="px-4 py-2.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.1] text-slate-200 font-semibold text-xs transition"
+                    className="px-6 py-3 rounded-full bg-[#0E131C]/80 hover:bg-[#141A24] border border-[#C6A04A]/60 hover:border-[#C6A04A] text-slate-100 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md backdrop-blur-sm flex items-center gap-2 group"
                   >
-                    Explore The 5 Houses
+                    <span>EXPLORE THE 5 HOUSES</span>
+                    <ChevronRight className="w-4 h-4 text-[#C6A04A] group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
-              </div>
 
-              {/* Right Column: Clean Trophy Showcase */}
-              <div className="lg:col-span-5 flex flex-col items-center">
-                <div className="w-full max-w-sm rounded-2xl bg-[#141822] border border-white/[0.08] p-6 space-y-5 shadow-lg">
-                  <div className="flex items-center justify-between text-xs pb-2 border-b border-white/[0.06]">
-                    <span className="font-semibold text-slate-400">APL Season 9 Trophy</span>
-                    <span className="font-mono text-emerald-400 font-semibold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      Live Standings
+                {/* Live Current Leader Mini-Badge */}
+                <div className="pt-2 flex items-center gap-3 text-xs text-slate-400">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141822]/80 border border-white/[0.08] backdrop-blur-sm">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[11px] font-medium text-slate-300">
+                      Current #1 Seed: <strong className="text-[#C6A04A] font-bold">{leadingHouse?.name || 'Alpha'}</strong> ({Number(leadingHouse?.totalPoints || 0).toFixed(2)} pts)
                     </span>
                   </div>
-
-                  {/* Trophy Image */}
-                  <div className="py-2 flex items-center justify-center">
-                    <img
-                      src="/logo.png"
-                      alt="APL Trophy"
-                      className="w-36 h-36 sm:w-40 sm:h-40 object-contain select-none"
-                    />
-                  </div>
-
-                  {/* Leader Spotlight */}
-                  <div className="p-3.5 rounded-xl bg-[#0E131C] border border-[#C6A04A]/30">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-[#C6A04A] uppercase tracking-wider mb-1.5">
-                      <span>Current #1 Seed</span>
-                      <span className="px-1.5 py-0.5 rounded bg-[#C6A04A] text-slate-950 font-black text-[10px]">
-                        Rank 1
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between pt-0.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#141822] border border-[#C6A04A]/40 flex items-center justify-center font-serif font-bold text-xs text-[#C6A04A]">
-                          {leadingHouse?.code || 'ALP'}
-                        </div>
-                        <div>
-                          <h3 className="font-serif font-bold text-white text-sm leading-tight">
-                            {leadingHouse?.name || 'Alpha'}
-                          </h3>
-                          <span className="text-xs text-slate-400">
-                            Capt: {leadingHouse?.captainName || 'Ethan Hunt'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[10px] text-slate-400 block font-medium">Points</span>
-                        <span className="font-mono font-bold text-base text-[#C6A04A]">
-                          {leadingHouse ? `${Number(leadingHouse.totalPoints).toFixed(2)}` : '0.00'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <span className="text-slate-600 hidden sm:inline">•</span>
+                  <span className="text-[11px] text-slate-400 hidden sm:inline">
+                    Nov 25 – 28, 2026 • Main Sports Complex
+                  </span>
                 </div>
               </div>
+
+              {/* Right Column: Kept clear for trophy visibility */}
+              <div className="lg:col-span-4 hidden lg:block" />
             </div>
           )}
+
+          {/* 3. SLEEK FLOATING SPORTS CONSOLE DOCK */}
+          <div className="pt-10 w-full">
+            <div className="rounded-2xl sm:rounded-full bg-[#080B10]/90 border border-[#C6A04A]/40 backdrop-blur-md p-2.5 sm:px-6 sm:py-3.5 flex items-center justify-between gap-3 overflow-x-auto shadow-2xl shadow-black/90">
+              <div className="flex items-center gap-4 sm:gap-7 shrink-0">
+                {sports.map((sp: any) => (
+                  <Link
+                    key={sp.id}
+                    href={`/sports`}
+                    className="flex items-center gap-2 text-slate-400 hover:text-white group transition"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-[#141822] border border-white/[0.08] flex items-center justify-center text-[#C6A04A] group-hover:border-[#C6A04A] group-hover:text-white transition shadow-inner">
+                      <SportIcon name={sp.name} className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-[11px] font-bold tracking-wider uppercase group-hover:text-[#C6A04A] transition whitespace-nowrap">
+                      {sp.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+
+              {/* 07 Sports Emblem */}
+              <div className="shrink-0 pl-3 border-l border-white/[0.1] hidden sm:block">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#C6A04A]/15 border border-[#C6A04A]/50 text-[#C6A04A] font-black text-xs italic tracking-wider whitespace-nowrap">
+                  07 SPORTS
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
