@@ -99,6 +99,7 @@ export default function PublicViewerPortal() {
         onRefresh={handleRefresh}
         refreshing={refreshing}
         lastUpdated={lastRefreshed}
+        activeOverride="home"
       />
 
       {/* 2. PROPORTIONAL HERO SECTION */}

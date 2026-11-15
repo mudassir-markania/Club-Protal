@@ -22,6 +22,7 @@ export default function PublicNavbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
+    { label: 'Home', href: '/', key: 'home' },
     { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
     { label: 'The 5 Houses', href: '/houses', key: 'houses' },
     { label: '7 Sports', href: '/sports', key: 'sports' },
@@ -34,6 +35,7 @@ export default function PublicNavbar({
     if (activeOverride) {
       return activeOverride === item.key;
     }
+    if (item.key === 'home' && pathname === '/') return true;
     if (pathname === item.href) return true;
     if (item.key === 'houses' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
     if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports')) return true;

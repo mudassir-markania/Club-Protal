@@ -22,6 +22,9 @@ export default function PublicFooter() {
 
         {/* Navigation Links */}
         <div className="flex flex-wrap items-center justify-center gap-5 text-xs">
+          <Link href="/" className="hover:text-[#C6A04A] transition">
+            Home
+          </Link>
           <Link href="/leaderboard" className="hover:text-[#C6A04A] transition">
             Leaderboard
           </Link>
