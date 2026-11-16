@@ -20,13 +20,13 @@ export default function DedicatedSplashPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#05070B]">
+    <div className="relative min-h-screen bg-[#FAFBFC]">
       {/* Live Splash Screen */}
       <ChampionshipSplashScreen
         key={key}
         onComplete={handleComplete}
         autoDismissDelay={4500}
-        forceShow={true}
+        initialTheme="white"
       />
     </div>
   );
