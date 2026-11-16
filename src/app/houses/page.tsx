@@ -134,10 +134,10 @@ export default function HousesPage() {
                   </div>
                 </div>
 
-                {/* Sponsoring Cricket Franchises */}
+                {/* House Teams */}
                 <div className="space-y-2">
                   <span className="text-[11px] font-semibold text-slate-400 block">
-                    Sponsored Cricket Franchises (2)
+                    House Teams (2)
                   </span>
                   <div className="flex items-center gap-2 flex-wrap">
                     {club.cricketTeams && club.cricketTeams.length > 0 ? (

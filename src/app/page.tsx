@@ -172,7 +172,7 @@ export default function PublicViewerPortal() {
 
                 {/* Tagline */}
                 <p className="text-xs sm:text-sm font-bold tracking-widest text-slate-200 uppercase pt-1">
-                  5 HOUSES. 8 SPORTS. 10 CRICKET TEAMS. ONE CHAMPION.
+                  5 HOUSES. 8 SPORTS. 10 HOUSE TEAMS. ONE CHAMPION.
                 </p>
 
                 {/* Action Buttons */}
@@ -261,7 +261,7 @@ export default function PublicViewerPortal() {
               className="p-3 bg-white rounded-xl border border-[#E0DCD3] hover:border-[#C6A04A] transition text-center shadow-xs block group"
             >
               <span className="font-serif text-2xl font-bold text-slate-900 group-hover:text-[#94712B] transition block">10</span>
-              <span className="text-xs font-semibold text-slate-600">Cricket Teams</span>
+              <span className="text-xs font-semibold text-slate-600">House Teams</span>
             </Link>
             <Link
               href="/sports"
@@ -379,7 +379,7 @@ export default function PublicViewerPortal() {
               href="/houses"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
             >
-              <span>Explore All 5 Houses & Cricket Franchises</span>
+              <span>Explore All 5 Houses & Teams</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -416,7 +416,7 @@ export default function PublicViewerPortal() {
 
                   <div className="space-y-1.5">
                     <span className="text-[11px] font-medium text-slate-400 block">
-                      Cricket Teams
+                      House Teams
                     </span>
                     <div className="flex items-center gap-2 flex-wrap">
                       {club.cricketTeams?.map((ct: any) => (
@@ -424,7 +424,7 @@ export default function PublicViewerPortal() {
                           key={ct.id}
                           className="px-2.5 py-1 rounded-md bg-[#0A0D14] border border-white/[0.06] text-xs font-medium text-slate-200"
                         >
-                          🏏 {ct.name}
+                          {ct.name}
                         </span>
                       ))}
                     </div>

@@ -474,9 +474,9 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="p-4 bg-slate-50 border-t border-slate-100 text-xs">
-              <span className="text-slate-500 block mb-1">Cricket Teams:</span>
+              <span className="text-slate-500 block mb-1">House Teams:</span>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                10 teams total (Team A & B for each house). Points earned by either team roll up to the parent house.
+                10 teams total (House Team A & B for each house). Points earned by either team roll up to the parent house.
               </p>
             </div>
           </div>

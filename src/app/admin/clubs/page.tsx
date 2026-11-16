@@ -174,13 +174,13 @@ export default function ClubsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold tracking-tight text-navy-950">Houses & Cricket Teams</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-navy-950">Houses & House Teams</h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                5 Houses • 10 Cricket Teams
+                5 Houses • 10 House Teams
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Manage the 5 participating houses and their respective A & B cricket teams. Points earned by cricket teams roll up directly to their parent house.
+              Manage the 5 participating houses and their respective A & B house teams. Points earned by house teams roll up directly to their parent house.
             </p>
           </div>
 
@@ -227,7 +227,7 @@ export default function ClubsPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              Cricket Teams ({cricketTeams.length} Teams)
+              House Teams ({cricketTeams.length} Teams)
             </button>
           </div>
 
@@ -252,9 +252,8 @@ export default function ClubsPage() {
                   <tr>
                     <th className="py-3 px-4">Rank</th>
                     <th className="py-3 px-4">House Name</th>
-                    <th className="py-3 px-4">Code</th>
                     <th className="py-3 px-4">Captain / Vice</th>
-                    <th className="py-3 px-4 text-center">Cricket Teams</th>
+                    <th className="py-3 px-4 text-center">House Team</th>
                     <th className="py-3 px-4 text-right">Total Points</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Actions</th>
@@ -263,7 +262,7 @@ export default function ClubsPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filteredClubs.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-8 text-center text-slate-400 text-xs">
+                      <td colSpan={7} className="py-8 text-center text-slate-400 text-xs">
                         No houses found.
                       </td>
                     </tr>
@@ -296,16 +295,13 @@ export default function ClubsPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-blue-600">
-                          {club.code}
-                        </td>
                         <td className="py-3.5 px-4">
                           <div className="font-semibold text-slate-800">{club.captainName || 'Not assigned'}</div>
                           <div className="text-[11px] text-slate-400">Vice: {club.viceCaptainName || 'None'}</div>
                         </td>
                         <td className="py-3.5 px-4 text-center font-bold text-slate-700">
-                          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] border border-blue-200">
-                            {club.name} A & B (2 Teams)
+                          <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
+                            {club.name} House Team (A & B)
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-right">
@@ -351,10 +347,10 @@ export default function ClubsPage() {
             <div className="p-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
               <div>
                 <span className="text-xs font-bold text-navy-950 uppercase tracking-wider block">
-                  The 10 Official Cricket Teams (2 Per House)
+                  The 10 Official House Teams (2 Per House)
                 </span>
                 <span className="text-[11px] text-slate-500">
-                  Each cricket team participates separately in fixtures, but points earned credit the parent house.
+                  Each house team participates separately in fixtures, but points earned credit the parent house.
                 </span>
               </div>
             </div>
@@ -362,7 +358,7 @@ export default function ClubsPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Cricket Team Name</th>
+                    <th className="py-3 px-4">House Team Name</th>
                     <th className="py-3 px-4">Parent House</th>
                     <th className="py-3 px-4">Captain</th>
                     <th className="py-3 px-4">Status</th>

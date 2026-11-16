@@ -162,7 +162,7 @@ export default function MatchesPage() {
 
     if (isCricket) {
       if (formData.entry1CricketTeamId === formData.entry2CricketTeamId) {
-        setError('Please select two distinct cricket teams');
+        setError('Please select two distinct house teams');
         return;
       }
     } else {
@@ -733,15 +733,15 @@ export default function MatchesPage() {
                   )}
               </div>
 
-              {/* Participants Selection: Cricket Teams or Houses */}
+              {/* Participants Selection: House Teams or Houses */}
               {formData.participantType === 'CRICKET_TEAM' ? (
                 <div className="p-3.5 bg-blue-50/70 rounded-xl border border-blue-200 space-y-3">
                   <span className="text-[11px] font-bold text-blue-950 uppercase tracking-wider block">
-                    Select 2 Cricket Teams (from the 10 Cricket Teams):
+                    Select 2 House Teams (from the 10 House Teams):
                   </span>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Cricket Team 1</label>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">House Team 1</label>
                       <select
                         value={formData.entry1CricketTeamId}
                         onChange={(e) => setFormData({ ...formData, entry1CricketTeamId: e.target.value })}
@@ -755,7 +755,7 @@ export default function MatchesPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Cricket Team 2</label>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">House Team 2</label>
                       <select
                         value={formData.entry2CricketTeamId}
                         onChange={(e) => setFormData({ ...formData, entry2CricketTeamId: e.target.value })}
