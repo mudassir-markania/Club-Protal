@@ -72,7 +72,7 @@ export default function PublicLeaderboardPage() {
               {championClub.name} Wins APL Season 9!
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-              Congratulations to {championClub.name}! They take the prestigious APL Season 9 Trophy with {Number(championClub.totalPoints).toFixed(2)} total points across 7 sports.
+              Congratulations to {championClub.name}! They take the prestigious APL Season 9 Trophy with {Number(championClub.totalPoints).toFixed(2)} total points across 8 sports.
             </p>
           </div>
         )}
@@ -88,7 +88,7 @@ export default function PublicLeaderboardPage() {
               Championship Leaderboard
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
-              Official cumulative house points earned across all 7 championship disciplines. Standings are recalculated in real-time as match results are verified and approved.
+              Official cumulative house points earned across all 8 championship disciplines. Standings are recalculated in real-time as match results are verified and approved.
             </p>
           </div>
 
@@ -122,7 +122,7 @@ export default function PublicLeaderboardPage() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              7-Sport Matrix
+              8-Sport Matrix
             </button>
           </div>
         </div>
@@ -272,7 +272,7 @@ export default function PublicLeaderboardPage() {
           </div>
         )}
 
-        {/* VIEW 3: 7-SPORT MATRIX */}
+        {/* VIEW 3: 8-SPORT MATRIX */}
         {viewMode === 'matrix' && (
           <div className="rounded-2xl bg-[#141822] border border-white/[0.08] overflow-hidden shadow-sm">
             <div className="overflow-x-auto">

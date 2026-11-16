@@ -192,6 +192,27 @@ export function ChessIcon({ className = 'w-4 h-4', size }: IconProps) {
   );
 }
 
+// Crisp Vector SVG for Treasure Hunt (Compass Quest)
+export function TreasureHuntIcon({ className = 'w-4 h-4', size }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      width={size}
+      height={size}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fillOpacity="0.2" />
+    </svg>
+  );
+}
+
 // Dynamic Sport Icon Resolver
 export function SportIcon({
   name,
@@ -201,6 +222,9 @@ export function SportIcon({
   className?: string;
 }) {
   const lower = (name || '').toLowerCase();
+  if (lower.includes('treasure') || lower.includes('hunt')) {
+    return <TreasureHuntIcon className={className} />;
+  }
   if (lower.includes('football') || lower.includes('soccer')) {
     return <FootballIcon className={className} />;
   }

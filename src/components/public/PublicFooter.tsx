@@ -32,7 +32,7 @@ export default function PublicFooter() {
             The 5 Houses
           </Link>
           <Link href="/sports" className="hover:text-[#C6A04A] transition">
-            7 Sports
+            8 Sports
           </Link>
           <Link href="/schedule" className="hover:text-[#C6A04A] transition">
             Schedule
@@ -54,7 +54,7 @@ export default function PublicFooter() {
 
         {/* Tagline / Year */}
         <div className="text-right text-[11px] text-slate-400 font-mono">
-          Season 2026 • 5 Houses • 7 Sports
+          Season 2026 • 5 Houses • 8 Sports
         </div>
       </div>
     </footer>

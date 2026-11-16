@@ -50,6 +50,7 @@ const INITIAL_SPORTS = [
   { id: 'sport-chess', name: 'Chess', category: 'Mind Sport', tournamentFormat: 'Rapid & Classical FIDE' },
   { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table' },
   { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'White Slam Knockout' },
+  { id: 'sport-treasure-hunt', name: 'Treasure Hunt', category: 'Adventure Quest', tournamentFormat: 'Campus Clue Quest & Vault Hunt' },
 ];
 
 export default function PublicViewerPortal() {
@@ -126,7 +127,7 @@ export default function PublicViewerPortal() {
                 {championClub.name} are Champions!
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Congratulations to {championClub.name}! With outstanding performance across all 7 sports, they take the APL Season 9 Trophy with {Number(championClub.totalPoints).toFixed(2)} total points.
+                Congratulations to {championClub.name}! With outstanding performance across all 8 sports, they take the APL Season 9 Trophy with {Number(championClub.totalPoints).toFixed(2)} total points.
               </p>
               <Link
                 href="/leaderboard"
@@ -171,7 +172,7 @@ export default function PublicViewerPortal() {
 
                 {/* Tagline */}
                 <p className="text-xs sm:text-sm font-bold tracking-widest text-slate-200 uppercase pt-1">
-                  5 HOUSES. 7 SPORTS. 10 CRICKET TEAMS. ONE CHAMPION.
+                  5 HOUSES. 8 SPORTS. 10 CRICKET TEAMS. ONE CHAMPION.
                 </p>
 
                 {/* Action Buttons */}
@@ -233,10 +234,10 @@ export default function PublicViewerPortal() {
                 ))}
               </div>
 
-              {/* 07 Sports Emblem */}
+              {/* 08 Sports Emblem */}
               <div className="shrink-0 pl-3 border-l border-white/[0.1] hidden sm:block">
                 <span className="px-3.5 py-1.5 rounded-full bg-[#C6A04A]/15 border border-[#C6A04A]/50 text-[#C6A04A] font-black text-xs italic tracking-wider whitespace-nowrap">
-                  07 SPORTS
+                  08 SPORTS
                 </span>
               </div>
             </div>
@@ -266,7 +267,7 @@ export default function PublicViewerPortal() {
               href="/sports"
               className="p-3 bg-white rounded-xl border border-[#E0DCD3] hover:border-[#C6A04A] transition text-center shadow-xs block group"
             >
-              <span className="font-serif text-2xl font-bold text-slate-900 group-hover:text-[#94712B] transition block">7</span>
+              <span className="font-serif text-2xl font-bold text-slate-900 group-hover:text-[#94712B] transition block">8</span>
               <span className="text-xs font-semibold text-slate-600">Sports Arena</span>
             </Link>
             <Link
@@ -297,7 +298,7 @@ export default function PublicViewerPortal() {
               href="/leaderboard"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
             >
-              <span>View Full Leaderboard & 7-Sport Matrix</span>
+              <span>View Full Leaderboard & 8-Sport Matrix</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -441,12 +442,12 @@ export default function PublicViewerPortal() {
           </div>
         </section>
 
-        {/* SECTION 3: 7 SPORTS ARENA */}
+        {/* SECTION 3: 8 SPORTS ARENA */}
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] block">
-                7 Sports Disciplines
+                8 Sports Disciplines
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-1">
                 Championship Arena
@@ -456,7 +457,7 @@ export default function PublicViewerPortal() {
               href="/sports"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
             >
-              <span>Explore All 7 Sports & Rules</span>
+              <span>Explore All 8 Sports & Rules</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>

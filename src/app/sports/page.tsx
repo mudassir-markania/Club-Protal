@@ -15,6 +15,7 @@ const INITIAL_SPORTS = [
   { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table', description: 'High-speed table tennis singles and doubles with sudden death deuce rules.' },
   { id: 'sport-cricket', name: 'Cricket', category: 'Field Sport', tournamentFormat: '10 Teams • 2 Pools • Super 4', description: 'Main championship centerpiece with 10 franchise teams competing for the trophy.' },
   { id: 'sport-football', name: 'Football', category: 'Field Sport', tournamentFormat: '5-a-side Turf League', description: 'Intense 5-a-side football on synthetic turf with group stage and finals.' },
+  { id: 'sport-treasure-hunt', name: 'Treasure Hunt', category: 'Adventure Quest', tournamentFormat: 'Campus Clue Quest & Vault Hunt', description: 'Campus-wide multi-clue adventure quest. House squads race against time across campus checkpoints to solve riddles and unlock the final treasure vault.' },
 ];
 
 export default function SportsPage() {
@@ -50,7 +51,7 @@ export default function SportsPage() {
     setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
-  const categories = ['ALL', 'Field Sport', 'Racquet', 'Indoor', 'E-Sports', 'Mind Sport'];
+  const categories = ['ALL', 'Field Sport', 'Racquet', 'Indoor', 'E-Sports', 'Mind Sport', 'Adventure Quest'];
 
   const filteredSports = selectedCategory === 'ALL'
     ? sports
@@ -69,10 +70,10 @@ export default function SportsPage() {
               <span>Championship Arena</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              7 Sports Disciplines
+              8 Sports Disciplines
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
-              Every house competes across all 7 official disciplines. Points scored across these disciplines roll directly into the unified APL Season 9 championship tally.
+              Every house competes across all 8 official disciplines. Points scored across these disciplines roll directly into the unified APL Season 9 championship tally.
             </p>
           </div>
 

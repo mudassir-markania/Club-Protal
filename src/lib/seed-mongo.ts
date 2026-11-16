@@ -145,6 +145,18 @@ export async function seedMongoDatabase() {
       scoringConfig: JSON.stringify({ halves: 2, minutesPerHalf: 20 }),
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
     },
+    {
+      name: 'Treasure Hunt',
+      category: 'Adventure Quest',
+      icon: 'Compass',
+      sportType: 'SQUAD',
+      maxParticipants: 5,
+      allowsMixedClubs: true,
+      pointsEntryMethod: 'POSITION',
+      positionPoints: JSON.stringify({ '1': 75, '2': 50, '3': 35, '4': 20, '5': 10 }),
+      scoringConfig: JSON.stringify({ type: 'clues_found', timeBased: true }),
+      pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
+    },
   ];
 
   const sports: any[] = [];
@@ -211,7 +223,7 @@ export async function seedMongoDatabase() {
       name: 'David Okafor',
       email: 'ref.david@sportsportal.com',
       phone: '+1 555-0194',
-      sportNames: ['Chess', 'BGMI', 'Football'],
+      sportNames: ['Chess', 'BGMI', 'Football', 'Treasure Hunt'],
     },
   ];
 
@@ -353,6 +365,51 @@ export async function seedMongoDatabase() {
         clubId: sp.clubId,
       },
     });
+  }
+
+  // Match: M-TH-01 (Treasure Hunt Campus Clue Quest)
+  const treasureHunt = sports.find((s) => s.name === 'Treasure Hunt');
+  const mainVenue = venues.find((v) => v.name === 'Olympic Grand Arena');
+
+  if (treasureHunt) {
+    const mTH = await db.match.upsert({
+      where: { matchCode: 'M-TH-01' },
+      update: {},
+      create: {
+        matchCode: 'M-TH-01',
+        sportId: treasureHunt.id,
+        round: 'Campus Finals - Clue Quest',
+        stageName: 'Championship Finals',
+        matchDate: '2026-11-27',
+        matchTime: '10:00',
+        venueId: mainVenue?.id,
+        status: 'SCHEDULED',
+        notes: 'Campus-wide multi-clue adventure quest. House squads race across checkpoints to unlock the vault.',
+      },
+    });
+
+    // Assign referee David Okafor
+    await db.matchReferee.upsert({
+      where: { matchId_refereeId: { matchId: mTH.id, refereeId: referees[2].id } },
+      update: {},
+      create: { matchId: mTH.id, refereeId: referees[2].id },
+    });
+
+    // Seed 5 participating house squads
+    for (let i = 0; i < clubs.length; i++) {
+      const c = clubs[i];
+      await db.matchParticipant.upsert({
+        where: { id: `part-th-sq${i + 1}-${mTH.id}` },
+        update: {},
+        create: {
+          id: `part-th-sq${i + 1}-${mTH.id}`,
+          matchId: mTH.id,
+          clubId: c.id,
+          teamName: `${c.name} Questers`,
+          score: 0,
+        },
+      });
+    }
   }
 
   // Tournament settings

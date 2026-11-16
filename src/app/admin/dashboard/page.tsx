@@ -187,7 +187,7 @@ export default function AdminDashboardPage() {
                   </span>
                   <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-amber-400" />
-                    5 Houses • 7 Sports • 10 Cricket Teams
+                    5 Houses • 8 Sports • 10 Cricket Teams
                   </span>
                   <span
                     className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
@@ -383,7 +383,7 @@ export default function AdminDashboardPage() {
                   <Trophy className="w-4 h-4 text-amber-500" />
                   <span>The 5 Houses — Current Standings</span>
                 </h3>
-                <p className="text-xs text-slate-500">Total verified points across all 7 sports</p>
+                <p className="text-xs text-slate-500">Total verified points across all 8 sports</p>
               </div>
               <Link
                 href="/admin/leaderboard"

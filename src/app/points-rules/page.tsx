@@ -238,6 +238,14 @@ export default function PointsRulesPage() {
                   <td className="py-3 px-4 text-right text-slate-500">20.00 pts</td>
                 </tr>
                 <tr className="hover:bg-white/[0.02]">
+                  <td className="py-3 px-4 font-sans font-bold text-white">Treasure Hunt</td>
+                  <td className="py-3 px-4 text-center text-slate-400 font-sans">Campus Clue Quest</td>
+                  <td className="py-3 px-4 text-right text-[#C6A04A] font-bold">75.00 pts</td>
+                  <td className="py-3 px-4 text-right text-slate-300">50.00 pts</td>
+                  <td className="py-3 px-4 text-right text-slate-400">35.00 pts</td>
+                  <td className="py-3 px-4 text-right text-slate-500">20.00 pts</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
                   <td className="py-3 px-4 font-sans font-bold text-white">Football</td>
                   <td className="py-3 px-4 text-center text-slate-400 font-sans">5-a-side Turf</td>
                   <td className="py-3 px-4 text-right text-[#C6A04A] font-bold">75.00 pts</td>

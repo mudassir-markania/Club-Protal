@@ -334,7 +334,7 @@ export default function MatchesPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Schedule competitions, assign certified referees, and verify incoming points distributions across the 7 sports.
+              Schedule competitions, assign certified referees, and verify incoming points distributions across the 8 sports.
             </p>
           </div>
 
@@ -427,7 +427,7 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          {/* 7 Sports Pills */}
+          {/* 8 Sports Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-slate-100 text-xs">
             <span className="text-[11px] text-slate-400 font-semibold mr-1 shrink-0">Sport:</span>
             <button
@@ -438,7 +438,7 @@ export default function MatchesPage() {
                   : 'text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200/60'
               }`}
             >
-              All 7 Sports
+              All Sports
             </button>
             {sports.map((sp) => (
               <button

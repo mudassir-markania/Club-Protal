@@ -146,6 +146,7 @@ export default function RefereeDashboardPage() {
     { label: 'Table Tennis', value: 'Table Tennis' },
     { label: 'Cricket', value: 'Cricket' },
     { label: 'Football', value: 'Football' },
+    { label: 'Treasure Hunt', value: 'Treasure Hunt' },
   ];
 
   const filteredMatches = matches.filter((m) => {
@@ -246,7 +247,7 @@ export default function RefereeDashboardPage() {
                         : 'bg-navy-800/80 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-700'
                     }`}
                   >
-                    David (Chess / BGMI / Football)
+                    David (Chess / BGMI / Treasure Hunt)
                   </button>
                 </div>
               </div>
@@ -441,7 +442,7 @@ export default function RefereeDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredMatches.map((match) => {
                 const participants = match.participants || [];
-                const isBgmiOrSquad = match.sport?.category === 'SQUAD' || match.sport?.name === 'BGMI';
+                const isBgmiOrSquad = match.sport?.category === 'SQUAD' || match.sport?.category === 'Adventure Quest' || match.sport?.sportType === 'SQUAD' || match.sport?.name === 'BGMI' || match.sport?.name === 'Treasure Hunt';
                 const isSubmitted = match.status === 'SUBMITTED';
                 const isCompleted = match.status === 'COMPLETED';
 

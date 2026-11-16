@@ -56,7 +56,7 @@ export default function RefereeMatchesPage() {
   };
 
   const sportsList = [
-    { label: 'All 7 Sports', value: '' },
+    { label: 'All Sports', value: '' },
     { label: 'BGMI', value: 'BGMI' },
     { label: 'Carrom', value: 'Carrom' },
     { label: 'Badminton', value: 'Badminton' },
@@ -64,6 +64,7 @@ export default function RefereeMatchesPage() {
     { label: 'Table Tennis', value: 'Table Tennis' },
     { label: 'Cricket', value: 'Cricket' },
     { label: 'Football', value: 'Football' },
+    { label: 'Treasure Hunt', value: 'Treasure Hunt' },
   ];
 
   const filteredMatches = matches.filter((m) => {

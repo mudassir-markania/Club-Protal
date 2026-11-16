@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     await seedMongoDatabase();
     return NextResponse.json({
       success: true,
-      message: 'MongoDB House Championship database successfully initialized and seeded with 5 clubs, 10 cricket teams, 7 sports, and demo fixtures.',
+      message: 'MongoDB House Championship database successfully initialized and seeded with 5 clubs, 10 cricket teams, 8 sports, and demo fixtures.',
     });
   } catch (error: any) {
     console.error('MongoDB Seeding Error:', error);

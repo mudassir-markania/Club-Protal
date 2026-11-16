@@ -114,7 +114,7 @@ export async function recalculateSportLeaderboard(sportId: string) {
 }
 
 /**
- * Recalculate the overall House Championship leaderboard across all 7 sports
+ * Recalculate the overall House Championship leaderboard across all 8 sports
  */
 export async function recalculateOverallLeaderboard() {
   const clubs = await db.club.findMany();

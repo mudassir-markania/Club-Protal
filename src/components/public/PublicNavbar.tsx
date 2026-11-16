@@ -27,7 +27,7 @@ export default function PublicNavbar({
     { label: 'Home', href: '/', key: 'home' },
     { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
     { label: 'The 5 Houses', href: '/houses', key: 'houses' },
-    { label: '7 Sports', href: '/sports', key: 'sports' },
+    { label: '8 Sports', href: '/sports', key: 'sports' },
     { label: 'Schedule', href: '/schedule', key: 'schedule' },
     { label: 'Results', href: '/results', key: 'results' },
     { label: 'Points Rules', href: '/points-rules', key: 'rules' },
@@ -51,7 +51,7 @@ export default function PublicNavbar({
     if (item.key === 'home' && pathname === '/') return true;
     if (pathname === item.href) return true;
     if (item.key === 'houses' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
-    if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports')) return true;
+    if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports' || pathname === '/8-sports')) return true;
     if (item.key === 'schedule' && (pathname === '/schedule' || pathname === '/matches')) return true;
     if (item.key === 'results' && (pathname === '/results' || pathname === '/approved-results')) return true;
     if (item.key === 'rules' && (pathname === '/points-rules' || pathname === '/rules' || pathname === '/points-system')) return true;

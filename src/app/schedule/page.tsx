@@ -75,7 +75,7 @@ export default function SchedulePage() {
               Match Radar & Timetable
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
-              Track upcoming fixtures, court assignments, and match timings across all 7 sports. Fixtures update automatically as referees and directors confirm schedules.
+              Track upcoming fixtures, court assignments, and match timings across all 8 sports. Fixtures update automatically as referees and directors confirm schedules.
             </p>
           </div>
 

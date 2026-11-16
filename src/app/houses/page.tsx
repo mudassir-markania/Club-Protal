@@ -168,7 +168,7 @@ export default function HousesPage() {
                   <div className="pt-3 border-t border-white/[0.06] space-y-2">
                     <div className="flex items-center justify-between text-[11px] text-slate-400">
                       <span>Sport Points Breakdown</span>
-                      <span className="text-[10px] text-[#C6A04A]">7 Sports</span>
+                      <span className="text-[10px] text-[#C6A04A]">8 Sports</span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5 text-center">
                       {sports.slice(0, 4).map((sp: any) => {
