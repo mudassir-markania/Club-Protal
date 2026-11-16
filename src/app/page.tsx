@@ -104,11 +104,11 @@ export default function PublicViewerPortal() {
 
   return (
     <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
-      {/* Crazy Championship Splash Screen */}
+      {/* Championship Splash Screen */}
       {showSplash && (
         <ChampionshipSplashScreen
           onComplete={handleSplashComplete}
-          autoDismissDelay={3800}
+          autoDismissDelay={1900}
         />
       )}
 
