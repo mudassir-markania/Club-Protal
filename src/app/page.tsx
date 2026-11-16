@@ -61,23 +61,15 @@ export default function PublicViewerPortal() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
-  const [showSplash, setShowSplash] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     fetchPublicOverview();
     setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-
-    // Show splash screen on first visit of this session
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('apl_splash_shown')) {
-      setShowSplash(true);
-    }
   }, []);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('apl_splash_shown', 'true');
-    }
   };
 
   const fetchPublicOverview = async () => {

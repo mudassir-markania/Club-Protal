@@ -25,6 +25,7 @@ export default function ChampionshipSplashScreen({
   forceShow = false,
 }: ChampionshipSplashScreenProps) {
   const [visible, setVisible] = useState(true);
+  const [closing, setClosing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<'ignite' | 'reveal' | 'houses' | 'ready'>('ignite');
   const [statusText, setStatusText] = useState('INITIALIZING ARENA...');
@@ -200,10 +201,13 @@ export default function ChampionshipSplashScreen({
   }, [autoDismissDelay]);
 
   const handleDismiss = () => {
-    setVisible(false);
-    if (onComplete) {
-      onComplete();
-    }
+    setClosing(true);
+    setTimeout(() => {
+      setVisible(false);
+      if (onComplete) {
+        onComplete();
+      }
+    }, 600);
   };
 
   const handleToggleSound = () => {
@@ -218,8 +222,8 @@ export default function ChampionshipSplashScreen({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-between bg-[#05070B] text-white overflow-hidden transition-all duration-700 select-none ${
-        visible ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-[#05070B] text-white overflow-hidden transition-all duration-700 select-none ${
+        !closing ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
       }`}
     >
       {/* Dynamic Starfield & Nebula Canvas */}
@@ -356,3 +360,4 @@ export default function ChampionshipSplashScreen({
     </div>
   );
 }
+
