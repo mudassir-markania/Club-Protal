@@ -167,6 +167,35 @@ export default function ClubsPage() {
       (ct.captainName && ct.captainName.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const getHouseTeamDisplay = (club: any) => {
+    const teams = cricketTeams.filter(
+      (ct: any) =>
+        ct.clubId === club.id ||
+        ct.clubId === club._id ||
+        ct.club?.id === club.id ||
+        ct.club?.code === club.code
+    );
+    if (!teams || teams.length === 0) {
+      return `${club.name} Team`;
+    }
+
+    const baseNames = Array.from(
+      new Set(
+        teams
+          .map((t: any) =>
+            t.name ? t.name.replace(/\s+[A-Za-z0-9]$/i, '').trim() : ''
+          )
+          .filter(Boolean)
+      )
+    );
+
+    if (teams.length >= 2 && baseNames.length === 1) {
+      return `${baseNames[0]} A & B (${teams.length} Teams)`;
+    }
+
+    return teams.map((t: any) => t.name).join(' & ');
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -301,7 +330,7 @@ export default function ClubsPage() {
                         </td>
                         <td className="py-3.5 px-4 text-center font-bold text-slate-700">
                           <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
-                            {club.name} House Team (A & B)
+                            {getHouseTeamDisplay(club)}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-right">
@@ -482,6 +511,104 @@ export default function ClubsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* House View Modal */}
+        {isViewModalOpen && clubDetails && (
+          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in">
+              <div className="p-6 bg-navy-950 text-white flex items-center justify-between border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                    <ClubBadge code={clubDetails.code} name={clubDetails.name} className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base">{clubDetails.name} House</h3>
+                    <span className="text-xs text-slate-300">
+                      Captain: {clubDetails.captainName || 'Not assigned'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsViewModalOpen(false)}
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Current Rank</span>
+                    <span className="text-2xl font-extrabold text-navy-900">#{clubDetails.currentRank || '-'}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Total Points</span>
+                    <span className="text-2xl font-extrabold text-blue-600">
+                      {Number(clubDetails.totalPoints || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">House Teams</span>
+                    <span className="text-2xl font-extrabold text-emerald-600">
+                      {cricketTeams.filter((ct: any) => ct.clubId === clubDetails.id).length || 2}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Registered Player Roster */}
+                <div>
+                  <h4 className="font-bold text-navy-950 uppercase tracking-wider text-xs mb-3 flex items-center justify-between">
+                    <span>Registered Player Roster ({clubDetails.players?.length || 0})</span>
+                  </h4>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
+                        <tr>
+                          <th className="py-2 px-3">Reg ID</th>
+                          <th className="py-2 px-3">Name</th>
+                          <th className="py-2 px-3">Email</th>
+                          <th className="py-2 px-3">Assigned Sports</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {!clubDetails.players || clubDetails.players.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="py-4 text-center text-slate-400 italic">
+                              No players registered for this house.
+                            </td>
+                          </tr>
+                        ) : (
+                          clubDetails.players.map((p: any) => (
+                            <tr key={p.id} className="hover:bg-slate-50">
+                              <td className="py-2 px-3 font-mono font-medium">{p.registrationId}</td>
+                              <td className="py-2 px-3 font-bold text-slate-800">{p.name}</td>
+                              <td className="py-2 px-3 text-slate-500">{p.email}</td>
+                              <td className="py-2 px-3 text-blue-600">
+                                {p.sports?.map((s: any) => s.sport?.name || s.sport).join(', ') || 'None'}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 bg-slate-50 border-t border-slate-200 text-right">
+                <button
+                  onClick={() => setIsViewModalOpen(false)}
+                  className="px-4 py-2 bg-navy-950 text-white font-bold rounded-lg hover:bg-navy-900 text-xs"
+                >
+                  Close Profile
+                </button>
+              </div>
             </div>
           </div>
         )}
