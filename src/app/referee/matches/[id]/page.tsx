@@ -501,32 +501,32 @@ export default function RefereeMatchSheetPage() {
 
           {!isReadOnly && (
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
-              <span className="text-xs text-slate-400">
-                Submitted results will be queued for Administrator verification before leaderboard commit.
+              <span className="text-xs text-slate-500">
+                Final points entered by the referee are automatically calculated and distributed to clubs immediately upon submission.
               </span>
 
               <button
                 type="button"
                 onClick={() => setIsConfirmModalOpen(true)}
-                className="px-6 py-2.5 bg-navy-950 hover:bg-navy-900 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-2 transition"
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-2 transition"
               >
-                <Send className="w-4 h-4 text-emerald-400" />
-                <span>Submit Result for Admin Approval</span>
+                <Check className="w-4 h-4 text-white" />
+                <span>Submit Final Result & Distribute Points</span>
               </button>
             </div>
           )}
 
           {isSubmitted && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Result submitted. Currently awaiting Administrator review and approval.</span>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+              <span>Result submitted and recorded. Points distributed to clubs.</span>
             </div>
           )}
 
           {isCompleted && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Result certified and approved by Administrator. Points have been officially committed.</span>
+              <span>Match completed! Official points have been automatically calculated, distributed to participating clubs, and credited on the leaderboard.</span>
             </div>
           )}
         </div>
@@ -562,10 +562,10 @@ export default function RefereeMatchSheetPage() {
                   })}
                 </div>
 
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-[11px] flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>
-                    Points will be automatically distributed across unique clubs. An Administrator must verify and approve this submission before it appears on the official leaderboard.
+                    Points will be automatically distributed across unique clubs and credited directly to the official leaderboard upon submission.
                   </span>
                 </div>
               </div>

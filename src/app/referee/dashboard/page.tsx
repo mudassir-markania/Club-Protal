@@ -280,7 +280,7 @@ export default function RefereeDashboardPage() {
             </span>
             <p className="text-2xl font-extrabold text-navy-950">{matches.length}</p>
             <div className="flex items-center gap-1 mt-1 text-[11px] text-slate-500 truncate font-medium">
-              Across 7 Championship Sports
+              Across 8 Championship Sports
             </div>
           </div>
 

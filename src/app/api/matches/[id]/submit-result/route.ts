@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { calculateClubPointsDistribution } from '@/lib/points-distribution';
+import { recalculateAllLeaderboards } from '@/lib/scoring';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -66,11 +67,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     let currentRotation = parseInt(rotationSetting?.value || '0', 10);
     if (isNaN(currentRotation)) currentRotation = 0;
 
-    // Remove any previously pending distributions for this match if referee is resubmitting
-    const pendingDistributions = await db.pointsDistribution.findMany({
-      where: { matchId: match.id, status: 'PENDING_APPROVAL' },
+    // Remove any previous PointsHistory, allocations, and distributions for this match if referee is updating
+    await db.pointsHistory.deleteMany({ where: { matchId: match.id } });
+    const prevDistributions = await db.pointsDistribution.findMany({
+      where: { matchId: match.id },
     });
-    for (const pd of pendingDistributions) {
+    for (const pd of prevDistributions) {
       await db.clubPointAllocation.deleteMany({ where: { distributionId: pd.id } });
       await db.pointsDistribution.delete({ where: { id: pd.id } });
     }
@@ -80,7 +82,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     // Process each participating entry
     for (const res of entryResults) {
-      const participant = match.participants.find((p) => p.id === res.participantId);
+      const participant = match.participants.find((p: any) => p.id === res.participantId);
       if (!participant) continue;
 
       const pointsEarned = Math.max(0, parseFloat(res.pointsEarned) || 0);
@@ -130,7 +132,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       const distCalc = calculateClubPointsDistribution(pointsEarned, playerContributions, currentRotation);
       currentRotation += 1;
 
-      // Create PointsDistribution record
+      // Create PointsDistribution record — AUTOMATICALLY APPROVED
       const distribution = await db.pointsDistribution.create({
         data: {
           matchId: match.id,
@@ -139,12 +141,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           originalPoints: pointsEarned,
           uniqueClubCount: distCalc.uniqueClubCount,
           calculationNote: distCalc.explanation,
-          status: 'PENDING_APPROVAL',
+          status: 'APPROVED',
+          approvedByUserId: user.id,
+          approvedAt: new Date(),
           submittedByRefereeId: refereeId,
         },
       });
 
-      // Create ClubPointAllocation records
+      // Create ClubPointAllocation records & immediate PointsHistory records for automatic club point crediting
       for (const alloc of distCalc.allocations) {
         await db.clubPointAllocation.create({
           data: {
@@ -153,6 +157,21 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             points: alloc.points,
             playersContributed: alloc.playersContributed,
             isRemainderWinner: alloc.isRemainderWinner,
+          },
+        });
+
+        const squadName = participant.teamName || participant.club?.name || alloc.clubName;
+        const reason = `${match.sport.name} - ${squadName} (${alloc.points.toFixed(2)} pts of ${pointsEarned.toFixed(2)} pts across ${distCalc.uniqueClubCount} unique club${distCalc.uniqueClubCount === 1 ? '' : 's'})`;
+
+        await db.pointsHistory.create({
+          data: {
+            clubId: alloc.clubId,
+            sportId: match.sportId,
+            matchId: match.id,
+            distributionId: distribution.id,
+            points: alloc.points,
+            reason,
+            recordedByUserId: user.id,
           },
         });
       }
@@ -180,42 +199,47 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     const fullSummary = scoresSummary || summaryParts.join(' | ');
 
-    // Create MatchResult record
+    // Create MatchResult record — AUTOMATICALLY APPROVED
     const matchResult = await db.matchResult.create({
       data: {
         matchId: match.id,
         submittedByRefereeId: refereeId,
         scoresSummary: fullSummary,
         refereeNotes: refereeNotes || null,
-        status: 'PENDING_APPROVAL',
+        status: 'APPROVED',
+        approvedByUserId: user.id,
+        approvedAt: new Date(),
       },
     });
 
-    // Update Match status
+    // Update Match status to COMPLETED immediately
     await db.match.update({
       where: { id: match.id },
       data: {
-        status: 'SUBMITTED',
+        status: 'COMPLETED',
         notes: refereeNotes
-          ? `${match.notes || ''}\n[Referee Submission]: ${refereeNotes}`
+          ? `${match.notes || ''}\n[Referee Final Result]: ${refereeNotes}`
           : match.notes,
       },
     });
+
+    // Automatically Recalculate Overall Leaderboards in real-time
+    await recalculateAllLeaderboards();
 
     // Notify admins
     await db.notification.create({
       data: {
         recipientRole: 'ADMIN',
-        title: `Results Submitted: ${match.matchCode} (${match.sport.name})`,
-        message: `Referee ${user.name} submitted results with points distribution across unique clubs. Awaiting Admin verification.`,
-        type: 'RESULT_SUBMITTED',
+        title: `Match Completed: ${match.matchCode} (${match.sport.name})`,
+        message: `Referee ${user.name} entered final results. Points have been automatically calculated and distributed to the participating clubs.`,
+        type: 'RESULT_APPROVED',
         link: `/admin/matches`,
       },
     });
 
     await createAuditLog({
       user,
-      action: 'SUBMIT_RESULT',
+      action: 'SUBMIT_AND_CREDIT_RESULT',
       entity: 'MatchResult',
       recordId: matchResult.id,
       updatedValue: { matchCode: match.matchCode, fullSummary, createdDistributions },
@@ -223,7 +247,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     return NextResponse.json({
       success: true,
-      message: 'Match results submitted for admin verification and approval.',
+      message: 'Match completed! Points have been automatically distributed to clubs and the live leaderboard has been updated.',
       matchResult,
       distributions: createdDistributions,
     });

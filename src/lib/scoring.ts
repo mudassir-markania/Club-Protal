@@ -22,10 +22,14 @@ export async function recalculateAllLeaderboards() {
 export async function recalculateSportLeaderboard(sportId: string) {
   const sport = await db.sport.findUnique({
     where: { id: sportId },
-    include: { matches: { include: { participants: true, results: true } } },
   });
 
   if (!sport) return;
+
+  const matches = await db.match.findMany({
+    where: { sportId },
+    include: { participants: true },
+  });
 
   const clubs = await db.club.findMany();
 
@@ -47,12 +51,12 @@ export async function recalculateSportLeaderboard(sportId: string) {
   }
 
   // 1. Count events/matches played by clubs in this sport
-  const completedMatches = sport.matches.filter(
-    (m) => m.status === 'COMPLETED' || m.status === 'APPROVED'
+  const completedMatches = (matches || []).filter(
+    (m: any) => m.status === 'COMPLETED' || m.status === 'APPROVED'
   );
 
   for (const match of completedMatches) {
-    const parts = match.participants;
+    const parts = match.participants || [];
     for (const p of parts) {
       if (p.clubId && clubStats[p.clubId]) {
         clubStats[p.clubId].played += 1;
