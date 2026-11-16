@@ -30,6 +30,13 @@ export default function ClubsPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<any | null>(null);
   const [clubDetails, setClubDetails] = useState<any | null>(null);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
+  const [teamFormData, setTeamFormData] = useState({
+    name: '',
+    captainName: '',
+    status: 'ACTIVE',
+  });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -153,6 +160,43 @@ export default function ClubsPage() {
     }
   };
 
+  const handleOpenEditTeam = (team: any) => {
+    setSelectedTeam(team);
+    setTeamFormData({
+      name: team.name,
+      captainName: team.captainName || '',
+      status: team.status || 'ACTIVE',
+    });
+    setError(null);
+    setIsTeamModalOpen(true);
+  };
+
+  const handleTeamSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTeam) return;
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch(`/api/cricket-teams/${selectedTeam.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(teamFormData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update team');
+      }
+
+      setSuccess('House team updated successfully!');
+      setIsTeamModalOpen(false);
+      fetchData();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const filteredClubs = clubs.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -166,6 +210,16 @@ export default function ClubsPage() {
       (ct.club?.name && ct.club.name.toLowerCase().includes(search.toLowerCase())) ||
       (ct.captainName && ct.captainName.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const getHouseTeams = (club: any) => {
+    return cricketTeams.filter(
+      (ct: any) =>
+        ct.clubId === club.id ||
+        ct.clubId === club._id ||
+        ct.club?.id === club.id ||
+        ct.club?.code === club.code
+    );
+  };
 
   const getHouseTeamDisplay = (club: any) => {
     const teams = cricketTeams.filter(
@@ -282,7 +336,7 @@ export default function ClubsPage() {
                     <th className="py-3 px-4">Rank</th>
                     <th className="py-3 px-4">House Name</th>
                     <th className="py-3 px-4">Captain / Vice</th>
-                    <th className="py-3 px-4 text-center">House Team</th>
+                    <th className="py-3 px-4 text-center">House Teams</th>
                     <th className="py-3 px-4 text-right">Total Points</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Actions</th>
@@ -328,10 +382,23 @@ export default function ClubsPage() {
                           <div className="font-semibold text-slate-800">{club.captainName || 'Not assigned'}</div>
                           <div className="text-[11px] text-slate-400">Vice: {club.viceCaptainName || 'None'}</div>
                         </td>
-                        <td className="py-3.5 px-4 text-center font-bold text-slate-700">
-                          <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
-                            {getHouseTeamDisplay(club)}
-                          </span>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="flex flex-wrap items-center justify-center gap-1.5">
+                            {getHouseTeams(club).length > 0 ? (
+                              getHouseTeams(club).map((t: any) => (
+                                <span
+                                  key={t.id || t._id}
+                                  className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200 whitespace-nowrap shadow-2xs"
+                                >
+                                  {t.name}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-lg bg-slate-50 text-slate-400 text-xs font-medium border border-slate-200">
+                                None
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <span className="text-sm font-black text-navy-950 font-mono bg-slate-100 px-2.5 py-1 rounded-md">
@@ -392,6 +459,7 @@ export default function ClubsPage() {
                     <th className="py-3 px-4">Captain</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Points Rollup Target</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -416,6 +484,15 @@ export default function ClubsPage() {
                       </td>
                       <td className="py-3 px-4 text-right text-[11px] text-slate-500">
                         Credits <strong>{ct.club?.name}</strong> Leaderboard
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          onClick={() => handleOpenEditTeam(ct)}
+                          title="Edit Team Name"
+                          className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -508,6 +585,90 @@ export default function ClubsPage() {
                     className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
                   >
                     {selectedClub ? 'Save Changes' : 'Create House'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* House Team Edit Modal */}
+        {isTeamModalOpen && selectedTeam && (
+          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in">
+              <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm">
+                    Edit House Team: {selectedTeam.name}
+                  </h3>
+                  <span className="text-[11px] text-slate-300">
+                    Parent House: {selectedTeam.club?.name || 'House'}
+                  </span>
+                </div>
+                <button onClick={() => setIsTeamModalOpen(false)} className="p-1 text-slate-400 hover:text-white rounded">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleTeamSubmit} className="p-6 space-y-4 text-xs">
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Team Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={teamFormData.name}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, name: e.target.value })}
+                    placeholder="e.g. Mavericks B"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-semibold text-slate-900"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-1 block">
+                    Points earned by this team roll up to the parent house leaderboard.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Team Captain</label>
+                  <input
+                    type="text"
+                    value={teamFormData.captainName}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, captainName: e.target.value })}
+                    placeholder="e.g. Vice Captain"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
+                  <select
+                    value={teamFormData.status}
+                    onChange={(e) => setTeamFormData({ ...teamFormData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                  </select>
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsTeamModalOpen(false)}
+                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
+                  >
+                    Save Team Changes
                   </button>
                 </div>
               </form>
