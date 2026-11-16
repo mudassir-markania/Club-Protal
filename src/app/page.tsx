@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
+import ChampionshipSplashScreen from '@/components/public/ChampionshipSplashScreen';
 import {
   Trophy,
   Medal,
@@ -60,11 +61,24 @@ export default function PublicViewerPortal() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
+  const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
     fetchPublicOverview();
     setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
+    // Show splash screen on first visit of this session
+    if (typeof window !== 'undefined' && !sessionStorage.getItem('apl_splash_shown')) {
+      setShowSplash(true);
+    }
   }, []);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('apl_splash_shown', 'true');
+    }
+  };
 
   const fetchPublicOverview = async () => {
     try {
@@ -98,6 +112,14 @@ export default function PublicViewerPortal() {
 
   return (
     <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
+      {/* Crazy Championship Splash Screen */}
+      {showSplash && (
+        <ChampionshipSplashScreen
+          onComplete={handleSplashComplete}
+          autoDismissDelay={3800}
+        />
+      )}
+
       {/* 1. UNIFIED NAVIGATION BAR */}
       <PublicNavbar
         onRefresh={handleRefresh}
@@ -195,6 +217,15 @@ export default function PublicViewerPortal() {
                     <span>EXPLORE THE 5 HOUSES</span>
                     <ChevronRight className="w-4 h-4 text-[#C6A04A] group-hover:translate-x-0.5 transition-transform" />
                   </Link>
+
+                  <button
+                    onClick={() => setShowSplash(true)}
+                    className="px-4 py-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.12] hover:border-[#C6A04A]/60 text-[#F3D787] font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-md flex items-center gap-2 group"
+                    title="Play Championship Intro Spectacle"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#C6A04A] group-hover:rotate-12 transition-transform" />
+                    <span>INTRO SPECTACLE</span>
+                  </button>
                 </div>
 
                 {/* Live Current Leader Mini-Badge */}
