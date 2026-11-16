@@ -189,17 +189,6 @@ export default function PublicNavbar({
                   </span>
                 </div>
               </Link>
-
-              <div className="h-[1px] bg-white/[0.06] my-1" />
-
-              {/* Unified Login Portal Link */}
-              <Link
-                href="/login"
-                onClick={() => setSignInDropdownOpen(false)}
-                className="block text-center py-1.5 px-2 rounded-lg bg-white/[0.03] hover:bg-[#C6A04A]/10 text-[11px] font-semibold text-slate-300 hover:text-[#F3D787] border border-white/[0.06] hover:border-[#C6A04A]/30 transition"
-              >
-                Unified Sign In Portal →
-              </Link>
             </div>
           )}
         </div>
