@@ -26,6 +26,7 @@ export default function PublicNavbar({
   const navItems = [
     { label: 'Home', href: '/', key: 'home' },
     { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
+    { label: 'Star Players', href: '/player-leaderboard', key: 'star-players' },
     { label: 'The 5 Houses', href: '/houses', key: 'houses' },
     { label: '8 Sports', href: '/sports', key: 'sports' },
     { label: 'Schedule', href: '/schedule', key: 'schedule' },
@@ -50,6 +51,7 @@ export default function PublicNavbar({
     }
     if (item.key === 'home' && pathname === '/') return true;
     if (pathname === item.href) return true;
+    if (item.key === 'star-players' && (pathname === '/player-leaderboard' || pathname === '/players')) return true;
     if (item.key === 'houses' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
     if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports' || pathname === '/8-sports')) return true;
     if (item.key === 'schedule' && (pathname === '/schedule' || pathname === '/matches')) return true;

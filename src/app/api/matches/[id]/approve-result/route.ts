@@ -69,11 +69,57 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           });
         }
 
-        // Mark Match as COMPLETED
+        // Mark Match as COMPLETED and ensure Star Player is recorded
+        const starPlayerId = targetResult?.starPlayerId || match.starPlayerId;
+        const starPlayerPoints = targetResult?.starPlayerPoints !== undefined
+          ? targetResult.starPlayerPoints
+          : (match.starPlayerPoints || 0);
+
         await tx.match.update({
           where: { id: match.id },
-          data: { status: 'COMPLETED' },
+          data: {
+            status: 'COMPLETED',
+            starPlayerId: starPlayerId || null,
+            starPlayerPoints: starPlayerPoints || 0,
+          },
         });
+
+        // Ensure PlayerPerformance record exists and is APPROVED
+        if (starPlayerId) {
+          const starPlayer = await tx.player.findUnique({ where: { id: starPlayerId } });
+          if (starPlayer) {
+            const existingPerf = await tx.playerPerformance.findFirst({
+              where: { matchId: match.id, playerId: starPlayer.id },
+            });
+
+            if (existingPerf) {
+              await tx.playerPerformance.update({
+                where: { id: existingPerf.id },
+                data: {
+                  status: 'APPROVED',
+                  performancePoints: starPlayerPoints,
+                  approvedByUserId: user.id,
+                  approvedAt: new Date(),
+                },
+              });
+            } else {
+              await tx.playerPerformance.create({
+                data: {
+                  matchId: match.id,
+                  playerId: starPlayer.id,
+                  sportId: match.sportId,
+                  clubId: starPlayer.clubId,
+                  teamName: starPlayer.teamName || starPlayer.club?.name,
+                  isStarPlayer: true,
+                  performancePoints: starPlayerPoints,
+                  status: 'APPROVED',
+                  approvedByUserId: user.id,
+                  approvedAt: new Date(),
+                },
+              });
+            }
+          }
+        }
 
         // Clear any prior PointsHistory for this match to prevent duplicate allocation
         await tx.pointsHistory.deleteMany({
@@ -116,6 +162,21 @@ export async function POST(req: Request, { params }: { params: { id: string } })
               },
             });
           }
+        }
+
+        // Approve PlayerPerformance records for Star Player tracking
+        const performances = await tx.playerPerformance.findMany({
+          where: { matchId: match.id },
+        });
+        for (const perf of performances) {
+          await tx.playerPerformance.update({
+            where: { id: perf.id },
+            data: {
+              status: 'APPROVED',
+              approvedByUserId: user.id,
+              approvedAt: new Date(),
+            },
+          });
         }
       });
 
@@ -174,6 +235,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           },
         });
 
+        await tx.playerPerformance.updateMany({
+          where: { matchId: match.id },
+          data: {
+            status: 'REJECTED',
+          },
+        });
+
+        await tx.pointsHistory.deleteMany({
+          where: { matchId: match.id },
+        });
+
         await tx.match.update({
           where: { id: match.id },
           data: {
@@ -182,6 +254,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           },
         });
       });
+
+      await recalculateAllLeaderboards();
 
       for (const mr of match.referees) {
         await db.notification.create({
@@ -310,9 +384,37 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           }
         }
 
+        const correctedStarPlayerId = body.starPlayerId || match.starPlayerId;
+        const correctedStarPlayerPoints = body.starPlayerPoints !== undefined ? parseFloat(body.starPlayerPoints) : match.starPlayerPoints;
+
+        if (correctedStarPlayerId) {
+          const starPlayer = await tx.player.findUnique({ where: { id: correctedStarPlayerId } });
+          if (starPlayer) {
+            await tx.playerPerformance.deleteMany({ where: { matchId: match.id } });
+            await tx.playerPerformance.create({
+              data: {
+                matchId: match.id,
+                playerId: starPlayer.id,
+                sportId: match.sportId,
+                clubId: starPlayer.clubId,
+                teamName: starPlayer.teamName || starPlayer.club?.name,
+                isStarPlayer: true,
+                performancePoints: Math.max(0, correctedStarPlayerPoints || 0),
+                status: 'APPROVED',
+                approvedByUserId: user.id,
+                approvedAt: new Date(),
+              },
+            });
+          }
+        }
+
         await tx.match.update({
           where: { id: match.id },
-          data: { status: 'COMPLETED' },
+          data: {
+            status: 'COMPLETED',
+            starPlayerId: correctedStarPlayerId,
+            starPlayerPoints: Math.max(0, correctedStarPlayerPoints || 0),
+          },
         });
 
         if (targetResult) {

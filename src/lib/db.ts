@@ -7,10 +7,10 @@ declare global {
   var mongoDbClient: any | undefined;
 }
 
-export const db = global.mongoDbClient || createMongoClient();
-
-if (!global.mongoDbClient) {
-  global.mongoDbClient = db;
+if (!global.mongoDbClient || !global.mongoDbClient.playerPerformance) {
+  global.mongoDbClient = createMongoClient();
 }
+
+export const db = global.mongoDbClient;
 
 export default db;

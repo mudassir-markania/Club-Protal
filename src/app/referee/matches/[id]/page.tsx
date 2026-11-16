@@ -21,6 +21,7 @@ import {
   MapPin,
   HelpCircle,
   FileText,
+  Star,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
 import { calculateClubPointsDistribution } from '@/lib/points-distribution';
@@ -39,6 +40,10 @@ export default function RefereeMatchSheetPage() {
     Record<string, { pointsEarned: number; rank?: number; isWinner: boolean }>
   >({});
   const [refereeNotes, setRefereeNotes] = useState('');
+
+  // Star Player Form States (Mandatory 1:1 rule)
+  const [selectedStarPlayerId, setSelectedStarPlayerId] = useState('');
+  const [starPlayerPoints, setStarPlayerPoints] = useState<number | string>('');
 
   // Modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -72,6 +77,13 @@ export default function RefereeMatchSheetPage() {
         });
       }
       setEntryResults(initialMap);
+
+      if (data.starPlayerId) setSelectedStarPlayerId(data.starPlayerId);
+      if (data.starPlayerPoints !== undefined && data.starPlayerPoints !== null) {
+        setStarPlayerPoints(data.starPlayerPoints);
+      } else if (data.results?.[0]?.starPlayerPoints !== undefined) {
+        setStarPlayerPoints(data.results[0].starPlayerPoints);
+      }
 
       if (data.notes) setRefereeNotes(data.notes);
     } catch (err: any) {
@@ -110,6 +122,17 @@ export default function RefereeMatchSheetPage() {
   };
 
   const handleSubmitResult = async () => {
+    if (!selectedStarPlayerId) {
+      alert('Star Player of the Match is mandatory! Please select exactly one participating player.');
+      return;
+    }
+
+    const pts = parseFloat(String(starPlayerPoints));
+    if (isNaN(pts) || pts < 0) {
+      alert('Please enter valid non-negative performance points for the Star Player.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const formattedResults = Object.entries(entryResults).map(([pId, val]) => ({
@@ -125,6 +148,8 @@ export default function RefereeMatchSheetPage() {
         body: JSON.stringify({
           entryResults: formattedResults,
           refereeNotes,
+          starPlayerId: selectedStarPlayerId,
+          starPlayerPoints: pts,
         }),
       });
 
@@ -483,6 +508,88 @@ export default function RefereeMatchSheetPage() {
           })}
         </div>
 
+        {/* ⭐ STAR PLAYER OF THE MATCH (Mandatory 1:1 Rule) */}
+        <div className="bg-gradient-to-br from-[#141822] to-[#0A0D14] text-white rounded-2xl border border-[#C6A04A]/50 shadow-lg p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#C6A04A]/20 border border-[#C6A04A]/60 flex items-center justify-center text-[#C6A04A]">
+                <Star className="w-5 h-5 fill-[#C6A04A]" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+                  <span>Star Player of the Match</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#C6A04A] text-[#0A0D14]">
+                    Mandatory • Exactly 1 Athlete
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300">
+                  Nominate exactly ONE standout athlete from the participating squads/teams of this match.
+                </p>
+              </div>
+            </div>
+
+            <div className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px] text-amber-300 font-semibold self-start sm:self-auto flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5 text-[#C6A04A]" />
+              <span>Individual Player Leaderboard</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Star Player Dropdown */}
+            <div>
+              <label className="block text-xs font-bold text-[#F3D787] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" />
+                <span>Nominate Star Player *</span>
+              </label>
+              <select
+                disabled={isReadOnly}
+                value={selectedStarPlayerId}
+                onChange={(e) => setSelectedStarPlayerId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#080A0E] border border-white/20 text-white font-bold text-xs focus:ring-2 focus:ring-[#C6A04A] focus:border-[#C6A04A] outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <option value="">-- Select Participating Athlete --</option>
+                {(match.eligibleStarPlayers || []).map((pl: any) => (
+                  <option key={pl.id} value={pl.id}>
+                    {pl.name} — House {pl.clubName || pl.clubCode} ({pl.teamName})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-slate-400 mt-1">
+                Filter strictly displays only players who participated in this specific fixture. Unrelated house athletes are excluded.
+              </p>
+            </div>
+
+            {/* Individual Performance Points Input */}
+            <div>
+              <label className="block text-xs font-bold text-[#F3D787] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#C6A04A]" />
+                <span>Star Player Individual Performance Points *</span>
+              </label>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                disabled={isReadOnly}
+                placeholder="e.g. 45"
+                value={starPlayerPoints}
+                onChange={(e) => setStarPlayerPoints(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#080A0E] border border-white/20 text-[#F3D787] font-mono font-black text-sm focus:ring-2 focus:ring-[#C6A04A] focus:border-[#C6A04A] outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+              <p className="text-[10px] text-slate-400 mt-1">
+                Points awarded strictly to this individual athlete. Must be greater than or equal to 0.
+              </p>
+            </div>
+          </div>
+
+          {/* Point System Isolation Notice */}
+          <div className="p-3.5 rounded-xl bg-white/[0.04] border border-[#C6A04A]/30 text-xs text-slate-200 flex items-start gap-2.5">
+            <Shield className="w-4 h-4 text-[#C6A04A] shrink-0 mt-0.5" />
+            <div className="text-[11px] leading-relaxed">
+              <strong className="text-white">Strict Point Isolation Rule:</strong> Individual performance points belong exclusively to this player&apos;s personal season record. They are <strong>NEVER added or mixed with House Championship points</strong>. The automatic house championship points distribution shown above continues independently.
+            </div>
+          </div>
+        </div>
+
         {/* Referee Official Observations & Submit Bar */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
           <div>
@@ -502,7 +609,7 @@ export default function RefereeMatchSheetPage() {
           {!isReadOnly && (
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
               <span className="text-xs text-slate-500">
-                Final points entered by the referee are automatically calculated and distributed to clubs immediately upon submission.
+                Submitted result and Star Player nomination will be routed to the Tournament Director / Admin for verification.
               </span>
 
               <button
@@ -511,22 +618,22 @@ export default function RefereeMatchSheetPage() {
                 className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-2 transition"
               >
                 <Check className="w-4 h-4 text-white" />
-                <span>Submit Final Result & Distribute Points</span>
+                <span>Submit Result for Admin Review</span>
               </button>
             </div>
           )}
 
           {isSubmitted && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-              <span>Result submitted and recorded. Points distributed to clubs.</span>
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Result and nominated Star Player have been submitted. Awaiting Admin review and final approval.</span>
             </div>
           )}
 
           {isCompleted && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Match completed! Official points have been automatically calculated, distributed to participating clubs, and credited on the leaderboard.</span>
+              <span>Match completed! Official points approved by Admin and credited to both the House Leaderboard and the Player Leaderboard.</span>
             </div>
           )}
         </div>
@@ -562,10 +669,31 @@ export default function RefereeMatchSheetPage() {
                   })}
                 </div>
 
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-[11px] flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                {/* Star Player Nomination Summary */}
+                {selectedStarPlayerId && (
+                  <div className="p-3 bg-gradient-to-r from-[#141822] to-[#0A0D14] border border-[#C6A04A]/40 rounded-xl text-white space-y-1">
+                    <div className="flex items-center gap-1.5 text-[#F3D787] font-bold text-[11px]">
+                      <Star className="w-3.5 h-3.5 fill-[#C6A04A] text-[#C6A04A]" />
+                      <span>Nominated Star Player:</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs pt-0.5">
+                      <span className="font-semibold text-slate-200">
+                        {match.eligibleStarPlayers?.find((pl: any) => pl.id === selectedStarPlayerId)?.name || 'Selected Athlete'}
+                        <span className="text-[10px] text-slate-400 block">
+                          House: {match.eligibleStarPlayers?.find((pl: any) => pl.id === selectedStarPlayerId)?.clubName}
+                        </span>
+                      </span>
+                      <span className="font-mono font-black text-[#F3D787] text-sm">
+                        {starPlayerPoints} individual pts
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] flex items-start gap-2">
+                  <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                   <span>
-                    Points will be automatically distributed across unique clubs and credited directly to the official leaderboard upon submission.
+                    This submission will be forwarded to the Admin panel. Both House Championship points and Star Player individual points will be officially credited immediately upon Admin approval.
                   </span>
                 </div>
               </div>

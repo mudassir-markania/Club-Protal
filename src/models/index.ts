@@ -10,6 +10,7 @@ function createSchema(definition: any, options: any = {}) {
     },
     {
       timestamps: true,
+      strict: false,
       toJSON: {
         virtuals: true,
         transform: (_doc, ret) => {
@@ -105,6 +106,8 @@ const PlayerSchema = createSchema({
   registrationDate: { type: Date, default: Date.now },
   status: { type: String, default: 'APPROVED' },
   paymentStatus: { type: String, default: 'PAID' },
+  totalPerformancePoints: { type: Number, default: 0 },
+  starPlayerCount: { type: Number, default: 0 },
 });
 
 // 7. PlayerSport
@@ -151,6 +154,8 @@ const MatchSchema = createSchema({
   venueId: { type: String },
   status: { type: String, default: 'SCHEDULED' },
   notes: { type: String },
+  starPlayerId: { type: String },
+  starPlayerPoints: { type: Number, default: 0 },
 });
 
 // 12. MatchParticipant
@@ -190,12 +195,30 @@ const MatchResultSchema = createSchema({
   winnerClubId: { type: String },
   scoresSummary: { type: String, required: true },
   refereeNotes: { type: String },
+  starPlayerId: { type: String },
+  starPlayerPoints: { type: Number, default: 0 },
   status: { type: String, default: 'PENDING_APPROVAL' },
   approvedByUserId: { type: String },
   approvedAt: { type: Date },
   disputeReason: { type: String },
   rejectionReason: { type: String },
 });
+
+// 15B. PlayerPerformance (Individual Star Player & Performance Tracking)
+const PlayerPerformanceSchema = createSchema({
+  matchId: { type: String, required: true },
+  playerId: { type: String, required: true },
+  sportId: { type: String, required: true },
+  clubId: { type: String, required: true },
+  teamName: { type: String },
+  isStarPlayer: { type: Boolean, default: true },
+  performancePoints: { type: Number, required: true, default: 0 },
+  status: { type: String, default: 'PENDING_APPROVAL' },
+  awardedAt: { type: Date, default: Date.now },
+  approvedAt: { type: Date },
+  approvedByUserId: { type: String },
+});
+PlayerPerformanceSchema.index({ matchId: 1, playerId: 1 });
 
 // 16. PointsDistribution
 const PointsDistributionSchema = createSchema({
@@ -336,7 +359,10 @@ const TournamentSettingSchema = createSchema({
 
 // Helper to get or create model safely in Next.js hot reloading
 function getModel(name: string, schema: Schema): Model<any> {
-  return (mongoose.models[name] as Model<any>) || mongoose.model<any>(name, schema);
+  if (mongoose.models[name]) {
+    delete (mongoose.models as any)[name];
+  }
+  return mongoose.model<any>(name, schema);
 }
 
 export const RoleModel: Model<any> = getModel('Role', RoleSchema);
@@ -354,6 +380,7 @@ export const MatchParticipantModel: Model<any> = getModel('MatchParticipant', Ma
 export const MatchParticipantPlayerModel: Model<any> = getModel('MatchParticipantPlayer', MatchParticipantPlayerSchema);
 export const MatchRefereeModel: Model<any> = getModel('MatchReferee', MatchRefereeSchema);
 export const MatchResultModel: Model<any> = getModel('MatchResult', MatchResultSchema);
+export const PlayerPerformanceModel: Model<any> = getModel('PlayerPerformance', PlayerPerformanceSchema);
 export const PointsDistributionModel: Model<any> = getModel('PointsDistribution', PointsDistributionSchema);
 export const ClubPointAllocationModel: Model<any> = getModel('ClubPointAllocation', ClubPointAllocationSchema);
 export const ScoreEntryModel: Model<any> = getModel('ScoreEntry', ScoreEntrySchema);
@@ -382,6 +409,7 @@ export const models: Record<string, Model<any>> = {
   MatchParticipantPlayer: MatchParticipantPlayerModel,
   MatchReferee: MatchRefereeModel,
   MatchResult: MatchResultModel,
+  PlayerPerformance: PlayerPerformanceModel,
   PointsDistribution: PointsDistributionModel,
   ClubPointAllocation: ClubPointAllocationModel,
   ScoreEntry: ScoreEntryModel,

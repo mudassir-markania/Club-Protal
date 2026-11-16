@@ -16,6 +16,8 @@ import {
   ChevronRight,
   Scale,
   Sparkles,
+  Star,
+  CheckCircle2,
 } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
 
@@ -92,6 +94,7 @@ export default function PublicViewerPortal() {
   const leadingHouse = championship?.leadingHouse || rawStandings[0];
   const sports = (data?.sports && data.sports.length > 0) ? data.sports : INITIAL_SPORTS;
   const upcomingMatches = data?.upcomingMatches || [];
+  const approvedMatches = data?.approvedMatches || [];
 
   return (
     <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
@@ -362,6 +365,152 @@ export default function PublicViewerPortal() {
               </article>
             )}
           </div>
+        </section>
+
+        {/* SECTION: MATCH HIGHLIGHTS & STAR PLAYERS OF THE MATCH (Section 5 Compliant) */}
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Star className="w-3.5 h-3.5 fill-[#C6A04A] text-[#C6A04A]" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A]">
+                  Certified Match Highlights
+                </span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white">
+                Star Players of the Match
+              </h2>
+            </div>
+            <Link
+              href="/player-leaderboard"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
+            >
+              <span>Explore Player Leaderboard</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {approvedMatches.length === 0 ? (
+            <div className="p-8 rounded-2xl bg-[#141822] border border-white/[0.08] text-center space-y-2">
+              <Star className="w-8 h-8 text-[#C6A04A]/60 mx-auto" />
+              <h3 className="font-serif text-base font-bold text-white">Championship Matches Underway</h3>
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                As tournament referees submit final results and the Tournament Director certifies them, certified Star Players and match highlights will be showcased here.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {approvedMatches.map((m: any) => {
+                const winner =
+                  m.participants?.find((p: any) => p.isWinner) ||
+                  (m.participants?.[0]?.score > (m.participants?.[1]?.score || 0)
+                    ? m.participants?.[0]
+                    : m.participants?.[1]);
+                const winnerName =
+                  winner?.teamName ||
+                  winner?.cricketTeam?.name ||
+                  winner?.club?.name ||
+                  'Championship Winner';
+
+                return (
+                  <article
+                    key={m.id}
+                    className="p-6 rounded-2xl bg-gradient-to-b from-[#141822] to-[#0D1017] border border-white/[0.08] hover:border-[#C6A04A]/50 transition shadow-lg space-y-4"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#0A0D14] border border-white/[0.08] flex items-center justify-center text-[#C6A04A]">
+                          <SportIcon name={m.sport?.name} className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-white">{m.sport?.name}</span>
+                            <span className="font-mono text-[10px] text-slate-400">• {m.matchCode}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400">{m.round}</span>
+                        </div>
+                      </div>
+
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Certified Result</span>
+                      </span>
+                    </div>
+
+                    {/* Winner & Match Summary */}
+                    <div className="p-3.5 rounded-xl bg-[#0A0D14] border border-white/[0.06] flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                          Winning Team / Entry
+                        </span>
+                        <span className="font-serif font-bold text-sm text-[#F3D787] flex items-center gap-1.5 mt-0.5">
+                          <Trophy className="w-3.5 h-3.5 text-[#C6A04A]" />
+                          <span>{winnerName}</span>
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                          Scores / Points
+                        </span>
+                        <span className="font-mono font-bold text-xs text-white">
+                          {m.participants?.[0]?.score || 0} pts vs {m.participants?.[1]?.score || 0} pts
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* ⭐ Star Player Spotlight Card */}
+                    {m.starPlayer && (
+                      <div className="p-4 rounded-xl bg-gradient-to-r from-[#1A2234] via-[#141822] to-[#1A2234] border border-[#C6A04A]/50 shadow-md space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-[#C6A04A]/20 border border-[#C6A04A]/50 flex items-center justify-center text-[#C6A04A]">
+                              <Star className="w-4 h-4 fill-[#C6A04A]" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-black text-[#F3D787] tracking-wider block">
+                                Star Player of the Match
+                              </span>
+                              <h4 className="font-serif text-base font-bold text-white">
+                                {m.starPlayer.name}
+                              </h4>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[9px] uppercase font-bold text-slate-400 block">Individual Points</span>
+                            <span className="font-mono font-black text-amber-300 text-sm">
+                              +{m.starPlayerPoints || 0} pts
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-slate-300">
+                          <span>
+                            House: <strong className="text-white">{m.starPlayer.club?.name || 'House Representative'}</strong>
+                          </span>
+                          <span className="text-slate-400">
+                            Team: {m.starPlayer.teamName || winnerName}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Card Footer Link */}
+                    <div className="pt-2 flex items-center justify-between text-xs text-slate-400">
+                      <span>{m.matchDate} • {m.venue?.name || 'Olympic Arena'}</span>
+                      <Link
+                        href="/results"
+                        className="text-[#C6A04A] hover:text-[#F3D787] font-bold text-[11px] inline-flex items-center gap-1 transition"
+                      >
+                        <span>View Match Details</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* SECTION 2: THE 5 HOUSES SHOWCASE */}

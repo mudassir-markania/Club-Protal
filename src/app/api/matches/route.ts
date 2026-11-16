@@ -39,6 +39,7 @@ export async function GET(req: Request) {
       include: {
         sport: true,
         venue: true,
+        starPlayer: true,
         participants: {
           include: {
             club: true,
@@ -198,6 +199,7 @@ export async function POST(req: Request) {
       include: {
         sport: true,
         venue: true,
+        starPlayer: true,
         participants: {
           include: {
             club: true,

@@ -9,6 +9,17 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       where: { id: params.id },
       include: {
         club: true,
+        performances: {
+          include: {
+            match: {
+              include: {
+                sport: true,
+                venue: true,
+              },
+            },
+            sport: true,
+          },
+        },
         sports: {
           include: {
             sport: true,

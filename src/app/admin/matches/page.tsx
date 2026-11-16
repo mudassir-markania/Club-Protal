@@ -25,6 +25,7 @@ import {
   Send,
   HelpCircle,
   Users,
+  Star,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
 
@@ -213,13 +214,26 @@ export default function MatchesPage() {
     }
   };
 
-  const handleOpenReview = (match: any) => {
+  const handleOpenReview = async (match: any) => {
     setSelectedMatch(match);
     const pendingResult = match.results?.find((r: any) => r.status === 'PENDING_APPROVAL') || match.results?.[0];
     setReviewResult(pendingResult);
     setShowRejectBox(false);
     setRejectionReason('');
     setIsReviewModalOpen(true);
+
+    const spId = match.starPlayerId || pendingResult?.starPlayerId;
+    if (spId && !match.starPlayer) {
+      try {
+        const res = await fetch(`/api/players/${spId}`);
+        if (res.ok) {
+          const spData = await res.json();
+          setSelectedMatch((prev: any) => ({ ...prev, starPlayer: spData }));
+        }
+      } catch (e) {
+        console.error('Failed to load star player details:', e);
+      }
+    }
   };
 
   const handleApproveResult = async () => {
@@ -579,6 +593,24 @@ export default function MatchesPage() {
                       })}
                     </div>
 
+                    {/* Star Player Badge */}
+                    {(match.starPlayer || match.starPlayerId) && (
+                      <div className="mb-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/80 flex items-center justify-between text-xs">
+                        <span className="font-extrabold text-amber-950 flex items-center gap-1.5 text-[11px]">
+                          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 shrink-0" />
+                          <span>Star Player: {match.starPlayer?.name || 'Nominated Athlete'}</span>
+                          {match.starPlayer?.club && (
+                            <span className="text-[10px] text-amber-800 font-semibold">
+                              ({match.starPlayer.club.name})
+                            </span>
+                          )}
+                        </span>
+                        <span className="font-mono font-black text-amber-900 bg-white/80 px-2 py-0.5 rounded text-[11px] border border-amber-200 shrink-0">
+                          {match.starPlayerPoints || 0} pts
+                        </span>
+                      </div>
+                    )}
+
                     <div className="text-xs text-slate-500 flex items-center justify-between pt-1">
                       <span className="flex items-center gap-1 font-medium">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -926,6 +958,44 @@ export default function MatchesPage() {
                   <span className="text-[11px] text-slate-500 font-medium">
                     {new Date(selectedMatch.results[0]?.createdAt).toLocaleString()}
                   </span>
+                </div>
+              )}
+
+              {/* Star Player Nomination Card (Section 4 Compliant) */}
+              {(selectedMatch.starPlayer || reviewResult?.starPlayerId || selectedMatch.starPlayerId) && (
+                <div className="bg-gradient-to-r from-navy-950 via-[#141822] to-navy-950 text-white p-4 rounded-xl border border-amber-500/50 shadow-md space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-black text-amber-300 block tracking-wider">
+                          Nominated Star Player of the Match
+                        </span>
+                        <span className="font-extrabold text-sm text-white">
+                          {selectedMatch.starPlayer?.name || 'Nominated Athlete'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Individual Points</span>
+                      <span className="font-mono font-black text-amber-300 text-base">
+                        {reviewResult?.starPlayerPoints ?? selectedMatch.starPlayerPoints ?? 0} pts
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-300">
+                    <span>
+                      Representing House: <strong className="text-white">{selectedMatch.starPlayer?.club?.name || 'Participating House'}</strong>
+                    </span>
+                    <span className="text-[10px] text-amber-300 font-semibold flex items-center gap-1">
+                      <Shield className="w-3 h-3 text-amber-400" />
+                      <span>Separate Points System (Never added to House Points)</span>
+                    </span>
+                  </div>
                 </div>
               )}
 

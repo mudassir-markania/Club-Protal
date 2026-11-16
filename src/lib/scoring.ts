@@ -14,6 +14,9 @@ export async function recalculateAllLeaderboards() {
 
   // 2. Recalculate overall championship standings
   await recalculateOverallLeaderboard();
+
+  // 3. Recalculate individual player performance totals (strictly separated from house points)
+  await recalculatePlayerLeaderboards();
 }
 
 /**
@@ -256,4 +259,40 @@ export async function recalculateOverallLeaderboard() {
   }
 
   return { leaderClubId, sortedOverall };
+}
+
+/**
+ * Recalculates individual player performance points and star player award counts
+ * based strictly on APPROVED player performance records.
+ * CRITICAL RULE: These points belong exclusively to individual athletes and are
+ * NEVER mixed or added into Club Championship points.
+ */
+export async function recalculatePlayerLeaderboards() {
+  const approvedPerformances = await db.playerPerformance.findMany({
+    where: { status: 'APPROVED' },
+  });
+
+  const playerStats: Record<string, { totalPoints: number; starPlayerCount: number }> = {};
+
+  for (const perf of approvedPerformances) {
+    if (!playerStats[perf.playerId]) {
+      playerStats[perf.playerId] = { totalPoints: 0, starPlayerCount: 0 };
+    }
+    playerStats[perf.playerId].totalPoints += Number(perf.performancePoints || 0);
+    if (perf.isStarPlayer) {
+      playerStats[perf.playerId].starPlayerCount += 1;
+    }
+  }
+
+  const allPlayers = await db.player.findMany();
+  for (const p of allPlayers) {
+    const stats = playerStats[p.id] || { totalPoints: 0, starPlayerCount: 0 };
+    await db.player.update({
+      where: { id: p.id },
+      data: {
+        totalPerformancePoints: Number(stats.totalPoints.toFixed(2)),
+        starPlayerCount: stats.starPlayerCount,
+      },
+    });
+  }
 }

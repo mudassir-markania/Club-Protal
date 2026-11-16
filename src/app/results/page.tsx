@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
-import { CheckCircle2, Trophy, MapPin, Calendar, Search, ArrowRight, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Trophy, MapPin, Calendar, Search, ArrowRight, ShieldCheck, Star } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
 
 export default function ResultsPage() {
@@ -177,6 +177,24 @@ export default function ResultsPage() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Star Player Spotlight */}
+                  {m.starPlayer && (
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-[#1C2331] to-[#0A0D14] border border-[#C6A04A]/40 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-md bg-[#C6A04A]/20 border border-[#C6A04A]/40 flex items-center justify-center text-[#C6A04A]">
+                          <Star className="w-3.5 h-3.5 fill-[#C6A04A]" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-[#F3D787] block">Star Player of Match</span>
+                          <span className="font-bold text-white text-xs">{m.starPlayer.name} ({m.starPlayer.club?.name || 'House'})</span>
+                        </div>
+                      </div>
+                      <span className="font-mono font-black text-amber-300 text-xs bg-black/40 px-2 py-1 rounded border border-amber-500/20">
+                        +{m.starPlayerPoints || 0} pts
+                      </span>
+                    </div>
+                  )}
 
                   {/* Venue & Date */}
                   <div className="flex items-center justify-between text-xs text-slate-400 pt-1">

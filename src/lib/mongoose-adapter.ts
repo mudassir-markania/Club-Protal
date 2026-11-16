@@ -27,6 +27,7 @@ const RELATIONS: Record<
   Player: {
     club: { model: 'Club', foreignKey: '_id', localKey: 'clubId' },
     sports: { model: 'PlayerSport', foreignKey: 'playerId', isArray: true },
+    performances: { model: 'PlayerPerformance', foreignKey: 'playerId', isArray: true },
   },
   PlayerSport: {
     player: { model: 'Player', foreignKey: '_id', localKey: 'playerId' },
@@ -50,6 +51,8 @@ const RELATIONS: Record<
     results: { model: 'MatchResult', foreignKey: 'matchId', isArray: true },
     distributions: { model: 'PointsDistribution', foreignKey: 'matchId', isArray: true },
     pointsHistory: { model: 'PointsHistory', foreignKey: 'matchId', isArray: true },
+    starPlayer: { model: 'Player', foreignKey: '_id', localKey: 'starPlayerId' },
+    playerPerformances: { model: 'PlayerPerformance', foreignKey: 'matchId', isArray: true },
   },
   MatchParticipant: {
     match: { model: 'Match', foreignKey: '_id', localKey: 'matchId' },
@@ -71,6 +74,13 @@ const RELATIONS: Record<
   MatchResult: {
     match: { model: 'Match', foreignKey: '_id', localKey: 'matchId' },
     referee: { model: 'Referee', foreignKey: '_id', localKey: 'submittedByRefereeId' },
+    starPlayer: { model: 'Player', foreignKey: '_id', localKey: 'starPlayerId' },
+  },
+  PlayerPerformance: {
+    match: { model: 'Match', foreignKey: '_id', localKey: 'matchId' },
+    player: { model: 'Player', foreignKey: '_id', localKey: 'playerId' },
+    sport: { model: 'Sport', foreignKey: '_id', localKey: 'sportId' },
+    club: { model: 'Club', foreignKey: '_id', localKey: 'clubId' },
   },
   PointsDistribution: {
     match: { model: 'Match', foreignKey: '_id', localKey: 'matchId' },
@@ -362,6 +372,7 @@ export function createCollectionDelegate(modelName: string) {
 
       const updated = await ModelClass.findOneAndUpdate(filter, mongoUpdate, {
         new: true,
+        strict: false,
       }).lean({ virtuals: true });
 
       if (!updated) return null;
@@ -405,7 +416,7 @@ export function createCollectionDelegate(modelName: string) {
       const existing = await ModelClass.findOne(filter);
 
       if (existing) {
-        const updated = await ModelClass.findOneAndUpdate(filter, { $set: args.update }, { new: true }).lean({
+        const updated = await ModelClass.findOneAndUpdate(filter, { $set: args.update }, { new: true, strict: false }).lean({
           virtuals: true,
         });
         let item = { ...updated, id: (updated as any)._id };
@@ -454,6 +465,7 @@ export function createMongoClient() {
     matchParticipantPlayer: createCollectionDelegate('MatchParticipantPlayer'),
     matchReferee: createCollectionDelegate('MatchReferee'),
     matchResult: createCollectionDelegate('MatchResult'),
+    playerPerformance: createCollectionDelegate('PlayerPerformance'),
     pointsDistribution: createCollectionDelegate('PointsDistribution'),
     clubPointAllocation: createCollectionDelegate('ClubPointAllocation'),
     scoreEntry: createCollectionDelegate('ScoreEntry'),

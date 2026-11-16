@@ -68,14 +68,15 @@ export async function GET() {
       };
     });
 
-    // 6. Fetch Completed / Approved Results for public viewing
-    const approvedMatches = await db.match.findMany({
+    // 6. Fetch Completed / Approved Results for public viewing (including Star Player)
+    const rawApprovedMatches = await db.match.findMany({
       where: { status: 'COMPLETED' },
       orderBy: [{ matchDate: 'desc' }, { matchTime: 'desc' }],
       take: 20,
       include: {
         sport: true,
         venue: true,
+        starPlayer: true,
         participants: {
           include: {
             club: true,
@@ -90,6 +91,26 @@ export async function GET() {
         },
       },
     });
+
+    // Populate club for starPlayer if needed
+    const approvedMatches = await Promise.all(
+      rawApprovedMatches.map(async (m: any) => {
+        let starPlayerObj = m.starPlayer;
+        if (!starPlayerObj && m.starPlayerId) {
+          starPlayerObj = await db.player.findUnique({
+            where: { id: m.starPlayerId },
+            include: { club: true },
+          });
+        } else if (starPlayerObj && !starPlayerObj.club && starPlayerObj.clubId) {
+          const club = await db.club.findUnique({ where: { id: starPlayerObj.clubId } });
+          starPlayerObj = { ...starPlayerObj, club };
+        }
+        return {
+          ...m,
+          starPlayer: starPlayerObj,
+        };
+      })
+    );
 
     // 7. Fetch Upcoming Fixtures
     const upcomingMatches = await db.match.findMany({
