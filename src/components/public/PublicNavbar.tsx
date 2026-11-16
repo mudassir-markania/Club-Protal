@@ -120,81 +120,85 @@ export default function PublicNavbar({
         </div>
 
         {/* Divider */}
-        <div className="hidden xl:block h-4 w-[1px] bg-white/[0.1]" />
+        <div className="hidden sm:block h-4 w-[1px] bg-white/[0.1]" />
 
-        {/* 1. Direct Buttons for XL Screens */}
-        <div className="hidden xl:flex items-center gap-2">
-          {/* Admin Sign In Button */}
-          <Link
-            href="/admin/login"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1C2331] border border-[#C6A04A]/50 text-xs font-bold text-[#F3D787] hover:border-[#C6A04A] transition shadow-xs whitespace-nowrap group"
-            title="Access Tournament Director & Championship Admin"
-          >
-            <Shield className="w-3.5 h-3.5 text-[#C6A04A] group-hover:scale-110 transition-transform" />
-            <span>Admin Sign In</span>
-          </Link>
-
-          {/* Referee Sign In Button */}
-          <Link
-            href="/referee/login"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1C2331] border border-emerald-500/40 text-xs font-bold text-emerald-400 hover:border-emerald-400 transition shadow-xs whitespace-nowrap group"
-            title="Access Official Referee Match Scoring Portal"
-          >
-            <Scale className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span>Referee Sign In</span>
-          </Link>
-        </div>
-
-        {/* 2. Compact Sign In Dropdown for Tablet / Medium screens */}
-        <div className="relative xl:hidden" ref={dropdownRef}>
+        {/* Unified Sign In Button for both panels */}
+        <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setSignInDropdownOpen(!signInDropdownOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1C2331] border border-[#C6A04A]/50 text-xs font-bold text-[#F3D787] transition shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1C2331] border border-[#C6A04A]/60 hover:border-[#C6A04A] text-xs font-bold text-[#F3D787] transition shadow-xs whitespace-nowrap group"
+            title="Sign in to Admin or Referee Panel"
             aria-expanded={signInDropdownOpen}
           >
-            <Lock className="w-3 h-3 text-[#C6A04A]" />
+            <Lock className="w-3.5 h-3.5 text-[#C6A04A] group-hover:scale-110 transition-transform" />
             <span>Sign In</span>
-            <ChevronDown className={`w-3 h-3 text-[#C6A04A] transition-transform duration-200 ${signInDropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-3.5 h-3.5 text-[#C6A04A] transition-transform duration-200 ${
+                signInDropdownOpen ? 'rotate-180' : ''
+              }`}
+            />
           </button>
 
           {signInDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-60 rounded-xl bg-[#0E131C] border border-[#C6A04A]/40 p-2 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0E131C] border border-[#C6A04A]/40 p-2.5 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-2.5 py-1.5 mb-1.5 border-b border-white/[0.08] flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Championship Sign In
+                </span>
+                <span className="text-[9px] font-mono text-[#C6A04A] bg-[#C6A04A]/10 px-1.5 py-0.5 rounded border border-[#C6A04A]/20">
+                  OFFICIALS
+                </span>
+              </div>
+
+              {/* Admin Panel */}
               <Link
                 href="/admin/login"
                 onClick={() => setSignInDropdownOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-white/[0.06] transition group"
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.06] transition group"
               >
                 <div className="w-8 h-8 rounded-lg bg-[#141822] border border-[#C6A04A]/40 flex items-center justify-center text-[#C6A04A] group-hover:bg-[#C6A04A] group-hover:text-slate-950 transition shrink-0">
                   <Shield className="w-4 h-4" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-white group-hover:text-[#C6A04A] transition block">
-                    Admin Sign In
+                    Admin Panel
                   </span>
                   <span className="text-[10px] text-slate-400 block">
-                    Tournament director controls
+                    Tournament director & controls
                   </span>
                 </div>
               </Link>
 
-              <div className="h-[1px] bg-white/[0.08] my-1" />
+              <div className="h-[1px] bg-white/[0.06] my-1" />
 
+              {/* Referee Panel */}
               <Link
                 href="/referee/login"
                 onClick={() => setSignInDropdownOpen(false)}
-                className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-white/[0.06] transition group"
+                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.06] transition group"
               >
                 <div className="w-8 h-8 rounded-lg bg-[#141822] border border-emerald-500/40 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition shrink-0">
                   <Scale className="w-4 h-4" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-white group-hover:text-emerald-400 transition block">
-                    Referee Sign In
+                    Referee Panel
                   </span>
                   <span className="text-[10px] text-slate-400 block">
-                    Match score & points submission
+                    Match score & star player submission
                   </span>
                 </div>
+              </Link>
+
+              <div className="h-[1px] bg-white/[0.06] my-1" />
+
+              {/* Unified Login Portal Link */}
+              <Link
+                href="/login"
+                onClick={() => setSignInDropdownOpen(false)}
+                className="block text-center py-1.5 px-2 rounded-lg bg-white/[0.03] hover:bg-[#C6A04A]/10 text-[11px] font-semibold text-slate-300 hover:text-[#F3D787] border border-white/[0.06] hover:border-[#C6A04A]/30 transition"
+              >
+                Unified Sign In Portal →
               </Link>
             </div>
           )}
@@ -247,26 +251,16 @@ export default function PublicNavbar({
           {/* Portal Sign In Section in Mobile Menu */}
           <div className="pt-3 border-t border-white/[0.08] space-y-2">
             <span className="text-[10px] font-bold text-slate-500 block px-1">
-              PORTAL AUTHENTICATION
+              CHAMPIONSHIP AUTHENTICATION
             </span>
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href="/admin/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-1.5 p-2.5 rounded-lg bg-[#141822] border border-[#C6A04A]/40 text-[#F3D787] font-bold text-[11px] text-center"
-              >
-                <Shield className="w-3.5 h-3.5 text-[#C6A04A]" />
-                <span>Admin Login</span>
-              </Link>
-              <Link
-                href="/referee/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-1.5 p-2.5 rounded-lg bg-[#141822] border border-emerald-500/40 text-emerald-400 font-bold text-[11px] text-center"
-              >
-                <Scale className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Referee Login</span>
-              </Link>
-            </div>
+            <Link
+              href="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-[#141822] border border-[#C6A04A]/60 hover:border-[#C6A04A] text-[#F3D787] font-bold text-xs shadow-md transition"
+            >
+              <Lock className="w-3.5 h-3.5 text-[#C6A04A]" />
+              <span>Sign In (Admin & Referee)</span>
+            </Link>
           </div>
         </div>
       )}

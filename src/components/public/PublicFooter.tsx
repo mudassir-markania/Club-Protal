@@ -44,11 +44,8 @@ export default function PublicFooter() {
             Points Rules
           </Link>
           <span className="text-slate-600 hidden md:inline">|</span>
-          <Link href="/admin/login" className="text-slate-400 hover:text-[#C6A04A] transition">
-            Admin Sign In
-          </Link>
-          <Link href="/referee/login" className="text-slate-400 hover:text-emerald-400 transition">
-            Referee Sign In
+          <Link href="/login" className="text-slate-400 hover:text-[#C6A04A] transition font-medium">
+            Sign In
           </Link>
         </div>
 
