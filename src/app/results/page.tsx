@@ -146,6 +146,11 @@ export default function ResultsPage() {
                         <SportIcon name={m.sport?.name} className="w-3.5 h-3.5" />
                       </div>
                       <span className="font-bold text-xs text-white">{m.sport?.name}</span>
+                      {m.matchCategory && m.matchCategory !== 'Singles' && (
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#C6A04A]/15 text-[#C6A04A] border border-[#C6A04A]/40">
+                          {m.matchCategory}
+                        </span>
+                      )}
                     </div>
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                       <CheckCircle2 className="w-3 h-3" />

@@ -78,24 +78,26 @@ export async function seedMongoDatabase() {
       category: 'BoardGame',
       icon: 'Target',
       sportType: 'INDIVIDUAL',
-      maxParticipants: 2,
+      maxParticipants: 4,
       allowsMixedClubs: false,
       pointsEntryMethod: 'POSITION',
       positionPoints: JSON.stringify({ '1': 50, '2': 30, '3': 20 }),
-      scoringConfig: JSON.stringify({ type: 'board_points', boards: 3 }),
+      scoringConfig: JSON.stringify({ type: 'board_points', boards: 3, categories: ['Singles', 'Doubles', 'Mixed Doubles'] }),
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
+      subCategories: ['Singles', 'Doubles', 'Mixed Doubles'],
     },
     {
       name: 'Badminton',
       category: 'Racquet',
       icon: 'Zap',
       sportType: 'INDIVIDUAL',
-      maxParticipants: 2,
+      maxParticipants: 4,
       allowsMixedClubs: false,
       pointsEntryMethod: 'BOTH',
       positionPoints: JSON.stringify({ '1': 50, '2': 30, '3': 20 }),
-      scoringConfig: JSON.stringify({ type: 'sets', setsToWin: 2, pointsPerSet: 21 }),
+      scoringConfig: JSON.stringify({ type: 'sets', setsToWin: 2, pointsPerSet: 21, categories: ['Singles', 'Doubles', 'Mixed Doubles'] }),
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
+      subCategories: ['Singles', 'Doubles', 'Mixed Doubles'],
     },
     {
       name: 'Chess',
@@ -410,6 +412,87 @@ export async function seedMongoDatabase() {
         },
       });
     }
+  }
+
+  // Match: M-BAD-D01 (Badminton Doubles)
+  const badminton = sports.find((s) => s.name === 'Badminton');
+  const indoorVenue = venues.find((v) => v.name === 'Indoor Sports Complex');
+
+  if (badminton && indoorVenue) {
+    const mBadD = await db.match.upsert({
+      where: { matchCode: 'M-BAD-D01' },
+      update: {},
+      create: {
+        matchCode: 'M-BAD-D01',
+        sportId: badminton.id,
+        round: 'Doubles Championship Round',
+        stageName: 'Doubles Finals',
+        matchCategory: 'Doubles',
+        matchDate: '2026-11-26',
+        matchTime: '17:00',
+        venueId: indoorVenue.id,
+        status: 'SCHEDULED',
+        notes: 'Badminton Doubles showdown between Alpha and Mavericks.',
+      },
+    });
+
+    await db.matchReferee.upsert({
+      where: { matchId_refereeId: { matchId: mBadD.id, refereeId: referees[1].id } },
+      update: {},
+      create: { matchId: mBadD.id, refereeId: referees[1].id },
+    });
+
+    await db.matchParticipant.upsert({
+      where: { id: `part-badd-1-${mBadD.id}` },
+      update: {},
+      create: { id: `part-badd-1-${mBadD.id}`, matchId: mBadD.id, clubId: clubs[0].id, score: 0 },
+    });
+
+    await db.matchParticipant.upsert({
+      where: { id: `part-badd-2-${mBadD.id}` },
+      update: {},
+      create: { id: `part-badd-2-${mBadD.id}`, matchId: mBadD.id, clubId: clubs[3].id, score: 0 },
+    });
+  }
+
+  // Match: M-CAR-M01 (Carrom Mixed Doubles)
+  const carrom = sports.find((s) => s.name === 'Carrom');
+
+  if (carrom && indoorVenue) {
+    const mCarM = await db.match.upsert({
+      where: { matchCode: 'M-CAR-M01' },
+      update: {},
+      create: {
+        matchCode: 'M-CAR-M01',
+        sportId: carrom.id,
+        round: 'Mixed Doubles Quarterfinals',
+        stageName: 'Mixed Doubles',
+        matchCategory: 'Mixed Doubles',
+        matchDate: '2026-11-27',
+        matchTime: '14:30',
+        venueId: indoorVenue.id,
+        status: 'SCHEDULED',
+        notes: 'Carrom Mixed Doubles clash between Crown Crushers and Dominator.',
+      },
+    });
+
+    await db.matchReferee.upsert({
+      where: { matchId_refereeId: { matchId: mCarM.id, refereeId: referees[1].id } },
+      update: {},
+      create: { matchId: mCarM.id, refereeId: referees[1].id },
+    });
+
+    await db.matchParticipant.upsert({
+      where: { id: `part-carm-1-${mCarM.id}` },
+      update: {},
+      create: { id: `part-carm-1-${mCarM.id}`, matchId: mCarM.id, clubId: clubs[1].id, score: 0 },
+    });
+
+    await db.matchParticipant.upsert({
+      where: { id: `part-carm-2-${mCarM.id}` },
+      update: {},
+      create: { id: `part-carm-2-${mCarM.id}`, matchId: mCarM.id, clubId: clubs[2].id, score: 0 },
+    });
   }
 
   // Tournament settings

@@ -57,6 +57,7 @@ export default function MatchesPage() {
   // New Match Form State
   const [formData, setFormData] = useState({
     sportId: '',
+    matchCategory: 'Singles',
     round: 'Final Stage',
     stageName: 'Grand Finals',
     matchDate: '2026-11-26',
@@ -115,6 +116,7 @@ export default function MatchesPage() {
     const isCricket = sports[0]?.name === 'Cricket';
     setFormData({
       sportId: defaultSport,
+      matchCategory: 'Singles',
       round: 'Grand Finals',
       stageName: 'Championship Round',
       matchDate: '2026-11-26',
@@ -132,13 +134,22 @@ export default function MatchesPage() {
     setIsCreateModalOpen(true);
   };
 
-  const handleSportSelectInForm = (sportId: string) => {
+  const handleSportSelectInForm = (compoundValue: string) => {
+    const [sportId, category] = compoundValue.includes('__')
+      ? compoundValue.split('__')
+      : [compoundValue, 'Singles'];
+
     const sp = sports.find((s) => s.id === sportId);
     const isCricket = sp?.name === 'Cricket';
+    const isDoublesOrMixed = category === 'Doubles' || category === 'Mixed Doubles';
+
     setFormData((prev) => ({
       ...prev,
       sportId,
+      matchCategory: category,
       participantType: isCricket ? 'CRICKET_TEAM' : 'CLUB',
+      round: isDoublesOrMixed ? `${category} Finals` : (prev.round || 'Grand Finals'),
+      stageName: isDoublesOrMixed ? `${category} Stage` : (prev.stageName || 'Championship Round'),
     }));
   };
 
@@ -173,6 +184,7 @@ export default function MatchesPage() {
 
     const payload = {
       sportId: formData.sportId,
+      matchCategory: formData.matchCategory || 'Singles',
       round: formData.round,
       stageName: formData.stageName,
       matchDate: formData.matchDate,
@@ -487,6 +499,11 @@ export default function MatchesPage() {
                           <SportIcon name={match.sport?.name} className="w-3.5 h-3.5 text-blue-600" />
                           <span>{match.sport?.name}</span>
                         </span>
+                        {match.matchCategory && match.matchCategory !== 'Singles' && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
+                            {match.matchCategory}
+                          </span>
+                        )}
                         <span className="text-[10px] text-slate-400 font-medium">• {match.round}</span>
                       </div>
 
@@ -643,20 +660,77 @@ export default function MatchesPage() {
               {/* Sport Picker */}
               <div>
                 <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Championship Sport *
+                  Championship Sport & Category *
                 </label>
                 <select
                   required
-                  value={formData.sportId}
+                  value={`${formData.sportId}__${formData.matchCategory || 'Singles'}`}
                   onChange={(e) => handleSportSelectInForm(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
                 >
-                  {sports.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.category} • {s.sportType})
-                    </option>
-                  ))}
+                  {sports.flatMap((s) => {
+                    if (s.name === 'Badminton' || s.name === 'Carrom') {
+                      return [
+                        <option key={`${s.id}__Singles`} value={`${s.id}__Singles`}>
+                          {s.name} - Singles ({s.category} • INDIVIDUAL)
+                        </option>,
+                        <option key={`${s.id}__Doubles`} value={`${s.id}__Doubles`}>
+                          {s.name} - Doubles ({s.category} • DOUBLES)
+                        </option>,
+                        <option key={`${s.id}__Mixed Doubles`} value={`${s.id}__Mixed Doubles`}>
+                          {s.name} - Mixed Doubles ({s.category} • MIXED DOUBLES)
+                        </option>,
+                      ];
+                    }
+                    return (
+                      <option key={`${s.id}__Singles`} value={`${s.id}__Singles`}>
+                        {s.name} ({s.category} • {s.sportType})
+                      </option>
+                    );
+                  })}
                 </select>
+
+                {/* Quick Category Buttons for Badminton & Carrom */}
+                {sports.find((s) => s.id === formData.sportId)?.name &&
+                  (sports.find((s) => s.id === formData.sportId)?.name === 'Badminton' ||
+                    sports.find((s) => s.id === formData.sportId)?.name === 'Carrom') && (
+                    <div className="mt-2.5 p-2.5 bg-blue-50/70 border border-blue-200/80 rounded-xl space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-blue-950 uppercase tracking-wider">
+                          {sports.find((s) => s.id === formData.sportId)?.name} Category:
+                        </span>
+                        <span className="text-[10px] font-semibold text-blue-700">
+                          Selected: {formData.matchCategory || 'Singles'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {(['Singles', 'Doubles', 'Mixed Doubles'] as const).map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                matchCategory: cat,
+                                round: cat !== 'Singles' ? `${cat} Championship` : 'Grand Finals',
+                                stageName: cat !== 'Singles' ? `${cat} Stage` : 'Championship Round',
+                              }));
+                            }}
+                            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                              formData.matchCategory === cat
+                                ? 'bg-blue-600 text-white shadow-xs'
+                                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            {cat === 'Singles' && '👤'}
+                            {cat === 'Doubles' && '👥'}
+                            {cat === 'Mixed Doubles' && '👫'}
+                            <span>{cat}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Participants Selection: Cricket Teams or Houses */}

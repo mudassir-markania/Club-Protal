@@ -46,10 +46,10 @@ const INITIAL_SPORTS = [
   { id: 'sport-cricket', name: 'Cricket', category: 'Field Sport', tournamentFormat: '10 Teams • 2 Pools • Super 4' },
   { id: 'sport-football', name: 'Football', category: 'Field Sport', tournamentFormat: '5-a-side Turf League' },
   { id: 'sport-bgmi', name: 'BGMI', category: 'E-Sports', tournamentFormat: 'Battle Royale 4-Man Squads' },
-  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Best of 3 Sets (21 Pts)' },
+  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Singles • Doubles • Mixed Doubles' },
   { id: 'sport-chess', name: 'Chess', category: 'Mind Sport', tournamentFormat: 'Rapid & Classical FIDE' },
   { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table' },
-  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'White Slam Knockout' },
+  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'Singles • Doubles • Mixed Doubles' },
   { id: 'sport-treasure-hunt', name: 'Treasure Hunt', category: 'Adventure Quest', tournamentFormat: 'Campus Clue Quest & Vault Hunt' },
 ];
 

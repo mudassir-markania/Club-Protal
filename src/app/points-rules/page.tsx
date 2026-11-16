@@ -255,7 +255,7 @@ export default function PointsRulesPage() {
                 </tr>
                 <tr className="hover:bg-white/[0.02]">
                   <td className="py-3 px-4 font-sans font-bold text-white">Badminton</td>
-                  <td className="py-3 px-4 text-center text-slate-400 font-sans">Sets (21 pts)</td>
+                  <td className="py-3 px-4 text-center text-slate-400 font-sans">Singles / Doubles / Mixed</td>
                   <td className="py-3 px-4 text-right text-[#C6A04A] font-bold">50.00 pts</td>
                   <td className="py-3 px-4 text-right text-slate-300">35.00 pts</td>
                   <td className="py-3 px-4 text-right text-slate-400">20.00 pts</td>
@@ -271,7 +271,7 @@ export default function PointsRulesPage() {
                 </tr>
                 <tr className="hover:bg-white/[0.02]">
                   <td className="py-3 px-4 font-sans font-bold text-white">Carrom</td>
-                  <td className="py-3 px-4 text-center text-slate-400 font-sans">White Slam Knockout</td>
+                  <td className="py-3 px-4 text-center text-slate-400 font-sans">Singles / Doubles / Mixed</td>
                   <td className="py-3 px-4 text-right text-[#C6A04A] font-bold">40.00 pts</td>
                   <td className="py-3 px-4 text-right text-slate-300">25.00 pts</td>
                   <td className="py-3 px-4 text-right text-slate-400">15.00 pts</td>

@@ -89,6 +89,7 @@ const SportSchema = createSchema({
   pointsEntryMethod: { type: String, default: 'BOTH' },
   positionPoints: { type: String },
   status: { type: String, default: 'ACTIVE' },
+  subCategories: { type: [String], default: [] },
 });
 
 // 6. Player
@@ -144,6 +145,7 @@ const MatchSchema = createSchema({
   sportId: { type: String, required: true },
   round: { type: String, required: true },
   stageName: { type: String },
+  matchCategory: { type: String, default: 'Singles' },
   matchDate: { type: String, required: true },
   matchTime: { type: String, required: true },
   venueId: { type: String },

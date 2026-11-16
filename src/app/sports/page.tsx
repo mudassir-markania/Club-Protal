@@ -9,8 +9,8 @@ import { Calendar, CheckCircle2, ChevronRight, Trophy } from 'lucide-react';
 
 const INITIAL_SPORTS = [
   { id: 'sport-bgmi', name: 'BGMI', category: 'E-Sports', tournamentFormat: 'Battle Royale 4-Man Squads', description: 'Mixed-house squads competing across multiple maps. Points split evenly among unique represented houses.' },
-  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'White Slam Knockout', description: 'Traditional board showdown featuring singles and doubles brackets.' },
-  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Best of 3 Sets (21 Pts)', description: 'Fast-paced singles and doubles matches played on indoor wooden courts.' },
+  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'Singles • Doubles • Mixed Doubles', description: 'Traditional board showdown featuring singles, doubles, and mixed doubles brackets on competition boards.' },
+  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Singles • Doubles • Mixed Doubles', description: 'Fast-paced singles, doubles, and mixed doubles sets (21 pts) played on indoor wooden courts.' },
   { id: 'sport-chess', name: 'Chess', category: 'Mind Sport', tournamentFormat: 'Rapid & Classical FIDE', description: 'Strategic intellectual battles on 64 squares with clock-controlled rounds.' },
   { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table', description: 'High-speed table tennis singles and doubles with sudden death deuce rules.' },
   { id: 'sport-cricket', name: 'Cricket', category: 'Field Sport', tournamentFormat: '10 Teams • 2 Pools • Super 4', description: 'Main championship centerpiece with 10 franchise teams competing for the trophy.' },
