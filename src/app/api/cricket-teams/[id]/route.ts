@@ -47,6 +47,24 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       include: { club: true },
     });
 
+    if (captainName !== undefined && existing.clubId) {
+      const isTeamB =
+        String(existing.id).endsWith('-b') ||
+        String(existing._id).endsWith('-b') ||
+        existing.name.endsWith(' B');
+      if (isTeamB) {
+        await db.club.update({
+          where: { id: existing.clubId },
+          data: { viceCaptainName: captainName.trim() },
+        });
+      } else {
+        await db.club.update({
+          where: { id: existing.clubId },
+          data: { captainName: captainName.trim() },
+        });
+      }
+    }
+
     await createAuditLog({
       user,
       action: 'UPDATE_CRICKET_TEAM',

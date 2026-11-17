@@ -64,35 +64,57 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       },
     });
 
-    if (team1Name !== undefined || team2Name !== undefined) {
-      const teams = await db.cricketTeam.findMany({
-        where: {
-          OR: [{ clubId: params.id }, { clubId: existing.id }],
+    // Also sync 1st team (led by House Captain) and 2nd team (led by House Vice Captain)
+    const teams = await db.cricketTeam.findMany({
+      where: {
+        OR: [{ clubId: params.id }, { clubId: existing.id }],
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const team1 = teams.find((t: any) => String(t.id).endsWith('-a') || String(t._id).endsWith('-a')) || teams[0];
+    const team2 = teams.find((t: any) => String(t.id).endsWith('-b') || String(t._id).endsWith('-b')) || teams[1];
+
+    if (team1) {
+      const updateData: any = {};
+      if (team1Name) updateData.name = team1Name.trim();
+      if (captainName !== undefined) updateData.captainName = captainName.trim();
+      if (Object.keys(updateData).length > 0) {
+        await db.cricketTeam.update({
+          where: { id: team1.id },
+          data: updateData,
+        });
+      }
+    } else if (team1Name) {
+      await db.cricketTeam.create({
+        data: {
+          name: team1Name.trim(),
+          clubId: params.id,
+          captainName: captainName ? captainName.trim() : null,
+          status: 'ACTIVE',
         },
-        orderBy: { name: 'asc' },
       });
+    }
 
-      if (team1Name && teams[0]) {
+    if (team2) {
+      const updateData: any = {};
+      if (team2Name) updateData.name = team2Name.trim();
+      if (viceCaptainName !== undefined) updateData.captainName = viceCaptainName.trim();
+      if (Object.keys(updateData).length > 0) {
         await db.cricketTeam.update({
-          where: { id: teams[0].id },
-          data: { name: team1Name.trim() },
-        });
-      } else if (team1Name && !teams[0]) {
-        await db.cricketTeam.create({
-          data: { name: team1Name.trim(), clubId: params.id, status: 'ACTIVE' },
+          where: { id: team2.id },
+          data: updateData,
         });
       }
-
-      if (team2Name && teams[1]) {
-        await db.cricketTeam.update({
-          where: { id: teams[1].id },
-          data: { name: team2Name.trim() },
-        });
-      } else if (team2Name && !teams[1]) {
-        await db.cricketTeam.create({
-          data: { name: team2Name.trim(), clubId: params.id, status: 'ACTIVE' },
-        });
-      }
+    } else if (team2Name) {
+      await db.cricketTeam.create({
+        data: {
+          name: team2Name.trim(),
+          clubId: params.id,
+          captainName: viceCaptainName ? viceCaptainName.trim() : null,
+          status: 'ACTIVE',
+        },
+      });
     }
 
     await createAuditLog({

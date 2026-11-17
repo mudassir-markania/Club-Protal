@@ -99,9 +99,21 @@ export default function ClubsPage() {
   const handleOpenEdit = (club: any) => {
     setSelectedClub(club);
     const houseTeams = getHouseTeams(club);
-    const sortedTeams = [...houseTeams].sort((a: any, b: any) => (a.name || '').localeCompare(b.name || ''));
-    const t1 = sortedTeams[0];
-    const t2 = sortedTeams[1];
+    const t1 =
+      houseTeams.find(
+        (t: any) =>
+          String(t.id).endsWith('-a') ||
+          String(t._id).endsWith('-a') ||
+          (t.name && /\s+A$/i.test(t.name))
+      ) || houseTeams[0];
+    const t2 =
+      houseTeams.find(
+        (t: any) =>
+          (String(t.id).endsWith('-b') ||
+            String(t._id).endsWith('-b') ||
+            (t.name && /\s+B$/i.test(t.name))) &&
+          t !== t1
+      ) || houseTeams.find((t: any) => t !== t1) || houseTeams[1];
 
     setFormData({
       name: club.name,
@@ -152,36 +164,50 @@ export default function ClubsPage() {
 
       const savedClubId = selectedClub ? selectedClub.id : data.id;
 
-      // Update or create Team 1
-      if (formData.team1Name) {
+      // Update or create Team 1 (led by House Captain)
+      if (formData.team1Name || formData.captainName) {
         if (formData.team1Id) {
           await fetch(`/api/cricket-teams/${formData.team1Id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: formData.team1Name }),
+            body: JSON.stringify({
+              name: formData.team1Name,
+              captainName: formData.captainName,
+            }),
           });
         } else if (savedClubId) {
           await fetch('/api/cricket-teams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: formData.team1Name, clubId: savedClubId }),
+            body: JSON.stringify({
+              name: formData.team1Name,
+              captainName: formData.captainName,
+              clubId: savedClubId,
+            }),
           });
         }
       }
 
-      // Update or create Team 2
-      if (formData.team2Name) {
+      // Update or create Team 2 (led by House Vice Captain)
+      if (formData.team2Name || formData.viceCaptainName) {
         if (formData.team2Id) {
           await fetch(`/api/cricket-teams/${formData.team2Id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: formData.team2Name }),
+            body: JSON.stringify({
+              name: formData.team2Name,
+              captainName: formData.viceCaptainName,
+            }),
           });
         } else if (savedClubId) {
           await fetch('/api/cricket-teams', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: formData.team2Name, clubId: savedClubId }),
+            body: JSON.stringify({
+              name: formData.team2Name,
+              captainName: formData.viceCaptainName,
+              clubId: savedClubId,
+            }),
           });
         }
       }
@@ -528,7 +554,13 @@ export default function ClubsPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-slate-600 font-medium">
-                        {ct.captainName || 'Assigned per fixture'}
+                        {ct.captainName ||
+                          (String(ct.id).endsWith('-b') ||
+                          String(ct._id).endsWith('-b') ||
+                          (ct.name && /\s+B$/i.test(ct.name))
+                            ? ct.club?.viceCaptainName
+                            : ct.club?.captainName) ||
+                          'Assigned per fixture'}
                       </td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
