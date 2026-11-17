@@ -398,7 +398,7 @@ export default function MatchesPage() {
             </div>
 
             {/* Status Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab('ALL')}
@@ -454,8 +454,8 @@ export default function MatchesPage() {
           </div>
 
           {/* 8 Sports Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-slate-100 text-xs">
-            <span className="text-[11px] text-slate-400 font-semibold mr-1 shrink-0">Sport:</span>
+          <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100 text-xs">
+            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mr-1 shrink-0">Sport:</span>
             <button
               onClick={() => setSelectedSport('')}
               className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition shrink-0 ${
