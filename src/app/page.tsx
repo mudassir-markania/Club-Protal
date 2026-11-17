@@ -38,11 +38,11 @@ const HOUSE_METADATA: Record<
 };
 
 const INITIAL_HOUSES = [
-  { id: 'club-alp', name: 'Alpha', code: 'ALP', captainName: 'Ethan Hunt', rank: 1, totalPoints: 0, cricketTeams: [{ id: 'crick-alp-a', name: 'Alpha A' }, { id: 'crick-alp-b', name: 'Alpha B' }] },
-  { id: 'club-crw', name: 'Crown Crushers', code: 'CRW', captainName: 'Zane Malik', rank: 2, totalPoints: 0, cricketTeams: [{ id: 'crick-crw-a', name: 'Crown Crushers A' }, { id: 'crick-crw-b', name: 'Crown Crushers B' }] },
-  { id: 'club-dom', name: 'Dominator', code: 'DOM', captainName: 'Leo Vance', rank: 3, totalPoints: 0, cricketTeams: [{ id: 'crick-dom-a', name: 'Dominator A' }, { id: 'crick-dom-b', name: 'Dominator B' }] },
-  { id: 'club-mav', name: 'Mavericks', code: 'MAV', captainName: 'Alex Rivera', rank: 4, totalPoints: 0, cricketTeams: [{ id: 'crick-mav-a', name: 'Mavericks A' }, { id: 'crick-mav-b', name: 'Mavericks B' }] },
-  { id: 'club-ryl', name: 'Royal Force', code: 'RYL', captainName: 'Carlos Vega', rank: 5, totalPoints: 0, cricketTeams: [{ id: 'crick-ryl-a', name: 'Royal Force A' }, { id: 'crick-ryl-b', name: 'Royal Force B' }] },
+  { id: 'club-alp', name: 'Alpha', code: 'ALP', captainName: 'Piyush Pandey', rank: 1, totalPoints: 0, cricketTeams: [{ id: 'crick-alp-a', name: 'Dominators' }, { id: 'crick-alp-b', name: 'Rebel Royals' }] },
+  { id: 'club-crw', name: 'Crown Crushers', code: 'CRW', captainName: 'Taha Choudhary', rank: 2, totalPoints: 0, cricketTeams: [{ id: 'crick-crw-a', name: 'Savage Strikers' }, { id: 'crick-crw-b', name: 'Storm Breakers' }] },
+  { id: 'club-dom', name: 'Dominator', code: 'DOM', captainName: 'Aquib Hingwala', rank: 3, totalPoints: 0, cricketTeams: [{ id: 'crick-dom-a', name: 'GenZ Warrior' }, { id: 'crick-dom-b', name: 'Crown Crusher' }] },
+  { id: 'club-mav', name: 'Blue', code: 'MAV', captainName: 'Affan', rank: 4, totalPoints: 0, cricketTeams: [{ id: 'crick-mav-a', name: 'Nex Blitz' }, { id: 'crick-mav-b', name: 'Royal Force' }] },
+  { id: 'club-ryl', name: 'Royal Force', code: 'RYL', captainName: 'Pravin', rank: 5, totalPoints: 0, cricketTeams: [{ id: 'crick-ryl-a', name: 'Alpha Warriors' }, { id: 'crick-ryl-b', name: 'Mavericks' }] },
 ];
 
 const INITIAL_SPORTS = [

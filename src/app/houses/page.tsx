@@ -19,11 +19,11 @@ const HOUSE_METADATA: Record<
 };
 
 const DEFAULT_HOUSES = [
-  { id: 'club-alp', name: 'Alpha', code: 'ALP', captainName: 'Ethan Hunt', rank: 1, totalPoints: 0, cricketTeams: [{ id: 'alp-a', name: 'Alpha A' }, { id: 'alp-b', name: 'Alpha B' }] },
-  { id: 'club-crw', name: 'Crown Crushers', code: 'CRW', captainName: 'Zane Malik', rank: 2, totalPoints: 0, cricketTeams: [{ id: 'crw-a', name: 'Crown Crushers A' }, { id: 'crw-b', name: 'Crown Crushers B' }] },
-  { id: 'club-dom', name: 'Dominator', code: 'DOM', captainName: 'Leo Vance', rank: 3, totalPoints: 0, cricketTeams: [{ id: 'dom-a', name: 'Dominator A' }, { id: 'dom-b', name: 'Dominator B' }] },
-  { id: 'club-mav', name: 'Mavericks', code: 'MAV', captainName: 'Alex Rivera', rank: 4, totalPoints: 0, cricketTeams: [{ id: 'mav-a', name: 'Mavericks A' }, { id: 'mav-b', name: 'Mavericks B' }] },
-  { id: 'club-ryl', name: 'Royal Force', code: 'RYL', captainName: 'Carlos Vega', rank: 5, totalPoints: 0, cricketTeams: [{ id: 'ryl-a', name: 'Royal Force A' }, { id: 'ryl-b', name: 'Royal Force B' }] },
+  { id: 'club-alp', name: 'Alpha', code: 'ALP', captainName: 'Piyush Pandey', rank: 1, totalPoints: 0, cricketTeams: [{ id: 'alp-a', name: 'Dominators' }, { id: 'alp-b', name: 'Rebel Royals' }] },
+  { id: 'club-crw', name: 'Crown Crushers', code: 'CRW', captainName: 'Taha Choudhary', rank: 2, totalPoints: 0, cricketTeams: [{ id: 'crw-a', name: 'Savage Strikers' }, { id: 'crw-b', name: 'Storm Breakers' }] },
+  { id: 'club-dom', name: 'Dominator', code: 'DOM', captainName: 'Aquib Hingwala', rank: 3, totalPoints: 0, cricketTeams: [{ id: 'dom-a', name: 'GenZ Warrior' }, { id: 'dom-b', name: 'Crown Crusher' }] },
+  { id: 'club-mav', name: 'Blue', code: 'MAV', captainName: 'Affan', rank: 4, totalPoints: 0, cricketTeams: [{ id: 'mav-a', name: 'Nex Blitz' }, { id: 'mav-b', name: 'Royal Force' }] },
+  { id: 'club-ryl', name: 'Royal Force', code: 'RYL', captainName: 'Pravin', rank: 5, totalPoints: 0, cricketTeams: [{ id: 'ryl-a', name: 'Alpha Warriors' }, { id: 'ryl-b', name: 'Mavericks' }] },
 ];
 
 export default function HousesPage() {

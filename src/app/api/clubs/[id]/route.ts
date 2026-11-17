@@ -117,6 +117,56 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       });
     }
 
+    // Sync Captain as a Player in db.player
+    if (captainName !== undefined && captainName.trim()) {
+      const existingCaptainPlayer = await db.player.findFirst({
+        where: {
+          clubId: params.id,
+          name: existing.captainName || captainName,
+        },
+      });
+      if (existingCaptainPlayer) {
+        await db.player.update({
+          where: { id: existingCaptainPlayer.id },
+          data: { name: captainName.trim() },
+        });
+      } else {
+        await db.player.create({
+          data: {
+            name: captainName.trim(),
+            clubId: params.id,
+            status: 'APPROVED',
+            registrationId: `REG-CAP-${params.id.slice(-4)}`,
+          },
+        });
+      }
+    }
+
+    // Sync Vice Captain as a Player in db.player
+    if (viceCaptainName !== undefined && viceCaptainName.trim()) {
+      const existingVicePlayer = await db.player.findFirst({
+        where: {
+          clubId: params.id,
+          name: existing.viceCaptainName || viceCaptainName,
+        },
+      });
+      if (existingVicePlayer) {
+        await db.player.update({
+          where: { id: existingVicePlayer.id },
+          data: { name: viceCaptainName.trim() },
+        });
+      } else {
+        await db.player.create({
+          data: {
+            name: viceCaptainName.trim(),
+            clubId: params.id,
+            status: 'APPROVED',
+            registrationId: `REG-VC-${params.id.slice(-4)}`,
+          },
+        });
+      }
+    }
+
     await createAuditLog({
       user,
       action: 'UPDATE_CLUB',
