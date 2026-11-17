@@ -28,10 +28,20 @@ export async function POST(req: Request) {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
     const body = await req.json();
 
-    const { name, code, logoUrl, captainName, viceCaptainName, status } = body;
+    let { name, code, logoUrl, captainName, viceCaptainName, status, team1Name, team2Name } = body;
 
-    if (!name || !code) {
-      return NextResponse.json({ error: 'Club Name and Code are required' }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: 'House Name is required' }, { status: 400 });
+    }
+
+    if (!code) {
+      const baseCode = name.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'HSE';
+      let candidate = baseCode;
+      let counter = 1;
+      while (await db.club.findFirst({ where: { code: candidate } })) {
+        candidate = `${baseCode.slice(0, 2)}${counter++}`;
+      }
+      code = candidate;
     }
 
     const existing = await db.club.findFirst({
@@ -41,7 +51,7 @@ export async function POST(req: Request) {
     });
 
     if (existing) {
-      return NextResponse.json({ error: 'Club with this name or code already exists' }, { status: 409 });
+      return NextResponse.json({ error: 'House with this name or code already exists' }, { status: 409 });
     }
 
     const clubCount = await db.club.count();
@@ -58,6 +68,25 @@ export async function POST(req: Request) {
         totalPoints: 0,
       },
     });
+
+    if (team1Name) {
+      await db.cricketTeam.create({
+        data: {
+          name: team1Name.trim(),
+          clubId: club.id,
+          status: 'ACTIVE',
+        },
+      });
+    }
+    if (team2Name) {
+      await db.cricketTeam.create({
+        data: {
+          name: team2Name.trim(),
+          clubId: club.id,
+          status: 'ACTIVE',
+        },
+      });
+    }
 
     await createAuditLog({
       user,

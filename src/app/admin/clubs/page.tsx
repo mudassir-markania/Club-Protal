@@ -48,6 +48,10 @@ export default function ClubsPage() {
     captainName: '',
     viceCaptainName: '',
     status: 'ACTIVE',
+    team1Name: '',
+    team2Name: '',
+    team1Id: '',
+    team2Id: '',
   });
 
   useEffect(() => {
@@ -83,6 +87,10 @@ export default function ClubsPage() {
       captainName: '',
       viceCaptainName: '',
       status: 'ACTIVE',
+      team1Name: '',
+      team2Name: '',
+      team1Id: '',
+      team2Id: '',
     });
     setError(null);
     setIsModalOpen(true);
@@ -90,6 +98,11 @@ export default function ClubsPage() {
 
   const handleOpenEdit = (club: any) => {
     setSelectedClub(club);
+    const houseTeams = getHouseTeams(club);
+    const sortedTeams = [...houseTeams].sort((a: any, b: any) => (a.name || '').localeCompare(b.name || ''));
+    const t1 = sortedTeams[0];
+    const t2 = sortedTeams[1];
+
     setFormData({
       name: club.name,
       code: club.code,
@@ -97,6 +110,10 @@ export default function ClubsPage() {
       captainName: club.captainName || '',
       viceCaptainName: club.viceCaptainName || '',
       status: club.status,
+      team1Name: t1?.name || '',
+      team2Name: t2?.name || '',
+      team1Id: t1?.id || t1?._id || '',
+      team2Id: t2?.id || t2?._id || '',
     });
     setError(null);
     setIsModalOpen(true);
@@ -130,10 +147,46 @@ export default function ClubsPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to save club');
+        throw new Error(data.error || 'Failed to save house');
       }
 
-      setSuccess(selectedClub ? 'Club updated successfully!' : 'New club created successfully!');
+      const savedClubId = selectedClub ? selectedClub.id : data.id;
+
+      // Update or create Team 1
+      if (formData.team1Name) {
+        if (formData.team1Id) {
+          await fetch(`/api/cricket-teams/${formData.team1Id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: formData.team1Name }),
+          });
+        } else if (savedClubId) {
+          await fetch('/api/cricket-teams', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: formData.team1Name, clubId: savedClubId }),
+          });
+        }
+      }
+
+      // Update or create Team 2
+      if (formData.team2Name) {
+        if (formData.team2Id) {
+          await fetch(`/api/cricket-teams/${formData.team2Id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: formData.team2Name }),
+          });
+        } else if (savedClubId) {
+          await fetch('/api/cricket-teams', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: formData.team2Name, clubId: savedClubId }),
+          });
+        }
+      }
+
+      setSuccess(selectedClub ? 'House and teams updated successfully!' : 'New house created successfully!');
       setIsModalOpen(false);
       fetchData();
     } catch (err: any) {
@@ -505,7 +558,7 @@ export default function ClubsPage() {
         {/* House Creation / Edit Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in">
               <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
                 <h3 className="font-bold text-sm">
                   {selectedClub ? `Edit House: ${selectedClub.name}` : 'Create New House'}
@@ -531,21 +584,44 @@ export default function ClubsPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Mavericks"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Code *</label>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">1st Team Name *</label>
                     <input
                       type="text"
                       required
-                      maxLength={4}
-                      value={formData.code}
-                      onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                      placeholder="e.g. MAV"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg font-mono uppercase outline-none focus:ring-2 focus:ring-blue-600"
+                      value={formData.team1Name}
+                      onChange={(e) => setFormData({ ...formData, team1Name: e.target.value })}
+                      placeholder="e.g. Mavericks A"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">2nd Team Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.team2Name}
+                      onChange={(e) => setFormData({ ...formData, team2Name: e.target.value })}
+                      placeholder="e.g. Mavericks B"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Captain</label>
+                    <input
+                      type="text"
+                      value={formData.captainName}
+                      onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
+                      placeholder="e.g. Alex Rivera"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
                     />
                   </div>
                   <div>
@@ -559,17 +635,6 @@ export default function ClubsPage() {
                       <option value="INACTIVE">Inactive</option>
                     </select>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Captain</label>
-                  <input
-                    type="text"
-                    value={formData.captainName}
-                    onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
-                    placeholder="e.g. Alex Rivera"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
-                  />
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">

@@ -50,19 +50,50 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: 'Club not found' }, { status: 404 });
     }
 
-    const { name, code, logoUrl, captainName, viceCaptainName, status } = body;
+    const { name, code, logoUrl, captainName, viceCaptainName, status, team1Name, team2Name } = body;
 
     const updated = await db.club.update({
       where: { id: params.id },
       data: {
         name: name !== undefined ? name : existing.name,
-        code: code !== undefined ? code.toUpperCase() : existing.code,
+        code: code !== undefined && code !== '' ? code.toUpperCase() : existing.code,
         logoUrl: logoUrl !== undefined ? logoUrl : existing.logoUrl,
         captainName: captainName !== undefined ? captainName : existing.captainName,
         viceCaptainName: viceCaptainName !== undefined ? viceCaptainName : existing.viceCaptainName,
         status: status !== undefined ? status : existing.status,
       },
     });
+
+    if (team1Name !== undefined || team2Name !== undefined) {
+      const teams = await db.cricketTeam.findMany({
+        where: {
+          OR: [{ clubId: params.id }, { clubId: existing.id }],
+        },
+        orderBy: { name: 'asc' },
+      });
+
+      if (team1Name && teams[0]) {
+        await db.cricketTeam.update({
+          where: { id: teams[0].id },
+          data: { name: team1Name.trim() },
+        });
+      } else if (team1Name && !teams[0]) {
+        await db.cricketTeam.create({
+          data: { name: team1Name.trim(), clubId: params.id, status: 'ACTIVE' },
+        });
+      }
+
+      if (team2Name && teams[1]) {
+        await db.cricketTeam.update({
+          where: { id: teams[1].id },
+          data: { name: team2Name.trim() },
+        });
+      } else if (team2Name && !teams[1]) {
+        await db.cricketTeam.create({
+          data: { name: team2Name.trim(), clubId: params.id, status: 'ACTIVE' },
+        });
+      }
+    }
 
     await createAuditLog({
       user,
