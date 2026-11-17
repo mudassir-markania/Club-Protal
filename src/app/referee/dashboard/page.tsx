@@ -288,12 +288,7 @@ export default function RefereeDashboardPage() {
             <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider block mb-1">
               Awaiting Submission
             </span>
-            <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-extrabold text-amber-700">{awaitingSubmission.length}</p>
-              {awaitingSubmission.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-              )}
-            </div>
+            <p className="text-2xl font-extrabold text-amber-700">{awaitingSubmission.length}</p>
             <span className="text-[11px] text-amber-600 mt-1 block font-medium">Ready for points entry</span>
           </div>
 
