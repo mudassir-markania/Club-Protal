@@ -576,16 +576,29 @@ export default function ClubsPage() {
                   </div>
                 )}
 
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Mavericks"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
-                  />
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g. Blue"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 bg-white"
+                    >
+                      <option value="ACTIVE">Active</option>
+                      <option value="INACTIVE">Inactive</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -625,15 +638,14 @@ export default function ClubsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Vice Captain</label>
+                    <input
+                      type="text"
+                      value={formData.viceCaptainName}
+                      onChange={(e) => setFormData({ ...formData, viceCaptainName: e.target.value })}
+                      placeholder="e.g. Jordan Smith"
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
-                    >
-                      <option value="ACTIVE">Active</option>
-                      <option value="INACTIVE">Inactive</option>
-                    </select>
+                    />
                   </div>
                 </div>
 
