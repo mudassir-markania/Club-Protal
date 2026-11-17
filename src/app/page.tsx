@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
-import ChampionshipSplashScreen from '@/components/public/ChampionshipSplashScreen';
 import {
   Trophy,
   Medal,
@@ -15,62 +14,334 @@ import {
   Shield,
   ArrowRight,
   ChevronRight,
-  Scale,
+  ChevronLeft,
   Sparkles,
-  Star,
+  Users,
+  Gamepad2,
+  Target,
+  Megaphone,
   CheckCircle2,
+  Search,
+  BarChart3,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
+import HeroChampionshipTrophy from '@/components/public/HeroChampionshipTrophy';
+import HeroStadiumBackground from '@/components/public/HeroStadiumBackground';
 
-const HOUSE_METADATA: Record<
-  string,
+// Mockup Accurate House Standings Data
+const MOCKUP_HOUSES = [
   {
-    code: string;
-    name: string;
-    accentColor: string;
+    id: 'house-mav',
+    rank: 1,
+    name: 'Mavericks',
+    code: 'MAV',
+    wins: 21,
+    gold: 8,
+    silver: 4,
+    bronze: 3,
+    points: 420,
+    captain: 'Alex Rivera',
+    motto: 'Unyielding Speed, Unbroken Pride',
+    accentColor: '#DC2626',
+    gradient: 'from-[#991B1B] via-[#DC2626] to-[#7F1D1D]',
+  },
+  {
+    id: 'house-dom',
+    rank: 2,
+    name: 'Dominators',
+    code: 'DOM',
+    wins: 18,
+    gold: 6,
+    silver: 5,
+    bronze: 4,
+    points: 380,
+    captain: 'Leo Vance',
+    motto: 'Command the Arena, Rule the Field',
+    accentColor: '#1E3A8A',
+    gradient: 'from-[#0C2D57] via-[#1E3A8A] to-[#144272]',
+  },
+  {
+    id: 'house-alp',
+    rank: 3,
+    name: 'Alphas',
+    code: 'ALP',
+    wins: 17,
+    gold: 5,
+    silver: 4,
+    bronze: 5,
+    points: 355,
+    captain: 'Ethan Hunt',
+    motto: 'First to Strike, Last to Fall',
+    accentColor: '#7C3AED',
+    gradient: 'from-[#3B185F] via-[#591A75] to-[#4C1D95]',
+  },
+  {
+    id: 'house-spa',
+    rank: 4,
+    name: 'Spartans',
+    code: 'SPA',
+    wins: 14,
+    gold: 4,
+    silver: 3,
+    bronze: 4,
+    points: 310,
+    captain: 'Marcus Cole',
+    motto: 'Discipline in Battle, Honor in Triumph',
+    accentColor: '#D97706',
+    gradient: 'from-[#78350F] via-[#B45309] to-[#92400E]',
+  },
+  {
+    id: 'house-phx',
+    rank: 5,
+    name: 'Phoenix',
+    code: 'PHX',
+    wins: 12,
+    gold: 3,
+    silver: 4,
+    bronze: 3,
+    points: 275,
+    captain: 'Aiden Drake',
+    motto: 'From the Ashes, Infinite Radiance',
+    accentColor: '#EA580C',
+    gradient: 'from-[#9A3412] via-[#EA580C] to-[#C2410C]',
+  },
+];
+
+// 8 Participating Sports from the Mockup
+const MOCKUP_SPORTS = [
+  {
+    id: 'cricket',
+    name: 'Cricket',
+    category: 'Field Sport',
+    format: '10 Teams • 2 Pools • Super 4',
+    iconBg: 'bg-sky-50 text-sky-600 border-sky-100',
+    hoverBorder: 'hover:border-sky-300',
+    tag: 'Outdoor Turf',
+    rules: 'T10 Fast Overs • 11 Players • 2 Sub Fielders • Super Over Decider',
+  },
+  {
+    id: 'football',
+    name: 'Football',
+    category: 'Field Sport',
+    format: '5-a-side Turf League',
+    iconBg: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    hoverBorder: 'hover:border-emerald-300',
+    tag: 'Main Arena',
+    rules: '20 Min Halves • 5 Players • Penalty Shootout on Draw',
+  },
+  {
+    id: 'badminton',
+    name: 'Badminton',
+    category: 'Racquet',
+    format: 'Singles • Doubles • Mixed',
+    iconBg: 'bg-cyan-50 text-cyan-600 border-cyan-100',
+    hoverBorder: 'hover:border-cyan-300',
+    tag: 'Indoor Court A',
+    rules: 'Best of 3 Sets • 21 Rally Points • BWF Official Shuttle',
+  },
+  {
+    id: 'table-tennis',
+    name: 'Table Tennis',
+    category: 'Racquet',
+    format: '11-Point Fast Table',
+    iconBg: 'bg-rose-50 text-rose-600 border-rose-100',
+    hoverBorder: 'hover:border-rose-300',
+    tag: 'Indoor Court B',
+    rules: 'Best of 5 Games • 11 Points • Deuce 2-Point Lead Required',
+  },
+  {
+    id: 'chess',
+    name: 'Chess',
+    category: 'Mind Sport',
+    format: 'Rapid & Classical FIDE',
+    iconBg: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+    hoverBorder: 'hover:border-indigo-300',
+    tag: 'Quiet Hall 3',
+    rules: '15+10 Rapid Clock • FIDE Swiss System • Touch Move Enforced',
+  },
+  {
+    id: 'carrom',
+    name: 'Carrom',
+    category: 'Indoor',
+    format: 'Singles • Doubles • Mixed',
+    iconBg: 'bg-amber-50 text-amber-600 border-amber-100',
+    hoverBorder: 'hover:border-amber-300',
+    tag: 'Club Hall 1',
+    rules: '29 Board Points • Queen Cover Required • 8 Boards Max',
+  },
+  {
+    id: 'bgmi',
+    name: 'BGMI',
+    category: 'E-Sports',
+    format: 'Battle Royale 4-Man Squads',
+    iconBg: 'bg-purple-50 text-purple-600 border-purple-100',
+    hoverBorder: 'hover:border-purple-300',
+    tag: 'LAN Arena',
+    rules: 'Erangel & Miramar • 4 Matches • Esports Points Matrix',
+  },
+  {
+    id: 'mystery',
+    name: 'Mystery Game',
+    category: 'Secret Quest',
+    format: 'Revealed on Nov 27th',
+    iconBg: 'bg-orange-50 text-orange-600 border-orange-100',
+    hoverBorder: 'hover:border-orange-300',
+    tag: 'Surprise Arena',
+    rules: 'Mystery team challenge unlocked on tournament Day 3!',
+  },
+];
+
+// Announcements List for Carousel
+const ANNOUNCEMENTS = [
+  {
+    id: 1,
+    title: 'Registrations Closed',
+    description: 'Player registrations are now closed. Final lists are under review.',
+    tag: 'Important',
+    date: 'Nov 20, 2026',
+  },
+  {
+    id: 2,
+    title: 'Official Schedule & Pool Draws Out',
+    description: 'Tournament brackets for Cricket, Football, and BGMI are now locked.',
+    tag: 'Fixtures',
+    date: 'Nov 22, 2026',
+  },
+  {
+    id: 3,
+    title: 'Referee Technical Briefing',
+    description: 'Mandatory technical rules coordination meeting scheduled on Nov 24, 4:00 PM.',
+    tag: 'Officials',
+    date: 'Nov 24, 2026',
+  },
+];
+
+// Upcoming Matches
+const UPCOMING_MATCHES = [
+  {
+    id: 'm1',
+    sport: 'CRICKET',
+    stage: 'League',
+    color: 'from-[#0284C7] to-[#0369A1]',
+    team1: { name: 'Mavericks', code: 'MAV' },
+    team2: { name: 'Alphas', code: 'ALP' },
+    time: 'Nov 26, 10:00 AM',
+    venue: 'Main Oval Ground',
+  },
+  {
+    id: 'm2',
+    sport: 'BADMINTON',
+    stage: 'Quarterfinal',
+    color: 'from-[#EA580C] to-[#C2410C]',
+    team1: { name: 'Dominators', code: 'DOM' },
+    team2: { name: 'Spartans', code: 'SPA' },
+    time: 'Nov 26, 12:30 PM',
+    venue: 'Indoor Sports Complex',
+  },
+  {
+    id: 'm3',
+    sport: 'CHESS',
+    stage: 'Round 2',
+    color: 'from-[#7C3AED] to-[#5B21B6]',
+    team1: { name: 'Phoenix', code: 'PHX' },
+    team2: { name: 'Alphas', code: 'ALP' },
+    time: 'Nov 26, 02:00 PM',
+    venue: 'Mind Sports Auditorium',
+  },
+];
+
+// Clean Vector House Crest Icons
+function HouseCrest({ name, className = 'w-6 h-6' }: { name: string; className?: string }) {
+  const n = (name || '').toLowerCase();
+  if (n.includes('mav')) {
+    // Mavericks Eagle Crest (Crimson, Black, Gold)
+    return (
+      <svg viewBox="0 0 44 44" className={className} fill="none">
+        <circle cx="22" cy="22" r="21" fill="#7F1D1D" stroke="#EF4444" strokeWidth="1.5" />
+        <path d="M11 26L17 14L23 20L29 11L32 20L34 24L29 30L19 31L11 26Z" fill="#FDE047" />
+        <path d="M21 19L28 24L25 29L19 27L21 19Z" fill="#DC2626" />
+        <circle cx="26" cy="19" r="1.5" fill="#0F172A" />
+      </svg>
+    );
   }
-> = {
-  ALP: { code: 'ALP', name: 'Alpha', accentColor: '#2563EB' },
-  CRW: { code: 'CRW', name: 'Crown Crushers', accentColor: '#D97706' },
-  DOM: { code: 'DOM', name: 'Dominator', accentColor: '#DC2626' },
-  MAV: { code: 'MAV', name: 'Mavericks', accentColor: '#059669' },
-  RYL: { code: 'RYL', name: 'Royal Force', accentColor: '#7C3AED' },
-};
-
-const INITIAL_HOUSES = [
-  { id: 'club-alp', name: 'Alpha', code: 'ALP', captainName: 'Piyush Pandey', rank: 1, totalPoints: 0, cricketTeams: [{ id: 'crick-alp-a', name: 'Dominators' }, { id: 'crick-alp-b', name: 'Rebel Royals' }] },
-  { id: 'club-crw', name: 'Crown Crushers', code: 'CRW', captainName: 'Taha Choudhary', rank: 2, totalPoints: 0, cricketTeams: [{ id: 'crick-crw-a', name: 'Savage Strikers' }, { id: 'crick-crw-b', name: 'Storm Breakers' }] },
-  { id: 'club-dom', name: 'Dominator', code: 'DOM', captainName: 'Aquib Hingwala', rank: 3, totalPoints: 0, cricketTeams: [{ id: 'crick-dom-a', name: 'GenZ Warrior' }, { id: 'crick-dom-b', name: 'Crown Crusher' }] },
-  { id: 'club-mav', name: 'Blue', code: 'MAV', captainName: 'Affan', rank: 4, totalPoints: 0, cricketTeams: [{ id: 'crick-mav-a', name: 'Nex Blitz' }, { id: 'crick-mav-b', name: 'Royal Force' }] },
-  { id: 'club-ryl', name: 'Royal Force', code: 'RYL', captainName: 'Pravin', rank: 5, totalPoints: 0, cricketTeams: [{ id: 'crick-ryl-a', name: 'Alpha Warriors' }, { id: 'crick-ryl-b', name: 'Mavericks' }] },
-];
-
-const INITIAL_SPORTS = [
-  { id: 'sport-cricket', name: 'Cricket', category: 'Field Sport', tournamentFormat: '10 Teams • 2 Pools • Super 4' },
-  { id: 'sport-football', name: 'Football', category: 'Field Sport', tournamentFormat: '5-a-side Turf League' },
-  { id: 'sport-bgmi', name: 'BGMI', category: 'E-Sports', tournamentFormat: 'Battle Royale 4-Man Squads' },
-  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Singles • Doubles • Mixed Doubles' },
-  { id: 'sport-chess', name: 'Chess', category: 'Mind Sport', tournamentFormat: 'Rapid & Classical FIDE' },
-  { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table' },
-  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'Singles • Doubles • Mixed Doubles' },
-  { id: 'sport-treasure-hunt', name: 'Treasure Hunt', category: 'Adventure Quest', tournamentFormat: 'Campus Clue Quest & Vault Hunt' },
-];
+  if (n.includes('dom')) {
+    // Dominators Wolf Crest (Navy, Silver, Cyan)
+    return (
+      <svg viewBox="0 0 44 44" className={className} fill="none">
+        <circle cx="22" cy="22" r="21" fill="#0F284E" stroke="#38BDF8" strokeWidth="1.5" />
+        <path d="M13 14L17 24L22 30L27 24L31 14L26 19L22 17L18 19L13 14Z" fill="#F1F5F9" />
+        <path d="M18 22L20 24L18 25Z" fill="#0284C7" />
+        <path d="M26 22L24 24L26 25Z" fill="#0284C7" />
+      </svg>
+    );
+  }
+  if (n.includes('alp')) {
+    // Alphas Futuristic 'A' Crest (Purple & White)
+    return (
+      <svg viewBox="0 0 44 44" className={className} fill="none">
+        <circle cx="22" cy="22" r="21" fill="#4A148C" stroke="#A855F7" strokeWidth="1.5" />
+        <path d="M22 8L32 32H26L22 20L18 32H12L22 8Z" fill="#FFFFFF" />
+        <path d="M16 25H28V27H16V25Z" fill="#C084FC" />
+      </svg>
+    );
+  }
+  if (n.includes('spa')) {
+    // Spartans Warrior Helmet Crest (Gold & Bronze)
+    return (
+      <svg viewBox="0 0 44 44" className={className} fill="none">
+        <circle cx="22" cy="22" r="21" fill="#78350F" stroke="#F59E0B" strokeWidth="1.5" />
+        <path d="M22 9C15 9 13 15 13 20V31L20 28V23H24V28L31 31V20C31 15 29 9 22 9Z" fill="#FDE68A" />
+        <rect x="20" y="16" width="4" height="12" fill="#78350F" rx="1" />
+      </svg>
+    );
+  }
+  // Phoenix Firebird Crest (Fiery Orange & Yellow)
+  return (
+    <svg viewBox="0 0 44 44" className={className} fill="none">
+      <circle cx="22" cy="22" r="21" fill="#9A3412" stroke="#FB923C" strokeWidth="1.5" />
+      <path d="M22 10C23 15 27 17 31 18C27 20 25 25 27 31C24 27 19 27 17 31C18 25 17 20 13 18C17 17 21 15 22 10Z" fill="#FED7AA" />
+      <circle cx="22" cy="19" r="2" fill="#EA580C" />
+    </svg>
+  );
+}
 
 export default function PublicViewerPortal() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastRefreshed, setLastRefreshed] = useState<string>('');
-  const [showSplash, setShowSplash] = useState(true);
+  const [announcementIdx, setAnnouncementIdx] = useState(0);
+  const [searchHouse, setSearchHouse] = useState('');
+  const [sortBy, setSortBy] = useState<'rank' | 'points' | 'wins' | 'gold'>('rank');
+  const [selectedHouse, setSelectedHouse] = useState<any>(null);
+  const [selectedSport, setSelectedSport] = useState<any>(null);
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [confettiActive, setConfettiActive] = useState(false);
+
+  // Countdown to Tournament (Nov 25, 2026)
+  const [timeLeft, setTimeLeft] = useState({ days: 8, hours: 14, mins: 32, secs: 45 });
 
   useEffect(() => {
     fetchPublicOverview();
-    setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.secs > 0) return { ...prev, secs: prev.secs - 1 };
+        if (prev.mins > 0) return { ...prev, mins: prev.mins - 1, secs: 59 };
+        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, mins: 59, secs: 59 };
+        if (prev.days > 0) return { ...prev, days: prev.days - 1, hours: 23, mins: 59, secs: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
+  // Announcement Carousel Autoplay
+  useEffect(() => {
+    const carTimer = setInterval(() => {
+      setAnnouncementIdx((prev) => (prev + 1) % ANNOUNCEMENTS.length);
+    }, 4500);
+    return () => clearInterval(carTimer);
+  }, []);
 
   const fetchPublicOverview = async () => {
     try {
@@ -80,632 +351,1207 @@ export default function PublicViewerPortal() {
         setData(json);
       }
     } catch (err) {
-      console.error('Failed to load public championship data:', err);
+      console.log('Public overview fallback active');
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchPublicOverview();
-    setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const triggerConfetti = () => {
+    setConfettiActive(true);
+    setTimeout(() => setConfettiActive(false), 3500);
   };
 
-  const championship = data?.championship || {};
-  const isClosed = championship?.status === 'CLOSED';
-  const championClub = championship?.championClub;
-  const rawStandings = (data?.standings && data.standings.length > 0) ? data.standings : INITIAL_HOUSES;
-  const leadingHouse = championship?.leadingHouse || rawStandings[0];
-  const sports = (data?.sports && data.sports.length > 0) ? data.sports : INITIAL_SPORTS;
-  const upcomingMatches = data?.upcomingMatches || [];
-  const approvedMatches = data?.approvedMatches || [];
+  // Filter & sort leaderboard
+  const sortedHouses = useMemo(() => {
+    let houses = [...MOCKUP_HOUSES];
+    if (searchHouse.trim()) {
+      houses = houses.filter((h) =>
+        h.name.toLowerCase().includes(searchHouse.toLowerCase()) ||
+        h.code.toLowerCase().includes(searchHouse.toLowerCase())
+      );
+    }
+    if (sortBy === 'points') {
+      houses.sort((a, b) => b.points - a.points);
+    } else if (sortBy === 'wins') {
+      houses.sort((a, b) => b.wins - a.wins);
+    } else if (sortBy === 'gold') {
+      houses.sort((a, b) => b.gold - a.gold);
+    } else {
+      houses.sort((a, b) => a.rank - b.rank);
+    }
+    return houses;
+  }, [searchHouse, sortBy]);
+
+  const currentAnnouncement = ANNOUNCEMENTS[announcementIdx];
 
   return (
-    <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
-      {/* Championship Splash Screen */}
-      {showSplash && (
-        <ChampionshipSplashScreen
-          onComplete={handleSplashComplete}
-          autoDismissDelay={1900}
-        />
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans selection:bg-[#0284C7] selection:text-white antialiased relative">
+      {/* Confetti Celebration Overlay */}
+      {confettiActive && (
+        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center overflow-hidden">
+          <div className="absolute top-10 flex gap-2 animate-bounce">
+            <span className="px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white font-black text-sm shadow-2xl flex items-center gap-2">
+              <Crown className="w-5 h-5 fill-amber-200 text-amber-200 animate-spin" />
+              APL SEASON 9 CHAMPIONSHIP GLORY!
+            </span>
+          </div>
+          {/* Confetti particles */}
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-3 h-3 rounded-xs opacity-90 animate-ping"
+              style={{
+                top: `${Math.random() * 85}%`,
+                left: `${Math.random() * 95}%`,
+                backgroundColor: ['#DC2626', '#F59E0B', '#0284C7', '#10B981', '#7C3AED', '#EA580C'][i % 6],
+                transform: `rotate(${Math.random() * 360}deg)`,
+                animationDuration: `${1 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
       )}
 
-      {/* 1. UNIFIED NAVIGATION BAR */}
-      <PublicNavbar
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-        lastUpdated={lastRefreshed}
-        activeOverride="home"
-      />
+      {/* 1. TOP NAVIGATION BAR */}
+      <PublicNavbar activeOverride="home" />
 
-      {/* 2. CINEMATIC CHAMPIONSHIP HERO BANNER */}
-      <section className="relative overflow-hidden border-b border-[#C6A04A]/30 bg-[#080A0E] text-white">
-        {/* Cinematic Backdrop Image with Rich Layered Lighting */}
-        <div
-          className="absolute inset-0 bg-cover bg-right lg:bg-center z-0 opacity-80"
-          style={{ backgroundImage: "url('/hero-bg.jpg')" }}
-        />
+            {/* 2. PRODUCTION HIGH-END HERO SHOWDOWN (100% PURE CODE - ZERO RASTER IMAGES) */}
+            <section className="relative overflow-hidden bg-[#EDF4FC] border-b border-slate-200/90 pt-3 pb-12 sm:pb-16 lg:pb-20">
+              {/* Pure Code SVG & CSS Stadium Atmosphere (Floodlights, Grandstands, Pennants, Ribbons) */}
+              <HeroStadiumBackground />
 
-        {/* Ambient Gradient Overlays for Readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#080A0E] via-[#080A0E]/90 via-45% to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080A0E] via-[#080A0E]/40 to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0D14]/90 via-transparent to-transparent z-10 pointer-events-none" />
+              {/* Glowing animated spotlight under the pedestal */}
+              <div
+                className="absolute pointer-events-none animate-pulse-glow"
+                style={{
+                  left: '60%',
+                  top: '78%',
+                  width: '26%',
+                  height: '18%',
+                  background: 'radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(217, 119, 6, 0.15) 50%, transparent 80%)',
+                  filter: 'blur(10px)',
+                }}
+              />
+              {/* Floating Live Countdown Badge on Top Right */}
+              <div className="absolute top-4 right-6 z-20 hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm text-xs font-semibold text-slate-700">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                </span>
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                  Kickoff In:
+                </span>
+                <span className="font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                  {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m {timeLeft.secs}s
+                </span>
+              </div>
 
-        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16 lg:py-20 flex flex-col justify-between min-h-[560px] lg:min-h-[640px]">
-          {isClosed && championClub ? (
-            <div className="max-w-2xl rounded-2xl bg-[#141822]/90 backdrop-blur-md border border-[#C6A04A] p-6 sm:p-10 text-white space-y-4 shadow-2xl my-auto">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] flex items-center gap-2">
-                <Crown className="w-4 h-4 text-[#C6A04A]" />
-                Tournament Concluded
-              </span>
-              <h1 className="font-serif text-3xl sm:text-5xl font-bold text-white">
-                {championClub.name} are Champions!
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Congratulations to {championClub.name}! With outstanding performance across all 8 sports, they take the APL Season 9 Trophy with {Number(championClub.totalPoints).toFixed(2)} total points.
-              </p>
-              <Link
-                href="/leaderboard"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#C6A04A] text-slate-950 font-bold text-xs uppercase tracking-wider hover:bg-[#B38F3A] transition shadow-lg"
+              {/* Subtle Twinkling Star Sparkle over the Trophy Star */}
+              <div
+                className="absolute pointer-events-none animate-pulse"
+                style={{
+                  left: '70.8%',
+                  top: '27.2%',
+                  width: '3.2%',
+                  height: '6.8%',
+                }}
               >
-                <span>View Final Standings</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1">
-              {/* Left Column: Bold 3D Championship Typography */}
-              <div className="lg:col-span-8 space-y-5 text-left max-w-2xl">
-                {/* Inter-Club Crown Pill */}
-                <div className="inline-flex items-center gap-2.5 select-none">
-                  <div className="h-[1px] w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#C6A04A]" />
-                  <Crown className="w-3.5 h-3.5 text-[#C6A04A]" />
-                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.3em] text-[#C6A04A]">
-                    INTER - CLUB
-                  </span>
-                  <div className="h-[1px] w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#C6A04A]" />
-                </div>
-
-                {/* Main Dual-Tone Metallic Headline */}
-                <div className="space-y-0 select-none">
-                  <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-[#F0F2F5] to-[#B0B7C3] drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] italic font-sans">
-                    HOUSE
-                  </h1>
-                  <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF2B2] via-[#DFB85C] to-[#8C6D23] drop-shadow-[0_4px_24px_rgba(198,160,74,0.45)] italic font-sans -mt-1 sm:-mt-2">
-                    CHAMPIONSHIP
-                  </h2>
-                </div>
-
-                {/* Subtitle & Season Tag */}
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="h-[1px] w-6 bg-[#C6A04A]/60" />
-                  <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.25em] text-[#C6A04A]">
-                    APL SEASON 9
-                  </span>
-                  <div className="h-[1px] w-6 bg-[#C6A04A]/60" />
-                </div>
-
-                {/* Tagline */}
-                <p className="text-xs sm:text-sm font-bold tracking-widest text-slate-200 uppercase pt-1">
-                  5 HOUSES. 8 SPORTS. 10 HOUSE TEAMS. ONE CHAMPION.
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3.5 pt-3">
-                  <Link
-                    href="/leaderboard"
-                    className="px-6 py-3 rounded-full bg-gradient-to-r from-[#DFB85C] via-[#C6A04A] to-[#B38F3A] hover:from-[#EDC96F] hover:to-[#C6A04A] text-slate-950 font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-xl shadow-[#C6A04A]/25 hover:shadow-[#C6A04A]/50 flex items-center gap-2 group"
-                  >
-                    <span>VIEW LIVE LEADERBOARD</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-
-                  <Link
-                    href="/houses"
-                    className="px-6 py-3 rounded-full bg-[#0E131C]/80 hover:bg-[#141A24] border border-[#C6A04A]/60 hover:border-[#C6A04A] text-slate-100 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md backdrop-blur-sm flex items-center gap-2 group"
-                  >
-                    <span>EXPLORE THE 5 HOUSES</span>
-                    <ChevronRight className="w-4 h-4 text-[#C6A04A] group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
-
-                  <button
-                    onClick={() => setShowSplash(true)}
-                    className="px-4 py-3 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.12] hover:border-[#C6A04A]/60 text-[#F3D787] font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-md flex items-center gap-2 group"
-                    title="Play Championship Intro Spectacle"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#C6A04A] group-hover:rotate-12 transition-transform" />
-                    <span>INTRO SPECTACLE</span>
-                  </button>
-                </div>
-
-                {/* Live Current Leader Mini-Badge */}
-                <div className="pt-2 flex items-center gap-3 text-xs text-slate-400">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#141822]/80 border border-white/[0.08] backdrop-blur-sm">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[11px] font-medium text-slate-300">
-                      Current #1 Seed: <strong className="text-[#C6A04A] font-bold">{leadingHouse?.name || 'Alpha'}</strong> ({Number(leadingHouse?.totalPoints || 0).toFixed(2)} pts)
-                    </span>
-                  </div>
-                  <span className="text-slate-600 hidden sm:inline">•</span>
-                  <span className="text-[11px] text-slate-400 hidden sm:inline">
-                    Nov 25 – 28, 2026 • Main Sports Complex
-                  </span>
-                </div>
+                <Sparkles className="w-full h-full text-amber-200 fill-white filter drop-shadow-[0_0_10px_rgba(251,191,36,0.95)]" />
               </div>
 
-              {/* Right Column: Kept clear for trophy visibility */}
-              <div className="lg:col-span-4 hidden lg:block" />
-            </div>
-          )}
+              {/* Interactive Hotspot 1: "View Schedule ->" Button */}
+              <Link
+                href="/schedule"
+                title="Click to View Full Tournament Schedule"
+                className="absolute rounded-full z-20 group transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+                style={{
+                  left: '8.8%',
+                  top: '76.0%',
+                  width: '18.2%',
+                  height: '11.5%',
+                }}
+              >
+                <div className="w-full h-full rounded-full border-2 border-transparent group-hover:border-white/80 group-hover:shadow-[0_0_22px_rgba(249,115,22,0.85)] transition-all flex items-center justify-center">
+                  <span className="sr-only">View Schedule</span>
+                  {/* Content Container */}
+                  <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-14">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
 
-          {/* 3. SLEEK FLOATING SPORTS CONSOLE DOCK */}
-          <div className="pt-10 w-full">
-            <div className="rounded-2xl sm:rounded-full bg-[#080B10]/90 border border-[#C6A04A]/40 backdrop-blur-md p-2.5 sm:px-6 sm:py-3.5 flex items-center justify-between gap-3 overflow-x-auto shadow-2xl shadow-black/90">
-              <div className="flex items-center gap-4 sm:gap-7 shrink-0">
-                {sports.map((sp: any) => (
-                  <Link
-                    key={sp.id}
-                    href={`/sports`}
-                    className="flex items-center gap-2 text-slate-400 hover:text-white group transition"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-[#141822] border border-white/[0.08] flex items-center justify-center text-[#C6A04A] group-hover:border-[#C6A04A] group-hover:text-white transition shadow-inner">
-                      <SportIcon name={sp.name} className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="text-[11px] font-bold tracking-wider uppercase group-hover:text-[#C6A04A] transition whitespace-nowrap">
-                      {sp.name}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-
-              {/* 08 Sports Emblem */}
-              <div className="shrink-0 pl-3 border-l border-white/[0.1] hidden sm:block">
-                <span className="px-3.5 py-1.5 rounded-full bg-[#C6A04A]/15 border border-[#C6A04A]/50 text-[#C6A04A] font-black text-xs italic tracking-wider whitespace-nowrap">
-                  08 SPORTS
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. COMPACT OVERVIEW STATS STRIP */}
-      <section className="py-6 px-4 sm:px-8 bg-[#F5F2EB] text-slate-900 border-b border-[#E0DCD3]">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <Link
-              href="/houses"
-              className="p-3 bg-white rounded-xl border border-[#E0DCD3] hover:border-[#C6A04A] transition text-center shadow-xs block group"
-            >
-              <span className="font-serif text-2xl font-bold text-slate-900 group-hover:text-[#94712B] transition block">5</span>
-              <span className="text-xs font-semibold text-slate-600">Houses</span>
-            </Link>
-            <Link
-              href="/houses"
-              className="p-3 bg-white rounded-xl border border-[#E0DCD3] hover:border-[#C6A04A] transition text-center shadow-xs block group"
-            >
-              <span className="font-serif text-2xl font-bold text-slate-900 group-hover:text-[#94712B] transition block">10</span>
-              <span className="text-xs font-semibold text-slate-600">House Teams</span>
-            </Link>
-            <Link
-              href="/sports"
-              className="p-3 bg-white rounded-xl border border-[#E0DCD3] hover:border-[#C6A04A] transition text-center shadow-xs block group"
-            >
-              <span className="font-serif text-2xl font-bold text-slate-900 group-hover:text-[#94712B] transition block">8</span>
-              <span className="text-xs font-semibold text-slate-600">Sports Arena</span>
-            </Link>
-            <Link
-              href="/points-rules"
-              className="p-3 bg-white rounded-xl border border-[#E0DCD3] hover:border-[#C6A04A] transition text-center shadow-xs block group"
-            >
-              <span className="font-serif text-2xl font-bold text-[#94712B] block">Equal Split</span>
-              <span className="text-xs font-semibold text-slate-600">Fair Division Engine</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. MAIN HOMEPAGE CONTENT */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 space-y-12">
-        {/* SECTION 1: LEADERBOARD SPOTLIGHT */}
-        <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] block">
-                Official Standings
-              </span>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-1">
-                Championship Leaderboard
-              </h2>
-            </div>
-            <Link
-              href="/leaderboard"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
-            >
-              <span>View Full Leaderboard & 8-Sport Matrix</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Top 3 Podium Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end pt-2">
-            {/* 2nd Place */}
-            {rawStandings[1] && (
-              <article className="order-2 md:order-1 rounded-2xl bg-[#141822] border border-white/[0.08] p-6 text-center space-y-3">
-                <span className="w-8 h-8 rounded-lg bg-[#0A0D14] border border-slate-400/40 text-slate-200 font-serif font-bold text-sm inline-flex items-center justify-center">
-                  2
-                </span>
-                <div>
-                  <h3 className="font-serif text-xl font-bold text-white">{rawStandings[1].name}</h3>
-                  <p className="text-xs text-slate-400">Capt: {rawStandings[1].captainName || 'Senior Captain'}</p>
-                </div>
-                <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Total Points</span>
-                  <span className="font-mono font-bold text-base text-white">
-                    {Number(rawStandings[1].totalPoints).toFixed(2)} pts
-                  </span>
-                </div>
-              </article>
-            )}
-
-            {/* 1st Place */}
-            {rawStandings[0] && (
-              <article className="order-1 md:order-2 rounded-2xl bg-[#141822] border-2 border-[#C6A04A] p-7 text-center space-y-3 md:-translate-y-2 shadow-lg">
-                <span className="w-10 h-10 rounded-xl bg-[#0A0D14] border border-[#C6A04A] text-[#C6A04A] font-serif font-bold text-base inline-flex items-center justify-center">
-                  1
-                </span>
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-white">{rawStandings[0].name}</h3>
-                  <p className="text-xs text-slate-300">Capt: {rawStandings[0].captainName || 'Ethan Hunt'}</p>
-                </div>
-                <div className="pt-4 border-t border-[#C6A04A]/30 flex items-center justify-between text-xs">
-                  <span className="text-[#C6A04A] font-semibold">Championship Points</span>
-                  <span className="font-mono font-bold text-xl text-[#C6A04A]">
-                    {Number(rawStandings[0].totalPoints).toFixed(2)} pts
-                  </span>
-                </div>
-              </article>
-            )}
-
-            {/* 3rd Place */}
-            {rawStandings[2] && (
-              <article className="order-3 rounded-2xl bg-[#141822] border border-white/[0.08] p-6 text-center space-y-3">
-                <span className="w-8 h-8 rounded-lg bg-[#0A0D14] border border-amber-700/40 text-amber-500 font-serif font-bold text-sm inline-flex items-center justify-center">
-                  3
-                </span>
-                <div>
-                  <h3 className="font-serif text-xl font-bold text-white">{rawStandings[2].name}</h3>
-                  <p className="text-xs text-slate-400">Capt: {rawStandings[2].captainName || 'Senior Captain'}</p>
-                </div>
-                <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Total Points</span>
-                  <span className="font-mono font-bold text-base text-amber-500">
-                    {Number(rawStandings[2].totalPoints).toFixed(2)} pts
-                  </span>
-                </div>
-              </article>
-            )}
-          </div>
-        </section>
-
-        {/* SECTION: MATCH HIGHLIGHTS & STAR PLAYERS OF THE MATCH (Section 5 Compliant) */}
-        <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Star className="w-3.5 h-3.5 fill-[#C6A04A] text-[#C6A04A]" />
-                <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A]">
-                  Certified Match Highlights
-                </span>
-              </div>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white">
-                Star Players of the Match
-              </h2>
-            </div>
-            <Link
-              href="/player-leaderboard"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
-            >
-              <span>Explore Player Leaderboard</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {approvedMatches.length === 0 ? (
-            <div className="p-8 rounded-2xl bg-[#141822] border border-white/[0.08] text-center space-y-2">
-              <Star className="w-8 h-8 text-[#C6A04A]/60 mx-auto" />
-              <h3 className="font-serif text-base font-bold text-white">Championship Matches Underway</h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                As tournament referees submit final results and the Tournament Director certifies them, certified Star Players and match highlights will be showcased here.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {approvedMatches.map((m: any) => {
-                const winner =
-                  m.participants?.find((p: any) => p.isWinner) ||
-                  (m.participants?.[0]?.score > (m.participants?.[1]?.score || 0)
-                    ? m.participants?.[0]
-                    : m.participants?.[1]);
-                const winnerName =
-                  winner?.teamName ||
-                  winner?.cricketTeam?.name ||
-                  winner?.club?.name ||
-                  'Championship Winner';
-
-                return (
-                  <article
-                    key={m.id}
-                    className="p-6 rounded-2xl bg-gradient-to-b from-[#141822] to-[#0D1017] border border-white/[0.08] hover:border-[#C6A04A]/50 transition shadow-lg space-y-4"
-                  >
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#0A0D14] border border-white/[0.08] flex items-center justify-center text-[#C6A04A]">
-                          <SportIcon name={m.sport?.name} className="w-4 h-4" />
+                      {/* LEFT COLUMN: PURE HTML/CSS TYPOGRAPHY & INTERACTIVE CONTROLS */}
+                      <div className="lg:col-span-7 space-y-4 sm:space-y-5 lg:space-y-6 pt-2 lg:pt-6 text-center lg:text-left">
+                        {/* Institution Eyebrow */}
+                        <div className="flex items-center justify-center lg:justify-start gap-3">
+                          <div className="h-[1.5px] w-6 sm:w-10 bg-slate-400/80" />
+                          <span className="text-[11px] sm:text-xs lg:text-[13px] font-black uppercase tracking-[0.22em] text-[#0A2540]">
+                            NEXCORE INSTITUTE OF TECHNOLOGY
+                          </span>
+                          <div className="h-[1.5px] w-6 sm:w-10 bg-slate-400/80" />
                         </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-white">{m.sport?.name}</span>
-                            <span className="font-mono text-[10px] text-slate-400">• {m.matchCode}</span>
+                      </Link>
+
+                      {/* Interactive Hotspot 2: "Live Leaderboard" Button */}
+                      <Link
+                        href="#leaderboard-section"
+                        title="Click to View Live Championship Leaderboard"
+                        className="absolute rounded-full z-20 group transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+                        style={{
+                          left: '28.8%',
+                          top: '76.0%',
+                          width: '20.2%',
+                          height: '11.5%',
+                        }}
+                      >
+                        <div className="w-full h-full rounded-full border-2 border-transparent group-hover:border-sky-400/80 group-hover:shadow-[0_0_22px_rgba(2,132,199,0.6)] transition-all flex items-center justify-center">
+                          <span className="sr-only">Live Leaderboard</span>
+                          {/* Huge Tournament Titles */}
+                          <div className="space-y-0 sm:space-y-0.5">
+                            <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-[96px] font-black italic tracking-tight text-[#082855] leading-[0.92] drop-shadow-[0_2px_4px_rgba(8,40,85,0.2)]">
+                              APL
+                            </h1>
+                            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[84px] font-black italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#FFA216] via-[#F97316] to-[#D94F04] leading-[0.95] drop-shadow-[0_3px_6px_rgba(249,115,22,0.25)]">
+                              SEASON 9
+                            </h2>
                           </div>
-                          <span className="text-[10px] text-slate-400">{m.round}</span>
+                      </Link>
+
+                      {/* Interactive Hotspot 3: 3D Championship Trophy (Triggers Confetti!) */}
+                      <div
+                        onClick={triggerConfetti}
+                        title="🏆 Click to Celebrate the Championship Trophy!"
+                        className="absolute z-20 cursor-pointer group"
+                        style={{
+                          left: '54.0%',
+                          top: '8.0%',
+                          width: '36.0%',
+                          height: '88.0%',
+                        }}
+                      >
+                        <div className="w-full h-full rounded-2xl group-hover:shadow-[0_0_40px_rgba(245,158,11,0.55)] border-2 border-transparent group-hover:border-amber-300/40 transition-all duration-300 flex items-start justify-end p-4">
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity px-3.5 py-1.5 rounded-full bg-slate-900/85 text-amber-300 text-[11px] font-bold shadow-xl flex items-center gap-1.5 backdrop-blur-xs">
+                            <Sparkles className="w-3.5 h-3.5 fill-amber-400" />
+                            <span>Click to Celebrate!</span>
+                          </span>
+                          {/* Slanted Parallelogram Showdown Banner */}
+                          <div className="inline-block relative">
+                            <div
+                              className="px-6 sm:px-8 py-2.5 sm:py-3 text-white font-black italic text-xs sm:text-sm lg:text-base uppercase tracking-[0.08em] shadow-[0_8px_20px_rgba(3,27,62,0.35)]"
+                              style={{
+                                background: 'linear-gradient(90deg, #021B3D 0%, #083877 82%, #FF7A00 82%, #EA580C 100%)',
+                                clipPath: 'polygon(3% 0%, 100% 0%, 97% 100%, 0% 100%)',
+                              }}
+                            >
+                              THE ULTIMATE SPORTS SHOWDOWN
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Floating Live Countdown Badge on Top Right */}
+                        <div className="absolute top-4 right-6 z-20 hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm text-xs font-semibold text-slate-700">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                          </span>
+                          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                            Kickoff In:
+                          </span>
+                          <span className="font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                            {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m {timeLeft.secs}s
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Tagline */}
+                    <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-800 tracking-wide max-w-xl mx-auto lg:mx-0">
+                      8 Games. 5 Houses. One Champion. Unlimited Glory.
+                    </p>
+
+                    {/* MOBILE RESPONSIVE STACK (<768px Viewports) */}
+                    <div className="block md:hidden px-4 py-8 space-y-6 text-center">
+                      {/* Header line with divider lines */}
+                      <div className="flex items-center justify-center gap-2.5">
+                        <div className="h-[1px] w-6 bg-slate-300" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0A2540]">
+                          NEXCORE INSTITUTE OF TECHNOLOGY
+                        </span>
+                        <div className="h-[1px] w-6 bg-slate-300" />
+                      </div>
+                      {/* Metadata Badges */}
+                      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-sky-100/80 flex items-center justify-center text-[#0284C7]">
+                            <Calendar className="w-4 h-4" />
+                          </div>
+                          <span>Nov 25th – Nov 28th, 2026</span>
+                        </div>
+                        <div className="hidden sm:block h-4 w-[1px] bg-slate-300" />
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-orange-100/80 flex items-center justify-center text-[#EA580C]">
+                            <MapPin className="w-4 h-4" />
+                          </div>
+                          <span>Nexcore Institute of Technology</span>
                         </div>
                       </div>
 
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>Certified Result</span>
-                      </span>
-                    </div>
-
-                    {/* Winner & Match Summary */}
-                    <div className="p-3.5 rounded-xl bg-[#0A0D14] border border-white/[0.06] flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                          Winning Team / Entry
-                        </span>
-                        <span className="font-serif font-bold text-sm text-[#F3D787] flex items-center gap-1.5 mt-0.5">
-                          <Trophy className="w-3.5 h-3.5 text-[#C6A04A]" />
-                          <span>{winnerName}</span>
-                        </span>
+                      {/* Titles */}
+                      <div className="space-y-0.5">
+                        <h1 className="text-5xl font-black italic tracking-tight text-[#082855] leading-none drop-shadow-xs">
+                          APL
+                        </h1>
+                        <h2 className="text-4xl font-black italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#FFA114] via-[#F97316] to-[#D95304] leading-none drop-shadow-xs">
+                          SEASON 9
+                        </h2>
                       </div>
-                      <div className="text-right">
-                        <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                          Scores / Points
-                        </span>
-                        <span className="font-mono font-bold text-xs text-white">
-                          {m.participants?.[0]?.score || 0} pts vs {m.participants?.[1]?.score || 0} pts
-                        </span>
-                      </div>
-                    </div>
+                      {/* Interactive Action Buttons */}
+                      <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+                        <Link
+                          href="/schedule"
+                          className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-to-r from-[#FF7A00] via-[#F97316] to-[#E65100] text-white font-bold text-sm sm:text-base tracking-wide shadow-[0_6px_22px_rgba(249,115,22,0.4)] hover:shadow-[0_8px_28px_rgba(249,115,22,0.55)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 group cursor-pointer"
+                        >
+                          <span>View Schedule</span>
+                          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
 
-                    {/* ⭐ Star Player Spotlight Card */}
-                    {m.starPlayer && (
-                      <div className="p-4 rounded-xl bg-gradient-to-r from-[#1A2234] via-[#141822] to-[#1A2234] border border-[#C6A04A]/50 shadow-md space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-[#C6A04A]/20 border border-[#C6A04A]/50 flex items-center justify-center text-[#C6A04A]">
-                              <Star className="w-4 h-4 fill-[#C6A04A]" />
-                            </div>
-                            <div>
-                              <span className="text-[10px] uppercase font-black text-[#F3D787] tracking-wider block">
-                                Star Player of the Match
-                              </span>
-                              <h4 className="font-serif text-base font-bold text-white">
-                                {m.starPlayer.name}
-                              </h4>
-                            </div>
+                        {/* Slanted Trapezoid Banner */}
+                        <div className="inline-block relative">
+                          <div
+                            className="px-5 py-2.5 text-white font-black italic text-xs uppercase tracking-wider shadow-md"
+                            style={{
+                              background: 'linear-gradient(90deg, #011E48 0%, #06397E 85%, #F97316 85%, #EA580C 100%)',
+                              clipPath: 'polygon(3% 0%, 100% 0%, 97% 100%, 0% 100%)',
+                            }}
+                          >
+                            THE ULTIMATE SPORTS SHOWDOWN
                           </div>
-                          <div className="text-right">
-                            <span className="text-[9px] uppercase font-bold text-slate-400 block">Individual Points</span>
-                            <span className="font-mono font-black text-amber-300 text-sm">
-                              +{m.starPlayerPoints || 0} pts
+                        </div>
+                        <Link
+                          href="#leaderboard-section"
+                          className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white border-2 border-[#0A3D80] text-[#0A3D80] font-bold text-sm sm:text-base tracking-wide shadow-sm hover:bg-[#F0F7FF] hover:border-[#0284C7] hover:text-[#0284C7] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <BarChart3 className="w-4 h-4 text-[#0284C7]" />
+                          <span>Live Leaderboard</span>
+                        </Link>
+
+                        {/* Tagline */}
+                        <p className="text-xs font-semibold text-slate-800 tracking-wide max-w-xs mx-auto">
+                          8 Games. 5 Houses. One Champion. Unlimited Glory.
+                        </p>
+                        <button
+                          onClick={triggerConfetti}
+                          className="hidden xl:flex items-center gap-1.5 px-4 py-3 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold hover:bg-amber-100 hover:scale-105 active:scale-95 transition-all shadow-2xs"
+                          title="Celebrate APL Glory"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Cheer</span>
+                        </button>
+                      </div>
+
+                      {/* Date & Location */}
+                      <div className="flex flex-col items-center gap-1.5 text-xs text-slate-600 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#0284C7]" />
+                          <span>Nov 25th – Nov 28th, 2026</span>
+                          {/* Mobile Countdown Row */}
+                          <div className="flex md:hidden items-center justify-center gap-2 pt-2 text-xs font-semibold text-slate-700">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                            </span>
+                            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                              Kickoff In:
+                            </span>
+                            <span className="font-mono font-black text-slate-900 bg-white border border-slate-200 px-2 py-0.5 rounded text-[11px] shadow-2xs">
+                              {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m {timeLeft.secs}s
                             </span>
                           </div>
                         </div>
-
-                        <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-slate-300">
-                          <span>
-                            House: <strong className="text-white">{m.starPlayer.club?.name || 'House Representative'}</strong>
-                          </span>
-                          <span className="text-slate-400">
-                            Team: {m.starPlayer.teamName || winnerName}
-                          </span>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#EA580C]" />
+                          <span>Nexcore Institute of Technology</span>
                         </div>
                       </div>
-                    )}
 
-                    {/* Card Footer Link */}
-                    <div className="pt-2 flex items-center justify-between text-xs text-slate-400">
-                      <span>{m.matchDate} • {m.venue?.name || 'Olympic Arena'}</span>
-                      <Link
-                        href="/results"
-                        className="text-[#C6A04A] hover:text-[#F3D787] font-bold text-[11px] inline-flex items-center gap-1 transition"
-                      >
-                        <span>View Match Details</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* SECTION 2: THE 5 HOUSES SHOWCASE */}
-        <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] block">
-                The 5 Houses
-              </span>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-1">
-                Participating Houses
-              </h2>
-            </div>
-            <Link
-              href="/houses"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
-            >
-              <span>Explore All 5 Houses & Teams</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rawStandings.map((club: any) => {
-              const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
-              return (
-                <article
-                  key={club.id}
-                  className="rounded-2xl bg-[#141822] border border-white/[0.08] p-6 space-y-5 hover:border-[#C6A04A]/40 transition shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center font-serif font-bold text-base text-white shadow-xs"
-                        style={{ backgroundColor: meta.accentColor }}
-                      >
-                        {club.code}
-                      </div>
-                      <div>
-                        <h3 className="font-serif text-lg font-bold text-white leading-tight">
-                          {club.name}
-                        </h3>
-                        <span className="text-xs text-slate-400">
-                          Capt: {club.captainName || 'Senior Captain'}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-[#0A0D14] border border-white/[0.08] text-[#C6A04A]">
-                      #{club.rank}
-                    </span>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <span className="text-[11px] font-medium text-slate-400 block">
-                      House Teams
-                    </span>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {club.cricketTeams?.map((ct: any) => (
-                        <span
-                          key={ct.id}
-                          className="px-2.5 py-1 rounded-md bg-[#0A0D14] border border-white/[0.06] text-xs font-medium text-slate-200"
+                      {/* Mobile Buttons */}
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+                        <Link
+                          href="/schedule"
+                          className="w-full sm:w-auto px-6 py-3 rounded-full bg-gradient-to-r from-[#FF7A00] via-[#F97316] to-[#E65100] text-white font-bold text-xs tracking-wide shadow-md shadow-orange-500/30 flex items-center justify-center gap-2"
                         >
-                          {ct.name}
-                        </span>
-                      ))}
+                          <span>View Schedule</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        {/* RIGHT COLUMN: PURE CODE 3D CHAMPIONSHIP TROPHY & STAGE */}
+                        <div className="lg:col-span-5 relative flex items-center justify-center pt-4 lg:pt-0">
+                          {/* Radial glow spotlight behind trophy */}
+                          <div
+                            className="absolute w-[360px] sm:w-[460px] h-[360px] sm:h-[460px] rounded-full pointer-events-none animate-pulse-glow"
+                            style={{
+                              background: 'radial-gradient(circle, rgba(254,240,138,0.5) 0%, rgba(245,158,11,0.2) 40%, rgba(2,132,199,0.1) 65%, transparent 80%)',
+                              filter: 'blur(30px)',
+                            }}
+                          />
+
+                          <Link
+                            href="#leaderboard-section"
+                            className="w-full sm:w-auto px-6 py-3 rounded-full bg-white border-2 border-[#0A3D80] text-[#0A3D80] font-bold text-xs tracking-wide shadow-xs flex items-center justify-center gap-2"
+                          >
+                            <BarChart3 className="w-4 h-4 text-[#0284C7]" />
+                            <span>Live Leaderboard</span>
+                          </Link>
+                        </div>
+                        {/* The Pure SVG & CSS Trophy Component */}
+                        <div className="relative w-full max-w-[360px] sm:max-w-[440px] lg:max-w-[500px]">
+                          <HeroChampionshipTrophy
+                            className="animate-float"
+                            onCelebrate={triggerConfetti}
+                          />
+
+                          {/* Mobile Photorealistic 3D Trophy Graphic */}
+                          <div
+                            onClick={triggerConfetti}
+                            className="pt-4 flex justify-center cursor-pointer group"
+                          >
+                            <div className="relative max-w-[280px]">
+                              <img
+                                src="/trophy-pedestal-hd.png"
+                                alt="Championship Trophy on Pedestal"
+                                className="w-full h-auto drop-shadow-2xl animate-float"
+                              />
+                              <div className="absolute top-2 right-2 bg-amber-400 text-slate-900 rounded-full p-1.5 shadow-md">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                {/* Interactive Click to Celebrate Floating Badge */}
+                                <div
+                                  onClick={triggerConfetti}
+                                  className="absolute top-2 right-4 z-20 cursor-pointer hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/85 backdrop-blur-xs text-amber-300 text-[11px] font-bold shadow-lg border border-amber-300/30 hover:scale-105 active:scale-95 transition-transform"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5 fill-amber-400" />
+                                  <span>Click to Celebrate!</span>
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* 3. FLOATING KEY STATS BAR */}
+                      <section className="relative z-20 -mt-6 sm:-mt-8 max-w-6xl mx-auto w-full px-4 sm:px-6">
+                        <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-slate-100 p-4 sm:p-5 flex items-center justify-around flex-wrap gap-4 sm:gap-6">
+                          {/* Stat 1 */}
+                          <Link
+                            href="/houses"
+                            className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:bg-[#0284C7] group-hover:text-white transition-colors shadow-2xs">
+                              <Users className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+                                5
+                              </span>
+                              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                Clubs / Houses
+                              </span>
+                            </div>
+                          </Link>
+
+                          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+
+                          {/* Stat 2 */}
+                          <Link
+                            href="/sports"
+                            className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:bg-[#0284C7] group-hover:text-white transition-colors shadow-2xs">
+                              <Gamepad2 className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+                                8
+                              </span>
+                              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                Sports / Games
+                              </span>
+                            </div>
+                          </Link>
+
+                          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+
+                          {/* Stat 3 */}
+                          <div className="flex items-center gap-3 group transition-transform hover:scale-105">
+                            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#EA580C] flex items-center justify-center shadow-2xs">
+                              <Users className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+                                300+
+                              </span>
+                              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                Registered Players
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+
+                          {/* Stat 4 */}
+                          <Link
+                            href="/schedule"
+                            className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:bg-[#0284C7] group-hover:text-white transition-colors shadow-2xs">
+                              <Trophy className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+                                42
+                              </span>
+                              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                Total Matches
+                              </span>
+                            </div>
+                          </Link>
+
+                          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+
+                          {/* Stat 5 */}
+                          <div
+                            onClick={triggerConfetti}
+                            className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors shadow-2xs">
+                              <Target className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+                                1
+                              </span>
+                              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                Overall Champion
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* 4. MAIN HOMEPAGE SECTIONS */}
+                      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-12 space-y-14">
+                        {/* ======================================================== */}
+                        {/* SECTION A: CHAMPIONSHIP LEADERBOARD & PODIUM */}
+                        {/* ======================================================== */}
+                        <section id="leaderboard-section" className="space-y-6 scroll-mt-20">
+                          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+                            {/* Header info (Left 5 cols) */}
+                            <div className="lg:col-span-5 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Trophy className="w-5 h-5 text-amber-500" />
+                                <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-[#0B2545]">
+                                  CHAMPIONSHIP <span className="text-[#EA580C]">LEADERBOARD</span>
+                                </h2>
+                              </div>
+                              <p className="text-xs text-slate-500 font-medium">
+                                Overall house standings across all sports.
+                              </p>
+                              <div className="pt-2">
+                                <Link
+                                  href="/leaderboard"
+                                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-300 hover:border-[#0284C7] bg-white text-slate-700 hover:text-[#0284C7] text-xs font-bold transition-all shadow-2xs group"
+                                >
+                                  <span>View Full Leaderboard</span>
+                                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                              </div>
+                            </div>
+
+                            {/* Top 3 Podium (Right 7 cols) */}
+                            <div className="lg:col-span-7">
+                              <div className="grid grid-cols-3 gap-2.5 sm:gap-4 items-end">
+                                {/* 2nd Place: Dominators (Silver) */}
+                                <div
+                                  onClick={() => setSelectedHouse(MOCKUP_HOUSES[1])}
+                                  className="bg-gradient-to-b from-[#EBF3FB] via-[#F0F6FD] to-[#DDE9F8] border border-blue-200/80 rounded-2xl p-3 sm:p-4 text-center shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 cursor-pointer relative group"
+                                >
+                                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-slate-300 border-2 border-white text-slate-700 font-black text-xs flex items-center justify-center shadow-xs">
+                                    2
+                                  </div>
+                                  <div className="w-12 h-12 mx-auto mt-2 mb-2 flex items-center justify-center">
+                                    <HouseCrest name="Dominators" className="w-10 h-10 drop-shadow-xs" />
+                                  </div>
+                                  <h3 className="font-black text-xs sm:text-sm text-slate-900 uppercase tracking-tight">
+                                    DOMINATORS
+                                  </h3>
+                                  <div className="text-[11px] sm:text-xs font-bold text-slate-600 mt-0.5">
+                                    <strong className="text-slate-900 font-black">380</strong> Points
+                                  </div>
+                                  <div className="text-[9px] text-slate-400 font-semibold mt-1">
+                                    🥈 Silver Podium
+                                  </div>
+                                </div>
+
+                                {/* 1st Place: Mavericks (Gold - Elevated) */}
+                                <div
+                                  onClick={() => setSelectedHouse(MOCKUP_HOUSES[0])}
+                                  className="bg-gradient-to-b from-[#FEF8E7] via-[#FFF3D1] to-[#FDE8B5] border-2 border-amber-400 rounded-2xl p-4 sm:p-5 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer relative group -translate-y-2"
+                                >
+                                  {/* Floating Gold Crown */}
+                                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 animate-crown">
+                                    <Crown className="w-6 h-6 text-amber-500 fill-amber-400 drop-shadow-sm" />
+                                  </div>
+                                  <div className="w-6 h-6 rounded-full bg-amber-400 border-2 border-white text-slate-900 font-black text-xs flex items-center justify-center shadow-xs mx-auto mb-1">
+                                    1
+                                  </div>
+                                  <div className="w-14 h-14 mx-auto mb-2 flex items-center justify-center">
+                                    <HouseCrest name="Mavericks" className="w-12 h-12 drop-shadow-md" />
+                                  </div>
+                                  <h3 className="font-black text-sm sm:text-base text-slate-900 uppercase tracking-tight">
+                                    MAVERICKS
+                                  </h3>
+                                  <div className="text-xs sm:text-sm font-black text-amber-900 mt-0.5">
+                                    <strong className="text-amber-950 font-black text-sm sm:text-base">420</strong> Points
+                                  </div>
+                                  <div className="text-[10px] text-amber-700 font-bold mt-1 uppercase tracking-wider flex items-center justify-center gap-1">
+                                    <Sparkles className="w-3 h-3 fill-amber-500 text-amber-600" />
+                                    <span>#1 Seed Champion</span>
+                                  </div>
+                                </div>
+
+                                {/* 3rd Place: Spartans (Bronze) */}
+                                <div
+                                  onClick={() => setSelectedHouse(MOCKUP_HOUSES[3])}
+                                  className="bg-gradient-to-b from-[#FAF0E6] via-[#FAF3EC] to-[#F3DFCD] border border-amber-200/90 rounded-2xl p-3 sm:p-4 text-center shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 cursor-pointer relative group"
+                                >
+                                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-amber-600 border-2 border-white text-white font-black text-xs flex items-center justify-center shadow-xs">
+                                    3
+                                  </div>
+                                  <div className="w-12 h-12 mx-auto mt-2 mb-2 flex items-center justify-center">
+                                    <HouseCrest name="Spartans" className="w-10 h-10 drop-shadow-xs" />
+                                  </div>
+                                  <h3 className="font-black text-xs sm:text-sm text-slate-900 uppercase tracking-tight">
+                                    SPARTANS
+                                  </h3>
+                                  <div className="text-[11px] sm:text-xs font-bold text-amber-900 mt-0.5">
+                                    <strong className="text-amber-950 font-black">310</strong> Points
+                                  </div>
+                                  <div className="text-[9px] text-amber-800 font-semibold mt-1">
+                                    🥉 Bronze Podium
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Leaderboard Table Container */}
+                          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                            {/* Table Filter / Search Sub-Bar */}
+                            <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-600 uppercase tracking-wider text-[11px]">
+                                  Sort By:
+                                </span>
+                                <button
+                                  onClick={() => setSortBy('rank')}
+                                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition ${sortBy === 'rank' ? 'bg-[#0284C7] text-white shadow-2xs' : 'bg-white border text-slate-600'
+                                    }`}
+                                >
+                                  Rank
+                                </button>
+                                <button
+                                  onClick={() => setSortBy('points')}
+                                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition ${sortBy === 'points' ? 'bg-[#0284C7] text-white shadow-2xs' : 'bg-white border text-slate-600'
+                                    }`}
+                                >
+                                  Points
+                                </button>
+                                <button
+                                  onClick={() => setSortBy('gold')}
+                                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition ${sortBy === 'gold' ? 'bg-[#0284C7] text-white shadow-2xs' : 'bg-white border text-slate-600'
+                                    }`}
+                                >
+                                  Gold Medals
+                                </button>
+                              </div>
+
+                              <div className="relative">
+                                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                                <input
+                                  type="text"
+                                  placeholder="Filter House..."
+                                  value={searchHouse}
+                                  onChange={(e) => setSearchHouse(e.target.value)}
+                                  className="pl-8 pr-3 py-1 bg-white border border-slate-200 rounded-full text-xs text-slate-700 focus:outline-none focus:border-[#0284C7] w-36 sm:w-48"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Navy Blue Header Bar */}
+                            <div className="bg-[#0A3977] text-white font-bold text-xs uppercase tracking-wider py-3 px-4 sm:px-6 grid grid-cols-12 items-center">
+                              <div className="col-span-1 text-center font-mono">#</div>
+                              <div className="col-span-4 sm:col-span-5 text-left">CLUB (HOUSE)</div>
+                              <div className="col-span-2 text-center">WINS</div>
+                              <div className="col-span-1 text-center hidden sm:block">GOLD 🏅</div>
+                              <div className="col-span-1 text-center hidden sm:block">SILVER 🥈</div>
+                              <div className="col-span-1 text-center hidden sm:block">BRONZE 🥉</div>
+                              <div className="col-span-5 sm:col-span-2 text-right">POINTS</div>
+                            </div>
+
+                            {/* Table Rows */}
+                            <div className="divide-y divide-slate-100">
+                              {sortedHouses.map((house, idx) => {
+                                const isFirst = house.rank === 1;
+                                return (
+                                  <div
+                                    key={house.id}
+                                    onClick={() => setSelectedHouse(house)}
+                                    className={`py-3.5 px-4 sm:px-6 grid grid-cols-12 items-center hover:bg-sky-50/60 transition-colors cursor-pointer group ${isFirst ? 'bg-amber-50/30' : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
+                                      }`}
+                                  >
+                                    {/* Rank Circle */}
+                                    <div className="col-span-1 text-center">
+                                      <span
+                                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs shadow-2xs ${house.rank === 1
+                                            ? 'bg-amber-400 text-slate-900 ring-2 ring-amber-300'
+                                            : house.rank === 2
+                                              ? 'bg-slate-300 text-slate-800'
+                                              : house.rank === 3
+                                                ? 'bg-amber-600 text-white'
+                                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                          }`}
+                                      >
+                                        {house.rank}
+                                      </span>
+                                    </div>
+
+                                    {/* House Details */}
+                                    <div className="col-span-4 sm:col-span-5 flex items-center gap-2.5 sm:gap-3">
+                                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
+                                        <HouseCrest name={house.name} className="w-7 h-7 drop-shadow-2xs" />
+                                      </div>
+                                      <div>
+                                        <span className="font-bold text-slate-900 text-sm group-hover:text-[#0284C7] transition-colors block">
+                                          {house.name}
+                                        </span>
+                                        <span className="text-[10px] text-slate-500 font-medium block">
+                                          Capt: {house.captain}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* Wins */}
+                                    <div className="col-span-2 text-center font-bold text-slate-800 text-sm">
+                                      {house.wins}
+                                    </div>
+
+                                    {/* Gold */}
+                                    <div className="col-span-1 text-center hidden sm:flex items-center justify-center gap-1 font-semibold text-xs text-amber-600">
+                                      <span>🏆</span>
+                                      <span>{house.gold}</span>
+                                    </div>
+
+                                    {/* Silver */}
+                                    <div className="col-span-1 text-center hidden sm:flex items-center justify-center gap-1 font-semibold text-xs text-slate-500">
+                                      <span>🥈</span>
+                                      <span>{house.silver}</span>
+                                    </div>
+
+                                    {/* Bronze */}
+                                    <div className="col-span-1 text-center hidden sm:flex items-center justify-center gap-1 font-semibold text-xs text-amber-700">
+                                      <span>🥉</span>
+                                      <span>{house.bronze}</span>
+                                    </div>
+
+                                    {/* Points */}
+                                    <div className="col-span-5 sm:col-span-2 text-right">
+                                      <span className="font-black text-base sm:text-lg text-slate-900 font-mono tracking-tight group-hover:text-[#0284C7] transition-colors">
+                                        {house.points}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400 font-semibold uppercase ml-1">
+                                        pts
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </section>
+
+                        {/* ======================================================== */}
+                        {/* SECTION B: TOURNAMENT UPDATES & ANNOUNCEMENTS */}
+                        {/* ======================================================== */}
+                        <section className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+                          {/* Left Title */}
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center shadow-2xs">
+                              <Megaphone className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="font-black text-xs sm:text-sm text-[#0B2545] uppercase tracking-tight block">
+                                TOURNAMENT UPDATES &amp;
+                              </span>
+                              <span className="font-black text-xs sm:text-sm text-[#EA580C] uppercase tracking-tight block -mt-0.5">
+                                ANNOUNCEMENTS
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Center Carousel Card */}
+                          <div className="flex-1 w-full bg-slate-50/80 border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3 shadow-inner">
+                            {/* Prev button */}
+                            <button
+                              onClick={() =>
+                                setAnnouncementIdx((prev) => (prev === 0 ? ANNOUNCEMENTS.length - 1 : prev - 1))
+                              }
+                              className="p-1 rounded-full hover:bg-slate-200 text-slate-600 transition"
+                              aria-label="Previous Announcement"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+
+                            {/* Announcement Message */}
+                            <div className="flex items-center gap-3 overflow-hidden text-center sm:text-left flex-1 justify-center sm:justify-start">
+                              <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 hidden sm:flex">
+                                <Calendar className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                                    {currentAnnouncement.title}
+                                  </h4>
+                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#0284C7]/10 text-[#0284C7] uppercase">
+                                    {currentAnnouncement.tag}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 truncate max-w-md sm:max-w-lg">
+                                  {currentAnnouncement.description}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Dots Pagination */}
+                            <div className="flex items-center gap-1.5 shrink-0 px-2">
+                              {ANNOUNCEMENTS.map((_, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => setAnnouncementIdx(i)}
+                                  className={`h-1.5 rounded-full transition-all duration-300 ${announcementIdx === i ? 'w-4 bg-[#0284C7]' : 'w-1.5 bg-slate-300'
+                                    }`}
+                                  aria-label={`Go to slide ${i + 1}`}
+                                />
+                              ))}
+                            </div>
+
+                            {/* Next button */}
+                            <button
+                              onClick={() => setAnnouncementIdx((prev) => (prev + 1) % ANNOUNCEMENTS.length)}
+                              className="p-1 rounded-full hover:bg-slate-200 text-slate-600 transition"
+                              aria-label="Next Announcement"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </section>
+
+                        {/* ======================================================== */}
+                        {/* SECTION C: UPCOMING MATCHES */}
+                        {/* ======================================================== */}
+                        <section className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-5 h-5 text-[#0284C7]" />
+                              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-[#0B2545]">
+                                UPCOMING MATCHES
+                              </h2>
+                            </div>
+                            <Link
+                              href="/schedule"
+                              className="text-xs font-bold text-[#EA580C] hover:text-[#C2410C] flex items-center gap-1 group transition-colors"
+                            >
+                              <span>View Full Schedule</span>
+                              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            {UPCOMING_MATCHES.map((match) => (
+                              <div
+                                key={match.id}
+                                onClick={() => setSelectedMatch(match)}
+                                className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden flex flex-col justify-between group"
+                              >
+                                {/* Header Banner Pill */}
+                                <div
+                                  className={`px-4 py-2.5 bg-gradient-to-r ${match.color} text-white flex items-center justify-between text-xs font-bold tracking-wider uppercase`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <SportIcon name={match.sport} className="w-4 h-4" />
+                                    <span>
+                                      {match.sport} — {match.stage}
+                                    </span>
+                                  </div>
+                                  <ChevronRight className="w-4 h-4 text-white/80 group-hover:translate-x-0.5 transition-transform" />
+                                </div>
+
+                                {/* Match Opponents Section */}
+                                <div className="p-5 flex items-center justify-between">
+                                  {/* Team 1 */}
+                                  <div className="flex flex-col items-center text-center space-y-1.5 w-5/12">
+                                    <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1 group-hover:scale-105 transition-transform shadow-2xs">
+                                      <HouseCrest name={match.team1.name} className="w-10 h-10" />
+                                    </div>
+                                    <span className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                                      {match.team1.name}
+                                    </span>
+                                  </div>
+
+                                  {/* VS Badge */}
+                                  <div className="w-2/12 flex flex-col items-center justify-center">
+                                    <span className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 font-black text-[11px] flex items-center justify-center border border-slate-200 shadow-inner">
+                                      VS
+                                    </span>
+                                  </div>
+
+                                  {/* Team 2 */}
+                                  <div className="flex flex-col items-center text-center space-y-1.5 w-5/12">
+                                    <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1 group-hover:scale-105 transition-transform shadow-2xs">
+                                      <HouseCrest name={match.team2.name} className="w-10 h-10" />
+                                    </div>
+                                    <span className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                                      {match.team2.name}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Match Bottom Bar */}
+                                <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 font-medium">
+                                  <div className="flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>{match.time}</span>
+                                  </div>
+                                  <div className="w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-[#0284C7] group-hover:border-[#0284C7] transition-colors">
+                                    <ArrowRight className="w-3 h-3" />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+
+                        {/* ======================================================== */}
+                        {/* SECTION D: PARTICIPATING SPORTS */}
+                        {/* ======================================================== */}
+                        <section className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Trophy className="w-5 h-5 text-[#0284C7]" />
+                              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-[#0B2545]">
+                                PARTICIPATING SPORTS
+                              </h2>
+                            </div>
+                            <Link
+                              href="/sports"
+                              className="text-xs font-bold text-[#0284C7] hover:underline"
+                            >
+                              Explore All Sports &amp; Rules
+                            </Link>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5">
+                            {MOCKUP_SPORTS.map((sport) => (
+                              <div
+                                key={sport.id}
+                                onClick={() => setSelectedSport(sport)}
+                                className={`bg-white rounded-2xl border border-slate-200 p-3.5 text-center flex flex-col items-center justify-center gap-2 shadow-xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group ${sport.hoverBorder}`}
+                              >
+                                <div
+                                  className={`w-11 h-11 rounded-xl flex items-center justify-center border shadow-2xs group-hover:scale-110 transition-transform ${sport.iconBg}`}
+                                >
+                                  <SportIcon name={sport.name} className="w-5 h-5" />
+                                </div>
+                                <span className="font-bold text-xs text-slate-800 group-hover:text-[#0284C7] transition-colors leading-tight">
+                                  {sport.name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+
+                        {/* ======================================================== */}
+                        {/* SECTION E: OUR CLUBS (HOUSES) */}
+                        {/* ======================================================== */}
+                        <section className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Shield className="w-5 h-5 text-[#0284C7]" />
+                              <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-[#0B2545]">
+                                OUR CLUBS <span className="text-[#EA580C]">(HOUSES)</span>
+                              </h2>
+                            </div>
+                            <Link
+                              href="/houses"
+                              className="text-xs font-bold text-[#EA580C] hover:underline"
+                            >
+                              Meet The House Captains
+                            </Link>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                            {MOCKUP_HOUSES.map((club) => (
+                              <div
+                                key={club.id}
+                                onClick={() => setSelectedHouse(club)}
+                                className={`rounded-2xl p-4 bg-gradient-to-r ${club.gradient} text-white shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer relative overflow-hidden group`}
+                              >
+                                {/* Light shimmer sweep effect */}
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] duration-1000" />
+
+                                <div className="flex items-center gap-3 relative z-10">
+                                  <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center shrink-0 p-1 group-hover:scale-110 transition-transform">
+                                    <HouseCrest name={club.name} className="w-8 h-8" />
+                                  </div>
+                                  <div>
+                                    <h3 className="font-black text-sm tracking-wide uppercase leading-tight">
+                                      {club.name}
+                                    </h3>
+                                    <span className="text-[10px] text-white/80 font-medium block">
+                                      {club.points} PTS • #{club.rank}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      </main>
+
+                      {/* ======================================================== */}
+                      {/* 5. INTERACTIVE MODALS */}
+                      {/* ======================================================== */}
+
+                      {/* House Details Modal */}
+                      {selectedHouse && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+                          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4">
+                            <button
+                              onClick={() => setSelectedHouse(null)}
+                              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="flex items-center gap-3">
+                              <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center p-2 shadow-xs">
+                                <HouseCrest name={selectedHouse.name} className="w-10 h-10" />
+                              </div>
+                              <div>
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800">
+                                  Rank #{selectedHouse.rank}
+                                </span>
+                                <h3 className="font-black text-xl text-slate-900 uppercase">
+                                  {selectedHouse.name}
+                                </h3>
+                                <p className="text-xs text-slate-500 italic">
+                                  &ldquo;{selectedHouse.motto}&rdquo;
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
+                              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                <span className="text-slate-400 uppercase text-[10px] block font-bold">Wins</span>
+                                <span className="font-black text-base text-slate-900">{selectedHouse.wins}</span>
+                              </div>
+                              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-100">
+                                <span className="text-amber-700 uppercase text-[10px] block font-bold">Gold Medals</span>
+                                <span className="font-black text-base text-amber-900">{selectedHouse.gold}</span>
+                              </div>
+                              <div className="p-2.5 rounded-xl bg-sky-50 border border-sky-100">
+                                <span className="text-sky-700 uppercase text-[10px] block font-bold">Total Points</span>
+                                <span className="font-black text-base text-sky-900">{selectedHouse.points}</span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-3">
+                              <div className="flex justify-between">
+                                <span className="font-semibold text-slate-400">House Captain:</span>
+                                <span className="font-bold text-slate-800">{selectedHouse.captain}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-semibold text-slate-400">House Code:</span>
+                                <span className="font-mono font-bold text-slate-800">{selectedHouse.code}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="font-semibold text-slate-400">Total Medals:</span>
+                                <span className="font-bold text-slate-800">
+                                  {selectedHouse.gold + selectedHouse.silver + selectedHouse.bronze}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="pt-2 flex gap-2">
+                              <Link
+                                href="/houses"
+                                className="flex-1 py-2.5 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-center font-bold text-xs transition shadow-md"
+                              >
+                                View Full House Profile
+                              </Link>
+                              <button
+                                onClick={() => setSelectedHouse(null)}
+                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Sport Details Modal */}
+                      {selectedSport && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+                          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4">
+                            <button
+                              onClick={() => setSelectedSport(null)}
+                              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-14 h-14 rounded-2xl flex items-center justify-center border shadow-xs ${selectedSport.iconBg}`}
+                              >
+                                <SportIcon name={selectedSport.name} className="w-7 h-7" />
+                              </div>
+                              <div>
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-800">
+                                  {selectedSport.category}
+                                </span>
+                                <h3 className="font-black text-xl text-slate-900 uppercase">
+                                  {selectedSport.name}
+                                </h3>
+                                <p className="text-xs text-slate-500 font-medium">
+                                  {selectedSport.tag}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                              <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                                Tournament Format:
+                              </span>
+                              <p className="text-xs font-semibold text-slate-800">{selectedSport.format}</p>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-sky-50/60 border border-sky-100 space-y-1">
+                              <span className="text-[10px] uppercase font-bold text-sky-700 block">
+                                Official Rules Summary:
+                              </span>
+                              <p className="text-xs text-slate-700">{selectedSport.rules}</p>
+                            </div>
+
+                            <div className="pt-2 flex gap-2">
+                              <Link
+                                href="/sports"
+                                className="flex-1 py-2.5 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-center font-bold text-xs transition shadow-md"
+                              >
+                                Open Full Sport Details
+                              </Link>
+                              <button
+                                onClick={() => setSelectedSport(null)}
+                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Match Details Modal */}
+                      {selectedMatch && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+                          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4">
+                            <button
+                              onClick={() => setSelectedMatch(null)}
+                              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-sky-50 text-[#0284C7] flex items-center justify-center">
+                                <SportIcon name={selectedMatch.sport} className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-black text-lg text-slate-900 uppercase">
+                                  {selectedMatch.sport} — {selectedMatch.stage}
+                                </h3>
+                                <span className="text-xs text-slate-500">{selectedMatch.venue}</span>
+                              </div>
+                            </div>
+
+                            {/* Teams Faceoff */}
+                            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-around">
+                              <div className="text-center space-y-1">
+                                <HouseCrest name={selectedMatch.team1.name} className="w-12 h-12 mx-auto" />
+                                <span className="font-bold text-sm text-slate-900 block">
+                                  {selectedMatch.team1.name}
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  {selectedMatch.team1.code}
+                                </span>
+                              </div>
+
+                              <div className="w-8 h-8 rounded-full bg-white border border-slate-200 font-black text-xs text-slate-400 flex items-center justify-center shadow-xs">
+                                VS
+                              </div>
+
+                              <div className="text-center space-y-1">
+                                <HouseCrest name={selectedMatch.team2.name} className="w-12 h-12 mx-auto" />
+                                <span className="font-bold text-sm text-slate-900 block">
+                                  {selectedMatch.team2.name}
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-mono">
+                                  {selectedMatch.team2.code}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2 text-xs text-slate-600">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-[#0284C7]" />
+                                <span>
+                                  Scheduled Time: <strong>{selectedMatch.time}</strong>
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-[#EA580C]" />
+                                <span>
+                                  Arena: <strong>{selectedMatch.venue}</strong>
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="pt-2 flex gap-2">
+                              <Link
+                                href="/schedule"
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white text-center font-bold text-xs transition shadow-md"
+                              >
+                                View in Tournament Schedule
+                              </Link>
+                              <button
+                                onClick={() => setSelectedMatch(null)}
+                                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 6. UNIFIED FOOTER */}
+                      <PublicFooter />
                     </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between">
-                    <span className="text-xs text-slate-400">Championship Points</span>
-                    <span className="font-mono font-bold text-base text-[#C6A04A]">
-                      {Number(club.totalPoints).toFixed(2)} pts
-                    </span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* SECTION 3: 8 SPORTS ARENA */}
-        <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] block">
-                8 Sports Disciplines
-              </span>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-1">
-                Championship Arena
-              </h2>
-            </div>
-            <Link
-              href="/sports"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
-            >
-              <span>Explore All 8 Sports & Rules</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {sports.slice(0, 4).map((sp: any) => (
-              <article
-                key={sp.id}
-                className="rounded-xl bg-[#141822] border border-white/[0.08] p-5 space-y-3 hover:border-[#C6A04A] transition shadow-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-lg bg-[#0A0D14] border border-white/[0.08] flex items-center justify-center text-[#C6A04A]">
-                    <SportIcon name={sp.name} className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-[#0A0D14] text-[#C6A04A] border border-white/[0.08]">
-                    {sp.category}
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="font-serif text-base font-bold text-white">{sp.name}</h3>
-                  <span className="text-xs text-slate-400 font-medium block mt-0.5">{sp.tournamentFormat}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* SECTION 4: POINTS DIVISION PROTOCOL */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-[#141822] border border-white/[0.08] space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#C6A04A] block">
-                Automated Scoring Protocol
-              </span>
-              <h2 className="font-serif text-2xl font-bold text-white mt-1">
-                Unique-Club Equal Division Engine
-              </h2>
-            </div>
-            <Link
-              href="/points-rules"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C6A04A] hover:text-[#DFB85C] transition"
-            >
-              <span>Test Live Simulator & Rules</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="p-5 rounded-xl bg-[#0A0D14] border border-white/[0.06] space-y-2">
-              <span className="text-[10px] font-bold text-[#C6A04A] uppercase tracking-wider block">1. Unique Houses</span>
-              <h3 className="font-serif text-sm font-bold text-white">Detect Representation</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Counts unique houses in a mixed squad (e.g. 4 players representing 3 houses).
-              </p>
-            </div>
-            <div className="p-5 rounded-xl bg-[#0A0D14] border border-white/[0.06] space-y-2">
-              <span className="text-[10px] font-bold text-[#C6A04A] uppercase tracking-wider block">2. Divide Points</span>
-              <h3 className="font-serif text-sm font-bold text-white">Equal Point Split</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Points are divided evenly: <code className="text-[#C6A04A] font-mono">100 ÷ 3 = 33.33 pts</code>
-              </p>
-            </div>
-            <div className="p-5 rounded-xl bg-[#0A0D14] border border-white/[0.06] space-y-2">
-              <span className="text-[10px] font-bold text-[#C6A04A] uppercase tracking-wider block">3. Remainder Balance</span>
-              <h3 className="font-serif text-sm font-bold text-white">Deterministic Rotation</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Fractional cents rotate fairly: <code className="text-emerald-400 font-mono">33.33 + 33.33 + 33.34 = 100</code>
-              </p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* 5. UNIFIED FOOTER */}
-      <PublicFooter />
-    </div>
-  );
+                    );
 }

@@ -5,17 +5,17 @@ import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
 import { SportIcon } from '@/components/ui/icons';
-import { Calendar, CheckCircle2, ChevronRight, Trophy } from 'lucide-react';
+import { Trophy, Calendar, ChevronRight } from 'lucide-react';
 
 const INITIAL_SPORTS = [
-  { id: 'sport-bgmi', name: 'BGMI', category: 'E-Sports', tournamentFormat: 'Battle Royale 4-Man Squads', description: 'Mixed-house squads competing across multiple maps. Points split evenly among unique represented houses.' },
-  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'Singles • Doubles • Mixed Doubles', description: 'Traditional board showdown featuring singles, doubles, and mixed doubles brackets on competition boards.' },
-  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Singles • Doubles • Mixed Doubles', description: 'Fast-paced singles, doubles, and mixed doubles sets (21 pts) played on indoor wooden courts.' },
-  { id: 'sport-chess', name: 'Chess', category: 'Mind Sport', tournamentFormat: 'Rapid & Classical FIDE', description: 'Strategic intellectual battles on 64 squares with clock-controlled rounds.' },
-  { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table', description: 'High-speed table tennis singles and doubles with sudden death deuce rules.' },
-  { id: 'sport-cricket', name: 'Cricket', category: 'Field Sport', tournamentFormat: '10 Teams • 2 Pools • Super 4', description: 'Main championship centerpiece with 10 franchise teams competing for the trophy.' },
-  { id: 'sport-football', name: 'Football', category: 'Field Sport', tournamentFormat: '5-a-side Turf League', description: 'Intense 5-a-side football on synthetic turf with group stage and finals.' },
-  { id: 'sport-treasure-hunt', name: 'Treasure Hunt', category: 'Adventure Quest', tournamentFormat: 'Campus Clue Quest & Vault Hunt', description: 'Campus-wide multi-clue adventure quest. House squads race against time across campus checkpoints to solve riddles and unlock the final treasure vault.' },
+  { id: 'sport-cricket', name: 'Cricket', category: 'Field Sport', tournamentFormat: '10 Teams • 2 Pools • Super 4', description: 'Main tournament flagship with 10 franchise teams competing across league matches, semifinals, and grand final.' },
+  { id: 'sport-football', name: 'Football', category: 'Field Sport', tournamentFormat: '5-a-side Turf League', description: 'Fast-paced turf football with knockout stages and sudden-death penalty deciders.' },
+  { id: 'sport-badminton', name: 'Badminton', category: 'Racquet', tournamentFormat: 'Singles • Doubles • Mixed Doubles', description: 'Intense 21-point rally format across Men’s Singles, Women’s Singles, and Mixed Doubles.' },
+  { id: 'sport-tt', name: 'Table Tennis', category: 'Racquet', tournamentFormat: '11-Point Fast Table', description: 'Speed and precision ping-pong on international standard tables with sudden death deuce rules.' },
+  { id: 'sport-chess', name: 'Chess', category: 'Mind Sport', tournamentFormat: 'Rapid & Classical FIDE', description: 'Strategic intellectual showdown with digital clock timers and FIDE Swiss bracket system.' },
+  { id: 'sport-carrom', name: 'Carrom', category: 'Indoor', tournamentFormat: 'Singles • Doubles • Mixed Doubles', description: 'Classic precision board championship featuring singles, doubles, and queen cover point systems.' },
+  { id: 'sport-bgmi', name: 'BGMI', category: 'E-Sports', tournamentFormat: 'Battle Royale 4-Man Squads', description: 'High-intensity mobile esports battle royale across custom campus servers with live casting.' },
+  { id: 'sport-mystery', name: 'Mystery Game', category: 'Secret Quest', tournamentFormat: 'Revealed on Nov 27th', description: 'Surprise team challenge unlocked on tournament Day 3 with bonus championship points.' },
 ];
 
 export default function SportsPage() {
@@ -51,28 +51,28 @@ export default function SportsPage() {
     setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
-  const categories = ['ALL', 'Field Sport', 'Racquet', 'Indoor', 'E-Sports', 'Mind Sport', 'Adventure Quest'];
+  const categories = ['ALL', 'Field Sport', 'Racquet', 'Indoor', 'E-Sports', 'Mind Sport'];
 
   const filteredSports = selectedCategory === 'ALL'
     ? sports
     : sports.filter((s) => s.category?.toLowerCase() === selectedCategory.toLowerCase());
 
   return (
-    <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col antialiased">
       <PublicNavbar onRefresh={handleRefresh} refreshing={refreshing} lastUpdated={lastRefreshed} activeOverride="sports" />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 space-y-8">
         {/* Header */}
-        <div className="border-b border-white/[0.08] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="border-b border-slate-200 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-[#C6A04A] mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-100 text-xs text-[#0284C7] font-bold mb-3">
               <Trophy className="w-3.5 h-3.5" />
               <span>Championship Arena</span>
             </div>
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              8 Sports Disciplines
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              8 Participating Sports
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-2xl leading-relaxed">
               Every house competes across all 8 official disciplines. Points scored across these disciplines roll directly into the unified APL Season 9 championship tally.
             </p>
           </div>
@@ -83,10 +83,10 @@ export default function SportsPage() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${
                   selectedCategory === cat
-                    ? 'bg-[#C6A04A] text-slate-950 font-bold'
-                    : 'bg-[#141822] text-slate-400 hover:text-white border border-white/[0.06]'
+                    ? 'bg-[#0284C7] text-white shadow-2xs'
+                    : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
                 }`}
               >
                 {cat}
@@ -96,54 +96,43 @@ export default function SportsPage() {
         </div>
 
         {/* Sports Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {filteredSports.map((sp: any) => (
             <article
               key={sp.id}
-              className="rounded-2xl bg-[#141822] border border-white/[0.08] hover:border-[#C6A04A]/50 transition p-6 space-y-4 shadow-sm flex flex-col justify-between"
+              className="rounded-2xl bg-white border border-slate-200 hover:border-[#0284C7]/50 transition p-5 space-y-4 shadow-xs hover:shadow-md flex flex-col justify-between group"
             >
-              <div className="space-y-4">
-                {/* Header: Icon + Category Badge */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-[#0A0D14] border border-white/[0.08] flex items-center justify-center text-[#C6A04A] shadow-inner">
+                  <div className="w-12 h-12 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                     <SportIcon name={sp.name} className="w-6 h-6" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[#0A0D14] text-[#C6A04A] border border-[#C6A04A]/30">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">
                     {sp.category || 'Discipline'}
                   </span>
                 </div>
 
-                {/* Name + Format */}
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-white tracking-tight">
+                  <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                     {sp.name}
                   </h2>
-                  <span className="text-xs font-medium text-slate-400 block mt-1">
-                    {sp.tournamentFormat || 'Championship Tournament'}
+                  <span className="text-xs font-semibold text-[#0284C7] block mt-0.5">
+                    {sp.tournamentFormat}
                   </span>
                 </div>
 
-                {/* Description if present */}
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {sp.description || `Official ${sp.name} competition in APL Season 9 with certified rules and points division.`}
+                <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                  {sp.description}
                 </p>
               </div>
 
-              {/* Action Links */}
-              <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between gap-2">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <span>Rules Certified</span>
                 <Link
-                  href={`/schedule?sport=${encodeURIComponent(sp.name)}`}
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-[#C6A04A] transition font-medium"
+                  href="/schedule"
+                  className="text-[#0284C7] font-bold flex items-center gap-1 group-hover:underline"
                 >
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Fixtures</span>
-                </Link>
-                <Link
-                  href={`/results?sport=${encodeURIComponent(sp.name)}`}
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-[#C6A04A] transition font-medium"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Results</span>
+                  <span>Matches</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -156,4 +145,3 @@ export default function SportsPage() {
     </div>
   );
 }
-

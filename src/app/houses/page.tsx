@@ -7,23 +7,62 @@ import PublicFooter from '@/components/public/PublicFooter';
 import { Trophy, Shield, Users, RefreshCw, ArrowRight, Award } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
 
-const HOUSE_METADATA: Record<
-  string,
-  { accentColor: string; bgSoft: string; borderHover: string }
-> = {
-  ALP: { accentColor: '#2563EB', bgSoft: 'rgba(37,99,235,0.08)', borderHover: 'hover:border-blue-500/50' },
-  CRW: { accentColor: '#D97706', bgSoft: 'rgba(217,119,6,0.08)', borderHover: 'hover:border-amber-500/50' },
-  DOM: { accentColor: '#DC2626', bgSoft: 'rgba(220,38,38,0.08)', borderHover: 'hover:border-red-500/50' },
-  MAV: { accentColor: '#059669', bgSoft: 'rgba(5,150,105,0.08)', borderHover: 'hover:border-emerald-500/50' },
-  RYL: { accentColor: '#7C3AED', bgSoft: 'rgba(124,58,237,0.08)', borderHover: 'hover:border-purple-500/50' },
-};
-
 const DEFAULT_HOUSES = [
-  { id: 'club-alp', name: 'Alpha', code: 'ALP', captainName: 'Piyush Pandey', rank: 1, totalPoints: 0, cricketTeams: [{ id: 'alp-a', name: 'Dominators' }, { id: 'alp-b', name: 'Rebel Royals' }] },
-  { id: 'club-crw', name: 'Crown Crushers', code: 'CRW', captainName: 'Taha Choudhary', rank: 2, totalPoints: 0, cricketTeams: [{ id: 'crw-a', name: 'Savage Strikers' }, { id: 'crw-b', name: 'Storm Breakers' }] },
-  { id: 'club-dom', name: 'Dominator', code: 'DOM', captainName: 'Aquib Hingwala', rank: 3, totalPoints: 0, cricketTeams: [{ id: 'dom-a', name: 'GenZ Warrior' }, { id: 'dom-b', name: 'Crown Crusher' }] },
-  { id: 'club-mav', name: 'Blue', code: 'MAV', captainName: 'Affan', rank: 4, totalPoints: 0, cricketTeams: [{ id: 'mav-a', name: 'Nex Blitz' }, { id: 'mav-b', name: 'Royal Force' }] },
-  { id: 'club-ryl', name: 'Royal Force', code: 'RYL', captainName: 'Pravin', rank: 5, totalPoints: 0, cricketTeams: [{ id: 'ryl-a', name: 'Alpha Warriors' }, { id: 'ryl-b', name: 'Mavericks' }] },
+  {
+    id: 'club-mav',
+    name: 'Mavericks',
+    code: 'MAV',
+    captainName: 'Alex Rivera',
+    rank: 1,
+    totalPoints: 420,
+    accentColor: '#DC2626',
+    motto: 'Unyielding Speed, Unbroken Pride',
+    cricketTeams: [{ id: 'mav-a', name: 'Mavericks A' }, { id: 'mav-b', name: 'Mavericks B' }],
+  },
+  {
+    id: 'club-dom',
+    name: 'Dominators',
+    code: 'DOM',
+    captainName: 'Leo Vance',
+    rank: 2,
+    totalPoints: 380,
+    accentColor: '#1E3A8A',
+    motto: 'Command the Arena, Rule the Field',
+    cricketTeams: [{ id: 'dom-a', name: 'Dominators A' }, { id: 'dom-b', name: 'Dominators B' }],
+  },
+  {
+    id: 'club-alp',
+    name: 'Alphas',
+    code: 'ALP',
+    captainName: 'Ethan Hunt',
+    rank: 3,
+    totalPoints: 355,
+    accentColor: '#7C3AED',
+    motto: 'First to Strike, Last to Fall',
+    cricketTeams: [{ id: 'alp-a', name: 'Alphas A' }, { id: 'alp-b', name: 'Alphas B' }],
+  },
+  {
+    id: 'club-spa',
+    name: 'Spartans',
+    code: 'SPA',
+    captainName: 'Marcus Cole',
+    rank: 4,
+    totalPoints: 310,
+    accentColor: '#D97706',
+    motto: 'Discipline in Battle, Honor in Triumph',
+    cricketTeams: [{ id: 'spa-a', name: 'Spartans A' }, { id: 'spa-b', name: 'Spartans B' }],
+  },
+  {
+    id: 'club-phx',
+    name: 'Phoenix',
+    code: 'PHX',
+    captainName: 'Aiden Drake',
+    rank: 5,
+    totalPoints: 275,
+    accentColor: '#EA580C',
+    motto: 'From the Ashes, Infinite Radiance',
+    cricketTeams: [{ id: 'phx-a', name: 'Phoenix A' }, { id: 'phx-b', name: 'Phoenix B' }],
+  },
 ];
 
 export default function HousesPage() {
@@ -31,7 +70,6 @@ export default function HousesPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState('');
-  const [selectedHouse, setSelectedHouse] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -60,140 +98,91 @@ export default function HousesPage() {
   };
 
   const houses = (data?.standings && data.standings.length > 0) ? data.standings : DEFAULT_HOUSES;
-  const sports = data?.sports || [];
 
   return (
-    <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
-      <PublicNavbar onRefresh={handleRefresh} refreshing={refreshing} lastUpdated={lastRefreshed} activeOverride="houses" />
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col antialiased">
+      <PublicNavbar onRefresh={handleRefresh} refreshing={refreshing} lastUpdated={lastRefreshed} activeOverride="clubs" />
 
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 space-y-8">
         {/* Page Header */}
-        <div className="border-b border-white/[0.08] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="border-b border-slate-200 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-[#C6A04A] mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-100 text-xs text-[#0284C7] font-bold mb-3">
               <Shield className="w-3.5 h-3.5" />
               <span>Official Participating Houses</span>
             </div>
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
               The 5 Participating Houses
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
-              5 storied houses competing across all 7 championship disciplines. Each house sponsors two official cricket franchises whose tournament points contribute directly to the house total.
+            <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-2xl leading-relaxed">
+              Explore the five student houses competing for the APL Season 9 Championship Trophy. Each house fields athletes across all 8 sports disciplines.
             </p>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/leaderboard"
-              className="px-4 py-2 rounded-lg bg-[#C6A04A] hover:bg-[#B38F3A] text-slate-950 font-bold text-xs transition flex items-center gap-2"
-            >
-              <Trophy className="w-3.5 h-3.5" />
-              <span>View Leaderboard</span>
-            </Link>
           </div>
         </div>
 
-        {/* 5 Houses Grid */}
+        {/* Houses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {houses.map((club: any) => {
-            const meta = HOUSE_METADATA[club.code] || HOUSE_METADATA.ALP;
-            const isSelected = selectedHouse === club.id;
-
-            return (
-              <article
-                key={club.id}
-                onClick={() => setSelectedHouse(isSelected ? null : club.id)}
-                className={`rounded-2xl bg-[#141822] border transition p-6 space-y-5 shadow-sm cursor-pointer ${
-                  isSelected ? 'border-[#C6A04A] ring-1 ring-[#C6A04A]/50' : 'border-white/[0.08] hover:border-[#C6A04A]/40'
-                }`}
-              >
-                {/* Crest + House Name + Rank Badge */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center font-serif font-bold text-base text-white shadow-md shrink-0"
-                      style={{ backgroundColor: meta.accentColor }}
-                    >
-                      {club.code}
-                    </div>
-                    <div>
-                      <h2 className="font-serif text-xl font-bold text-white leading-tight">
-                        {club.name}
-                      </h2>
-                      <span className="text-xs text-slate-400">
-                        Senior Captain: <strong className="text-slate-200">{club.captainName || 'Senior Captain'}</strong>
-                      </span>
-                    </div>
+          {houses.map((house: any) => (
+            <div
+              key={house.id}
+              className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-base text-white shadow-xs"
+                    style={{ backgroundColor: house.accentColor || '#0284C7' }}
+                  >
+                    {house.code}
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Rank</span>
-                    <span className="font-mono text-sm font-bold px-2 py-0.5 rounded bg-[#0A0D14] border border-white/[0.08] text-[#C6A04A]">
-                      #{club.rank}
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 leading-tight">
+                      {house.name}
+                    </h2>
+                    <span className="text-xs text-slate-500 font-medium">
+                      Capt: {house.captainName || 'Senior Captain'}
                     </span>
                   </div>
                 </div>
 
-                {/* House Teams */}
-                <div className="space-y-2">
-                  <span className="text-[11px] font-semibold text-slate-400 block">
-                    House Teams (2)
-                  </span>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {club.cricketTeams && club.cricketTeams.length > 0 ? (
-                      club.cricketTeams.map((ct: any) => (
-                        <span
-                          key={ct.id}
-                          className="px-2.5 py-1 rounded-md bg-[#0A0D14] border border-white/[0.06] text-xs font-medium text-slate-200 flex items-center gap-1.5"
-                        >
-                          <span>🏏</span>
-                          <span>{ct.name}</span>
-                        </span>
-                      ))
-                    ) : (
-                      <>
-                        <span className="px-2.5 py-1 rounded-md bg-[#0A0D14] border border-white/[0.06] text-xs font-medium text-slate-200">
-                          🏏 {club.name} A
-                        </span>
-                        <span className="px-2.5 py-1 rounded-md bg-[#0A0D14] border border-white/[0.06] text-xs font-medium text-slate-200">
-                          🏏 {club.name} B
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
+                <span className="font-mono text-xs font-black px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                  #{house.rank}
+                </span>
+              </div>
 
-                {/* Sport Points Breakdown (when sports data available) */}
-                {sports.length > 0 && club.sportBreakdown && (
-                  <div className="pt-3 border-t border-white/[0.06] space-y-2">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
-                      <span>Sport Points Breakdown</span>
-                      <span className="text-[10px] text-[#C6A04A]">8 Sports</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1.5 text-center">
-                      {sports.slice(0, 4).map((sp: any) => {
-                        const pts = club.sportBreakdown?.[sp.id] ?? club.sportBreakdown?.[sp.name] ?? 0;
-                        return (
-                          <div key={sp.id} className="p-1.5 rounded bg-[#0A0D14] border border-white/[0.04]">
-                            <span className="text-[9px] text-slate-400 block truncate">{sp.name}</span>
-                            <span className="font-mono text-xs font-bold text-slate-200">{Number(pts).toFixed(1)}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+              {house.motto && (
+                <p className="text-xs italic text-slate-500">
+                  &ldquo;{house.motto}&rdquo;
+                </p>
+              )}
 
-                {/* Points Bar */}
-                <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between">
-                  <span className="text-xs text-slate-400">Championship Tally</span>
-                  <span className="font-mono font-bold text-lg text-[#C6A04A]">
-                    {Number(club.totalPoints).toFixed(2)} pts
-                  </span>
+              {/* Franchise Teams */}
+              <div className="space-y-2">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                  Registered Franchises
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {house.cricketTeams?.map((ct: any) => (
+                    <span
+                      key={ct.id}
+                      className="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700"
+                    >
+                      🏏 {ct.name}
+                    </span>
+                  ))}
                 </div>
-              </article>
-            );
-          })}
+              </div>
+
+              {/* Total Points Footer */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-500">Championship Points</span>
+                <span className="font-mono font-black text-lg text-slate-900">
+                  {Number(house.totalPoints).toFixed(2)} pts
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
 
@@ -201,4 +190,3 @@ export default function HousesPage() {
     </div>
   );
 }
-

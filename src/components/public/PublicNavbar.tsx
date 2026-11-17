@@ -1,9 +1,18 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, RefreshCw, Shield, Scale, Lock, ChevronDown } from 'lucide-react';
+import {
+  Trophy,
+  UserCheck,
+  Crown,
+  Menu,
+  X,
+  ExternalLink,
+  Calendar,
+  Sparkles,
+} from 'lucide-react';
 
 interface PublicNavbarProps {
   onRefresh?: () => void;
@@ -20,30 +29,16 @@ export default function PublicNavbar({
 }: PublicNavbarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [signInDropdownOpen, setSignInDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
     { label: 'Home', href: '/', key: 'home' },
-    { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
-    { label: 'Star Players', href: '/player-leaderboard', key: 'star-players' },
-    { label: 'The 5 Houses', href: '/houses', key: 'houses' },
-    { label: '8 Sports', href: '/sports', key: 'sports' },
+    { label: 'About', href: '#about-section', key: 'about' },
+    { label: 'Sports', href: '/sports', key: 'sports' },
     { label: 'Schedule', href: '/schedule', key: 'schedule' },
-    { label: 'Results', href: '/results', key: 'results' },
-    { label: 'Points Rules', href: '/points-rules', key: 'rules' },
+    { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
+    { label: 'Clubs', href: '/houses', key: 'clubs' },
+    { label: 'Gallery', href: '#gallery-section', key: 'gallery' },
   ];
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setSignInDropdownOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const isItemActive = (item: (typeof navItems)[0]) => {
     if (activeOverride) {
@@ -51,172 +46,115 @@ export default function PublicNavbar({
     }
     if (item.key === 'home' && pathname === '/') return true;
     if (pathname === item.href) return true;
-    if (item.key === 'star-players' && (pathname === '/player-leaderboard' || pathname === '/players')) return true;
-    if (item.key === 'houses' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
-    if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports' || pathname === '/8-sports')) return true;
+    if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports')) return true;
     if (item.key === 'schedule' && (pathname === '/schedule' || pathname === '/matches')) return true;
-    if (item.key === 'results' && (pathname === '/results' || pathname === '/approved-results')) return true;
-    if (item.key === 'rules' && (pathname === '/points-rules' || pathname === '/rules' || pathname === '/points-system')) return true;
+    if (item.key === 'leaderboard' && (pathname === '/leaderboard' || pathname === '/player-leaderboard')) return true;
+    if (item.key === 'clubs' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
     return false;
   };
 
-  const handleRefreshClick = () => {
-    if (onRefresh) {
-      onRefresh();
-    } else {
-      window.location.reload();
-    }
-  };
-
   return (
-    <header className="sticky top-0 z-50 bg-[#080A0E]/95 backdrop-blur-md border-b border-white/[0.08] px-4 lg:px-8 h-16 flex items-center justify-between transition-all">
-      {/* Brand Logo & Name */}
-      <Link href="/" className="flex items-center gap-2.5 cursor-pointer select-none group shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[#141822] border border-[#C6A04A]/40 p-1 flex items-center justify-center shrink-0 group-hover:border-[#C6A04A] transition">
-          <img src="/logo.png" alt="APL Logo" className="w-full h-full object-contain" />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="font-serif font-black text-base sm:text-lg tracking-tight text-white whitespace-nowrap">
-            APL <span className="text-[#C6A04A]">SEASON 9</span>
-          </span>
-          <span className="hidden 2xl:inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/[0.04] text-[#C6A04A] border border-[#C6A04A]/30 whitespace-nowrap">
-            House Championship
-          </span>
-        </div>
-      </Link>
-
-      {/* Desktop Navigation Links — single-line & whitespace-nowrap */}
-      <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
-        {navItems.map((item) => {
-          const active = isItemActive(item);
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`relative py-1 text-xs font-semibold tracking-wider uppercase whitespace-nowrap transition-colors duration-150 ${
-                active
-                  ? 'text-[#C6A04A] font-bold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              <span>{item.label}</span>
-              {active && (
-                <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#C6A04A] rounded-full shadow-[0_0_8px_rgba(198,160,74,0.7)]" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Right Side: Live Standings + Sign In Buttons (Admin & Referee) + Refresh */}
-      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-        {/* Live Standings Status Pill */}
-        <div className="hidden sm:flex items-center gap-2 px-2.5 xl:px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-slate-300 whitespace-nowrap">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="text-[11px] font-medium tracking-wide">Live Standings</span>
-        </div>
-
-        {/* Divider */}
-        <div className="hidden sm:block h-4 w-[1px] bg-white/[0.1]" />
-
-        {/* Unified Sign In Button for both panels */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setSignInDropdownOpen(!signInDropdownOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1C2331] border border-[#C6A04A]/60 hover:border-[#C6A04A] text-xs font-bold text-[#F3D787] transition shadow-xs whitespace-nowrap group"
-            title="Sign in to Admin or Referee Panel"
-            aria-expanded={signInDropdownOpen}
-          >
-            <Lock className="w-3.5 h-3.5 text-[#C6A04A] group-hover:scale-110 transition-transform" />
-            <span>Sign In</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 text-[#C6A04A] transition-transform duration-200 ${
-                signInDropdownOpen ? 'rotate-180' : ''
-              }`}
-            />
-          </button>
-
-          {signInDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[#0E131C] border border-[#C6A04A]/40 p-2.5 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="px-2.5 py-1.5 mb-1.5 border-b border-white/[0.08] flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Championship Sign In
-                </span>
-                <span className="text-[9px] font-mono text-[#C6A04A] bg-[#C6A04A]/10 px-1.5 py-0.5 rounded border border-[#C6A04A]/20">
-                  OFFICIALS
-                </span>
-              </div>
-
-              {/* Admin Panel */}
-              <Link
-                href="/admin/login"
-                onClick={() => setSignInDropdownOpen(false)}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.06] transition group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#141822] border border-[#C6A04A]/40 flex items-center justify-center text-[#C6A04A] group-hover:bg-[#C6A04A] group-hover:text-slate-950 transition shrink-0">
-                  <Shield className="w-4 h-4" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white group-hover:text-[#C6A04A] transition block">
-                    Admin Panel
-                  </span>
-                  <span className="text-[10px] text-slate-400 block">
-                    Tournament director & controls
-                  </span>
-                </div>
-              </Link>
-
-              <div className="h-[1px] bg-white/[0.06] my-1" />
-
-              {/* Referee Panel */}
-              <Link
-                href="/referee/login"
-                onClick={() => setSignInDropdownOpen(false)}
-                className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.06] transition group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#141822] border border-emerald-500/40 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition shrink-0">
-                  <Scale className="w-4 h-4" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white group-hover:text-emerald-400 transition block">
-                    Referee Panel
-                  </span>
-                  <span className="text-[10px] text-slate-400 block">
-                    Match score & star player submission
-                  </span>
-                </div>
-              </Link>
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        {/* Brand Logo & Name */}
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-xs text-white group-hover:scale-105 transition-transform">
+              <Trophy className="w-4 h-4 fill-white text-white drop-shadow-xs" />
             </div>
-          )}
+            <div className="flex flex-col leading-none">
+              <span className="font-black text-sm sm:text-base tracking-tight text-[#0B1E38] uppercase">
+                APEX<span className="text-[#0284C7]">ARENA</span>
+              </span>
+              <span className="text-[10px] font-black tracking-widest text-[#EA580C] uppercase -mt-0.5">
+                APL SEASON 9
+              </span>
+            </div>
+          </Link>
+
+          {/* Divider */}
+          <div className="h-6 w-[1.5px] bg-slate-300 hidden md:block" />
+
+          {/* Nexcore Institution Badge */}
+          <div className="hidden md:flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-[#0A2540] text-white font-mono font-black text-[10px] flex items-center justify-center tracking-tighter">
+              NT
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-[11px] font-bold text-slate-800 tracking-wider uppercase">
+                NEXCORE
+              </span>
+              <span className="text-[9px] font-medium text-slate-500 tracking-tight">
+                INSTITUTE OF TECHNOLOGY
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Refresh Button */}
-        <button
-          onClick={handleRefreshClick}
-          className="p-1.5 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition border border-white/[0.08]"
-          title={lastUpdated ? `Updated ${lastUpdated}` : 'Refresh'}
-          aria-label="Refresh Data"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#C6A04A]' : ''}`} />
-        </button>
+        {/* Center Desktop Navigation Pills */}
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+          {navItems.map((item) => {
+            const active = isItemActive(item);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
+                  active
+                    ? 'bg-[#0284C7] text-white shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-[#0B1E38] hover:bg-slate-100/80'
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-        {/* Mobile Hamburger Toggle */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-1.5 text-slate-300 hover:text-white bg-white/[0.06] rounded-lg border border-white/[0.08]"
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? <X className="w-4 h-4 text-[#C6A04A]" /> : <Menu className="w-4 h-4" />}
-        </button>
+        {/* Right Side: Referee Login & Admin Login Buttons */}
+        <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+          {/* Referee Login Pill */}
+          <Link
+            href="/referee/login"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-900 text-xs font-bold transition shadow-2xs group"
+          >
+            <UserCheck className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#0284C7] transition-colors" />
+            <span>Referee Login</span>
+          </Link>
+
+          {/* Admin Login Pill */}
+          <Link
+            href="/admin/login"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#0088FF] to-[#0060DF] hover:from-[#007AE6] hover:to-[#0050C0] text-white text-xs font-bold transition shadow-md shadow-blue-500/25 group transform hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <Crown className="w-3.5 h-3.5 text-amber-300 group-hover:rotate-12 transition-transform" />
+            <span>Admin Login</span>
+          </Link>
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <div className="flex sm:hidden items-center gap-2">
+          <Link
+            href="/admin/login"
+            className="p-1.5 rounded-full bg-[#0284C7] text-white"
+            title="Admin Login"
+          >
+            <Crown className="w-4 h-4 text-amber-300" />
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg text-slate-700 hover:bg-slate-100"
+            aria-label="Toggle Menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden absolute top-16 left-0 right-0 bg-[#0E131C] border-b border-white/[0.08] p-4 space-y-3 text-xs font-semibold tracking-wider uppercase shadow-2xl z-50">
-          <div className="space-y-1">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 shadow-xl">
+          <div className="grid grid-cols-2 gap-2 pt-2">
             {navItems.map((item) => {
               const active = isItemActive(item);
               return (
@@ -224,31 +162,34 @@ export default function PublicNavbar({
                   key={item.key}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between p-2.5 rounded-lg transition ${
+                  className={`px-3 py-2 rounded-xl text-center text-xs font-bold ${
                     active
-                      ? 'bg-[#141822] text-[#C6A04A] font-bold border border-[#C6A04A]/30'
-                      : 'text-slate-300 hover:bg-white/[0.05]'
+                      ? 'bg-[#0284C7] text-white'
+                      : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
-                  <span>{item.label}</span>
-                  {active && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A04A]" />}
+                  {item.label}
                 </Link>
               );
             })}
           </div>
 
-          {/* Portal Sign In Section in Mobile Menu */}
-          <div className="pt-3 border-t border-white/[0.08] space-y-2">
-            <span className="text-[10px] font-bold text-slate-500 block px-1">
-              CHAMPIONSHIP AUTHENTICATION
-            </span>
+          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
             <Link
-              href="/login"
+              href="/referee/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-[#141822] border border-[#C6A04A]/60 hover:border-[#C6A04A] text-[#F3D787] font-bold text-xs shadow-md transition"
+              className="flex items-center justify-center gap-2 py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold"
             >
-              <Lock className="w-3.5 h-3.5 text-[#C6A04A]" />
-              <span>Sign In (Admin & Referee)</span>
+              <UserCheck className="w-4 h-4 text-[#0284C7]" />
+              <span>Referee Login</span>
+            </Link>
+            <Link
+              href="/admin/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[#0088FF] to-[#0060DF] text-white text-xs font-bold shadow-md"
+            >
+              <Crown className="w-4 h-4 text-amber-300" />
+              <span>Admin Login</span>
             </Link>
           </div>
         </div>

@@ -7,6 +7,75 @@ import PublicFooter from '@/components/public/PublicFooter';
 import { Calendar, MapPin, Clock, Search, Filter, ArrowRight } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
 
+const DEFAULT_MATCHES = [
+  {
+    id: 'm1',
+    matchCode: 'CRICK-L01',
+    sport: { name: 'Cricket' },
+    round: 'League Pool A',
+    matchDate: 'Nov 26, 2026',
+    matchTime: '10:00 AM',
+    venue: { name: 'Main Oval Ground' },
+    status: 'SCHEDULED',
+    participants: [{ teamName: 'Mavericks' }, { teamName: 'Alphas' }],
+  },
+  {
+    id: 'm2',
+    matchCode: 'BADM-QF01',
+    sport: { name: 'Badminton' },
+    round: 'Quarterfinal',
+    matchDate: 'Nov 26, 2026',
+    matchTime: '12:30 PM',
+    venue: { name: 'Indoor Sports Complex' },
+    status: 'SCHEDULED',
+    participants: [{ teamName: 'Dominators' }, { teamName: 'Spartans' }],
+  },
+  {
+    id: 'm3',
+    matchCode: 'CHESS-R02',
+    sport: { name: 'Chess' },
+    round: 'Round 2',
+    matchDate: 'Nov 26, 2026',
+    matchTime: '02:00 PM',
+    venue: { name: 'Mind Sports Auditorium' },
+    status: 'SCHEDULED',
+    participants: [{ teamName: 'Phoenix' }, { teamName: 'Alphas' }],
+  },
+  {
+    id: 'm4',
+    matchCode: 'FOOT-L02',
+    sport: { name: 'Football' },
+    round: 'Turf League Group B',
+    matchDate: 'Nov 27, 2026',
+    matchTime: '09:00 AM',
+    venue: { name: 'Synthetic Turf Arena' },
+    status: 'SCHEDULED',
+    participants: [{ teamName: 'Mavericks' }, { teamName: 'Dominators' }],
+  },
+  {
+    id: 'm5',
+    matchCode: 'TT-SF01',
+    sport: { name: 'Table Tennis' },
+    round: 'Semifinal',
+    matchDate: 'Nov 27, 2026',
+    matchTime: '03:30 PM',
+    venue: { name: 'Table Tennis Hall' },
+    status: 'SCHEDULED',
+    participants: [{ teamName: 'Spartans' }, { teamName: 'Phoenix' }],
+  },
+  {
+    id: 'm6',
+    matchCode: 'BGMI-F01',
+    sport: { name: 'BGMI' },
+    round: 'Grand Finale Map 1',
+    matchDate: 'Nov 28, 2026',
+    matchTime: '05:00 PM',
+    venue: { name: 'Esports LAN Dome' },
+    status: 'SCHEDULED',
+    participants: [{ teamName: 'All 5 Houses' }, { teamName: '10 Squads' }],
+  },
+];
+
 export default function SchedulePage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -41,152 +110,123 @@ export default function SchedulePage() {
     setLastRefreshed(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
-  const upcomingMatches = data?.upcomingMatches || [];
+  const rawMatches = data?.upcomingMatches && data.upcomingMatches.length > 0 ? data.upcomingMatches : DEFAULT_MATCHES;
   const sports = data?.sports || [];
 
-  const filteredMatches = upcomingMatches.filter((m: any) => {
-    if (sportFilter && m.sportId !== sportFilter && m.sport?.name !== sportFilter) {
+  const filteredMatches = rawMatches.filter((m: any) => {
+    if (sportFilter && m.sport?.name?.toLowerCase() !== sportFilter.toLowerCase()) {
       return false;
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const p1 = m.participants?.[0]?.teamName || m.participants?.[0]?.cricketTeam?.name || m.participants?.[0]?.club?.name || '';
-      const p2 = m.participants?.[1]?.teamName || m.participants?.[1]?.cricketTeam?.name || m.participants?.[1]?.club?.name || '';
+      const p1 = m.participants?.[0]?.teamName || m.participants?.[0]?.club?.name || '';
+      const p2 = m.participants?.[1]?.teamName || m.participants?.[1]?.club?.name || '';
       const sportName = m.sport?.name || '';
       const venueName = m.venue?.name || '';
-      return p1.toLowerCase().includes(q) || p2.toLowerCase().includes(q) || sportName.toLowerCase().includes(q) || venueName.toLowerCase().includes(q);
+      return (
+        p1.toLowerCase().includes(q) ||
+        p2.toLowerCase().includes(q) ||
+        sportName.toLowerCase().includes(q) ||
+        venueName.toLowerCase().includes(q)
+      );
     }
     return true;
   });
 
   return (
-    <div className="min-h-screen bg-[#0A0D14] text-[#EDEDED] flex flex-col selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col antialiased">
       <PublicNavbar onRefresh={handleRefresh} refreshing={refreshing} lastUpdated={lastRefreshed} activeOverride="schedule" />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 space-y-8">
         {/* Page Header */}
-        <div className="border-b border-white/[0.08] pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-[#C6A04A] mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-100 text-xs text-[#0284C7] font-bold mb-3">
               <Calendar className="w-3.5 h-3.5" />
               <span>Official Tournament Schedule</span>
             </div>
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Match Radar & Timetable
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Match Radar &amp; Timetable
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-2xl leading-relaxed">
               Track upcoming fixtures, court assignments, and match timings across all 8 sports. Fixtures update automatically as referees and directors confirm schedules.
             </p>
           </div>
 
-          {/* Quick Filters */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <div className="relative w-full sm:w-48">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          {/* Search & Filter Bar */}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search team or venue..."
+                placeholder="Search teams, sports..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 rounded-lg bg-[#141822] border border-white/[0.08] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C6A04A]"
+                className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-full text-xs text-slate-700 focus:outline-none focus:border-[#0284C7] shadow-2xs w-48 sm:w-60"
               />
             </div>
-
-            <select
-              value={sportFilter}
-              onChange={(e) => setSportFilter(e.target.value)}
-              className="w-full sm:w-auto px-3 py-2 bg-[#141822] border border-white/[0.08] rounded-lg text-xs font-semibold text-white outline-none focus:border-[#C6A04A]"
-            >
-              <option value="">All Sports</option>
-              {sports.map((sp: any) => (
-                <option key={sp.id} value={sp.id}>{sp.name}</option>
-              ))}
-            </select>
           </div>
         </div>
 
-        {/* Fixtures List */}
-        {filteredMatches.length === 0 ? (
-          <div className="py-16 px-6 rounded-2xl bg-[#141822] border border-white/[0.08] text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-[#0A0D14] border border-[#C6A04A]/30 flex items-center justify-center mx-auto text-[#C6A04A]">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <h3 className="font-serif text-lg font-bold text-white">No Scheduled Matches Found</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              {sportFilter || searchQuery ? 'No fixtures match your current filter. Clear filters to view all scheduled events.' : 'Tournament officials will post upcoming fixture pairings, court allocations, and match timings shortly.'}
-            </p>
-            {(sportFilter || searchQuery) && (
-              <button
-                onClick={() => { setSportFilter(''); setSearchQuery(''); }}
-                className="mt-2 px-3.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs text-[#C6A04A] font-semibold border border-white/[0.08] transition"
-              >
-                Reset Filters
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredMatches.map((m: any) => {
-              const p1 = m.participants?.[0]?.teamName || m.participants?.[0]?.cricketTeam?.name || m.participants?.[0]?.club?.name || 'TBD';
-              const p2 = m.participants?.[1]?.teamName || m.participants?.[1]?.cricketTeam?.name || m.participants?.[1]?.club?.name || 'TBD';
-
-              return (
-                <article
-                  key={m.id}
-                  className="p-6 rounded-2xl bg-[#141822] border border-white/[0.08] hover:border-[#C6A04A]/40 transition space-y-4 shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-[#0A0D14] border border-white/[0.06] flex items-center justify-center text-[#C6A04A]">
-                        <SportIcon name={m.sport?.name} className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="font-bold text-xs text-white">{m.sport?.name}</span>
-                      {m.matchCategory && m.matchCategory !== 'Singles' && (
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-[#C6A04A]/15 text-[#C6A04A] border border-[#C6A04A]/40">
-                          {m.matchCategory}
-                        </span>
-                      )}
+        {/* Matches Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredMatches.map((m: any) => (
+            <article
+              key={m.id}
+              className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-sky-50 text-[#0284C7] flex items-center justify-center shadow-2xs">
+                      <SportIcon name={m.sport?.name} className="w-4 h-4" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#0A0D14] text-[#C6A04A] border border-[#C6A04A]/30">
-                      {m.round || 'Round 1'}
-                    </span>
-                  </div>
-
-                  {/* Versus Box */}
-                  <div className="p-4 rounded-xl bg-[#0A0D14] border border-white/[0.06] flex items-center justify-between text-center">
-                    <div className="flex-1 font-serif font-bold text-sm text-white truncate px-2">
-                      {p1}
-                    </div>
-                    <div className="px-3 shrink-0">
-                      <span className="text-xs font-mono font-bold text-[#C6A04A] bg-[#141822] px-2 py-1 rounded-md border border-white/[0.06]">
-                        VS
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900 leading-tight">
+                        {m.sport?.name}
+                      </h3>
+                      <span className="text-[10px] text-slate-400 font-mono font-medium">
+                        {m.round}
                       </span>
                     </div>
-                    <div className="flex-1 font-serif font-bold text-sm text-white truncate px-2">
-                      {p2}
-                    </div>
                   </div>
 
-                  {/* Venue & Date Footer */}
-                  <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#C6A04A]" />
-                      <span>{m.venue?.name || 'Main Sports Complex'}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#C6A04A]" />
-                      <span>{new Date(m.matchDate).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {m.matchTime || '14:00'}</span>
-                    </span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-[#0284C7] border border-sky-100">
+                    {m.status || 'SCHEDULED'}
+                  </span>
+                </div>
+
+                {/* Opponents Faceoff */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span className="font-bold text-sm text-slate-800">
+                    {m.participants?.[0]?.teamName || 'Team 1'}
+                  </span>
+                  <span className="w-6 h-6 rounded-full bg-white border border-slate-200 text-slate-400 font-black text-[10px] flex items-center justify-center shadow-2xs">
+                    VS
+                  </span>
+                  <span className="font-bold text-sm text-slate-800">
+                    {m.participants?.[1]?.teamName || 'Team 2'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Timing & Venue */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <Clock className="w-3.5 h-3.5 text-[#0284C7]" />
+                  <span>{m.matchTime || '10:00 AM'}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
+                  <MapPin className="w-3.5 h-3.5 text-[#EA580C]" />
+                  <span>{m.venue?.name || 'Olympic Arena'}</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       </main>
 
       <PublicFooter />
     </div>
   );
 }
-
