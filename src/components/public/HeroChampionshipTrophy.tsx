@@ -3,16 +3,16 @@
 import React from 'react';
 
 /**
- * Pure SVG & CSS High-Precision 3D Championship Trophy
- * NO RASTER IMAGES USED.
+ * High-Precision Pure SVG & CSS 3D Championship Trophy
+ * 100% PURE CODE — ZERO RASTER IMAGES.
  * Features:
- * - Multi-stop cylindrical gold gradients for realistic turned-metal curvature
- * - 10-facet 3D beveled gold star with specular reflections
- * - Sweeping aerodynamic championship handles/wings with beveled ridge lines
- * - Fluted chalice cup with elliptical perspective interior
+ * - Turned-metal multi-stop cylindrical gold gradients with ray-traced highlights
+ * - 10-facet 3D beveled gold star with specular reflections and diamond star flare
+ * - Aerodynamic soaring twin golden wing blades with beveled ridge lines
+ * - Fluted central chalice cup with elliptical perspective interior
  * - Olympic-grade golden laurel wreaths with two-tone faceted leaves
  * - Beveled navy obsidian plinth with embossed metallic gold "APL SEASON 9"
- * - Multi-tiered circular stadium stage with illuminated blue/gold lighting
+ * - Multi-tiered circular stadium stage with illuminated cyan/blue lighting
  */
 export default function HeroChampionshipTrophy({
   className = 'w-full h-auto',
@@ -25,170 +25,190 @@ export default function HeroChampionshipTrophy({
     <div
       onClick={onCelebrate}
       className={`relative select-none cursor-pointer group ${className}`}
-      title="Click to Celebrate Championship Glory!"
+      title="🏆 Click to Celebrate Championship Glory!"
     >
       <svg
         viewBox="0 0 500 580"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full filter drop-shadow-[0_20px_35px_rgba(2,132,199,0.18)] transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+        className="w-full h-full filter drop-shadow-[0_25px_45px_rgba(2,132,199,0.22)] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
       >
         <defs>
           {/* 1. Core Metallic Gold Gradients */}
           <linearGradient id="gold-bright" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FFFDF0" />
-            <stop offset="15%" stopColor="#FEF08A" />
-            <stop offset="38%" stopColor="#FACC15" />
+            <stop offset="12%" stopColor="#FEF08A" />
+            <stop offset="35%" stopColor="#FACC15" />
             <stop offset="60%" stopColor="#EAB308" />
             <stop offset="82%" stopColor="#A16207" />
             <stop offset="100%" stopColor="#78350F" />
           </linearGradient>
 
-          {/* Cylindrical Gold Gradient for Curved Turnings (Chalice, Stem, Rings) */}
+          {/* Cylindrical Turned-Metal Gold Gradient */}
           <linearGradient id="gold-cylinder" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#78350F" />
-            <stop offset="12%" stopColor="#B45309" />
-            <stop offset="26%" stopColor="#FDE047" />
-            <stop offset="42%" stopColor="#FFFFFF" />
-            <stop offset="56%" stopColor="#FACC15" />
-            <stop offset="78%" stopColor="#CA8A04" />
-            <stop offset="92%" stopColor="#854D0E" />
+            <stop offset="0%" stopColor="#5A2E05" />
+            <stop offset="8%" stopColor="#92400E" />
+            <stop offset="22%" stopColor="#FDE047" />
+            <stop offset="38%" stopColor="#FFFFFF" />
+            <stop offset="55%" stopColor="#FACC15" />
+            <stop offset="76%" stopColor="#B45309" />
+            <stop offset="90%" stopColor="#78350F" />
+            <stop offset="100%" stopColor="#3B1C05" />
+          </linearGradient>
+
+          {/* Left Wing Outer Shaded Facet */}
+          <linearGradient id="wing-left-outer" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FEF08A" />
+            <stop offset="25%" stopColor="#EAB308" />
+            <stop offset="55%" stopColor="#B45309" />
+            <stop offset="85%" stopColor="#78350F" />
             <stop offset="100%" stopColor="#451A03" />
           </linearGradient>
 
-          {/* Left Wing Sweep Gradient */}
-          <linearGradient id="gold-wing-left" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FFFDE0" />
-            <stop offset="20%" stopColor="#FEF08A" />
-            <stop offset="45%" stopColor="#FACC15" />
-            <stop offset="70%" stopColor="#CA8A04" />
-            <stop offset="88%" stopColor="#854D0E" />
+          {/* Left Wing Inner Reflective Facet */}
+          <linearGradient id="wing-left-inner" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="20%" stopColor="#FFFDE0" />
+            <stop offset="45%" stopColor="#FDE047" />
+            <stop offset="75%" stopColor="#EAB308" />
+            <stop offset="100%" stopColor="#92400E" />
+          </linearGradient>
+
+          {/* Right Wing Outer Shaded Facet */}
+          <linearGradient id="wing-right-outer" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FEF08A" />
+            <stop offset="25%" stopColor="#EAB308" />
+            <stop offset="55%" stopColor="#B45309" />
+            <stop offset="85%" stopColor="#78350F" />
             <stop offset="100%" stopColor="#451A03" />
           </linearGradient>
 
-          {/* Right Wing Sweep Gradient */}
-          <linearGradient id="gold-wing-right" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#FFFDE0" />
-            <stop offset="20%" stopColor="#FEF08A" />
-            <stop offset="45%" stopColor="#FACC15" />
-            <stop offset="70%" stopColor="#CA8A04" />
-            <stop offset="88%" stopColor="#854D0E" />
-            <stop offset="100%" stopColor="#451A03" />
+          {/* Right Wing Inner Reflective Facet */}
+          <linearGradient id="wing-right-inner" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="20%" stopColor="#FFFDE0" />
+            <stop offset="45%" stopColor="#FDE047" />
+            <stop offset="75%" stopColor="#EAB308" />
+            <stop offset="100%" stopColor="#92400E" />
           </linearGradient>
 
           {/* 3D Star Facet Gradients */}
           <linearGradient id="star-facet-light" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="40%" stopColor="#FEF08A" />
-            <stop offset="100%" stopColor="#F59E0B" />
+            <stop offset="35%" stopColor="#FEF08A" />
+            <stop offset="75%" stopColor="#F59E0B" />
+            <stop offset="100%" stopColor="#D97706" />
           </linearGradient>
 
           <linearGradient id="star-facet-shadow" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#CA8A04" />
-            <stop offset="50%" stopColor="#92400E" />
+            <stop offset="45%" stopColor="#92400E" />
+            <stop offset="85%" stopColor="#78350F" />
             <stop offset="100%" stopColor="#451A03" />
           </linearGradient>
 
           {/* Laurel Leaf Two-Tone Gradients */}
           <linearGradient id="laurel-light" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FFFDE0" />
-            <stop offset="40%" stopColor="#FDE047" />
-            <stop offset="100%" stopColor="#D97706" />
+            <stop offset="35%" stopColor="#FDE047" />
+            <stop offset="80%" stopColor="#F59E0B" />
+            <stop offset="100%" stopColor="#B45309" />
           </linearGradient>
 
           <linearGradient id="laurel-dark" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#B45309" />
-            <stop offset="60%" stopColor="#78350F" />
+            <stop offset="0%" stopColor="#D97706" />
+            <stop offset="55%" stopColor="#92400E" />
             <stop offset="100%" stopColor="#451A03" />
           </linearGradient>
 
           {/* Plinth Navy Obsidian Texture */}
           <linearGradient id="plinth-body" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#0E2B54" />
-            <stop offset="35%" stopColor="#081E3D" />
-            <stop offset="75%" stopColor="#041228" />
+            <stop offset="30%" stopColor="#081E3D" />
+            <stop offset="70%" stopColor="#041228" />
             <stop offset="100%" stopColor="#020914" />
           </linearGradient>
 
           {/* Circular Stage Dais Gradients */}
           <linearGradient id="stage-top" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#E2E8F0" />
-            <stop offset="50%" stopColor="#CBD5E1" />
-            <stop offset="100%" stopColor="#94A3B8" />
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="40%" stopColor="#E0F2FE" />
+            <stop offset="80%" stopColor="#BAE6FD" />
+            <stop offset="100%" stopColor="#7DD3FC" />
           </linearGradient>
 
           <linearGradient id="stage-rim" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#0F2B48" />
+            <stop offset="0%" stopColor="#0B2344" />
             <stop offset="25%" stopColor="#1E3A8A" />
             <stop offset="50%" stopColor="#38BDF8" />
             <stop offset="75%" stopColor="#1E3A8A" />
-            <stop offset="100%" stopColor="#0C1E36" />
+            <stop offset="100%" stopColor="#081A33" />
           </linearGradient>
 
-          {/* Radial Bloom & Backlight Auras */}
-          <radialGradient id="trophy-aura" cx="50%" cy="40%" r="50%">
-            <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.55" />
-            <stop offset="35%" stopColor="#F59E0B" stopOpacity="0.25" />
-            <stop offset="70%" stopColor="#0284C7" stopOpacity="0.10" />
+          {/* Radiant Aura Behind Trophy */}
+          <radialGradient id="trophy-aura" cx="50%" cy="35%" r="50%">
+            <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.65" />
+            <stop offset="30%" stopColor="#F59E0B" stopOpacity="0.30" />
+            <stop offset="65%" stopColor="#38BDF8" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#0284C7" stopOpacity="0" />
           </radialGradient>
 
           <radialGradient id="stage-ground-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.75" />
-            <stop offset="40%" stopColor="#0284C7" stopOpacity="0.4" />
-            <stop offset="75%" stopColor="#F59E0B" stopOpacity="0.15" />
+            <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
+            <stop offset="35%" stopColor="#0284C7" stopOpacity="0.45" />
+            <stop offset="70%" stopColor="#F59E0B" stopOpacity="0.15" />
             <stop offset="100%" stopColor="#0284C7" stopOpacity="0" />
           </radialGradient>
 
           {/* Embossed Drop Shadow for Gold Inscriptions */}
           <filter id="gold-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.85" />
+            <feDropShadow dx="0" dy="2.5" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.95" />
           </filter>
         </defs>
 
         {/* ------------------------------------------------------------- */}
         {/* LAYER 0: RADIANT BACKLIGHT AURA BEHIND THE CUP                */}
         {/* ------------------------------------------------------------- */}
-        <circle cx="250" cy="190" r="150" fill="url(#trophy-aura)" />
+        <circle cx="250" cy="180" r="160" fill="url(#trophy-aura)" />
 
         {/* ------------------------------------------------------------- */}
-        {/* LAYER 1: MULTI-TIERED STADIUM STAGE DAIS                      */}
+        {/* LAYER 1: MULTI-TIERED CIRCULAR STADIUM STAGE DAIS             */}
         {/* ------------------------------------------------------------- */}
         {/* Ground ambient light pool */}
-        <ellipse cx="250" cy="515" rx="210" ry="42" fill="url(#stage-ground-glow)" />
+        <ellipse cx="250" cy="520" rx="220" ry="42" fill="url(#stage-ground-glow)" />
 
         {/* Stage Bottom Platform Rim (Perspective Depth) */}
         <path
-          d="M 60 500 C 60 535, 440 535, 440 500 L 440 518 C 440 553, 60 553, 60 518 Z"
+          d="M 50 505 C 50 542, 450 542, 450 505 L 450 525 C 450 562, 50 562, 50 525 Z"
           fill="url(#stage-rim)"
         />
         {/* Stage Bottom Platform Top Disc */}
-        <ellipse cx="250" cy="500" rx="190" ry="32" fill="url(#stage-top)" stroke="#38BDF8" strokeWidth="2" />
-        <ellipse cx="250" cy="500" rx="180" ry="26" fill="none" stroke="#F59E0B" strokeWidth="1" strokeOpacity="0.6" />
+        <ellipse cx="250" cy="505" rx="200" ry="32" fill="url(#stage-top)" stroke="#38BDF8" strokeWidth="2.5" />
+        <ellipse cx="250" cy="505" rx="188" ry="26" fill="none" stroke="#F59E0B" strokeWidth="1.2" strokeOpacity="0.75" />
 
         {/* Stage Middle Tier Rim */}
         <path
-          d="M 105 470 C 105 498, 395 498, 395 470 L 395 482 C 395 510, 105 510, 105 482 Z"
+          d="M 95 474 C 95 504, 405 504, 405 474 L 405 488 C 405 518, 95 518, 95 488 Z"
           fill="url(#gold-cylinder)"
         />
         {/* Stage Middle Tier Top Disc */}
-        <ellipse cx="250" cy="470" rx="145" ry="22" fill="#0C2548" stroke="url(#gold-bright)" strokeWidth="2.5" />
+        <ellipse cx="250" cy="474" rx="155" ry="23" fill="#0C2548" stroke="url(#gold-bright)" strokeWidth="2.5" />
 
         {/* Stage Top Dais Ring */}
-        <ellipse cx="250" cy="452" rx="125" ry="16" fill="url(#gold-cylinder)" />
+        <ellipse cx="250" cy="454" rx="130" ry="16" fill="url(#gold-cylinder)" />
 
         {/* ------------------------------------------------------------- */}
-        {/* LAYER 2: THE BEVELED NAVY PLINTH (CENTRAL BLOCK)              */}
+        {/* LAYER 2: THE BEVELED NAVY OBSIDIAN PLINTH                     */}
         {/* ------------------------------------------------------------- */}
         {/* Lower gold moulding of plinth */}
         <path
-          d="M 130 452 L 370 452 L 360 440 L 140 440 Z"
+          d="M 132 454 L 368 454 L 358 440 L 142 440 Z"
           fill="url(#gold-bright)"
         />
 
-        {/* Main Plinth Body (Octagonal / Beveled Obsidian Block) */}
+        {/* Main Plinth Body (Trapezoidal Obsidian Block) */}
         <path
-          d="M 140 440 L 360 440 L 340 335 L 160 335 Z"
+          d="M 142 440 L 358 440 L 338 335 L 162 335 Z"
           fill="url(#plinth-body)"
           stroke="url(#gold-bright)"
           strokeWidth="1.5"
@@ -197,38 +217,38 @@ export default function HeroChampionshipTrophy({
         {/* Plinth Subtle Side Facets for 3D Bevel Depth */}
         {/* Left bevel facet */}
         <path
-          d="M 140 440 L 160 440 L 175 335 L 160 335 Z"
+          d="M 142 440 L 164 440 L 178 335 L 162 335 Z"
           fill="#1E3A8A"
           fillOpacity="0.45"
         />
         {/* Right bevel facet */}
         <path
-          d="M 360 440 L 340 440 L 325 335 L 340 335 Z"
+          d="M 358 440 L 336 440 L 322 335 L 338 335 Z"
           fill="#000000"
-          fillOpacity="0.4"
+          fillOpacity="0.45"
         />
 
         {/* Plinth Inner Recessed Display Panel */}
         <rect
-          x="168"
-          y="345"
-          width="164"
-          height="82"
-          rx="4"
+          x="170"
+          y="346"
+          width="160"
+          height="80"
+          rx="5"
           fill="#051326"
           stroke="url(#gold-bright)"
           strokeWidth="1"
-          strokeOpacity="0.75"
+          strokeOpacity="0.8"
         />
 
         {/* Top gold moulding of plinth */}
         <path
-          d="M 160 335 L 340 335 L 330 322 L 170 322 Z"
+          d="M 162 335 L 338 335 L 326 320 L 174 320 Z"
           fill="url(#gold-bright)"
         />
 
         {/* Plinth Crown Ring */}
-        <ellipse cx="250" cy="322" rx="80" ry="10" fill="url(#gold-cylinder)" />
+        <ellipse cx="250" cy="320" rx="80" ry="10" fill="url(#gold-cylinder)" />
 
         {/* ------------------------------------------------------------- */}
         {/* LAYER 3: EMBOSSED GOLD INSCRIPTIONS ON PLINTH                 */}
@@ -243,7 +263,7 @@ export default function HeroChampionshipTrophy({
           fontWeight="900"
           fontStyle="italic"
           letterSpacing="4"
-          fill="#3B1C05"
+          fill="#2B1502"
         >
           APL
         </text>
@@ -265,19 +285,19 @@ export default function HeroChampionshipTrophy({
         {/* "SEASON 9" Subtitle with gold metallic sheen */}
         <text
           x="250"
-          y="412"
+          y="411"
           textAnchor="middle"
           fontSize="13"
           fontFamily="system-ui, -apple-system, sans-serif"
           fontWeight="800"
           letterSpacing="5"
-          fill="#3B1C05"
+          fill="#2B1502"
         >
           SEASON 9
         </text>
         <text
           x="250"
-          y="411"
+          y="410"
           textAnchor="middle"
           fontSize="13"
           fontFamily="system-ui, -apple-system, sans-serif"
@@ -289,245 +309,184 @@ export default function HeroChampionshipTrophy({
         </text>
 
         {/* Decorative pinstripe divider under SEASON 9 */}
-        <line x1="195" y1="418" x2="305" y2="418" stroke="url(#gold-bright)" strokeWidth="1" strokeOpacity="0.8" />
+        <line x1="195" y1="416" x2="305" y2="416" stroke="url(#gold-bright)" strokeWidth="1" strokeOpacity="0.8" />
 
         {/* ------------------------------------------------------------- */}
         {/* LAYER 4: GOLDEN LAUREL WREATH (FLANKING THE PLINTH)           */}
         {/* ------------------------------------------------------------- */}
         {/* Left Laurel Branch Stem */}
         <path
-          d="M 148 440 C 120 420, 105 380, 118 335 C 122 320, 130 310, 138 300"
+          d="M 148 438 C 118 418, 105 378, 118 335 C 122 320, 130 310, 138 300"
           fill="none"
           stroke="url(#gold-bright)"
-          strokeWidth="3"
+          strokeWidth="3.2"
           strokeLinecap="round"
         />
         {/* Right Laurel Branch Stem */}
         <path
-          d="M 352 440 C 380 420, 395 380, 382 335 C 378 320, 370 310, 362 300"
+          d="M 352 438 C 382 418, 395 378, 382 335 C 378 320, 370 310, 362 300"
           fill="none"
           stroke="url(#gold-bright)"
-          strokeWidth="3"
+          strokeWidth="3.2"
           strokeLinecap="round"
         />
 
-        {/* Left Laurel Leaves (7 Pairs with two-tone faceted gold) */}
-        {/* Pair 1 */}
-        <g transform="translate(144, 432) rotate(-25)">
-          <path d="M 0 0 C -6 -8, -14 -12, -18 -8 C -14 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 4, -12 6, -18 -8 C -10 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C 6 -8, 14 -12, 18 -8 C 14 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 4, 12 6, 18 -8 C 10 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 2 */}
-        <g transform="translate(132, 408) rotate(-35)">
-          <path d="M 0 0 C -6 -9, -15 -14, -20 -9 C -15 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 4, -13 7, -20 -9 C -11 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C 6 -9, 15 -14, 20 -9 C 15 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 4, 13 7, 20 -9 C 11 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 3 */}
-        <g transform="translate(122, 382) rotate(-45)">
-          <path d="M 0 0 C -6 -9, -16 -15, -22 -10 C -16 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 5, -14 8, -22 -10 C -12 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C 6 -9, 16 -15, 22 -10 C 16 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 5, 14 8, 22 -10 C 12 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 4 */}
-        <g transform="translate(116, 354) rotate(-55)">
-          <path d="M 0 0 C -6 -9, -16 -15, -22 -10 C -16 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 5, -14 8, -22 -10 C -12 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C 6 -9, 16 -15, 22 -10 C 16 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 5, 14 8, 22 -10 C 12 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 5 */}
-        <g transform="translate(118, 328) rotate(-70)">
-          <path d="M 0 0 C -6 -9, -15 -14, -20 -9 C -15 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 4, -13 7, -20 -9 C -11 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C 6 -9, 15 -14, 20 -9 C 15 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 4, 13 7, 20 -9 C 11 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 6 */}
-        <g transform="translate(126, 305) rotate(-85)">
-          <path d="M 0 0 C -5 -8, -13 -12, -18 -8 C -13 -2, -5 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -3 4, -11 6, -18 -8 C -10 -4, -3 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C 5 -8, 13 -12, 18 -8 C 13 -2, 5 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 3 4, 11 6, 18 -8 C 10 -4, 3 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Tip Leaf */}
-        <g transform="translate(136, 292) rotate(-95)">
-          <path d="M 0 0 C -4 -10, -10 -16, -14 -12 C -10 -2, -4 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 2, 8 4, -14 -12 C -6 -4, -2 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
+        {/* Left Laurel Leaves (Two-tone faceted gold) */}
+        {[
+          { x: 144, y: 430, rot: -25 },
+          { x: 132, y: 406, rot: -35 },
+          { x: 122, y: 380, rot: -45 },
+          { x: 116, y: 352, rot: -55 },
+          { x: 118, y: 326, rot: -70 },
+          { x: 126, y: 303, rot: -85 },
+          { x: 136, y: 290, rot: -95 },
+        ].map((leaf, idx) => (
+          <g key={`l-leaf-${idx}`} transform={`translate(${leaf.x}, ${leaf.y}) rotate(${leaf.rot})`}>
+            <path d="M 0 0 C -6 -8, -14 -12, -18 -8 C -14 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
+            <path d="M 0 0 C -4 4, -12 6, -18 -8 C -10 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
+            <path d="M 0 0 C 6 -8, 14 -12, 18 -8 C 14 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
+            <path d="M 0 0 C 4 4, 12 6, 18 -8 C 10 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
+          </g>
+        ))}
 
-        {/* Right Laurel Leaves (7 Pairs symmetrical) */}
-        {/* Pair 1 */}
-        <g transform="translate(356, 432) rotate(25)">
-          <path d="M 0 0 C 6 -8, 14 -12, 18 -8 C 14 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 4, 12 6, 18 -8 C 10 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C -6 -8, -14 -12, -18 -8 C -14 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 4, -12 6, -18 -8 C -10 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 2 */}
-        <g transform="translate(368, 408) rotate(35)">
-          <path d="M 0 0 C 6 -9, 15 -14, 20 -9 C 15 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 4, 13 7, 20 -9 C 11 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C -6 -9, -15 -14, -20 -9 C -15 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 4, -13 7, -20 -9 C -11 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 3 */}
-        <g transform="translate(378, 382) rotate(45)">
-          <path d="M 0 0 C 6 -9, 16 -15, 22 -10 C 16 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 5, 14 8, 22 -10 C 12 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C -6 -9, -16 -15, -22 -10 C -16 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 5, -14 8, -22 -10 C -12 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 4 */}
-        <g transform="translate(384, 354) rotate(55)">
-          <path d="M 0 0 C 6 -9, 16 -15, 22 -10 C 16 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 5, 14 8, 22 -10 C 12 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C -6 -9, -16 -15, -22 -10 C -16 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 5, -14 8, -22 -10 C -12 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 5 */}
-        <g transform="translate(382, 328) rotate(70)">
-          <path d="M 0 0 C 6 -9, 15 -14, 20 -9 C 15 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 4 4, 13 7, 20 -9 C 11 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C -6 -9, -15 -14, -20 -9 C -15 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 4, -13 7, -20 -9 C -11 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Pair 6 */}
-        <g transform="translate(374, 305) rotate(85)">
-          <path d="M 0 0 C 5 -8, 13 -12, 18 -8 C 13 -2, 5 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C 3 4, 11 6, 18 -8 C 10 -4, 3 -1, 0 0 Z" fill="url(#laurel-dark)" />
-          <path d="M 0 0 C -5 -8, -13 -12, -18 -8 C -13 -2, -5 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -3 4, -11 6, -18 -8 C -10 -4, -3 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
-        {/* Tip Leaf */}
-        <g transform="translate(364, 292) rotate(95)">
-          <path d="M 0 0 C 4 -10, 10 -16, 14 -12 C 10 -2, 4 0, 0 0 Z" fill="url(#laurel-light)" />
-          <path d="M 0 0 C -4 2, -8 4, 14 -12 C 6 -4, 2 -1, 0 0 Z" fill="url(#laurel-dark)" />
-        </g>
+        {/* Right Laurel Leaves (Symmetrical) */}
+        {[
+          { x: 356, y: 430, rot: 25 },
+          { x: 368, y: 406, rot: 35 },
+          { x: 378, y: 380, rot: 45 },
+          { x: 384, y: 352, rot: 55 },
+          { x: 382, y: 326, rot: 70 },
+          { x: 374, y: 303, rot: 85 },
+          { x: 364, y: 290, rot: 95 },
+        ].map((leaf, idx) => (
+          <g key={`r-leaf-${idx}`} transform={`translate(${leaf.x}, ${leaf.y}) rotate(${leaf.rot})`}>
+            <path d="M 0 0 C 6 -8, 14 -12, 18 -8 C 14 -2, 6 0, 0 0 Z" fill="url(#laurel-light)" />
+            <path d="M 0 0 C 4 4, 12 6, 18 -8 C 10 -4, 4 -1, 0 0 Z" fill="url(#laurel-dark)" />
+            <path d="M 0 0 C -6 -8, -14 -12, -18 -8 C -14 -2, -6 0, 0 0 Z" fill="url(#laurel-light)" />
+            <path d="M 0 0 C -4 4, -12 6, -18 -8 C -10 -4, -4 -1, 0 0 Z" fill="url(#laurel-dark)" />
+          </g>
+        ))}
 
         {/* ------------------------------------------------------------- */}
         {/* LAYER 5: TROPHY STEM & STEPPED RINGS                          */}
         {/* ------------------------------------------------------------- */}
         {/* Stem Base Ring */}
-        <ellipse cx="250" cy="316" rx="60" ry="8" fill="url(#gold-cylinder)" />
+        <ellipse cx="250" cy="314" rx="58" ry="8" fill="url(#gold-cylinder)" />
         {/* Lower Neck */}
         <path
-          d="M 215 316 C 215 285, 230 270, 235 260 L 265 260 C 270 270, 285 285, 285 316 Z"
+          d="M 218 314 C 218 285, 232 272, 236 262 L 264 262 C 268 272, 282 285, 282 314 Z"
           fill="url(#gold-cylinder)"
         />
-        {/* Mid-Stem Knurled Ring */}
-        <ellipse cx="250" cy="275" rx="35" ry="6" fill="url(#gold-bright)" stroke="#78350F" strokeWidth="0.8" />
-        <ellipse cx="250" cy="260" rx="30" ry="5" fill="url(#gold-cylinder)" />
+        {/* Mid-Stem Knurled Collar */}
+        <ellipse cx="250" cy="276" rx="36" ry="6" fill="url(#gold-bright)" stroke="#78350F" strokeWidth="0.8" />
+        <ellipse cx="250" cy="262" rx="32" ry="5" fill="url(#gold-cylinder)" />
 
         {/* ------------------------------------------------------------- */}
-        {/* LAYER 6: THE CENTRAL CHALICE / CUP BODY                       */}
+        {/* LAYER 6: THE CENTRAL CHALICE CUP                             */}
         {/* ------------------------------------------------------------- */}
         {/* Chalice Goblet Body (Smooth Fluted Curve) */}
         <path
-          d="M 205 160 C 205 210, 225 250, 235 260 L 265 260 C 275 250, 295 210, 295 160 Z"
+          d="M 208 155 C 208 210, 228 252, 236 262 L 264 262 C 272 252, 292 210, 292 155 Z"
           fill="url(#gold-cylinder)"
         />
         {/* Chalice Lip Rim Ellipse (Top Edge) */}
-        <ellipse cx="250" cy="160" rx="45" ry="9" fill="#5A2E05" stroke="url(#gold-bright)" strokeWidth="2" />
+        <ellipse cx="250" cy="155" rx="42" ry="9" fill="#5A2E05" stroke="url(#gold-bright)" strokeWidth="2" />
         {/* Interior Cup Shading (Perspective Hollow Depth) */}
-        <ellipse cx="250" cy="161" rx="42" ry="7" fill="#2E1502" />
+        <ellipse cx="250" cy="156" rx="39" ry="7" fill="#2E1502" />
 
         {/* ------------------------------------------------------------- */}
-        {/* LAYER 7: DRAMATIC SWEEPING WINGS / HANDLES                    */}
+        {/* LAYER 7: AERODYNAMIC SOARING TWIN GOLDEN WINGS / BLADES       */}
         {/* ------------------------------------------------------------- */}
-        {/* LEFT WING */}
-        {/* Main outer wing shape */}
+        {/* LEFT SOARING BLADE */}
+        {/* Outer Shaded Facet */}
         <path
-          d="M 220 265 C 190 275, 150 250, 115 210 C 85 170, 88 120, 110 80 C 122 58, 140 45, 158 55 C 172 65, 175 85, 152 105 C 130 125, 122 155, 142 190 C 160 220, 192 240, 215 248 Z"
-          fill="url(#gold-wing-left)"
-          stroke="#92400E"
-          strokeWidth="1.5"
+          d="M 224 264 C 196 276, 160 252, 138 200 C 118 154, 124 102, 148 62 C 160 42, 174 34, 186 32 C 180 62, 184 100, 196 142 C 208 184, 222 232, 224 264 Z"
+          fill="url(#wing-left-outer)"
+          stroke="#78350F"
+          strokeWidth="1.2"
         />
-        {/* Left Wing Inner Beveled Highlight Ridge */}
+        {/* Inner Reflective Specular Facet */}
         <path
-          d="M 215 258 C 185 266, 148 244, 120 206 C 94 170, 96 126, 116 90 C 126 72, 140 60, 154 68 C 164 76, 162 90, 146 108 C 128 128, 122 155, 140 186 C 158 214, 188 232, 210 242"
-          fill="none"
-          stroke="#FFFDE0"
-          strokeWidth="2"
+          d="M 186 32 C 192 52, 198 90, 204 135 C 210 180, 220 228, 224 264 C 230 254, 234 220, 230 180 C 224 140, 208 85, 186 32 Z"
+          fill="url(#wing-left-inner)"
+          stroke="#FDE047"
+          strokeWidth="0.8"
+        />
+        {/* Beveled Center Ridge Line */}
+        <path
+          d="M 186 32 C 194 65, 198 105, 204 145 C 212 188, 220 234, 224 264"
+          stroke="#FFFFFF"
+          strokeWidth="1.8"
           strokeLinecap="round"
-          strokeOpacity="0.85"
+          strokeOpacity="0.9"
         />
 
-        {/* RIGHT WING (Symmetrical Mirror Across X=250) */}
-        {/* Main outer wing shape */}
+        {/* RIGHT SOARING BLADE (Symmetrical Mirror) */}
+        {/* Outer Shaded Facet */}
         <path
-          d="M 280 265 C 310 275, 350 250, 385 210 C 415 170, 412 120, 390 80 C 378 58, 360 45, 342 55 C 328 65, 325 85, 348 105 C 370 125, 378 155, 358 190 C 340 220, 308 240, 285 248 Z"
-          fill="url(#gold-wing-right)"
-          stroke="#92400E"
-          strokeWidth="1.5"
+          d="M 276 264 C 304 276, 340 252, 362 200 C 382 154, 376 102, 352 62 C 340 42, 326 34, 314 32 C 320 62, 316 100, 304 142 C 292 184, 278 232, 276 264 Z"
+          fill="url(#wing-right-outer)"
+          stroke="#78350F"
+          strokeWidth="1.2"
         />
-        {/* Right Wing Inner Beveled Highlight Ridge */}
+        {/* Inner Reflective Specular Facet */}
         <path
-          d="M 285 258 C 315 266, 352 244, 380 206 C 406 170, 404 126, 384 90 C 374 72, 360 60, 346 68 C 336 76, 338 90, 354 108 C 372 128, 378 155, 360 186 C 342 214, 312 232, 290 242"
-          fill="none"
-          stroke="#FFFDE0"
-          strokeWidth="2"
+          d="M 314 32 C 308 52, 302 90, 296 135 C 290 180, 280 228, 276 264 C 270 254, 266 220, 270 180 C 276 140, 292 85, 314 32 Z"
+          fill="url(#wing-right-inner)"
+          stroke="#FDE047"
+          strokeWidth="0.8"
+        />
+        {/* Beveled Center Ridge Line */}
+        <path
+          d="M 314 32 C 306 65, 302 105, 296 145 C 288 188, 280 234, 276 264"
+          stroke="#FFFFFF"
+          strokeWidth="1.8"
           strokeLinecap="round"
-          strokeOpacity="0.85"
+          strokeOpacity="0.9"
         />
 
         {/* ------------------------------------------------------------- */}
-        {/* LAYER 8: 10-FACET 3D BEVELED GOLD CHAMPIONSHIP STAR           */}
+        {/* LAYER 8: CENTRAL FLOATING 10-FACET 3D GOLDEN STAR             */}
+        {/* Center: (250, 135), R=34, r=15                                */}
         {/* ------------------------------------------------------------- */}
-        {/* Center: (250, 138), Outer R=34, Inner r=13 */}
-        <g id="championship-star" className="filter drop-shadow-[0_4px_12px_rgba(245,158,11,0.65)]">
-          {/* Facet 1: Top Point Right Side (Light) */}
-          <polygon points="250,138 250,104 257.6,127.5" fill="url(#star-facet-light)" />
-          {/* Facet 2: Upper Right Valley to Point (Shadow) */}
-          <polygon points="250,138 257.6,127.5 282.3,127.5" fill="url(#star-facet-shadow)" />
-          {/* Facet 3: Upper Right Point to Valley (Light) */}
-          <polygon points="250,138 282.3,127.5 262.8,142" fill="url(#star-facet-light)" />
-          {/* Facet 4: Lower Right Valley to Point (Shadow) */}
-          <polygon points="250,138 262.8,142 270,165.5" fill="url(#star-facet-shadow)" />
-          {/* Facet 5: Lower Right Point to Bottom Valley (Light) */}
-          <polygon points="250,138 270,165.5 250,151" fill="url(#star-facet-light)" />
-          {/* Facet 6: Bottom Valley to Lower Left Point (Shadow) */}
-          <polygon points="250,138 250,151 230,165.5" fill="url(#star-facet-shadow)" />
-          {/* Facet 7: Lower Left Point to Valley (Light) */}
-          <polygon points="250,138 230,165.5 237.2,142" fill="url(#star-facet-light)" />
-          {/* Facet 8: Valley to Upper Left Point (Shadow) */}
-          <polygon points="250,138 237.2,142 217.7,127.5" fill="url(#star-facet-shadow)" />
-          {/* Facet 9: Upper Left Point to Valley (Light) */}
-          <polygon points="250,138 217.7,127.5 242.4,127.5" fill="url(#star-facet-light)" />
-          {/* Facet 10: Valley to Top Point Left Side (Shadow) */}
-          <polygon points="250,138 242.4,127.5 250,104" fill="url(#star-facet-shadow)" />
+        <g id="central-3d-star" filter="drop-shadow(0 6px 12px rgba(120,53,15,0.45))">
+          {/* 10 Triangular Beveled Facets */}
+          {/* Top Tip (250, 101) */}
+          <polygon points="250,135 250,101 258.8,122.9" fill="url(#star-facet-shadow)" />
+          <polygon points="250,135 250,101 241.2,122.9" fill="url(#star-facet-light)" />
 
-          {/* Golden Star Specular Diamond Glint at the Center & Tip */}
-          <circle cx="250" cy="138" r="2.5" fill="#FFFFFF" />
-          <path d="M 250 96 L 252 104 L 250 112 L 248 104 Z" fill="#FFFFFF" />
-          <path d="M 242 104 L 250 106 L 258 104 L 250 102 Z" fill="#FFFFFF" />
+          {/* Top-Right Tip (282.3, 124.5) */}
+          <polygon points="250,135 282.3,124.5 258.8,122.9" fill="url(#star-facet-light)" />
+          <polygon points="250,135 282.3,124.5 264.3,139.6" fill="url(#star-facet-shadow)" />
+
+          {/* Bottom-Right Tip (270.0, 162.5) */}
+          <polygon points="250,135 270.0,162.5 264.3,139.6" fill="url(#star-facet-light)" />
+          <polygon points="250,135 270.0,162.5 250,150" fill="url(#star-facet-shadow)" />
+
+          {/* Bottom-Left Tip (230.0, 162.5) */}
+          <polygon points="250,135 230.0,162.5 250,150" fill="url(#star-facet-light)" />
+          <polygon points="250,135 230.0,162.5 235.7,139.6" fill="url(#star-facet-shadow)" />
+
+          {/* Top-Left Tip (217.7, 124.5) */}
+          <polygon points="250,135 217.7,124.5 235.7,139.6" fill="url(#star-facet-shadow)" />
+          <polygon points="250,135 217.7,124.5 241.2,122.9" fill="url(#star-facet-light)" />
+
+          {/* Center Specular Glint Core */}
+          <circle cx="250" cy="135" r="2.5" fill="#FFFFFF" />
         </g>
 
         {/* ------------------------------------------------------------- */}
-        {/* LAYER 9: SPECULAR SPARKLE ACCENTS & LIGHT FLARES              */}
+        {/* LAYER 9: SPECULAR LENS FLARE / STARBURST                      */}
         {/* ------------------------------------------------------------- */}
-        {/* Left Wing Tip Sparkle */}
-        <g transform="translate(158, 55) scale(0.7)">
-          <path d="M 0 -14 L 3 -3 L 14 0 L 3 3 L 0 14 L -3 3 L -14 0 L -3 -3 Z" fill="#FFFDE0" />
-          <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
+        <g transform="translate(235, 116)" className="animate-pulse">
+          {/* Diamond Flare Shape */}
+          <polygon points="0,-16 4,-4 16,0 4,4 0,16 -4,4 -16,0 -4,-4" fill="#FFFFFF" opacity="0.95" />
+          <circle cx="0" cy="0" r="5" fill="#FEF08A" filter="blur(2px)" />
         </g>
-        {/* Right Wing Tip Sparkle */}
-        <g transform="translate(342, 55) scale(0.7)">
-          <path d="M 0 -14 L 3 -3 L 14 0 L 3 3 L 0 14 L -3 3 L -14 0 L -3 -3 Z" fill="#FFFDE0" />
-          <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
-        </g>
-        {/* Plinth Gold Corner Glint */}
-        <g transform="translate(142, 440) scale(0.5)">
-          <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
-          <path d="M 0 -10 L 2 -2 L 10 0 L 2 2 L 0 10 L -2 2 L -10 0 L -2 -2 Z" fill="#FEF08A" />
-        </g>
-        <g transform="translate(358, 440) scale(0.5)">
-          <circle cx="0" cy="0" r="4" fill="#FFFFFF" />
-          <path d="M 0 -10 L 2 -2 L 10 0 L 2 2 L 0 10 L -2 2 L -10 0 L -2 -2 Z" fill="#FEF08A" />
+
+        {/* Secondary Flare on Right Wing Tip */}
+        <g transform="translate(314, 34)" className="animate-pulse">
+          <polygon points="0,-10 2.5,-2.5 10,0 2.5,2.5 0,10 -2.5,2.5 -10,0 -2.5,-2.5" fill="#FFFFFF" opacity="0.85" />
         </g>
       </svg>
     </div>
