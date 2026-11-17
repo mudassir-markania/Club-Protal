@@ -183,20 +183,17 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider flex items-center gap-1.5">
                     <Shield className="w-3 h-3 text-blue-400" />
-                    APL Season 9 Operations
-                  </span>
-                  <span className="text-xs text-amber-400 font-bold bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-amber-400" />
-                    5 Houses • 8 Sports • 10 Cricket Teams
+                    APL Season 9
                   </span>
                   <span
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                    className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border flex items-center gap-1.5 ${
                       championshipStatus === 'CLOSED'
-                        ? 'bg-purple-950 text-purple-300 border-purple-700'
-                        : 'bg-emerald-950 text-emerald-300 border-emerald-700'
+                        ? 'bg-purple-950/80 text-purple-300 border-purple-700/60'
+                        : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
                     }`}
                   >
-                    {championshipStatus === 'CLOSED' ? 'Championship Closed' : 'Live Tournament Active'}
+                    <span className={`w-1.5 h-1.5 rounded-full ${championshipStatus === 'CLOSED' ? 'bg-purple-400' : 'bg-emerald-400 animate-pulse'}`} />
+                    {championshipStatus === 'CLOSED' ? 'Tournament Closed' : 'Live Tournament Active'}
                   </span>
                 </div>
 
@@ -204,13 +201,13 @@ export default function AdminDashboardPage() {
                   Tournament Command Center
                 </h1>
                 <p className="text-xs sm:text-sm text-navy-200 mt-1 max-w-2xl leading-relaxed">
-                  Oversee inter-club fixtures, review referee result submissions with automatic unique-club points distribution, and track official house championship standings.
+                  Oversee fixtures, review referee result submissions, and monitor house championship standings.
                 </p>
               </div>
             </div>
 
             {/* Quick Primary Actions */}
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-2.5 shrink-0">
               <button
                 onClick={fetchDashboardData}
                 className="p-2.5 bg-navy-800/80 hover:bg-navy-700 text-navy-300 hover:text-white rounded-xl border border-navy-700 transition"
@@ -224,13 +221,6 @@ export default function AdminDashboardPage() {
               >
                 <Plus className="w-4 h-4" />
                 Schedule Competition
-              </Link>
-              <Link
-                href="/admin/leaderboard"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-800 hover:bg-navy-700 text-white font-bold text-xs rounded-xl border border-navy-700 transition"
-              >
-                <Trophy className="w-4 h-4 text-amber-400" />
-                Standings Matrix
               </Link>
             </div>
           </div>
