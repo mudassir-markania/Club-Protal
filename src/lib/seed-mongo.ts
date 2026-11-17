@@ -26,35 +26,44 @@ export async function seedMongoDatabase() {
 
   console.log('2. Seeding 5 Houses / Clubs...');
   const clubsData = [
-    { name: 'Mavericks', code: 'MAV', logoUrl: '/clubs/mavericks.png', captainName: 'Alex Rivera' },
-    { name: 'Dominator', code: 'DOM', logoUrl: '/clubs/dominator.png', captainName: 'Leo Vance' },
-    { name: 'Alpha', code: 'ALP', logoUrl: '/clubs/alpha.png', captainName: 'Ethan Hunt' },
-    { name: 'Royal Force', code: 'RYL', logoUrl: '/clubs/royal-force.png', captainName: 'Carlos Vega' },
-    { name: 'Crown Crushers', code: 'CRW', logoUrl: '/clubs/crown-crushers.png', captainName: 'Zane Malik' },
+    { name: 'Blue', code: 'MAV', logoUrl: '/clubs/mavericks.png', captainName: 'Affan', viceCaptainName: 'Irfan' },
+    { name: 'Red', code: 'DOM', logoUrl: '/clubs/dominator.png', captainName: 'Aquib Hingwala', viceCaptainName: 'Ubaid' },
+    { name: 'Green', code: 'ALP', logoUrl: '/clubs/alpha.png', captainName: 'Piyush Pandey', viceCaptainName: 'Shams ali Shaikh' },
+    { name: 'Purple', code: 'RYL', logoUrl: '/clubs/royal-force.png', captainName: 'Pravin', viceCaptainName: 'Zaid Acchwa' },
+    { name: 'Yellow', code: 'CRW', logoUrl: '/clubs/crown-crushers.png', captainName: 'Taha Choudhary', viceCaptainName: 'Ali Mapri' },
   ];
 
   const clubs: any[] = [];
   for (const c of clubsData) {
     const club = await db.club.upsert({
       where: { code: c.code },
-      update: { name: c.name, logoUrl: c.logoUrl, captainName: c.captainName },
+      update: { name: c.name, logoUrl: c.logoUrl, captainName: c.captainName, viceCaptainName: c.viceCaptainName },
       create: { ...c, totalPoints: 0.0, currentRank: 1 },
     });
     clubs.push(club);
   }
 
-  console.log('3. Seeding 10 Cricket Teams (2 per House)...');
+  console.log('3. Seeding 10 House Teams (2 per House)...');
+  const houseTeamsMap: Record<string, { team1: string; team2: string }> = {
+    Blue: { team1: 'Nex Blitz', team2: 'Royal Force' },
+    Red: { team1: 'GenZ Warrior', team2: 'Crown Crusher' },
+    Green: { team1: 'Dominators', team2: 'Rebel Royals' },
+    Purple: { team1: 'Alpha Warriors', team2: 'Mavericks' },
+    Yellow: { team1: 'Savage Strikers', team2: 'Storm Breakers' },
+  };
+
   const cricketTeams: any[] = [];
   for (const c of clubs) {
+    const mapping = houseTeamsMap[c.name] || { team1: `${c.name} A`, team2: `${c.name} B` };
     const teamA = await db.cricketTeam.upsert({
-      where: { name: `${c.name} A` },
-      update: { clubId: c.id },
-      create: { name: `${c.name} A`, clubId: c.id, captainName: `${c.captainName} (A)` },
+      where: { id: `crick-${c.code.toLowerCase()}-a` },
+      update: { name: mapping.team1, clubId: c.id, captainName: c.captainName },
+      create: { id: `crick-${c.code.toLowerCase()}-a`, name: mapping.team1, clubId: c.id, captainName: c.captainName },
     });
     const teamB = await db.cricketTeam.upsert({
-      where: { name: `${c.name} B` },
-      update: { clubId: c.id },
-      create: { name: `${c.name} B`, clubId: c.id, captainName: `${c.name} Vice Captain (B)` },
+      where: { id: `crick-${c.code.toLowerCase()}-b` },
+      update: { name: mapping.team2, clubId: c.id, captainName: c.viceCaptainName },
+      create: { id: `crick-${c.code.toLowerCase()}-b`, name: mapping.team2, clubId: c.id, captainName: c.viceCaptainName },
     });
     cricketTeams.push(teamA, teamB);
   }
@@ -270,18 +279,18 @@ export async function seedMongoDatabase() {
     }
   }
 
-  console.log('7. Seeding Athletes across 5 Clubs...');
+  console.log('7. Seeding 10 Official House Athletes (Captains & Vice Captains)...');
   const sampleAthletes = [
-    { name: 'Alex Rivera', clubCode: 'MAV' },
-    { name: 'David Miller', clubCode: 'MAV' },
-    { name: 'Kenji Sato', clubCode: 'MAV' },
-    { name: 'Leo Vance', clubCode: 'DOM' },
-    { name: 'Samira Khan', clubCode: 'DOM' },
-    { name: 'Ethan Hunt', clubCode: 'ALP' },
-    { name: 'Priya Sharma', clubCode: 'ALP' },
-    { name: 'Carlos Vega', clubCode: 'RYL' },
-    { name: 'Maya Patel', clubCode: 'RYL' },
-    { name: 'Zane Malik', clubCode: 'CRW' },
+    { name: 'Affan', clubCode: 'MAV' },
+    { name: 'Irfan', clubCode: 'MAV' },
+    { name: 'Aquib Hingwala', clubCode: 'DOM' },
+    { name: 'Ubaid', clubCode: 'DOM' },
+    { name: 'Piyush Pandey', clubCode: 'ALP' },
+    { name: 'Shams ali Shaikh', clubCode: 'ALP' },
+    { name: 'Pravin', clubCode: 'RYL' },
+    { name: 'Zaid Acchwa', clubCode: 'RYL' },
+    { name: 'Taha Choudhary', clubCode: 'CRW' },
+    { name: 'Ali Mapri', clubCode: 'CRW' },
   ];
 
   const players: any[] = [];
@@ -304,197 +313,6 @@ export async function seedMongoDatabase() {
     players.push({ ...p, clubCode: a.clubCode });
   }
 
-  console.log('8. Seeding Initial Matches & Fixtures...');
-  const bgmi = sports.find((s) => s.name === 'BGMI');
-  const esportsVenue = venues.find((v) => v.name === 'Esports Center');
-
-  // Match: M-BGMI-01 with multi-club squad
-  const mBgmi = await db.match.upsert({
-    where: { matchCode: 'M-BGMI-01' },
-    update: {},
-    create: {
-      matchCode: 'M-BGMI-01',
-      sportId: bgmi.id,
-      round: 'Grand Finals - Erangel',
-      stageName: 'Championship Finals',
-      matchDate: '2026-11-26',
-      matchTime: '15:00',
-      venueId: esportsVenue?.id,
-      status: 'SCHEDULED',
-      notes: 'Squad 1 features mixed club athletes (2 Mavericks, 1 Dominator, 1 Alpha).',
-    },
-  });
-
-  // Assign referee Marcus
-  await db.matchReferee.upsert({
-    where: { matchId_refereeId: { matchId: mBgmi.id, refereeId: referees[0].id } },
-    update: {},
-    create: { matchId: mBgmi.id, refereeId: referees[0].id },
-  });
-
-  // Squad 1 participant
-  const squad1 = await db.matchParticipant.upsert({
-    where: { id: `part-bgmi-sq1-${mBgmi.id}` },
-    update: {},
-    create: {
-      id: `part-bgmi-sq1-${mBgmi.id}`,
-      matchId: mBgmi.id,
-      teamName: 'Squad Titans',
-      score: 100,
-      rank: 1,
-      isWinner: true,
-    },
-  });
-
-  // Link 4 athletes: 2 Mavericks, 1 Dominator, 1 Alpha
-  const mavPlayers = players.filter((p) => p.clubCode === 'MAV').slice(0, 2);
-  const domPlayer = players.find((p) => p.clubCode === 'DOM');
-  const alpPlayer = players.find((p) => p.clubCode === 'ALP');
-
-  const squadPlayers = [
-    ...mavPlayers.map((p) => ({ playerId: p.id, clubId: clubs.find((c) => c.code === 'MAV').id })),
-    { playerId: domPlayer.id, clubId: clubs.find((c) => c.code === 'DOM').id },
-    { playerId: alpPlayer.id, clubId: clubs.find((c) => c.code === 'ALP').id },
-  ];
-
-  for (const sp of squadPlayers) {
-    await db.matchParticipantPlayer.upsert({
-      where: { participantId_playerId: { participantId: squad1.id, playerId: sp.playerId } },
-      update: { clubId: sp.clubId },
-      create: {
-        participantId: squad1.id,
-        playerId: sp.playerId,
-        clubId: sp.clubId,
-      },
-    });
-  }
-
-  // Match: M-TH-01 (Treasure Hunt Campus Clue Quest)
-  const treasureHunt = sports.find((s) => s.name === 'Treasure Hunt');
-  const mainVenue = venues.find((v) => v.name === 'Olympic Grand Arena');
-
-  if (treasureHunt) {
-    const mTH = await db.match.upsert({
-      where: { matchCode: 'M-TH-01' },
-      update: {},
-      create: {
-        matchCode: 'M-TH-01',
-        sportId: treasureHunt.id,
-        round: 'Campus Finals - Clue Quest',
-        stageName: 'Championship Finals',
-        matchDate: '2026-11-27',
-        matchTime: '10:00',
-        venueId: mainVenue?.id,
-        status: 'SCHEDULED',
-        notes: 'Campus-wide multi-clue adventure quest. House squads race across checkpoints to unlock the vault.',
-      },
-    });
-
-    // Assign referee David Okafor
-    await db.matchReferee.upsert({
-      where: { matchId_refereeId: { matchId: mTH.id, refereeId: referees[2].id } },
-      update: {},
-      create: { matchId: mTH.id, refereeId: referees[2].id },
-    });
-
-    // Seed 5 participating house squads
-    for (let i = 0; i < clubs.length; i++) {
-      const c = clubs[i];
-      await db.matchParticipant.upsert({
-        where: { id: `part-th-sq${i + 1}-${mTH.id}` },
-        update: {},
-        create: {
-          id: `part-th-sq${i + 1}-${mTH.id}`,
-          matchId: mTH.id,
-          clubId: c.id,
-          teamName: `${c.name} Questers`,
-          score: 0,
-        },
-      });
-    }
-  }
-
-  // Match: M-BAD-D01 (Badminton Doubles)
-  const badminton = sports.find((s) => s.name === 'Badminton');
-  const indoorVenue = venues.find((v) => v.name === 'Indoor Sports Complex');
-
-  if (badminton && indoorVenue) {
-    const mBadD = await db.match.upsert({
-      where: { matchCode: 'M-BAD-D01' },
-      update: {},
-      create: {
-        matchCode: 'M-BAD-D01',
-        sportId: badminton.id,
-        round: 'Doubles Championship Round',
-        stageName: 'Doubles Finals',
-        matchCategory: 'Doubles',
-        matchDate: '2026-11-26',
-        matchTime: '17:00',
-        venueId: indoorVenue.id,
-        status: 'SCHEDULED',
-        notes: 'Badminton Doubles showdown between Alpha and Mavericks.',
-      },
-    });
-
-    await db.matchReferee.upsert({
-      where: { matchId_refereeId: { matchId: mBadD.id, refereeId: referees[1].id } },
-      update: {},
-      create: { matchId: mBadD.id, refereeId: referees[1].id },
-    });
-
-    await db.matchParticipant.upsert({
-      where: { id: `part-badd-1-${mBadD.id}` },
-      update: {},
-      create: { id: `part-badd-1-${mBadD.id}`, matchId: mBadD.id, clubId: clubs[0].id, score: 0 },
-    });
-
-    await db.matchParticipant.upsert({
-      where: { id: `part-badd-2-${mBadD.id}` },
-      update: {},
-      create: { id: `part-badd-2-${mBadD.id}`, matchId: mBadD.id, clubId: clubs[3].id, score: 0 },
-    });
-  }
-
-  // Match: M-CAR-M01 (Carrom Mixed Doubles)
-  const carrom = sports.find((s) => s.name === 'Carrom');
-
-  if (carrom && indoorVenue) {
-    const mCarM = await db.match.upsert({
-      where: { matchCode: 'M-CAR-M01' },
-      update: {},
-      create: {
-        matchCode: 'M-CAR-M01',
-        sportId: carrom.id,
-        round: 'Mixed Doubles Quarterfinals',
-        stageName: 'Mixed Doubles',
-        matchCategory: 'Mixed Doubles',
-        matchDate: '2026-11-27',
-        matchTime: '14:30',
-        venueId: indoorVenue.id,
-        status: 'SCHEDULED',
-        notes: 'Carrom Mixed Doubles clash between Crown Crushers and Dominator.',
-      },
-    });
-
-    await db.matchReferee.upsert({
-      where: { matchId_refereeId: { matchId: mCarM.id, refereeId: referees[1].id } },
-      update: {},
-      create: { matchId: mCarM.id, refereeId: referees[1].id },
-    });
-
-    await db.matchParticipant.upsert({
-      where: { id: `part-carm-1-${mCarM.id}` },
-      update: {},
-      create: { id: `part-carm-1-${mCarM.id}`, matchId: mCarM.id, clubId: clubs[1].id, score: 0 },
-    });
-
-    await db.matchParticipant.upsert({
-      where: { id: `part-carm-2-${mCarM.id}` },
-      update: {},
-      create: { id: `part-carm-2-${mCarM.id}`, matchId: mCarM.id, clubId: clubs[2].id, score: 0 },
-    });
-  }
-
   // Tournament settings
   await db.tournamentSetting.upsert({
     where: { key: 'CHAMPIONSHIP_STATUS' },
@@ -508,6 +326,6 @@ export async function seedMongoDatabase() {
     create: { key: 'CURRENT_ROTATION_INDEX', value: '0', description: 'Deterministic remainder rotation' },
   });
 
-  console.log('MongoDB House Championship Seeding completed successfully!');
+  console.log('MongoDB House Championship Baseline Seeding completed successfully!');
 }
 
