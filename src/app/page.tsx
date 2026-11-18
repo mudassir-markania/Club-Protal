@@ -391,7 +391,7 @@ export default function PublicViewerPortal() {
       <PublicNavbar activeOverride="home" />
 
       {/* 2. 100% PURE CODE 3D STADIUM & CHAMPIONSHIP HERO SHOWDOWN (NO IMAGES) */}
-      <section className="relative overflow-hidden bg-[#EDF4FC] border-b border-slate-200/90 pt-4 pb-14 sm:pb-18 lg:pb-22 select-none">
+      <section className="relative overflow-hidden bg-[#030812] border-b border-[#0F2655]/60 pt-4 pb-14 sm:pb-18 lg:pb-22 select-none">
         {/* Pure Code SVG & CSS Stadium Atmosphere (Floodlights, Grandstands, Pennants, Ribbons) */}
         <HeroStadiumBackground />
 
@@ -408,16 +408,16 @@ export default function PublicViewerPortal() {
           }}
         />
 
-        {/* Floating Live Countdown Badge on Top Right */}
-        <div className="absolute top-4 right-6 z-20 hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm text-xs font-semibold text-slate-700">
+        {/* Floating Live Countdown Badge on Top Right — dark glassmorphic */}
+        <div className="absolute top-4 right-6 z-20 hidden md:flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border border-amber-500/30 shadow-lg text-xs font-semibold" style={{background:'rgba(10,20,50,0.75)'}}>
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" />
           </span>
-          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+          <span className="text-[11px] font-bold text-amber-300/80 uppercase tracking-widest">
             Kickoff In:
           </span>
-          <span className="font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+          <span className="font-mono font-black text-amber-200 bg-amber-900/40 px-2 py-0.5 rounded text-[11px] border border-amber-700/40">
             {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m {timeLeft.secs}s
           </span>
         </div>
@@ -429,19 +429,19 @@ export default function PublicViewerPortal() {
             <div className="lg:col-span-7 space-y-4 sm:space-y-5 lg:space-y-6 pt-2 lg:pt-4 text-center lg:text-left">
               {/* Institution Eyebrow */}
               <div className="flex items-center justify-center lg:justify-start gap-3">
-                <div className="h-[1.5px] w-6 sm:w-10 bg-slate-400/80" />
-                <span className="text-[11px] sm:text-xs lg:text-[13px] font-black uppercase tracking-[0.22em] text-[#0A2540]">
+                <div className="h-[1.5px] w-6 sm:w-10 bg-amber-500/50" />
+                <span className="text-[11px] sm:text-xs lg:text-[13px] font-black uppercase tracking-[0.22em] text-amber-300/80">
                   NEXCORE INSTITUTE OF TECHNOLOGY
                 </span>
-                <div className="h-[1.5px] w-6 sm:w-10 bg-slate-400/80" />
+                <div className="h-[1.5px] w-6 sm:w-10 bg-amber-500/50" />
               </div>
 
               {/* Huge Tournament Titles */}
               <div className="space-y-0 sm:space-y-0.5">
-                <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-[96px] font-black italic tracking-tight text-[#082855] leading-[0.92] drop-shadow-[0_3px_6px_rgba(8,40,85,0.22)]">
+                <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-[96px] font-black italic tracking-tight text-white leading-[0.92] drop-shadow-[0_4px_24px_rgba(255,255,255,0.15)]">
                   APL
                 </h1>
-                <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[84px] font-black italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#FFA216] via-[#F97316] to-[#D94F04] leading-[0.95] drop-shadow-[0_3px_8px_rgba(249,115,22,0.28)]">
+                <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[84px] font-black italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#FFA216] via-[#F97316] to-[#D94F04] leading-[0.95] drop-shadow-[0_3px_8px_rgba(249,115,22,0.35)]">
                   SEASON 9
                 </h2>
               </div>
@@ -460,21 +460,21 @@ export default function PublicViewerPortal() {
               </div>
 
               {/* Tagline */}
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-800 tracking-wide max-w-xl mx-auto lg:mx-0">
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-200/90 tracking-wide max-w-xl mx-auto lg:mx-0">
                 8 Games. 5 Houses. One Champion. Unlimited Glory.
               </p>
 
               {/* Metadata Badges: Date & Venue */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-slate-600">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-slate-300/80">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-sky-100/80 flex items-center justify-center text-[#0284C7] shadow-2xs">
+                  <div className="w-7 h-7 rounded-lg bg-sky-900/60 flex items-center justify-center text-sky-400 shadow-2xs border border-sky-800/50">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <span>Nov 25th – Nov 28th, 2026</span>
                 </div>
-                <div className="hidden sm:block h-4 w-[1px] bg-slate-300" />
+                <div className="hidden sm:block h-4 w-[1px] bg-slate-600" />
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-orange-100/80 flex items-center justify-center text-[#EA580C] shadow-2xs">
+                  <div className="w-7 h-7 rounded-lg bg-orange-900/60 flex items-center justify-center text-orange-400 shadow-2xs border border-orange-800/50">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <span>Nexcore Institute of Technology</span>
@@ -482,15 +482,15 @@ export default function PublicViewerPortal() {
               </div>
 
               {/* Mobile Countdown Row (<md) */}
-              <div className="flex md:hidden items-center justify-center gap-2 pt-1 text-xs font-semibold text-slate-700">
+              <div className="flex md:hidden items-center justify-center gap-2 pt-1 text-xs font-semibold text-slate-300">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-400" />
                 </span>
-                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                <span className="text-[11px] font-bold text-amber-300/80 uppercase tracking-wide">
                   Kickoff In:
                 </span>
-                <span className="font-mono font-black text-slate-900 bg-white border border-slate-200 px-2 py-0.5 rounded text-[11px] shadow-2xs">
+                <span className="font-mono font-black text-amber-200 bg-amber-900/40 border border-amber-700/40 px-2 py-0.5 rounded text-[11px]">
                   {timeLeft.days}d {timeLeft.hours}h {timeLeft.mins}m {timeLeft.secs}s
                 </span>
               </div>
@@ -499,7 +499,7 @@ export default function PublicViewerPortal() {
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
                   href="/schedule"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-to-r from-[#FF7A00] via-[#F97316] to-[#E65100] text-white font-bold text-sm sm:text-base tracking-wide shadow-[0_6px_22px_rgba(249,115,22,0.4)] hover:shadow-[0_8px_28px_rgba(249,115,22,0.55)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 group cursor-pointer"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-to-r from-[#FF7A00] via-[#F97316] to-[#E65100] text-white font-bold text-sm sm:text-base tracking-wide shadow-[0_6px_28px_rgba(249,115,22,0.5)] hover:shadow-[0_8px_36px_rgba(249,115,22,0.65)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 group cursor-pointer"
                 >
                   <span>View Schedule</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -507,30 +507,41 @@ export default function PublicViewerPortal() {
 
                 <Link
                   href="#leaderboard-section"
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white border-2 border-[#0A3D80] text-[#0A3D80] font-bold text-sm sm:text-base tracking-wide shadow-sm hover:bg-[#F0F7FF] hover:border-[#0284C7] hover:text-[#0284C7] hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-full border-2 border-white/20 text-white font-bold text-sm sm:text-base tracking-wide hover:bg-white/10 hover:border-white/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm"
+                  style={{background:'rgba(255,255,255,0.07)'}}
                 >
-                  <BarChart3 className="w-4 h-4 text-[#0284C7]" />
+                  <BarChart3 className="w-4 h-4 text-sky-400" />
                   <span>Live Leaderboard</span>
                 </Link>
 
                 <button
                   onClick={triggerConfetti}
-                  className="hidden xl:flex items-center gap-1.5 px-4 py-3 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold hover:bg-amber-100 hover:scale-105 active:scale-95 transition-all shadow-2xs cursor-pointer"
+                  className="hidden xl:flex items-center gap-1.5 px-4 py-3 rounded-full border border-amber-600/40 text-amber-300 text-xs font-bold hover:bg-amber-900/30 hover:scale-105 active:scale-95 transition-all shadow-2xs cursor-pointer backdrop-blur-sm"
+                  style={{background:'rgba(120,53,15,0.2)'}}
                   title="Celebrate APL Glory"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Cheer</span>
                 </button>
+              </div>
+
+              {/* Sports icons strip */}
+              <div className="flex items-center justify-center lg:justify-start gap-3 pt-1 flex-wrap">
+                {['Cricket','Badminton','Chess','Football','BGMI','Carrom','Volleyball'].map((s) => (
+                  <span key={s} className="text-[10px] font-bold uppercase tracking-widest text-slate-400/70 border border-slate-700/50 px-2 py-0.5 rounded">
+                    {s}
+                  </span>
+                ))}
               </div>
             </div>
 
             {/* RIGHT COLUMN: PURE CODE 3D CHAMPIONSHIP TROPHY & STAGE */}
             <div className="lg:col-span-5 relative flex items-center justify-center pt-4 lg:pt-0">
-              {/* Radial glow spotlight behind trophy */}
+              {/* Radial glow spotlight behind trophy — gold on dark */}
               <div
                 className="absolute w-[380px] sm:w-[480px] h-[380px] sm:h-[480px] rounded-full pointer-events-none animate-pulse-glow"
                 style={{
-                  background: 'radial-gradient(circle, rgba(254,240,138,0.55) 0%, rgba(245,158,11,0.22) 40%, rgba(2,132,199,0.12) 65%, transparent 80%)',
+                  background: 'radial-gradient(circle, rgba(254,240,138,0.18) 0%, rgba(245,158,11,0.10) 40%, rgba(234,179,8,0.05) 65%, transparent 80%)',
                   filter: 'blur(30px)',
                 }}
               />
@@ -558,97 +569,97 @@ export default function PublicViewerPortal() {
 
       {/* 3. FLOATING KEY STATS BAR */}
       <section className="relative z-20 -mt-6 sm:-mt-8 max-w-6xl mx-auto w-full px-4 sm:px-6">
-        <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-slate-100 p-4 sm:p-5 flex items-center justify-around flex-wrap gap-4 sm:gap-6">
+        <div className="rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-amber-900/30 p-4 sm:p-5 flex items-center justify-around flex-wrap gap-4 sm:gap-6 backdrop-blur-md" style={{background:'linear-gradient(135deg, rgba(10,20,50,0.95) 0%, rgba(6,14,30,0.98) 100%)'}}>
           {/* Stat 1 */}
           <Link
             href="/houses"
             className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:bg-[#0284C7] group-hover:text-white transition-colors shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-sky-900/40 text-sky-400 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-colors border border-sky-800/40">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+              <span className="font-black text-xl sm:text-2xl text-white leading-tight block">
                 5
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                 Clubs / Houses
               </span>
             </div>
           </Link>
 
-          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+          <div className="h-8 w-[1px] bg-slate-700 hidden md:block" />
 
           {/* Stat 2 */}
           <Link
             href="/sports"
             className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:bg-[#0284C7] group-hover:text-white transition-colors shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-sky-900/40 text-sky-400 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-colors border border-sky-800/40">
               <Gamepad2 className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+              <span className="font-black text-xl sm:text-2xl text-white leading-tight block">
                 8
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                 Sports / Games
               </span>
             </div>
           </Link>
 
-          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+          <div className="h-8 w-[1px] bg-slate-700 hidden md:block" />
 
           {/* Stat 3 */}
           <div className="flex items-center gap-3 group transition-transform hover:scale-105">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#EA580C] flex items-center justify-center shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-orange-900/40 text-orange-400 flex items-center justify-center border border-orange-800/40">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+              <span className="font-black text-xl sm:text-2xl text-white leading-tight block">
                 300+
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                 Registered Players
               </span>
             </div>
           </div>
 
-          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+          <div className="h-8 w-[1px] bg-slate-700 hidden md:block" />
 
           {/* Stat 4 */}
           <Link
             href="/schedule"
             className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-[#0284C7] flex items-center justify-center group-hover:bg-[#0284C7] group-hover:text-white transition-colors shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-sky-900/40 text-sky-400 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-colors border border-sky-800/40">
               <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+              <span className="font-black text-xl sm:text-2xl text-white leading-tight block">
                 42
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                 Total Matches
               </span>
             </div>
           </Link>
 
-          <div className="h-8 w-[1px] bg-slate-200 hidden md:block" />
+          <div className="h-8 w-[1px] bg-slate-700 hidden md:block" />
 
           {/* Stat 5 */}
           <div
             onClick={triggerConfetti}
             className="flex items-center gap-3 group transition-transform hover:scale-105 cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-amber-900/40 text-amber-400 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors border border-amber-800/40">
               <Target className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-black text-xl sm:text-2xl text-slate-900 leading-tight block">
+              <span className="font-black text-xl sm:text-2xl text-white leading-tight block">
                 1
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                 Overall Champion
               </span>
             </div>

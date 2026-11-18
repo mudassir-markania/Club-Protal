@@ -3,45 +3,53 @@
 import React from 'react';
 
 /**
- * Pure SVG & CSS High-Precision Arena Stadium Background
+ * Dark Cinematic Arena Night Background
  * 100% PURE CODE — ZERO RASTER IMAGES.
  * Features:
- * - Radiant daylight arena sky with multi-stop volumetric sunbeam flare
- * - Architectural stadium steel floodlight towers with 16-lamp matrix and realistic volumetric light cones
- * - Spectator seating grandstand tiers with architectural seating raker curves
- * - Nexcore Institute "NT" heraldic tournament pennants with metallic gold trim
- * - Dynamic fluid athletic 3D swooshes in cyan/azure and sports flame orange
+ * - Deep navy/black arena night atmosphere with volumetric fog
+ * - Dramatic stadium floodlight towers with blinding white beams on dark
+ * - Golden particle dust & lens flare effects
+ * - Sweeping gold/amber + navy ribbon swooshes (cinematic sports broadcast style)
+ * - Atmospheric glow rings and crowd silhouette base
  */
 export default function HeroStadiumBackground() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
-      {/* 1. Daylight Atmosphere Base Gradients */}
+      {/* 1. Deep Dark Arena Base */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 95% 75% at 75% 15%, #FFFFFF 0%, #EBF4FC 35%, #D9ECFA 70%, #EFF6FC 100%)',
+          background: 'radial-gradient(ellipse 130% 100% at 65% 0%, #0D1F3C 0%, #060E1E 40%, #030812 75%, #020609 100%)',
         }}
       />
 
-      {/* 2. Top-Right Stadium Floodlight Flare & Ambient Sun Glow */}
+      {/* 2. Right-side gold atmospheric haze (behind trophy) */}
       <div
-        className="absolute -top-32 right-[-5%] w-[750px] h-[550px] rounded-full pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at center, rgba(255,255,255,0.98) 0%, rgba(254,240,138,0.5) 25%, rgba(56,189,248,0.22) 55%, transparent 75%)',
-          filter: 'blur(40px)',
+          right: '-5%',
+          top: '-10%',
+          width: '70%',
+          height: '110%',
+          background: 'radial-gradient(ellipse 70% 80% at 70% 40%, rgba(245,158,11,0.13) 0%, rgba(234,179,8,0.07) 35%, transparent 70%)',
+          filter: 'blur(30px)',
         }}
       />
 
-      {/* 3. Left Ambient Cyan Flare */}
+      {/* 3. Left cyan accent glow */}
       <div
-        className="absolute -top-20 -left-20 w-[550px] h-[450px] rounded-full pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at center, rgba(56,189,248,0.35) 0%, rgba(2,132,199,0.14) 40%, transparent 70%)',
-          filter: 'blur(45px)',
+          left: '-10%',
+          top: '0%',
+          width: '55%',
+          height: '70%',
+          background: 'radial-gradient(ellipse 60% 70% at 25% 30%, rgba(14,165,233,0.09) 0%, rgba(2,132,199,0.05) 45%, transparent 75%)',
+          filter: 'blur(25px)',
         }}
       />
 
-      {/* 4. Full SVG Stadium Architecture, Floodlights, Pennants & Ribbons */}
+      {/* 4. Full SVG Layer: Towers, Beams, Swooshes, Architecture */}
       <svg
         viewBox="0 0 1440 640"
         fill="none"
@@ -50,34 +58,62 @@ export default function HeroStadiumBackground() {
         className="absolute inset-0 w-full h-full"
       >
         <defs>
-          {/* Volumetric Floodlight Beams */}
-          <linearGradient id="light-beam-left" x1="0%" y1="0%" x2="70%" y2="100%">
+          {/* Floodlight beam — cool white on dark */}
+          <linearGradient id="beam-left" x1="0%" y1="0%" x2="80%" y2="100%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.55" />
-            <stop offset="35%" stopColor="#BAE6FD" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#E0F2FE" stopOpacity="0" />
+            <stop offset="30%" stopColor="#BAE6FD" stopOpacity="0.22" />
+            <stop offset="70%" stopColor="#7DD3FC" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
           </linearGradient>
 
-          <linearGradient id="light-beam-right" x1="100%" y1="0%" x2="30%" y2="100%">
+          <linearGradient id="beam-right" x1="100%" y1="0%" x2="20%" y2="100%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.65" />
-            <stop offset="30%" stopColor="#FEF08A" stopOpacity="0.3" />
-            <stop offset="65%" stopColor="#BAE6FD" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#E0F2FE" stopOpacity="0" />
+            <stop offset="25%" stopColor="#FEF9C3" stopOpacity="0.28" />
+            <stop offset="60%" stopColor="#BAE6FD" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
           </linearGradient>
 
-          {/* Grandstand Seating Tiers */}
-          <linearGradient id="grandstand-tier-1" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#CBE4F9" stopOpacity="0.75" />
-            <stop offset="50%" stopColor="#B3D7F5" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#D5E8F8" stopOpacity="0.2" />
+          {/* Gold ribbon gradient */}
+          <linearGradient id="ribbon-gold" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#78350F" />
+            <stop offset="15%" stopColor="#B45309" />
+            <stop offset="38%" stopColor="#F59E0B" />
+            <stop offset="55%" stopColor="#FDE68A" />
+            <stop offset="72%" stopColor="#F59E0B" />
+            <stop offset="90%" stopColor="#B45309" />
+            <stop offset="100%" stopColor="#78350F" />
           </linearGradient>
 
-          <linearGradient id="grandstand-tier-2" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#B9DCF7" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#E2F0FB" stopOpacity="0.1" />
+          {/* Deep navy accent ribbon */}
+          <linearGradient id="ribbon-navy" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#020617" />
+            <stop offset="25%" stopColor="#0C1A36" />
+            <stop offset="55%" stopColor="#0F2655" />
+            <stop offset="85%" stopColor="#091A3A" />
+            <stop offset="100%" stopColor="#020617" />
           </linearGradient>
 
-          {/* Pennant Cloth Gradients */}
-          <linearGradient id="banner-navy" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* Orange flame ribbon */}
+          <linearGradient id="ribbon-orange" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#7C2D12" />
+            <stop offset="20%" stopColor="#C2410C" />
+            <stop offset="45%" stopColor="#F97316" />
+            <stop offset="65%" stopColor="#FB923C" />
+            <stop offset="85%" stopColor="#EA580C" />
+            <stop offset="100%" stopColor="#7C2D12" />
+          </linearGradient>
+
+          {/* Tower steel gradient */}
+          <linearGradient id="tower-steel" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#0F172A" />
+            <stop offset="30%" stopColor="#1E293B" />
+            <stop offset="60%" stopColor="#334155" />
+            <stop offset="85%" stopColor="#1E293B" />
+            <stop offset="100%" stopColor="#0F172A" />
+          </linearGradient>
+
+          {/* Banner cloth */}
+          <linearGradient id="banner-dark" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0B2B5C" />
             <stop offset="50%" stopColor="#071E42" />
             <stop offset="100%" stopColor="#04122A" />
@@ -89,226 +125,150 @@ export default function HeroStadiumBackground() {
             <stop offset="100%" stopColor="#D97706" />
           </linearGradient>
 
-          {/* Aerodynamic 3D Sports Swooshes */}
-          <linearGradient id="swoosh-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#38BDF8" />
-            <stop offset="35%" stopColor="#0284C7" />
-            <stop offset="70%" stopColor="#0369A1" />
-            <stop offset="100%" stopColor="#012B68" />
+          {/* Crowd silhouette */}
+          <linearGradient id="crowd-dark" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#0A1628" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#020609" stopOpacity="0.5" />
           </linearGradient>
 
-          <linearGradient id="swoosh-orange" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FFA216" />
-            <stop offset="45%" stopColor="#F97316" />
-            <stop offset="85%" stopColor="#EA580C" />
-            <stop offset="100%" stopColor="#C2410C" />
-          </linearGradient>
-
-          {/* Realistic Soft Drop Shadow for Swooshes */}
-          <filter id="ribbon-shadow" x="-5%" y="-10%" width="115%" height="130%">
-            <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="#06214A" floodOpacity="0.22" />
-          </filter>
-
-          <filter id="pennant-shadow" x="-10%" y="-10%" width="120%" height="130%">
-            <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#041633" floodOpacity="0.3" />
+          <filter id="glow-lamp">
+            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
 
-        {/* ------------------------------------------------------------- */}
-        {/* A. DISTANT ARCHITECTURAL GRANDSTAND & SEATING CURVES          */}
-        {/* ------------------------------------------------------------- */}
-        {/* Distant Stadium Roof Canopy Curve */}
+        {/* ------------------------------------------------------------------ */}
+        {/* A. DARK GRANDSTAND SILHOUETTE (bottom crowd shape)                  */}
+        {/* ------------------------------------------------------------------ */}
         <path
-          d="M -100 280 Q 720 170 1540 280 L 1540 430 Q 720 320 -100 430 Z"
-          fill="url(#grandstand-tier-2)"
+          d="M -20 640 L -20 310 Q 180 290 360 300 Q 540 310 720 295 Q 900 280 1080 295 Q 1260 310 1460 290 L 1460 640 Z"
+          fill="url(#crowd-dark)"
+          opacity="0.6"
         />
-        {/* Mid-tier seating deck curve */}
-        <path
-          d="M -100 340 Q 720 240 1540 340 L 1540 470 Q 720 370 -100 470 Z"
-          fill="url(#grandstand-tier-1)"
-        />
-        {/* Seating Raker Accent Lines for architectural realism */}
-        <path
-          d="M 100 325 Q 720 250 1340 325"
-          stroke="#93C5FD"
-          strokeWidth="1.5"
-          strokeOpacity="0.45"
-          strokeDasharray="6 4"
-        />
-        <path
-          d="M 50 365 Q 720 285 1390 365"
-          stroke="#60A5FA"
-          strokeWidth="1.5"
-          strokeOpacity="0.35"
-          strokeDasharray="8 5"
-        />
-        <path
-          d="M 0 405 Q 720 325 1440 405"
-          stroke="#94A3B8"
-          strokeWidth="1.5"
-          strokeOpacity="0.3"
-        />
+        {/* Row lines to suggest stadium seating */}
+        {[320, 340, 360, 380, 400].map((y, i) => (
+          <path
+            key={i}
+            d={`M -20 ${y} Q 360 ${y - 15} 720 ${y + 5} Q 1080 ${y + 20} 1460 ${y - 10}`}
+            stroke="#0F2655"
+            strokeWidth="1.2"
+            strokeOpacity={0.4 - i * 0.06}
+            fill="none"
+          />
+        ))}
 
-        {/* ------------------------------------------------------------- */}
-        {/* B. VOLUMETRIC FLOODLIGHT LIGHT BEAMS                          */}
-        {/* ------------------------------------------------------------- */}
-        {/* Left Floodlight Cones washing across arena */}
-        <polygon points="50,110 540,390 400,500 35,130" fill="url(#light-beam-left)" />
-        <polygon points="50,110 770,430 600,530 35,130" fill="url(#light-beam-left)" opacity="0.65" />
-
-        {/* Right Floodlight Cones washing down towards Trophy */}
-        <polygon points="1390,95 840,340 730,500 1410,120" fill="url(#light-beam-right)" />
-        <polygon points="1390,95 1060,450 900,580 1410,120" fill="url(#light-beam-right)" opacity="0.8" />
-
-        {/* ------------------------------------------------------------- */}
-        {/* C. LEFT STADIUM FLOODLIGHT TOWER                              */}
-        {/* ------------------------------------------------------------- */}
-        <g id="left-floodlight-tower" transform="translate(18, 65)">
-          {/* Steel Pylon Lattice Mast */}
-          <path d="M 32 60 L 22 240 M 48 60 L 58 240" stroke="#64748B" strokeWidth="2.5" />
-          <line x1="28" y1="95" x2="52" y2="95" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="26" y1="135" x2="54" y2="135" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="24" y1="175" x2="56" y2="175" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="22" y1="215" x2="58" y2="215" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="28" y1="95" x2="54" y2="135" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="52" y1="95" x2="26" y2="135" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="26" y1="135" x2="56" y2="175" stroke="#94A3B8" strokeWidth="1" />
-          <line x1="54" y1="135" x2="24" y2="175" stroke="#94A3B8" strokeWidth="1" />
-
-          {/* Lamp Bank Head Mounting Bar (Angled down ~12°) */}
-          <rect x="0" y="30" width="82" height="24" rx="3" fill="#0F172A" stroke="#334155" strokeWidth="1.5" transform="rotate(12, 40, 42)" />
-          {/* 12 High-Power LED Floodlight Lamps (4x3 array) */}
-          {[0, 1, 2, 3].map((col) => (
+        {/* ------------------------------------------------------------------ */}
+        {/* B. LEFT FLOODLIGHT TOWER                                            */}
+        {/* ------------------------------------------------------------------ */}
+        <g id="left-tower" transform="translate(28, 80)">
+          <rect x="31" y="0" width="18" height="250" rx="2" fill="url(#tower-steel)" />
+          <line x1="31" y1="60" x2="49" y2="60" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="110" x2="49" y2="110" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="165" x2="49" y2="165" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="215" x2="49" y2="215" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="60" x2="49" y2="110" stroke="#1E293B" strokeWidth="1" strokeOpacity="0.8" />
+          <line x1="49" y1="60" x2="31" y2="110" stroke="#1E293B" strokeWidth="1" strokeOpacity="0.8" />
+          <line x1="31" y1="110" x2="49" y2="165" stroke="#1E293B" strokeWidth="1" strokeOpacity="0.6" />
+          <line x1="49" y1="110" x2="31" y2="165" stroke="#1E293B" strokeWidth="1" strokeOpacity="0.6" />
+          <rect x="-5" y="-8" width="90" height="22" rx="4" fill="#0F172A" stroke="#334155" strokeWidth="1.5" transform="rotate(-12, 40, 6)" />
+          {[0,1,2,3].map(col => (
             <React.Fragment key={col}>
-              <circle cx={14 + col * 17} cy={37} r={4.5} fill="#FFFFFF" filter="drop-shadow(0 0 8px #38BDF8)" />
-              <circle cx={14 + col * 17} cy={47} r={4.5} fill="#FFFFFF" filter="drop-shadow(0 0 8px #38BDF8)" />
+              <circle cx={8 + col * 18} cy={3} r={5} fill="#FFFDE0" filter="url(#glow-lamp)" />
+              <circle cx={8 + col * 18} cy={14} r={5} fill="#FFFDE0" filter="url(#glow-lamp)" />
             </React.Fragment>
           ))}
-          {/* Overpowering Glow Flare on Bank */}
-          <ellipse cx="40" cy="42" rx="55" ry="26" fill="#FFFFFF" fillOpacity="0.5" filter="blur(8px)" />
+          <ellipse cx="40" cy="8" rx="70" ry="28" fill="#FFFDE0" fillOpacity="0.18" style={{filter:'blur(14px)'}} />
         </g>
 
-        {/* ------------------------------------------------------------- */}
-        {/* D. RIGHT STADIUM FLOODLIGHT TOWER                             */}
-        {/* ------------------------------------------------------------- */}
-        <g id="right-floodlight-tower" transform="translate(1342, 50)">
-          {/* Steel Pylon Lattice Mast */}
-          <path d="M 48 60 L 58 240 M 32 60 L 22 240" stroke="#64748B" strokeWidth="2.5" />
-          <line x1="28" y1="95" x2="52" y2="95" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="26" y1="135" x2="54" y2="135" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="24" y1="175" x2="56" y2="175" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="22" y1="215" x2="58" y2="215" stroke="#64748B" strokeWidth="1.5" />
-
-          {/* Lamp Bank Head Mounting Bar (Angled down ~15° towards trophy) */}
-          <rect x="0" y="30" width="82" height="24" rx="3" fill="#0F172A" stroke="#334155" strokeWidth="1.5" transform="rotate(-15, 40, 42)" />
-          {[0, 1, 2, 3].map((col) => (
+        {/* ------------------------------------------------------------------ */}
+        {/* C. RIGHT FLOODLIGHT TOWER                                           */}
+        {/* ------------------------------------------------------------------ */}
+        <g id="right-tower" transform="translate(1360, 70)">
+          <rect x="31" y="0" width="18" height="250" rx="2" fill="url(#tower-steel)" />
+          <line x1="31" y1="60" x2="49" y2="60" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="110" x2="49" y2="110" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="165" x2="49" y2="165" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="215" x2="49" y2="215" stroke="#334155" strokeWidth="1.5" />
+          <line x1="31" y1="60" x2="49" y2="110" stroke="#1E293B" strokeWidth="1" strokeOpacity="0.8" />
+          <line x1="49" y1="60" x2="31" y2="110" stroke="#1E293B" strokeWidth="1" strokeOpacity="0.8" />
+          <rect x="-5" y="-8" width="90" height="22" rx="4" fill="#0F172A" stroke="#334155" strokeWidth="1.5" transform="rotate(12, 40, 6)" />
+          {[0,1,2,3].map(col => (
             <React.Fragment key={col}>
-              <circle cx={14 + col * 17} cy={37} r={4.5} fill="#FFFBEB" filter="drop-shadow(0 0 9px #FEF08A)" />
-              <circle cx={14 + col * 17} cy={47} r={4.5} fill="#FFFBEB" filter="drop-shadow(0 0 9px #FEF08A)" />
+              <circle cx={8 + col * 18} cy={3} r={5} fill="#FFFDE0" filter="url(#glow-lamp)" />
+              <circle cx={8 + col * 18} cy={14} r={5} fill="#FFFDE0" filter="url(#glow-lamp)" />
             </React.Fragment>
           ))}
-          <ellipse cx="40" cy="42" rx="60" ry="30" fill="#FFFBEB" fillOpacity="0.6" filter="blur(9px)" />
+          <ellipse cx="40" cy="8" rx="70" ry="28" fill="#FFFDE0" fillOpacity="0.18" style={{filter:'blur(14px)'}} />
         </g>
 
-        {/* ------------------------------------------------------------- */}
-        {/* E. NEXCORE "NT" HERALDIC TOURNAMENT PENNANTS                  */}
-        {/* ------------------------------------------------------------- */}
-        {/* Left Pennant Banner */}
-        <g id="left-pennant" transform="translate(18, 225)" filter="url(#pennant-shadow)">
-          <line x1="0" y1="0" x2="65" y2="0" stroke="url(#banner-gold-trim)" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="0" cy="0" r="3.5" fill="#F59E0B" />
-          <circle cx="65" cy="0" r="3.5" fill="#F59E0B" />
-          {/* Pennant Cloth with Chevron Swallowtail */}
-          <path
-            d="M 6 0 L 59 0 L 59 85 L 32.5 105 L 6 85 Z"
-            fill="url(#banner-navy)"
-            stroke="url(#banner-gold-trim)"
-            strokeWidth="1.8"
-          />
-          {/* "NT" Monogram */}
-          <text
-            x="32.5"
-            y="56"
-            textAnchor="middle"
-            fontFamily="system-ui, sans-serif"
-            fontWeight="900"
-            fontSize="26"
-            fontStyle="italic"
-            letterSpacing="1"
-            fill="url(#banner-gold-trim)"
-          >
-            NT
-          </text>
+        {/* ------------------------------------------------------------------ */}
+        {/* D. VOLUMETRIC FLOODLIGHT BEAMS (dramatic on dark)                   */}
+        {/* ------------------------------------------------------------------ */}
+        <path d="M 100 95 L 480 420 L 540 420 L 115 95 Z" fill="url(#beam-left)" opacity="0.5" />
+        <path d="M 90 92 L 300 450 L 360 450 L 110 92 Z" fill="url(#beam-left)" opacity="0.3" />
+        <path d="M 1385 88 L 950 400 L 900 400 L 1370 88 Z" fill="url(#beam-right)" opacity="0.55" />
+        <path d="M 1395 90 L 1150 460 L 1100 460 L 1375 90 Z" fill="url(#beam-right)" opacity="0.28" />
+
+        {/* ------------------------------------------------------------------ */}
+        {/* E. NT TOURNAMENT PENNANTS                                            */}
+        {/* ------------------------------------------------------------------ */}
+        <g transform="translate(26, 220)">
+          <line x1="0" y1="0" x2="66" y2="0" stroke="url(#banner-gold-trim)" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="0" cy="0" r="4" fill="#F59E0B" />
+          <circle cx="66" cy="0" r="4" fill="#F59E0B" />
+          <path d="M 6 0 L 60 0 L 60 90 L 33 112 L 6 90 Z" fill="url(#banner-dark)" stroke="url(#banner-gold-trim)" strokeWidth="1.8" />
+          <text x="33" y="60" textAnchor="middle" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="27" fontStyle="italic" letterSpacing="1" fill="url(#banner-gold-trim)">NT</text>
+        </g>
+        <g transform="translate(1356, 210)">
+          <line x1="0" y1="0" x2="66" y2="0" stroke="url(#banner-gold-trim)" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="0" cy="0" r="4" fill="#F59E0B" />
+          <circle cx="66" cy="0" r="4" fill="#F59E0B" />
+          <path d="M 6 0 L 60 0 L 60 90 L 33 112 L 6 90 Z" fill="url(#banner-dark)" stroke="url(#banner-gold-trim)" strokeWidth="1.8" />
+          <text x="33" y="60" textAnchor="middle" fontFamily="system-ui, sans-serif" fontWeight="900" fontSize="27" fontStyle="italic" letterSpacing="1" fill="url(#banner-gold-trim)">NT</text>
         </g>
 
-        {/* Right Pennant Banner */}
-        <g id="right-pennant" transform="translate(1357, 215)" filter="url(#pennant-shadow)">
-          <line x1="0" y1="0" x2="65" y2="0" stroke="url(#banner-gold-trim)" strokeWidth="3" strokeLinecap="round" />
-          <circle cx="0" cy="0" r="3.5" fill="#F59E0B" />
-          <circle cx="65" cy="0" r="3.5" fill="#F59E0B" />
-          <path
-            d="M 6 0 L 59 0 L 59 85 L 32.5 105 L 6 85 Z"
-            fill="url(#banner-navy)"
-            stroke="url(#banner-gold-trim)"
-            strokeWidth="1.8"
-          />
-          <text
-            x="32.5"
-            y="56"
-            textAnchor="middle"
-            fontFamily="system-ui, sans-serif"
-            fontWeight="900"
-            fontSize="26"
-            fontStyle="italic"
-            letterSpacing="1"
-            fill="url(#banner-gold-trim)"
-          >
-            NT
-          </text>
-        </g>
+        {/* ------------------------------------------------------------------ */}
+        {/* F. CINEMATIC GOLD + NAVY SWOOSH RIBBONS (bottom)                    */}
+        {/* ------------------------------------------------------------------ */}
+        <path d="M -60 500 C 200 455, 480 510, 720 540 C 960 570, 1240 525, 1500 460 L 1500 660 L -60 660 Z" fill="url(#ribbon-navy)" opacity="0.95" />
+        <path d="M -60 528 C 180 480, 440 532, 720 558 C 1000 584, 1280 540, 1500 480 L 1500 548 C 1280 608, 1000 652, 720 626 C 440 600, 180 548, -60 596 Z" fill="url(#ribbon-gold)" opacity="0.85" />
+        <path d="M -60 528 C 180 480, 440 532, 720 558 C 1000 584, 1280 540, 1500 480" stroke="#FEF08A" strokeWidth="2" strokeOpacity="0.7" fill="none" />
+        <path d="M -80 560 C 160 510, 400 558, 720 582 C 1040 606, 1300 562, 1520 505 L 1520 660 L -80 660 Z" fill="url(#ribbon-orange)" opacity="0.9" />
+        <path d="M -80 560 C 160 510, 400 558, 720 582 C 1040 606, 1300 562, 1520 505" stroke="#FED7AA" strokeWidth="2" strokeOpacity="0.75" fill="none" />
 
-        {/* ------------------------------------------------------------- */}
-        {/* F. SWEEPING 3D ATHLETIC SWOOSHES / RIBBONS                    */}
-        {/* ------------------------------------------------------------- */}
-        {/* Top-Left Corner Fluid Azure Arch */}
-        <path
-          d="M -40 -10 C 60 40, 180 80, 310 50 C 380 30, 420 10, 480 -30 L -40 -30 Z"
-          fill="url(#swoosh-cyan)"
-          opacity="0.85"
-        />
-
-        {/* Primary Bottom Azure Swoosh with Drop Shadow */}
-        <path
-          d="M -60 520 C 180 470, 420 540, 720 580 C 1020 620, 1280 570, 1500 480 L 1500 660 L -60 660 Z"
-          fill="url(#swoosh-cyan)"
-          filter="url(#ribbon-shadow)"
-        />
-
-        {/* Gloss Specular Highlight Line on Azure Swoosh */}
-        <path
-          d="M -60 520 C 180 470, 420 540, 720 580 C 1020 620, 1280 570, 1500 480"
-          stroke="#FFFFFF"
-          strokeWidth="2.5"
-          strokeOpacity="0.75"
-          fill="none"
-        />
-
-        {/* Dynamic Sports Flame Orange Sweeping Ribbon */}
-        <path
-          d="M -80 570 C 160 515, 380 565, 680 600 C 980 635, 1260 595, 1520 520 L 1520 660 L -80 660 Z"
-          fill="url(#swoosh-orange)"
-          opacity="0.95"
-        />
-
-        {/* Orange Ribbon Top Accent Highlight */}
-        <path
-          d="M -80 570 C 160 515, 380 565, 680 600 C 980 635, 1260 595, 1520 520"
-          stroke="#FED7AA"
-          strokeWidth="2"
-          strokeOpacity="0.85"
-          fill="none"
-        />
+        {/* ------------------------------------------------------------------ */}
+        {/* G. GOLDEN PARTICLE DUST (scattered dots)                             */}
+        {/* ------------------------------------------------------------------ */}
+        {[
+          {cx:320,cy:120,r:1.8,op:0.6},{cx:450,cy:85,r:1.2,op:0.4},{cx:600,cy:140,r:2.0,op:0.5},
+          {cx:200,cy:200,r:1.5,op:0.35},{cx:380,cy:60,r:1.0,op:0.5},{cx:520,cy:170,r:1.6,op:0.45},
+          {cx:160,cy:300,r:1.2,op:0.3},{cx:700,cy:50,r:1.4,op:0.55},{cx:880,cy:80,r:1.8,op:0.4},
+          {cx:1100,cy:130,r:1.5,op:0.5},{cx:1200,cy:60,r:1.2,op:0.35},{cx:1050,cy:200,r:1.6,op:0.45},
+        ].map((p, i) => (
+          <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill="#FDE68A" opacity={p.op} />
+        ))}
       </svg>
+
+      {/* 5. Central arena floodlight glow point (pure CSS, behind trophy) */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          right: '25%',
+          top: '10%',
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle at center, rgba(255,250,205,0.07) 0%, rgba(245,158,11,0.05) 25%, transparent 65%)',
+          filter: 'blur(20px)',
+        }}
+      />
+
+      {/* 6. Bottom vignette to blend into page */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(2,6,9,0.6) 100%)',
+        }}
+      />
     </div>
   );
 }
