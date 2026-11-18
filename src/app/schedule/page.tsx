@@ -473,7 +473,7 @@ export default function SchedulePage() {
                       </span>
                     </div>
                     <button
-                      onClick={() => setShowLiveLiveStream(true)}
+                      onClick={() => setShowLiveModal(true)}
                       className="px-4 py-1.5 rounded-lg bg-[#eb6905] hover:bg-[#783200] text-white text-xs uppercase font-bold font-manrope transition-colors cursor-pointer"
                     >
                       Watch Stream

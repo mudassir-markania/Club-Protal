@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Shield, Lock } from 'lucide-react';
+import { Menu, X, LogIn } from 'lucide-react';
 
 interface PublicNavbarProps {
   onRefresh?: () => void;
@@ -103,38 +103,14 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
             View Championship
           </Link>
 
-          {/* Referee & Admin Portal Access Pill */}
-          <div className="hidden md:flex items-center gap-1.5 pl-1 border-l border-[#c6c5d0]">
-            <Link
-              href="/referee/login"
-              title="Referee Portal"
-              className="p-2 rounded-lg hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/admin/login"
-              title="Admin Console"
-              className="p-2 rounded-lg hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors"
-            >
-              <Lock className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {/* Profile / Secretariat Icon */}
-          <div className="flex items-center gap-2 pl-1">
-            <img
-              alt="Tournament Director"
-              className="w-8 h-8 rounded-full object-cover border border-[#c6c5d0]"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnjT1YhFNcqD1FRCReeI5S0PbJaxS_LD9CSr7zhdwx_TZKDLTDxJ4fQixoWzuVaGzmBWOXL3erJfxxw2e0ObMBD-i2-1Q9WcJ3XqosbexhBYTpRdS6uq7QGJyKABUl2AEZK5HjAVZHsbROFkfVO4NSUEvtRVbGqYVAOqxelPtqmS6fp0KdweHYLl86NO_6HMaFJP_i0GpmxxvUuL8dTkCnMFmim_iozAX7CQoWZb8R"
-            />
-            <div className="hidden 2xl:flex flex-col leading-tight">
-              <span className="text-[10px] font-bold text-[#000f3f] uppercase font-manrope">
-                Tournament Dir.
-              </span>
-              <span className="text-[10px] text-[#45464f] font-medium">Sec. Operations</span>
-            </div>
-          </div>
+          {/* Unified Role-Based Login CTA */}
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#000f3f]/20 hover:border-[#000f3f] bg-white hover:bg-[#000f3f] text-[#000f3f] hover:text-white text-xs uppercase tracking-wider font-extrabold transition-all duration-150 shadow-xs font-manrope group"
+          >
+            <LogIn className="w-3.5 h-3.5 text-[#0051d5] group-hover:text-white transition-colors" />
+            <span>Log In</span>
+          </Link>
 
           {/* Mobile hamburger button */}
           <button
@@ -167,22 +143,14 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
               </Link>
             );
           })}
-          <div className="pt-2 border-t border-[#e2e7ff] flex flex-col gap-2">
+          <div className="pt-2 border-t border-[#e2e7ff]">
             <Link
-              href="/referee/login"
+              href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase text-[#000f3f] bg-[#f2f3ff]"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider text-white bg-[#000f3f] hover:bg-[#0051d5] transition-all font-manrope shadow-sm"
             >
-              <Shield className="w-4 h-4 text-[#0051d5]" />
-              Referee Console
-            </Link>
-            <Link
-              href="/admin/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase text-white bg-[#000f3f]"
-            >
-              <Lock className="w-4 h-4 text-amber-300" />
-              Tournament Admin Portal
+              <LogIn className="w-4 h-4" />
+              <span>Log In</span>
             </Link>
           </div>
         </div>

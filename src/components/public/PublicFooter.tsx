@@ -164,7 +164,7 @@ export default function PublicFooter() {
               Fair Division Protocol
             </Link>
             <span>•</span>
-            <Link href="/admin/login" className="hover:text-amber-400 transition">
+            <Link href="/login" className="hover:text-amber-400 transition">
               Officials Portal
             </Link>
           </div>
