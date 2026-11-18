@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Manrope:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-surface":"#131b2e","on-primary":"#ffffff","secondary-fixed-dim":"#b4c5ff","primary-fixed-dim":"#b7c4fd","on-secondary":"#ffffff","on-primary-fixed":"#071747","surface-container-low":"#f2f3ff","on-error-container":"#93000a","on-primary-fixed-variant":"#374475","inverse-surface":"#283044","on-tertiary":"#ffffff","surface":"#faf8ff","surface-container-high":"#e2e7ff","primary":"#000f3f","on-tertiary-fixed-variant":"#783200","background":"#faf8ff","surface-bright":"#faf8ff","surface-tint":"#4f5c8e","on-secondary-container":"#fefcff","surface-container-lowest":"#ffffff","secondary":"#0051d5","secondary-container":"#316bf3","tertiary-fixed":"#ffdbca","on-error":"#ffffff","surface-container-highest":"#dae2fd","error":"#ba1a1a","tertiary":"#280c00","primary-fixed":"#dce1ff","on-tertiary-container":"#eb6905","on-tertiary-fixed":"#341100","tertiary-container":"#481b00","on-primary-container":"#808dc2","inverse-primary":"#b7c4fd","outline-variant":"#c6c5d0","surface-dim":"#d2d9f4","error-container":"#ffdad6","on-secondary-fixed-variant":"#003ea8","surface-variant":"#dae2fd","inverse-on-surface":"#eef0ff","on-secondary-fixed":"#00174b","primary-container":"#172554","secondary-fixed":"#dbe1ff","surface-container":"#eaedff","on-surface-variant":"#45464f","tertiary-fixed-dim":"#ffb690","on-background":"#131b2e","outline":"#767680"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-sm":"0.5rem","space-lg":"1.5rem","margin-mobile":"1rem","space-md":"1rem","gutter":"1.5rem","space-xs":"0.25rem","margin":"3rem","gutter-mobile":"1rem","space-xl":"2.5rem"},fontFamily:{"label-md":["Manrope"],"body-md":["Inter"],"display-xl":["Manrope"],"display-lg-mobile":["Manrope"],"display-xl-mobile":["Manrope"],"label-lg":["Manrope"],"body-lg":["Inter"],"headline-xl":["Manrope"],"display-lg":["Manrope"],"headline-sm":["Manrope"],"label-sm":["Manrope"],"headline-md":["Manrope"],"body-sm":["Inter"],"headline-lg":["Manrope"],"headline-xl-mobile":["Manrope"]},fontSize:{"label-md":["12px",{lineHeight:"14px",letterSpacing:"0.08em",fontWeight:"700"}],"body-md":["15px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],"display-xl":["72px",{lineHeight:"76px",letterSpacing:"-0.04em",fontWeight:"800"}],"display-lg-mobile":["36px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"800"}],"display-xl-mobile":["44px",{lineHeight:"48px",letterSpacing:"-0.03em",fontWeight:"800"}],"label-lg":["14px",{lineHeight:"16px",letterSpacing:"0.06em",fontWeight:"700"}],"body-lg":["18px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"400"}],"headline-xl":["40px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"700"}],"display-lg":["56px",{lineHeight:"60px",letterSpacing:"-0.03em",fontWeight:"800"}],"headline-sm":["20px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-sm":["10px",{lineHeight:"12px",letterSpacing:"0.1em",fontWeight:"800"}],"headline-md":["24px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"700"}],"body-sm":["13px",{lineHeight:"18px",letterSpacing:"0.01em",fontWeight:"400"}],"headline-lg":["32px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-xl-mobile":["28px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"700"}]}}}}</script></head><body class="bg-surface text-on-surface font-body-md text-body-md antialiased selection:bg-secondary selection:text-on-secondary"><header class="fixed top-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-margin-mobile lg:px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><img alt="Apex Arena Crest Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsYOXH0JYiyX1rmUrq9scGTZImP9xqWivkekIWmx1Ruo3otUd9tF9VRe8WIEtDDPKFqcNYPrtpXTIXrhPILhl9C2Uw5zIvtHrgYGOblFU_y9Yhx0x9Afb48VKHwvWODlmjYpYUyz_3yPcHKJKV9F_uUUhRi2EmHmOnbK1FUcl9_CtwK5i8ia2Y4vQEOzSc86Qw-nN0mJFIxB1L5GZVK5OaxLk0RGsSzIYuMPIrLWbc"/><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm uppercase tracking-tight text-primary leading-none">Apex Arena</span><span class="px-1.5 py-0.5 rounded-lg bg-surface-container-highest text-primary font-label-sm text-label-sm uppercase tracking-wider">APL S9</span></div><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">NexCore Institute of Technology</span></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-primary text-on-primary font-label-md"><a class="px-space-md py-2 rounded-lg text-on-surface-variant font-label-md text-label-md uppercase tracking-wider transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="home" href="#">Home</a><a class="px-space-md py-2 rounded-lg text-on-surface-variant font-label-md text-label-md uppercase tracking-wider transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="schedule" href="#">Schedule</a><a class="px-space-md py-2 rounded-lg text-on-surface-variant font-label-md text-label-md uppercase tracking-wider transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="leaderboard" href="#">Leaderboard</a><a aria-current="page" class="px-space-md py-2 rounded-lg uppercase tracking-wider transition-all bg-primary text-on-primary font-label-md" data-path="houses" href="#">Houses</a><a class="px-space-md py-2 rounded-lg text-on-surface-variant font-label-md text-label-md uppercase tracking-wider transition-all hover:bg-surface-container-high hover:text-on-surface" data-path="sports" href="#">Sports</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-error-container/40"><span class="w-2 h-2 rounded-full bg-error animate-ping"></span><span class="font-label-sm text-label-sm text-on-error-container uppercase font-extrabold tracking-widest">APL S9 Live</span></div><a class="inline-flex items-center justify-center px-space-md py-2 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md uppercase tracking-wider transition-colors duration-150 shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-path="view-championship" href="#">View Championship</a><div class="flex items-center gap-2 pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnjT1YhFNcqD1FRCReeI5S0PbJaxS_LD9CSr7zhdwx_TZKDLTDxJ4fQixoWzuVaGzmBWOXL3erJfxxw2e0ObMBD-i2-1Q9WcJ3XqosbexhBYTpRdS6uq7QGJyKABUl2AEZK5HjAVZHsbROFkfVO4NSUEvtRVbGqYVAOqxelPtqmS6fp0KdweHYLl86NO_6HMaFJP_i0GpmxxvUuL8dTkCnMFmim_iozAX7CQoWZb8R"/><div class="hidden 2xl:flex flex-col leading-tight"><span class="font-label-sm text-label-sm text-primary uppercase">Tournament Dir.</span><span class="font-label-sm text-label-sm text-on-surface-variant">Sec. Operations</span></div></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-80px)]"><div class="flex flex-col w-full">
+<!-- Editorial Header Strip -->
+<section class="w-full bg-primary text-on-primary py-space-xl px-margin-mobile lg:px-margin relative overflow-hidden">
+<!-- Atmospheric Ambient Glows representing the House spectrum -->
+<div class="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-secondary opacity-30 blur-3xl pointer-events-none"></div>
+<div class="absolute left-1/4 -bottom-24 w-80 h-80 rounded-full bg-tertiary-container opacity-40 blur-3xl pointer-events-none"></div>
+<div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row items-start lg:items-end justify-between gap-space-lg relative z-10">
+<div class="flex flex-col gap-space-xs max-w-3xl">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed">Identity • Pride • Brotherhood</span>
+</div>
+<h1 class="font-display-xl text-display-xl uppercase tracking-tight text-on-primary leading-none mt-space-xs">
+          Five Houses.<br/>
+<span class="text-secondary-fixed">One Crown.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-primary-container max-w-xl mt-space-sm">
+          Discover the heritage, rosters, battle mottos, and athletic legacies of the 5 collegiate factions battling for ultimate supremacy in Season 9.
+        </p>
+</div>
+<!-- Quick Telemetry Aggregate -->
+<div class="flex flex-wrap lg:flex-col gap-space-sm bg-primary-container/80 backdrop-blur-md p-space-md rounded-xl w-full sm:w-auto">
+<div class="flex items-center justify-between gap-space-lg min-w-[220px]">
+<span class="font-label-sm text-label-sm text-primary-fixed uppercase tracking-wider">Total Athletes</span>
+<span class="font-headline-sm text-headline-sm text-on-primary font-bold">329 Selected</span>
+</div>
+<div class="h-[1px] w-full bg-on-primary-container/20"></div>
+<div class="flex items-center justify-between gap-space-lg min-w-[220px]">
+<span class="font-label-sm text-label-sm text-primary-fixed uppercase tracking-wider">Defending Champions</span>
+<span class="font-headline-sm text-headline-sm text-tertiary-fixed font-bold">Dominators</span>
+</div>
+<div class="h-[1px] w-full bg-on-primary-container/20"></div>
+<div class="flex items-center justify-between gap-space-lg min-w-[220px]">
+<span class="font-label-sm text-label-sm text-primary-fixed uppercase tracking-wider">Trophy Weight</span>
+<span class="font-headline-sm text-headline-sm text-on-primary font-bold">14.2 kg Brass</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive House Switcher / Live Filter Rail -->
+<section class="w-full bg-surface-container-low px-margin-mobile lg:px-margin py-space-sm sticky top-20 z-40 shadow-sm backdrop-blur-md bg-surface-container-low/95">
+<div class="max-w-[1440px] mx-auto flex items-center justify-between overflow-x-auto gap-space-sm no-scrollbar py-1">
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase pr-space-xs">Jump to:</span>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-highest hover:bg-secondary hover:text-on-secondary transition-colors font-label-md text-label-md uppercase tracking-wider text-on-surface flex items-center gap-2" onclick="scrollToHouse('dominators')">
+<span class="w-2 h-2 rounded-full bg-error"></span> Dominators
+        </button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-highest hover:bg-secondary hover:text-on-secondary transition-colors font-label-md text-label-md uppercase tracking-wider text-on-surface flex items-center gap-2" onclick="scrollToHouse('mavericks')">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Mavericks
+        </button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-highest hover:bg-secondary hover:text-on-secondary transition-colors font-label-md text-label-md uppercase tracking-wider text-on-surface flex items-center gap-2" onclick="scrollToHouse('alphas')">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span> Alphas
+        </button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-highest hover:bg-secondary hover:text-on-secondary transition-colors font-label-md text-label-md uppercase tracking-wider text-on-surface flex items-center gap-2" onclick="scrollToHouse('spartans')">
+<span class="w-2 h-2 rounded-full bg-surface-tint"></span> Spartans
+        </button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-highest hover:bg-secondary hover:text-on-secondary transition-colors font-label-md text-label-md uppercase tracking-wider text-on-surface flex items-center gap-2" onclick="scrollToHouse('phoenix')">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span> Phoenix
+        </button>
+</div>
+<div class="hidden md:flex items-center gap-space-xs shrink-0">
+<a class="px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider hover:bg-secondary transition-colors" href="#stats-matrix">
+          Compare Attributes
+        </a>
+</div>
+</div>
+</section>
+<!-- Editorial House Showcase Cards (5 Major Franchises) -->
+<section class="w-full px-margin-mobile lg:px-margin py-space-xl flex flex-col gap-space-xl max-w-[1440px] mx-auto">
+<!-- 01: DOMINATORS (1st Place / Defending Champions) -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-md overflow-hidden relative group" id="dominators">
+<div class="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+<!-- Visual & Mascot Hero Column -->
+<div class="lg:col-span-5 relative bg-primary flex flex-col justify-between p-space-lg text-on-primary overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-30 group-hover:scale-105 transition-transform duration-700" data-alt="High-intensity athletic photograph of collegiate track and football athletes charging forward under stadium lights, crimson atmospheric smoke, high contrast rim lighting, dramatic championship energy." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD2hezt5BjzBRFF05UV7ls00v9nv5wXNofhVA5yteG5diT3tugcdmyiwpAyWv-WZsVmPCTOwGBkFogv-yIA2vCzpmNGw3NpNUfDLloXSRTsRZLXFxxfTxvzWtsIkU49H_4BJiLX38wf3yUC7-DTrtjJYXtWtFCn0KJQxr4lrFcJA19k5XDL1T8Hsg_v_5c8yQIGSRQRhJ1snuC88bMlfMaJ5cTE6QBY6ytXJyXytJyQ')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm uppercase font-bold tracking-widest flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span> Rank 1 • 450 PTS
+            </span>
+<span class="font-display-lg text-display-lg text-surface-container-highest/20 font-extrabold select-none">01</span>
+</div>
+<div class="relative z-10 flex flex-col gap-space-xs mt-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-error text-[28px]">sports_kabaddi</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">The Red Legion • Bull Mascot</span>
+</div>
+<h2 class="font-display-lg text-display-lg uppercase font-black tracking-tight text-on-primary leading-none">
+              Dominators
+            </h2>
+<p class="font-label-lg text-label-lg uppercase tracking-wider text-tertiary-fixed italic">
+              "Power Through Precision"
+            </p>
+</div>
+</div>
+<!-- Roster, Captain & Metrics Column -->
+<div class="lg:col-span-7 p-space-lg flex flex-col justify-between gap-space-lg bg-surface-container-lowest">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Captain</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Rohit Deshmukh</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Football • Senior Striker</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Squad Strength</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">72 Athletes</span>
+<span class="font-body-sm text-body-sm text-secondary">Full Roster Filled</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Core Fortresses</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Football / Track</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">14 Match Streak</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary">House Heraldry & Season Narrative</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Reigning champions for three consecutive seasons, the Dominators bring an unrelenting physical tempo. Their ground dominance in Football and 400m relays anchors their lead on the overall points table. Known for military-like drills led by Deshmukh.
+            </p>
+</div>
+<!-- Performance Radar Sparklines -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm bg-surface-container rounded-lg p-space-md">
+<div class="flex items-center gap-space-md w-full sm:w-auto">
+<div class="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">military_tech</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Battle Chant</span>
+<span class="font-body-md text-body-md font-semibold text-primary">"Crimson wave, break the cage!"</span>
+</div>
+</div>
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md uppercase tracking-wider transition-colors shrink-0 shadow-sm flex items-center justify-center gap-2">
+<span>Inspect Full 72 Roster</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- 02: MAVERICKS (2nd Place / Electric Contenders) -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-md overflow-hidden relative group" id="mavericks">
+<div class="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+<!-- Visual & Mascot Hero Column -->
+<div class="lg:col-span-5 relative bg-primary-container flex flex-col justify-between p-space-lg text-on-primary overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-35 group-hover:scale-105 transition-transform duration-700" data-alt="Dynamic close up of collegiate cricket bowler releasing a fast ball in floodlit stadium, electric cobalt blue energy arcs, dust kick-up, hyper focused athletic determination." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCWIWlsIPqevz4HD46QenroRW9JQopH9hrHdO4mA22Vk8f2HxiDWNMNIzYoy_OVi5L9THK3KTaxnFWA7D9D4SWXV98CSUX4h3ATMRroTp_bZfpqpasdunrg1GQVrHpNyM20kpIPuQqc4jLEyfSwQbZerm--fq6XNCa8a0_SDGFD1meouyoW0ozQQQK1P582fx2rSOvruv-uhxoLvimrf6HF_kEJipIA9-YXq6bhM20U')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container via-primary-container/70 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm uppercase font-bold tracking-widest flex items-center gap-1.5">
+              Rank 2 • 415 PTS
+            </span>
+<span class="font-display-lg text-display-lg text-surface-container-highest/20 font-extrabold select-none">02</span>
+</div>
+<div class="relative z-10 flex flex-col gap-space-xs mt-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary-fixed text-[28px]">flight</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Cobalt Squadron • Falcon Mascot</span>
+</div>
+<h2 class="font-display-lg text-display-lg uppercase font-black tracking-tight text-on-primary leading-none">
+              Mavericks
+            </h2>
+<p class="font-label-lg text-label-lg uppercase tracking-wider text-secondary-fixed italic">
+              "Defy The Ordinary"
+            </p>
+</div>
+</div>
+<!-- Roster, Captain & Metrics Column -->
+<div class="lg:col-span-7 p-space-lg flex flex-col justify-between gap-space-lg bg-surface-container-lowest">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Captain</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Aryan Sharma</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Cricket • All-Rounder</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Squad Strength</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">68 Athletes</span>
+<span class="font-body-sm text-body-sm text-secondary">Balanced Divisions</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Core Fortresses</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Cricket / B-Ball</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Record High Runs</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary">House Heraldry & Season Narrative</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              The aerial tacticians of Apex Arena. The Mavericks lean heavily into tactical fast breaks on the hardwood and high run-rate aggression in Cricket T10. Aryan Sharma's leadership has bridged junior prodigies with veteran collegiate seniors into a lethal unit.
+            </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm bg-surface-container rounded-lg p-space-md">
+<div class="flex items-center gap-space-md w-full sm:w-auto">
+<div class="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-on-secondary">
+<span class="material-symbols-outlined">sports_cricket</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Battle Chant</span>
+<span class="font-body-md text-body-md font-semibold text-primary">"Blue skies roar, blue sky strike!"</span>
+</div>
+</div>
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md uppercase tracking-wider transition-colors shrink-0 shadow-sm flex items-center justify-center gap-2">
+<span>Inspect Full 68 Roster</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- 03: ALPHAS (3rd Place / Royal Gold) -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-md overflow-hidden relative group" id="alphas">
+<div class="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+<!-- Visual & Mascot Hero Column -->
+<div class="lg:col-span-5 relative bg-inverse-surface flex flex-col justify-between p-space-lg text-on-primary overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-30 group-hover:scale-105 transition-transform duration-700" data-alt="Indoor sports arena with dramatic golden spotlights on a collegiate badminton singles final, intense shuttlecock smash motion blur, golden ambient dust, prestige sports photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDYXCIdNG-nT14M423btXvJzXDhumFzOoGCOS-MUbhvU05K5AJjMijYBgApjQMaqIVmQv_oDyAaojUWxG4HfXfvGYjSaGhfg1KdKXQbUE68zJrKYlkfwtqQJXkrAxpBJi5YftSX9ZlaPbaNnGe5G4fWP5ejAuLVcQNDotnRK2s0-mVjOj_gWwrRKLQwUcOW18IhTZ0IhbgY8O-wf19stZMp_aiPOudhV9IaiKx6wF2d')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface via-inverse-surface/80 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm uppercase font-bold tracking-widest flex items-center gap-1.5">
+              Rank 3 • 380 PTS
+            </span>
+<span class="font-display-lg text-display-lg text-surface-container-highest/20 font-extrabold select-none">03</span>
+</div>
+<div class="relative z-10 flex flex-col gap-space-xs mt-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[28px]">shield</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Golden Monarchs • Lion Mascot</span>
+</div>
+<h2 class="font-display-lg text-display-lg uppercase font-black tracking-tight text-on-primary leading-none">
+              Alphas
+            </h2>
+<p class="font-label-lg text-label-lg uppercase tracking-wider text-tertiary-fixed italic">
+              "Born To Conquer"
+            </p>
+</div>
+</div>
+<!-- Roster, Captain & Metrics Column -->
+<div class="lg:col-span-7 p-space-lg flex flex-col justify-between gap-space-lg bg-surface-container-lowest">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Captain</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Vikramaditya Singh</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Badminton • National Seed</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Squad Strength</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">65 Athletes</span>
+<span class="font-body-sm text-body-sm text-secondary">Racket Supremacy</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Core Fortresses</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Badminton / TT</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Zero Court Losses</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary">House Heraldry & Season Narrative</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              The oldest established fraternity house at NexCore. Alphas bring immaculate discipline and undefeated records in indoor racquet sports. Led by state champion Vikramaditya Singh, their technical reflex scores lead all five houses by an unprecedented 18%.
+            </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm bg-surface-container rounded-lg p-space-md">
+<div class="flex items-center gap-space-md w-full sm:w-auto">
+<div class="w-12 h-12 rounded-lg bg-surface-tint flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">sports_tennis</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Battle Chant</span>
+<span class="font-body-md text-body-md font-semibold text-primary">"Kings on the court, crown on our chest!"</span>
+</div>
+</div>
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md uppercase tracking-wider transition-colors shrink-0 shadow-sm flex items-center justify-center gap-2">
+<span>Inspect Full 65 Roster</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- 04: SPARTANS (4th Place / Emerald Vanguard) -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-md overflow-hidden relative group" id="spartans">
+<div class="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+<!-- Visual & Mascot Hero Column -->
+<div class="lg:col-span-5 relative bg-primary-container flex flex-col justify-between p-space-lg text-on-primary overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-30 group-hover:scale-105 transition-transform duration-700" data-alt="High tech esports battle arena and collegiate chess match split view, green neon backlit consoles, reflective glass surfaces, razor focus young competitors." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBnpAqPeg1XQQVX0kOFCpnTP-ZfQ6nvcLLj3aTOQANTS1OwkldwCXCLSPeuCkOC1h1RI_beL-CnYnshG9G_c_Dv5P_XGJIAEtjvJSS6jBzHjh2IlM4Sg5bvsacUiI3vAvroYLfB0xxjXKcOR9t3r59HoQVwC4VouFo9WPC2L480ryTno1HoYahel_DfklvrUYqkp7x68etEYPGG5W8biZojaOzvvdWB2oJfDSNJYhYz')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container via-primary-container/85 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm uppercase font-bold tracking-widest flex items-center gap-1.5">
+              Rank 4 • 340 PTS
+            </span>
+<span class="font-display-lg text-display-lg text-surface-container-highest/20 font-extrabold select-none">04</span>
+</div>
+<div class="relative z-10 flex flex-col gap-space-xs mt-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary-fixed text-[28px]">security</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-primary-fixed">Emerald Guard • Gladiator Mascot</span>
+</div>
+<h2 class="font-display-lg text-display-lg uppercase font-black tracking-tight text-on-primary leading-none">
+              Spartans
+            </h2>
+<p class="font-label-lg text-label-lg uppercase tracking-wider text-secondary-fixed-dim italic">
+              "Unbroken. Unshaken."
+            </p>
+</div>
+</div>
+<!-- Roster, Captain & Metrics Column -->
+<div class="lg:col-span-7 p-space-lg flex flex-col justify-between gap-space-lg bg-surface-container-lowest">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Captain</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Devendra Nair</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">FIDE Candidate • Chess GM</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Squad Strength</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">60 Athletes</span>
+<span class="font-body-sm text-body-sm text-secondary">Tactical & Esports</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Core Fortresses</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Chess / BGMI</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Undefeated Mind Sports</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary">House Heraldry & Season Narrative</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              The intellectual powerhouse of the tournament. The Spartans dominate mental gymnastics, tabletop grand strategy, and collegiate esports. Their defense ratings on the tactical board are the highest recorded in nine seasons of Apex history.
+            </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm bg-surface-container rounded-lg p-space-md">
+<div class="flex items-center gap-space-md w-full sm:w-auto">
+<div class="w-12 h-12 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">sports_esports</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Battle Chant</span>
+<span class="font-body-md text-body-md font-semibold text-primary">"Shields lock! Never yield!"</span>
+</div>
+</div>
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md uppercase tracking-wider transition-colors shrink-0 shadow-sm flex items-center justify-center gap-2">
+<span>Inspect Full 60 Roster</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- 05: PHOENIX (5th Place / Solar Fire) -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-md overflow-hidden relative group" id="phoenix">
+<div class="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+<!-- Visual & Mascot Hero Column -->
+<div class="lg:col-span-5 relative bg-tertiary-container flex flex-col justify-between p-space-lg text-on-primary overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-30 group-hover:scale-105 transition-transform duration-700" data-alt="Passionate collegiate athletes celebrating in sunset orange flares, sprinters celebrating at finish line, high energy dynamic crowd behind, vibrant warm tones." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmwYEC3ugVYf0BfVnQ88zXqlgy73Gy3U8VGDOBJ3EDrXF73hKq3Zt6O7z4Pih2OYmcYLTPLNRjc9O1FcG6D_KMHxVFLtfoxGsTqClHoDjeHpUfYHxK_PQTacV02DAzpAO5B8o3zn2H4nyKn1hOLzY2_7n4hE85juTaGY9wtPHFVOlUKG0JpUR6oeeMZm9E3sAO2Rf6MX_b6Apiuc1OSr0mpX4a3Rk26yHNjIcuujwj')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-tertiary-container via-tertiary-container/80 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm uppercase font-bold tracking-widest flex items-center gap-1.5">
+              Rank 5 • 310 PTS
+            </span>
+<span class="font-display-lg text-display-lg text-surface-container-highest/20 font-extrabold select-none">05</span>
+</div>
+<div class="relative z-10 flex flex-col gap-space-xs mt-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary-fixed text-[28px]">local_fire_department</span>
+<span class="font-label-md text-label-md uppercase tracking-widest text-tertiary-fixed-dim">Solar Faction • Firebird Mascot</span>
+</div>
+<h2 class="font-display-lg text-display-lg uppercase font-black tracking-tight text-on-primary leading-none">
+              Phoenix
+            </h2>
+<p class="font-label-lg text-label-lg uppercase tracking-wider text-tertiary-fixed italic">
+              "Rise Above All"
+            </p>
+</div>
+</div>
+<!-- Roster, Captain & Metrics Column -->
+<div class="lg:col-span-7 p-space-lg flex flex-col justify-between gap-space-lg bg-surface-container-lowest">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Captain</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Kabir Mehta</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Decathlon • 200m Record</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Squad Strength</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">64 Athletes</span>
+<span class="font-body-sm text-body-sm text-secondary">Relay Specialists</span>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Core Fortresses</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold mt-1">Athletics / Cricket</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Fastest 100m Time</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary">House Heraldry & Season Narrative</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+              Known as the comeback kings. The Phoenix house thrives on high-stakes fourth-quarter turnarounds. Though trailing in aggregate points early in the season, their explosive track-and-field division has historically swept finals week.
+            </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-sm bg-surface-container rounded-lg p-space-md">
+<div class="flex items-center gap-space-md w-full sm:w-auto">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">sprint</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Battle Chant</span>
+<span class="font-body-md text-body-md font-semibold text-primary">"From the ashes we reign!"</span>
+</div>
+</div>
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-md text-label-md uppercase tracking-wider transition-colors shrink-0 shadow-sm flex items-center justify-center gap-2">
+<span>Inspect Full 64 Roster</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+</section>
+<!-- Interactive House Comparison & Telemetry Matrix Section -->
+<section class="w-full bg-surface-container py-space-xl px-margin-mobile lg:px-margin" id="stats-matrix">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">Comprehensive Benchmark</span>
+<h3 class="font-headline-xl text-headline-xl uppercase text-primary font-extrabold tracking-tight">
+            Attribute Radar & Discipline Index
+          </h3>
+</div>
+<div class="text-on-surface-variant font-body-sm text-body-sm max-w-sm">
+          Telemetry rated from 0 to 100 based on season match performance, disciplinary penalties, and championship bracket outcomes.
+        </div>
+</div>
+<!-- Comparative Performance Matrix -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- SVG Visual Data Radar / Bar Array -->
+<div class="lg:col-span-8 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-primary">Direct Discipline Comparison</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Season 9 Normalized</span>
+</div>
+<!-- Inline Bar Graphic Component for High Technical Precision -->
+<div class="flex flex-col gap-space-md pt-space-xs">
+<!-- Row 1: Offensive Impact -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-on-surface font-label-sm text-label-sm uppercase">
+<span>Offensive Impact (Points per Match)</span>
+<span class="text-secondary font-bold">Dominators (94) vs Mavericks (91)</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden flex">
+<div class="h-full bg-error" style="width: 32%" title="Dominators: 94"></div>
+<div class="h-full bg-secondary" style="width: 29%" title="Mavericks: 91"></div>
+<div class="h-full bg-tertiary-fixed-dim" style="width: 18%" title="Alphas: 78"></div>
+<div class="h-full bg-surface-tint" style="width: 11%" title="Spartans: 68"></div>
+<div class="h-full bg-tertiary-container" style="width: 10%" title="Phoenix: 74"></div>
+</div>
+</div>
+<!-- Row 2: Defensive Rigidity -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-on-surface font-label-sm text-label-sm uppercase">
+<span>Defensive Rigidity & Clean Sheets</span>
+<span class="text-secondary font-bold">Spartans (96) Highest</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden flex">
+<div class="h-full bg-surface-tint" style="width: 34%" title="Spartans: 96"></div>
+<div class="h-full bg-error" style="width: 26%" title="Dominators: 84"></div>
+<div class="h-full bg-tertiary-fixed-dim" style="width: 20%" title="Alphas: 80"></div>
+<div class="h-full bg-secondary" style="width: 12%" title="Mavericks: 71"></div>
+<div class="h-full bg-tertiary-container" style="width: 8%" title="Phoenix: 65"></div>
+</div>
+</div>
+<!-- Row 3: Indoor Court Supremacy -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-on-surface font-label-sm text-label-sm uppercase">
+<span>Indoor Racquet & Table Reflexes</span>
+<span class="text-secondary font-bold">Alphas (98) Dominant</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden flex">
+<div class="h-full bg-tertiary-fixed-dim" style="width: 38%" title="Alphas: 98"></div>
+<div class="h-full bg-secondary" style="width: 22%" title="Mavericks: 79"></div>
+<div class="h-full bg-error" style="width: 18%" title="Dominators: 72"></div>
+<div class="h-full bg-tertiary-container" style="width: 12%" title="Phoenix: 69"></div>
+<div class="h-full bg-surface-tint" style="width: 10%" title="Spartans: 61"></div>
+</div>
+</div>
+<!-- Row 4: Sprint Velocity -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-on-surface font-label-sm text-label-sm uppercase">
+<span>Sprint & Track Acceleration</span>
+<span class="text-secondary font-bold">Phoenix (95) Peak Pace</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden flex">
+<div class="h-full bg-tertiary-container" style="width: 35%" title="Phoenix: 95"></div>
+<div class="h-full bg-error" style="width: 28%" title="Dominators: 89"></div>
+<div class="h-full bg-secondary" style="width: 18%" title="Mavericks: 77"></div>
+<div class="h-full bg-tertiary-fixed-dim" style="width: 10%" title="Alphas: 68"></div>
+<div class="h-full bg-surface-tint" style="width: 9%" title="Spartans: 64"></div>
+</div>
+</div>
+</div>
+<!-- Color Legend Key -->
+<div class="flex flex-wrap items-center gap-space-md pt-space-sm border-t border-surface-container">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Dominators</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Mavericks</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Alphas</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-surface-tint"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Spartans</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-tertiary-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Phoenix</span>
+</div>
+</div>
+</div>
+<!-- Trophy Room & Hall of Fame Side Panel -->
+<div class="lg:col-span-4 bg-primary text-on-primary p-space-lg rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed">Historical Record</span>
+<span class="material-symbols-outlined text-secondary-fixed">emoji_events</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg uppercase font-bold text-on-primary leading-tight">
+              Trophy Dynasty Index
+            </h4>
+<p class="font-body-sm text-body-sm text-on-primary-container">
+              Seasons 1 through 8 championship count at the NexCore Directorate of Physical Education.
+            </p>
+</div>
+<div class="flex flex-col gap-space-xs my-space-md">
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-primary-container">
+<span class="font-label-md text-label-md uppercase text-on-primary">Dominators</span>
+<span class="font-label-md text-label-md text-tertiary-fixed font-bold">3 Titles (S6, S7, S8)</span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-primary-container">
+<span class="font-label-md text-label-md uppercase text-on-primary">Mavericks</span>
+<span class="font-label-md text-label-md text-secondary-fixed font-bold">2 Titles (S3, S5)</span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-primary-container">
+<span class="font-label-md text-label-md uppercase text-on-primary">Alphas</span>
+<span class="font-label-md text-label-md text-primary-fixed font-bold">2 Titles (S1, S2)</span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-primary-container">
+<span class="font-label-md text-label-md uppercase text-on-primary">Phoenix</span>
+<span class="font-label-md text-label-md text-tertiary-fixed-dim font-bold">1 Title (S4)</span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-primary-container">
+<span class="font-label-md text-label-md uppercase text-on-primary">Spartans</span>
+<span class="font-label-md text-label-md text-on-primary-container">Chasing Maiden Crown</span>
+</div>
+</div>
+<a class="w-full py-2.5 rounded-lg bg-secondary hover:bg-secondary-container text-on-secondary font-label-md text-label-md uppercase tracking-wider text-center transition-colors" data-path="leaderboard" href="#">
+            View Live Points Table
+          </a>
+</div>
+</div>
+</div>
+</section>
+<!-- Fanfare & Student Section: House Battle Cry Station -->
+<section class="w-full bg-surface px-margin-mobile lg:px-margin py-space-xl">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-xs text-center items-center">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">Bleacher Roars</span>
+<h3 class="font-headline-xl text-headline-xl uppercase text-primary font-black tracking-tight">
+          Supporter Anthems & Arena Chants
+        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+          Hear the sanctioned student cheers echoing through the NexCore Stadium grandstands during prime-time clashes.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<!-- Chant 1 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-error font-bold">Dominators Stadium Cry</span>
+<span class="material-symbols-outlined text-on-surface-variant">volume_up</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary italic font-serif">
+            "We do not bend, we do not fall. The crimson bull dismantles all!"
+          </p>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Sung in: Football • Athletics</span>
+<button class="text-secondary hover:underline uppercase font-bold">Listen Audio</button>
+</div>
+</div>
+<!-- Chant 2 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-bold">Mavericks Flight Cry</span>
+<span class="material-symbols-outlined text-on-surface-variant">volume_up</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary italic font-serif">
+            "Wings in the storm, heart on the line. The Falcon takes what is divine!"
+          </p>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Sung in: Cricket • Basketball</span>
+<button class="text-secondary hover:underline uppercase font-bold">Listen Audio</button>
+</div>
+</div>
+<!-- Chant 3 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-tertiary-fixed-dim font-bold">Alphas Imperial Roar</span>
+<span class="material-symbols-outlined text-on-surface-variant">volume_up</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary italic font-serif">
+            "Golden banners, fearless paw. We rule the court, we write the law!"
+          </p>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Sung in: Badminton • TT</span>
+<button class="text-secondary hover:underline uppercase font-bold">Listen Audio</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Script for Smooth Section Navigation -->
+<script>
+    function scrollToHouse(id) {
+      const element = document.getElementById(id);
+      if (element) {
+        const offset = 140; // account for fixed header + sticky rail
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin pt-space-xl pb-space-lg"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-lg pb-space-xl"><div class="lg:col-span-2 flex flex-col gap-space-md pr-0 lg:pr-space-lg"><div class="flex items-center gap-space-sm"><span class="font-headline-md text-headline-md uppercase tracking-tight text-primary">Apex Arena</span><span class="px-2 py-0.5 rounded-lg bg-surface-container-highest text-primary font-label-sm text-label-sm uppercase">Season 9</span></div><p class="font-body-md text-body-md text-on-surface-variant max-w-md">Official Collegiate Inter-House Athletic & Esports Championship. Hosted annually under the regulatory authority of the Directorate of Physical Education and Sports, NexCore Institute of Technology.</p><div class="flex items-center gap-space-md text-on-surface-variant"><a class="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#" title="Broadcast Hub"><span class="material-symbols-outlined text-[20px]">live_tv</span></a><a class="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#" title="Tournament Desk"><span class="material-symbols-outlined text-[20px]">sports_score</span></a><a class="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#" title="Press & Media"><span class="material-symbols-outlined text-[20px]">campaign</span></a><a class="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#" title="Official Mail"><span class="material-symbols-outlined text-[20px]">mail</span></a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-lg text-label-lg uppercase tracking-wider text-primary">Tournament Links</span><div class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><a class="hover:text-primary transition-colors" data-path="home" href="#">Tournament Central</a><a class="hover:text-primary transition-colors" data-path="schedule" href="#">Fixtures & Timings</a><a class="hover:text-primary transition-colors" data-path="leaderboard" href="#">Championship Points Table</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Medal Tally & Records</a><a class="hover:text-primary transition-colors" data-path="view-championship" href="#">Knockout Brackets</a><a class="hover:text-primary transition-colors" href="#">Code of Conduct & Rules</a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-lg text-label-lg uppercase tracking-wider text-primary">Houses</span><div class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><a class="hover:text-primary transition-colors flex items-center justify-between" data-path="houses" href="#"><span>Mavericks</span><span class="font-label-sm text-label-sm text-secondary uppercase">Crimson</span></a><a class="hover:text-primary transition-colors flex items-center justify-between" data-path="houses" href="#"><span>Dominators</span><span class="font-label-sm text-label-sm text-secondary uppercase">Cobalt</span></a><a class="hover:text-primary transition-colors flex items-center justify-between" data-path="houses" href="#"><span>Alphas</span><span class="font-label-sm text-label-sm text-secondary uppercase">Emerald</span></a><a class="hover:text-primary transition-colors flex items-center justify-between" data-path="houses" href="#"><span>Spartans</span><span class="font-label-sm text-label-sm text-secondary uppercase">Amber</span></a><a class="hover:text-primary transition-colors flex items-center justify-between" data-path="houses" href="#"><span>Phoenix</span><span class="font-label-sm text-label-sm text-secondary uppercase">Solar</span></a></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-lg text-label-lg uppercase tracking-wider text-primary">Sports Discipline</span><div class="grid grid-cols-2 gap-x-space-sm gap-y-space-xs font-body-sm text-body-sm text-on-surface-variant"><a class="hover:text-primary transition-colors" data-path="sports" href="#">Cricket T10</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Football</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Badminton</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Table Tennis</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Chess</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Basketball</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">Athletics</a><a class="hover:text-primary transition-colors" data-path="sports" href="#">BGMI</a></div></div></div><div class="pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-sm"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Accredited by Council of Collegiate Athletics & NexCore Institute of Technology.</span></div><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm uppercase tracking-wider">© 2025 APEX ARENA PREMIER LEAGUE. ALL RIGHTS RESERVED.</span><div class="flex items-center gap-space-sm"><a class="hover:text-primary transition-colors" href="#">Privacy Policy</a><span class="text-outline-variant">•</span><a class="hover:text-primary transition-colors" href="#">Official Regulations</a></div></div></div></div></footer></body></html>

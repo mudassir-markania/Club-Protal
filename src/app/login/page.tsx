@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Shield, Scale, ArrowLeft, Crown, Lock, Mail, AlertCircle, ArrowRight } from 'lucide-react';
+import { Shield, Scale, ArrowLeft, Crown, Lock, Mail, AlertCircle, ArrowRight, Trophy } from 'lucide-react';
 
 export default function UnifiedLoginPage() {
   const router = useRouter();
@@ -51,66 +51,66 @@ export default function UnifiedLoginPage() {
       setPassword('admin123');
     } else {
       setEmail('ref.marcus@sportsportal.com');
-      setPassword('ref123');
+      setPassword('referee123');
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#080A0E] text-[#EDEDED] flex flex-col justify-between selection:bg-[#C6A04A] selection:text-[#0A0D14] antialiased">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between selection:bg-[#0284C7] selection:text-white antialiased">
       {/* Top Header */}
-      <header className="border-b border-white/[0.08] px-4 sm:px-8 py-4 flex items-center justify-between">
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-4 flex items-center justify-between shadow-xs">
         <Link href="/" className="flex items-center gap-3 select-none group">
-          <div className="w-8 h-8 rounded-lg bg-[#141822] border border-[#C6A04A]/40 p-1 flex items-center justify-center group-hover:border-[#C6A04A] transition">
-            <img src="/logo.png" alt="APL Logo" className="w-full h-full object-contain" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition">
+            <Trophy className="w-4 h-4 fill-white" />
           </div>
           <div>
-            <span className="font-serif font-black text-base tracking-tight text-white block leading-tight">
-              APL <span className="text-[#C6A04A]">SEASON 9</span>
+            <span className="font-black text-base tracking-tight text-[#0B2545] block leading-tight">
+              APEX<span className="text-[#0284C7]">ARENA</span>
             </span>
-            <span className="text-[10px] text-slate-400 block font-medium">
-              Inter-Club House Championship
+            <span className="text-[10px] text-slate-500 block font-bold uppercase tracking-wider">
+              APL SEASON 9 CHAMPIONSHIP
             </span>
           </div>
         </Link>
 
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition font-medium"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-[#0284C7] transition font-bold px-3 py-1.5 rounded-full hover:bg-slate-100"
         >
-          <ArrowLeft className="w-3.5 h-3.5 text-[#C6A04A]" />
-          <span>Public Viewer Portal</span>
+          <ArrowLeft className="w-3.5 h-3.5 text-[#0284C7]" />
+          <span>Back to Public Portal</span>
         </Link>
       </header>
 
       {/* Main Single Sign In Area */}
-      <main className="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center space-y-6">
+      <main className="flex-1 max-w-md w-full mx-auto p-4 sm:p-6 flex flex-col justify-center space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-[#C6A04A]">
-            <Crown className="w-3.5 h-3.5 text-[#C6A04A]" />
-            <span>Staff & Officials Unified Login</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-100 text-xs text-[#0284C7] font-bold shadow-2xs">
+            <Crown className="w-3.5 h-3.5" />
+            <span>Staff &amp; Officials Unified Portal</span>
           </div>
-          <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-black text-[#0B2545] tracking-tight">
             Championship Sign In
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto">
-            Single sign in for both <span className="text-[#F3D787] font-semibold">Admin Panel</span> and{' '}
-            <span className="text-emerald-400 font-semibold">Referee Panel</span>. The system automatically detects your role.
+          <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
+            Single sign-in for <strong className="text-slate-800">Admin Oversight</strong> and{' '}
+            <strong className="text-slate-800">Match Officials</strong>. Role is detected automatically.
           </p>
         </div>
 
         {/* Single Unified Sign In Card */}
-        <div className="rounded-2xl bg-[#141822] border border-white/[0.1] shadow-2xl p-6 sm:p-8 space-y-6">
+        <div className="rounded-2xl bg-white border border-slate-200/90 shadow-xl p-6 sm:p-8 space-y-6">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
               <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                Email / Official Username
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Official Email / Username
               </label>
               <div className="relative">
                 <input
@@ -118,15 +118,15 @@ export default function UnifiedLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@sportsportal.com or ref.marcus@..."
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#0A0D14] border border-white/[0.12] text-white text-xs placeholder:text-slate-500 outline-none focus:border-[#C6A04A] focus:ring-1 focus:ring-[#C6A04A] transition"
+                  placeholder="admin@sportsportal.com or ref.marcus@sportsportal.com"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#0284C7] focus:ring-1 focus:ring-[#0284C7] transition"
                 />
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -136,20 +136,20 @@ export default function UnifiedLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#0A0D14] border border-white/[0.12] text-white text-xs placeholder:text-slate-500 outline-none focus:border-[#C6A04A] focus:ring-1 focus:ring-[#C6A04A] transition"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#0284C7] focus:ring-1 focus:ring-[#0284C7] transition"
                 />
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C6A04A] to-[#D4AF37] hover:from-[#B89438] hover:to-[#C6A04A] text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] hover:from-[#0369A1] hover:to-[#075985] text-white font-bold text-xs uppercase tracking-wider transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Verifying Credentials...</span>
                 </>
               ) : (
@@ -162,33 +162,33 @@ export default function UnifiedLoginPage() {
           </form>
 
           {/* Quick Login Role Selectors */}
-          <div className="pt-4 border-t border-white/[0.08] space-y-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-              Quick Sign In Shortcuts
+          <div className="pt-4 border-t border-slate-100 space-y-2.5">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block text-center">
+              1-Click Demo Credentials
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => fillQuickLogin('ADMIN')}
-                className="p-2.5 rounded-xl bg-[#0A0D14] border border-[#C6A04A]/30 hover:border-[#C6A04A] text-left transition group"
+                className="p-3 rounded-xl bg-sky-50/60 border border-sky-200 hover:border-[#0284C7] text-left transition group cursor-pointer"
               >
-                <div className="flex items-center gap-1.5 text-[#F3D787] font-bold text-xs mb-0.5">
-                  <Shield className="w-3.5 h-3.5 text-[#C6A04A]" />
-                  <span>Admin Role</span>
+                <div className="flex items-center gap-1.5 text-[#0284C7] font-bold text-xs mb-0.5">
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Super Admin</span>
                 </div>
-                <span className="text-[10px] text-slate-400 block font-mono">admin123</span>
+                <span className="text-[10px] text-slate-500 block font-mono">admin123</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => fillQuickLogin('REFEREE')}
-                className="p-2.5 rounded-xl bg-[#0A0D14] border border-emerald-500/30 hover:border-emerald-500 text-left transition group"
+                className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 hover:border-emerald-600 text-left transition group cursor-pointer"
               >
-                <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs mb-0.5">
-                  <Scale className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Referee Role</span>
+                <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-xs mb-0.5">
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>Referee Marcus</span>
                 </div>
-                <span className="text-[10px] text-slate-400 block font-mono">ref123</span>
+                <span className="text-[10px] text-slate-500 block font-mono">referee123</span>
               </button>
             </div>
           </div>
@@ -196,8 +196,8 @@ export default function UnifiedLoginPage() {
       </main>
 
       {/* Bottom Footer */}
-      <footer className="border-t border-white/[0.08] py-4 px-4 text-center text-xs text-slate-500">
-        APL Season 9 House Championship • Single Sign In for Admin & Referee
+      <footer className="border-t border-slate-200/80 py-4 px-4 text-center text-xs text-slate-500 bg-white/50">
+        APL Season 9 House Championship • Unified Authentication Gate
       </footer>
     </div>
   );

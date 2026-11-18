@@ -3,16 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Trophy,
-  UserCheck,
-  Crown,
-  Menu,
-  X,
-  ExternalLink,
-  Calendar,
-  Sparkles,
-} from 'lucide-react';
+import { Menu, X, Shield, Lock } from 'lucide-react';
 
 interface PublicNavbarProps {
   onRefresh?: () => void;
@@ -21,23 +12,16 @@ interface PublicNavbarProps {
   activeOverride?: string;
 }
 
-export default function PublicNavbar({
-  onRefresh,
-  refreshing = false,
-  lastUpdated,
-  activeOverride,
-}: PublicNavbarProps) {
+export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { label: 'Home', href: '/', key: 'home' },
-    { label: 'About', href: '#about-section', key: 'about' },
-    { label: 'Sports', href: '/sports', key: 'sports' },
     { label: 'Schedule', href: '/schedule', key: 'schedule' },
     { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
-    { label: 'Clubs', href: '/houses', key: 'clubs' },
-    { label: 'Gallery', href: '#gallery-section', key: 'gallery' },
+    { label: 'Houses', href: '/houses', key: 'houses' },
+    { label: 'Sports', href: '/sports', key: 'sports' },
   ];
 
   const isItemActive = (item: (typeof navItems)[0]) => {
@@ -49,60 +33,50 @@ export default function PublicNavbar({
     if (item.key === 'sports' && (pathname === '/sports' || pathname === '/7-sports')) return true;
     if (item.key === 'schedule' && (pathname === '/schedule' || pathname === '/matches')) return true;
     if (item.key === 'leaderboard' && (pathname === '/leaderboard' || pathname === '/player-leaderboard')) return true;
-    if (item.key === 'clubs' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
+    if (item.key === 'houses' && (pathname === '/houses' || pathname === '/the-5-houses')) return true;
     return false;
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Brand Logo & Name */}
-        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-xs text-white group-hover:scale-105 transition-transform">
-              <Trophy className="w-4 h-4 fill-white text-white drop-shadow-xs" />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="font-black text-sm sm:text-base tracking-tight text-[#0B1E38] uppercase">
-                APEX<span className="text-[#0284C7]">ARENA</span>
-              </span>
-              <span className="text-[10px] font-black tracking-widest text-[#EA580C] uppercase -mt-0.5">
-                APL SEASON 9
+    <header className="fixed top-0 left-0 w-full z-50 bg-[#faf8ff]/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#e2e7ff]/60">
+      <div className="h-20 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between gap-4">
+        {/* Brand Crest & Title */}
+        <div className="flex items-center gap-3.5 shrink-0">
+          <Link href="/" className="flex items-center gap-3 group">
+            {/* Crest Logo */}
+            <img
+              alt="Apex Arena Crest Logo"
+              className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsYOXH0JYiyX1rmUrq9scGTZImP9xqWivkekIWmx1Ruo3otUd9tF9VRe8WIEtDDPKFqcNYPrtpXTIXrhPILhl9C2Uw5zIvtHrgYGOblFU_y9Yhx0x9Afb48VKHwvWODlmjYpYUyz_3yPcHKJKV9F_uUUhRi2EmHmOnbK1FUcl9_CtwK5i8ia2Y4vQEOzSc86Qw-nN0mJFIxB1L5GZVK5OaxLk0RGsSzIYuMPIrLWbc"
+            />
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-manrope text-xl font-bold uppercase tracking-tight text-[#000f3f] leading-none">
+                  Apex Arena
+                </span>
+                <span className="px-1.5 py-0.5 rounded-lg bg-[#dae2fd] text-[#000f3f] text-[10px] font-extrabold uppercase tracking-wider font-manrope">
+                  APL S9
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-[#45464f] tracking-wider uppercase font-manrope mt-0.5">
+                NexCore Institute of Technology
               </span>
             </div>
           </Link>
-
-          {/* Divider */}
-          <div className="h-6 w-[1.5px] bg-slate-300 hidden md:block" />
-
-          {/* Nexcore Institution Badge */}
-          <div className="hidden md:flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-[#0A2540] text-white font-mono font-black text-[10px] flex items-center justify-center tracking-tighter">
-              NT
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-[11px] font-bold text-slate-800 tracking-wider uppercase">
-                NEXCORE
-              </span>
-              <span className="text-[9px] font-medium text-slate-500 tracking-tight">
-                INSTITUTE OF TECHNOLOGY
-              </span>
-            </div>
-          </div>
         </div>
 
-        {/* Center Desktop Navigation Pills */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+        {/* Desktop Nav Items */}
+        <nav className="hidden xl:flex items-center gap-1.5">
           {navItems.map((item) => {
             const active = isItemActive(item);
             return (
               <Link
                 key={item.key}
                 href={item.href}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
+                className={`px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-bold transition-all font-manrope ${
                   active
-                    ? 'bg-[#0284C7] text-white shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-[#0B1E38] hover:bg-slate-100/80'
+                    ? 'bg-[#000f3f] text-white shadow-sm'
+                    : 'text-[#45464f] hover:bg-[#e2e7ff] hover:text-[#131b2e]'
                 }`}
               >
                 {item.label}
@@ -111,85 +85,104 @@ export default function PublicNavbar({
           })}
         </nav>
 
-        {/* Right Side: Referee Login & Admin Login Buttons */}
-        <div className="hidden sm:flex items-center gap-2.5 shrink-0">
-          {/* Referee Login Pill */}
+        {/* Right CTA / Status / Portals */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Live Ping Badge */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffdad6]/40 border border-[#ffdad6]">
+            <span className="w-2 h-2 rounded-full bg-[#ba1a1a] animate-ping" />
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#93000a] font-manrope">
+              APL S9 Live
+            </span>
+          </div>
+
+          {/* View Championship Primary Button */}
           <Link
-            href="/referee/login"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-900 text-xs font-bold transition shadow-2xs group"
+            href="/schedule"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-[#000f3f] hover:bg-[#0051d5] text-white text-xs uppercase tracking-wider font-bold transition-colors duration-150 shadow-[0_1px_8px_rgba(0,0,0,0.04)] font-manrope"
           >
-            <UserCheck className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#0284C7] transition-colors" />
-            <span>Referee Login</span>
+            View Championship
           </Link>
 
-          {/* Admin Login Pill */}
-          <Link
-            href="/admin/login"
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#0088FF] to-[#0060DF] hover:from-[#007AE6] hover:to-[#0050C0] text-white text-xs font-bold transition shadow-md shadow-blue-500/25 group transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <Crown className="w-3.5 h-3.5 text-amber-300 group-hover:rotate-12 transition-transform" />
-            <span>Admin Login</span>
-          </Link>
-        </div>
+          {/* Referee & Admin Portal Access Pill */}
+          <div className="hidden md:flex items-center gap-1.5 pl-1 border-l border-[#c6c5d0]">
+            <Link
+              href="/referee/login"
+              title="Referee Portal"
+              className="p-2 rounded-lg hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors"
+            >
+              <Shield className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/admin/login"
+              title="Admin Console"
+              className="p-2 rounded-lg hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors"
+            >
+              <Lock className="w-4 h-4" />
+            </Link>
+          </div>
 
-        {/* Mobile Hamburger Button */}
-        <div className="flex sm:hidden items-center gap-2">
-          <Link
-            href="/admin/login"
-            className="p-1.5 rounded-full bg-[#0284C7] text-white"
-            title="Admin Login"
-          >
-            <Crown className="w-4 h-4 text-amber-300" />
-          </Link>
+          {/* Profile / Secretariat Icon */}
+          <div className="flex items-center gap-2 pl-1">
+            <img
+              alt="Tournament Director"
+              className="w-8 h-8 rounded-full object-cover border border-[#c6c5d0]"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnjT1YhFNcqD1FRCReeI5S0PbJaxS_LD9CSr7zhdwx_TZKDLTDxJ4fQixoWzuVaGzmBWOXL3erJfxxw2e0ObMBD-i2-1Q9WcJ3XqosbexhBYTpRdS6uq7QGJyKABUl2AEZK5HjAVZHsbROFkfVO4NSUEvtRVbGqYVAOqxelPtqmS6fp0KdweHYLl86NO_6HMaFJP_i0GpmxxvUuL8dTkCnMFmim_iozAX7CQoWZb8R"
+            />
+            <div className="hidden 2xl:flex flex-col leading-tight">
+              <span className="text-[10px] font-bold text-[#000f3f] uppercase font-manrope">
+                Tournament Dir.
+              </span>
+              <span className="text-[10px] text-[#45464f] font-medium">Sec. Operations</span>
+            </div>
+          </div>
+
+          {/* Mobile hamburger button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-slate-700 hover:bg-slate-100"
-            aria-label="Toggle Menu"
+            className="xl:hidden p-2 rounded-lg text-[#000f3f] hover:bg-[#e2e7ff]"
+            aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 shadow-xl">
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            {navItems.map((item) => {
-              const active = isItemActive(item);
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3 py-2 rounded-xl text-center text-xs font-bold ${
-                    active
-                      ? 'bg-[#0284C7] text-white'
-                      : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+        <div className="xl:hidden bg-white/98 backdrop-blur-xl border-b border-[#c6c5d0] px-4 py-4 space-y-2 animate-in slide-in-from-top-2">
+          {navItems.map((item) => {
+            const active = isItemActive(item);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2.5 rounded-lg text-sm uppercase tracking-wider font-bold transition-all font-manrope ${
+                  active
+                    ? 'bg-[#000f3f] text-white'
+                    : 'text-[#45464f] hover:bg-[#f2f3ff] hover:text-[#000f3f]'
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+          <div className="pt-2 border-t border-[#e2e7ff] flex flex-col gap-2">
             <Link
               href="/referee/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase text-[#000f3f] bg-[#f2f3ff]"
             >
-              <UserCheck className="w-4 h-4 text-[#0284C7]" />
-              <span>Referee Login</span>
+              <Shield className="w-4 h-4 text-[#0051d5]" />
+              Referee Console
             </Link>
             <Link
               href="/admin/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[#0088FF] to-[#0060DF] text-white text-xs font-bold shadow-md"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase text-white bg-[#000f3f]"
             >
-              <Crown className="w-4 h-4 text-amber-300" />
-              <span>Admin Login</span>
+              <Lock className="w-4 h-4 text-amber-300" />
+              Tournament Admin Portal
             </Link>
           </div>
         </div>

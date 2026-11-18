@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'APL Season 9 | House Championship Portal',
-  description: 'Centralized management portal for APL Season 9 House Championship: clubs, cricket teams, sports, referees, and leaderboards.',
+  title: 'Apex Arena | APL Season 9 Inter-House Championship',
+  description: 'Official tournament broadcast and management engine for NexCore Institute of Technology: clubs, sports, live telemetry, and overall leaderboards.',
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
@@ -17,7 +17,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen bg-[#f8f9ff] text-[#0b1c30] antialiased selection:bg-[#0051d5] selection:text-white font-sans">
         {children}
       </body>
     </html>
