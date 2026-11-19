@@ -449,41 +449,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
-            {/* Stadium Telemetry Stats Ribbon Pinned to Bottom */}
-            <div className="hidden sm:block w-full bg-[#172554] text-[#808dc2] py-3 sm:py-3.5 relative z-10 border-t border-white/10 shrink-0">
-              <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-wrap items-center justify-between gap-y-2 gap-x-6 text-center lg:text-left">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs uppercase text-white font-extrabold tracking-widest font-manrope">
-                    APL S9 RECORD
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#dbe1ff]" />
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-6 lg:gap-12 text-[11px] sm:text-xs uppercase tracking-widest font-manrope font-bold">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white text-lg sm:text-xl font-extrabold">5</span>
-                    <span className="text-[#808dc2]">HOUSES</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white text-lg sm:text-xl font-extrabold">6</span>
-                    <span className="text-[#808dc2]">DISCIPLINES</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white text-lg sm:text-xl font-extrabold">42</span>
-                    <span className="text-[#808dc2]">HIGH-STAKES MATCHES</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white text-lg sm:text-xl font-extrabold">1,200+</span>
-                    <span className="text-[#808dc2]">ATHLETES</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#eb6905] text-lg sm:text-xl font-extrabold">1</span>
-                    <span className="text-[#eb6905] font-extrabold">APEX CROWN</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </section>
 
           {/* ======================================================== */}
