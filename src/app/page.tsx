@@ -322,13 +322,13 @@ export default function HomePage() {
       {/* 1. BRAND HEADER & NAVBAR */}
       <PublicNavbar activeOverride="home" />
 
-      <main className="w-full pt-20 bg-[#faf8ff] min-h-[calc(100vh-80px)]">
+      <main className="w-full pt-16 sm:pt-20 bg-[#faf8ff] min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
         <div className="flex flex-col w-full">
           {/* ======================================================== */}
           {/* 2. HERO SECTION (MULTI-SPORT STADIUM SHOWCASE - H-SCREEN) */}
           {/* ======================================================== */}
           <section
-            className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
+            className="relative w-full h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)] min-h-[540px] sm:min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
           >
             {/* Multi-Sport Stadium Backgrounds with Fast Snappy 500ms Cross-Fade */}
             <div className="absolute inset-0 z-0 overflow-hidden">
@@ -367,8 +367,8 @@ export default function HomePage() {
               </div>
 
               {/* Discipline Switcher Pill Dock with Chevron Arrows */}
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
-                <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#808dc2] font-manrope mr-1 hidden md:inline">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-4 overflow-x-auto no-scrollbar max-w-full py-1">
+                <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#808dc2] font-manrope mr-1 hidden md:inline shrink-0">
                   Select Discipline:
                 </span>
                 <button
