@@ -1,19 +1,19 @@
 # Dependencies
-/node_modules/
+node_modules/
 /.pnpm-store/
 /jspm_packages/
 /web_modules/
 
 # Next.js Build Outputs
-/.next/
+.next/
 /out/
 /build/
-/dist/
+dist/
 *.tsbuildinfo
 
 # Caches and Temporary Folders
 /.cache/
-/.turbo/
+.turbo/
 /.swc/
 /tmp/
 /temp/
@@ -69,3 +69,8 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 node_modules
+
+# Monorepo
+.turbo/
+dist/
+.next/

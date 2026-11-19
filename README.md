@@ -25,29 +25,64 @@ A modern, production-grade, database-driven **Sports Tournament Management Porta
 
 ---
 
+## Project Structure (Turborepo monorepo)
+
+```
+club-portal/
+├── apps/
+│   ├── frontend/     # Next.js web app (admin, referee and public pages). UI only.
+│   └── backend/      # Node.js + Express + Mongoose REST API (/api/...)
+├── packages/
+│   └── shared/       # Logic used by both: scoring rules and triggers, points distribution, match formats
+├── package.json      # npm workspaces
+└── turbo.json        # task pipeline (dev, build, typecheck)
+```
+
+- **Frontend** never touches the database. The browser calls `/api/...` on the frontend origin and Next.js forwards it to
+  the backend (`BACKEND_URL`, see `next.config.mjs`), so login cookies stay same-origin.
+- **Backend** exposes the REST API with Express. Each file in `apps/backend/src/routes/**/route.ts` is one endpoint
+  (`GET`/`POST`/`PUT`/`DELETE` exports); `npm run generate` turns them into Express routes (`[id]` becomes `:id`).
+  Models and the points/scoring engine live in `apps/backend/src`.
+- **Shared** is imported as `@club-portal/shared` and ships TypeScript source (no build step).
+
+---
+
 ## Quick Start & Running the Portal
 
 ### Prerequisites
-- Node.js (v18+)
-- npm or pnpm
+- Node.js (v18+) and npm
 
-### 1. Database Initialization
-The database runs on **MongoDB Atlas** with Mongoose ODM schemas (`src/models/index.ts`).
-To re-seed fresh demo data at any time:
+### 1. Install and configure
 ```bash
-node scripts/seed-mongo.js
+npm install                       # installs every workspace
+```
+Create the env files (the real ones are git-ignored):
+
+| File | Content |
+|------|---------|
+| `apps/backend/.env` | copy `apps/backend/.env.example`: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN` |
+| `apps/frontend/.env.local` | `BACKEND_URL=http://localhost:5000` |
+
+### 2. Seed the database (MongoDB Atlas, Mongoose)
+```bash
+npm run seed:admin                # roles + admin@sportsportal.com (default password admin123 - change it)
+npm run seed:scoring-rules        # official scoring rules
+npm run seed:roster               # houses, teams, sports and players
 ```
 
-### 2. Start the Development Server
+### 3. Run in development
 ```bash
-npm run dev
+npm run dev                       # frontend on :3000 and backend on :5000 together (Turborepo)
+npm run dev:backend               # or one at a time
+npm run dev:frontend
 ```
-Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+Open **[http://localhost:3000](http://localhost:3000)**. The API answers on `http://localhost:5000/api/health`.
 
-Or to run the optimized production build:
+### 4. Production build
 ```bash
-npm run build
-npm start
+npm run build                     # frontend (.next) and backend (apps/backend/dist/server.js)
+npm run start                     # frontend :3000, backend :5000
+npm run typecheck                 # all three packages
 ```
 
 ---
