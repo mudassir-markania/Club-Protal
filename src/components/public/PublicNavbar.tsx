@@ -87,14 +87,6 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
 
         {/* Right CTA / Status / Portals */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* Live Ping Badge */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffdad6]/40 border border-[#ffdad6]">
-            <span className="w-2 h-2 rounded-full bg-[#ba1a1a] animate-ping" />
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#93000a] font-manrope">
-              APL S9 Live
-            </span>
-          </div>
-
           {/* View Championship Primary Button */}
           <Link
             href="/schedule"

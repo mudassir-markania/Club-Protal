@@ -349,28 +349,6 @@ export default function HomePage() {
 
             {/* Live Telemetry Watermark & Centered Content */}
             <div className="relative z-10 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 flex-1 flex flex-col justify-center py-3 sm:py-5">
-              {/* Live Multi-Sport Pill Chip */}
-              <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 shadow-sm">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#eb6905] opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#eb6905]" />
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#eb6905] font-extrabold font-manrope">
-                    {activeHero.badge} • DAY 4 OF 12
-                  </span>
-                  <span className="text-[#808dc2] text-xs">|</span>
-                  <span className="text-[10px] sm:text-[11px] text-[#dce1ff] uppercase tracking-wider hidden sm:inline font-manrope font-semibold">
-                    CENTRAL ARENA COMPLEX
-                  </span>
-                </div>
-
-                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0051d5]/30 border border-[#0051d5]/40 text-[#dbe1ff] text-[10px] uppercase font-extrabold tracking-wider font-manrope">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
-                  <span>6 Championship Disciplines</span>
-                </div>
-              </div>
-
               {/* Monumental Typography Stack */}
               <div className="max-w-4xl flex flex-col gap-1 sm:gap-1.5 mb-3 sm:mb-4">
                 <span className="text-[11px] sm:text-xs uppercase tracking-widest text-[#dbe1ff] font-bold font-manrope">
