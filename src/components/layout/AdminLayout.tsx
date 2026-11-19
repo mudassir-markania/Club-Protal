@@ -88,6 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Matches & Fixtures', href: '/admin/matches', icon: Calendar },
     { name: 'Clubs & Cricket Teams', href: '/admin/clubs', icon: Shield },
     { name: 'Sports & Scoring', href: '/admin/sports', icon: Medal },
+    { name: 'Scoring Rules (PDF)', href: '/admin/scoring-rules', icon: Sparkles },
     { name: 'Player Rosters', href: '/admin/players', icon: Users },
     { name: 'Referee Management', href: '/admin/referees', icon: UserCheck },
     { name: 'Points History', href: '/admin/points-history', icon: History },

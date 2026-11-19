@@ -164,6 +164,33 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           }
         }
 
+        // Approve and credit Individual Award Allocations
+        const awards = await tx.awardAllocation.findMany({
+          where: { matchId: match.id },
+        });
+
+        for (const award of awards) {
+          await tx.awardAllocation.update({
+            where: { id: award.id },
+            data: {
+              status: 'APPROVED',
+              approvedByUserId: user.id,
+              approvedAt: new Date(),
+            },
+          });
+
+          await tx.pointsHistory.create({
+            data: {
+              clubId: award.clubId,
+              sportId: match.sportId,
+              matchId: match.id,
+              points: award.points,
+              reason: `${match.sport.name} - ${award.awardTitle}: ${award.playerName} (${award.points.toFixed(2)} pts)`,
+              recordedByUserId: user.id,
+            },
+          });
+        }
+
         // Approve PlayerPerformance records for Star Player tracking
         const performances = await tx.playerPerformance.findMany({
           where: { matchId: match.id },
@@ -236,6 +263,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         });
 
         await tx.playerPerformance.updateMany({
+          where: { matchId: match.id },
+          data: {
+            status: 'REJECTED',
+          },
+        });
+
+        await tx.awardAllocation.updateMany({
           where: { matchId: match.id },
           data: {
             status: 'REJECTED',

@@ -135,10 +135,16 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     const eligibleStarPlayers = Array.from(eligibleMap.values());
 
+    const awardAllocations = await db.awardAllocation.findMany({
+      where: { matchId: match.id },
+      include: { club: true, player: true },
+    });
+
     return NextResponse.json({
       ...match,
       starPlayer,
       eligibleStarPlayers,
+      awardAllocations,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

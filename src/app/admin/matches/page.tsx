@@ -58,9 +58,10 @@ export default function MatchesPage() {
   // New Match Form State
   const [formData, setFormData] = useState({
     sportId: '',
-    matchCategory: 'Singles',
-    round: 'Final Stage',
-    stageName: 'Grand Finals',
+    matchCategory: "Men's singles / doubles",
+    stageType: 'NORMAL',
+    round: 'League Match',
+    stageName: 'Championship Round',
     matchDate: '2026-11-26',
     matchTime: '15:00',
     venueId: '',
@@ -117,9 +118,10 @@ export default function MatchesPage() {
     const isCricket = sports[0]?.name === 'Cricket';
     setFormData({
       sportId: defaultSport,
-      matchCategory: 'Singles',
-      round: 'Grand Finals',
-      stageName: 'Championship Round',
+      matchCategory: "Men's singles / doubles",
+      stageType: 'NORMAL',
+      round: 'Championship Round',
+      stageName: 'Championship Stage',
       matchDate: '2026-11-26',
       matchTime: '14:00',
       venueId: venues[0]?.id || '',
@@ -185,7 +187,8 @@ export default function MatchesPage() {
 
     const payload = {
       sportId: formData.sportId,
-      matchCategory: formData.matchCategory || 'Singles',
+      matchCategory: formData.matchCategory || "Men's singles / doubles",
+      stageType: formData.stageType || 'NORMAL',
       round: formData.round,
       stageName: formData.stageName,
       matchDate: formData.matchDate,
@@ -221,6 +224,18 @@ export default function MatchesPage() {
     setShowRejectBox(false);
     setRejectionReason('');
     setIsReviewModalOpen(true);
+
+    try {
+      const res = await fetch(`/api/matches/${match.id}`);
+      if (res.ok) {
+        const fullMatch = await res.json();
+        setSelectedMatch(fullMatch);
+        const fullPending = fullMatch.results?.find((r: any) => r.status === 'PENDING_APPROVAL') || fullMatch.results?.[0];
+        setReviewResult(fullPending);
+      }
+    } catch (e) {
+      console.error('Failed to load full match details:', e);
+    }
 
     const spId = match.starPlayerId || pendingResult?.starPlayerId;
     if (spId && !match.starPlayer) {
@@ -696,21 +711,27 @@ export default function MatchesPage() {
                 </label>
                 <select
                   required
-                  value={`${formData.sportId}__${formData.matchCategory || 'Singles'}`}
+                  value={`${formData.sportId}__${formData.matchCategory || "Men's singles / doubles"}`}
                   onChange={(e) => handleSportSelectInForm(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-600"
                 >
                   {sports.flatMap((s) => {
                     if (s.name === 'Badminton' || s.name === 'Carrom') {
                       return [
-                        <option key={`${s.id}__Singles`} value={`${s.id}__Singles`}>
-                          {s.name} - Singles ({s.category} • INDIVIDUAL)
+                        <option key={`${s.id}__Men's singles / doubles`} value={`${s.id}__Men's singles / doubles`}>
+                          {s.name} — Men&apos;s singles / doubles (10/7/5 pts)
                         </option>,
-                        <option key={`${s.id}__Doubles`} value={`${s.id}__Doubles`}>
-                          {s.name} - Doubles ({s.category} • DOUBLES)
+                        <option key={`${s.id}__Women's singles / doubles`} value={`${s.id}__Women's singles / doubles`}>
+                          {s.name} — Women&apos;s singles / doubles (10/7/5 pts)
                         </option>,
-                        <option key={`${s.id}__Mixed Doubles`} value={`${s.id}__Mixed Doubles`}>
-                          {s.name} - Mixed Doubles ({s.category} • MIXED DOUBLES)
+                        <option key={`${s.id}__Mixed`} value={`${s.id}__Mixed`}>
+                          {s.name} — Mixed (20/14/10 pts)
+                        </option>,
+                        <option key={`${s.id}__MD`} value={`${s.id}__MD`}>
+                          {s.name} — MD Category (20/14/10 pts)
+                        </option>,
+                        <option key={`${s.id}__WD`} value={`${s.id}__WD`}>
+                          {s.name} — WD Category (20/14/10 pts)
                         </option>,
                       ];
                     }
@@ -722,6 +743,28 @@ export default function MatchesPage() {
                   })}
                 </select>
 
+                {/* Stage Type Picker */}
+                <div className="mt-2.5 grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'NORMAL', label: 'League / Regular' },
+                    { id: 'FINAL', label: 'Championship Final' },
+                    { id: 'THIRD_PLACE', label: '3rd Place Playoff' },
+                  ].map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, stageType: st.id, round: st.label }))}
+                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold border transition text-center ${
+                        formData.stageType === st.id
+                          ? 'bg-navy-950 text-white border-navy-950 shadow-xs'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Quick Category Buttons for Badminton & Carrom */}
                 {sports.find((s) => s.id === formData.sportId)?.name &&
                   (sports.find((s) => s.id === formData.sportId)?.name === 'Badminton' ||
@@ -729,14 +772,20 @@ export default function MatchesPage() {
                     <div className="mt-2.5 p-2.5 bg-blue-50/70 border border-blue-200/80 rounded-xl space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-blue-950 uppercase tracking-wider">
-                          {sports.find((s) => s.id === formData.sportId)?.name} Category:
+                          Official PDF Category:
                         </span>
-                        <span className="text-[10px] font-semibold text-blue-700">
-                          Selected: {formData.matchCategory || 'Singles'}
+                        <span className="text-[10px] font-semibold text-blue-700 truncate max-w-[200px]">
+                          {formData.matchCategory}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {(['Singles', 'Doubles', 'Mixed Doubles'] as const).map((cat) => (
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 text-[11px]">
+                        {[
+                          "Men's singles / doubles",
+                          "Women's singles / doubles",
+                          'Mixed',
+                          'MD',
+                          'WD',
+                        ].map((cat) => (
                           <button
                             key={cat}
                             type="button"
@@ -744,20 +793,17 @@ export default function MatchesPage() {
                               setFormData((prev) => ({
                                 ...prev,
                                 matchCategory: cat,
-                                round: cat !== 'Singles' ? `${cat} Championship` : 'Grand Finals',
-                                stageName: cat !== 'Singles' ? `${cat} Stage` : 'Championship Round',
+                                round: `${cat} ${prev.stageType === 'FINAL' ? 'Final' : 'Round'}`,
                               }));
                             }}
-                            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                            className={`py-1 px-1.5 rounded text-[10px] font-bold transition truncate text-center ${
                               formData.matchCategory === cat
                                 ? 'bg-blue-600 text-white shadow-xs'
                                 : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                             }`}
+                            title={cat}
                           >
-                            {cat === 'Singles' && '👤'}
-                            {cat === 'Doubles' && '👥'}
-                            {cat === 'Mixed Doubles' && '👫'}
-                            <span>{cat}</span>
+                            {cat}
                           </button>
                         ))}
                       </div>
@@ -1082,6 +1128,33 @@ export default function MatchesPage() {
                   );
                 })}
               </div>
+
+              {/* Individual Award Allocations (PDF Rules) */}
+              {selectedMatch.awardAllocations && selectedMatch.awardAllocations.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">
+                    Individual Award Allocations (Credited directly to House):
+                  </span>
+                  <div className="space-y-1.5">
+                    {selectedMatch.awardAllocations.map((aw: any) => (
+                      <div
+                        key={aw.id}
+                        className="p-2.5 bg-amber-50/60 rounded-xl border border-amber-200/80 flex items-center justify-between text-xs"
+                      >
+                        <div>
+                          <span className="font-extrabold text-navy-950 block">{aw.awardTitle}</span>
+                          <span className="text-[11px] text-slate-600">
+                            {aw.playerName} • <strong className="text-navy-900">House {aw.clubName || aw.club?.name}</strong>
+                          </span>
+                        </div>
+                        <span className="font-mono text-xs font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded-lg">
+                          +{aw.points} pts
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {reviewResult?.refereeNotes && (
                 <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-slate-600 text-[11px]">

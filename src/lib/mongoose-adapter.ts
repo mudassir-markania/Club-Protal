@@ -101,6 +101,15 @@ const RELATIONS: Record<
   LeaderboardEntry: {
     club: { model: 'Club', foreignKey: '_id', localKey: 'clubId' },
   },
+  AwardAllocation: {
+    match: { model: 'Match', foreignKey: '_id', localKey: 'matchId' },
+    sport: { model: 'Sport', foreignKey: '_id', localKey: 'sportId' },
+    player: { model: 'Player', foreignKey: '_id', localKey: 'playerId' },
+    club: { model: 'Club', foreignKey: '_id', localKey: 'clubId' },
+  },
+  SportScoringRule: {
+    sport: { model: 'Sport', foreignKey: '_id', localKey: 'sportId' },
+  },
   AuditLog: {
     user: { model: 'User', foreignKey: '_id', localKey: 'userId' },
   },
@@ -477,6 +486,8 @@ export function createMongoClient() {
     notification: createCollectionDelegate('Notification'),
     auditLog: createCollectionDelegate('AuditLog'),
     tournamentSetting: createCollectionDelegate('TournamentSetting'),
+    sportScoringRule: createCollectionDelegate('SportScoringRule'),
+    awardAllocation: createCollectionDelegate('AwardAllocation'),
 
     async $transaction(arg: any) {
       if (typeof arg === 'function') {

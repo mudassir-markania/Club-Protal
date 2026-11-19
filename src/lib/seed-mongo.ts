@@ -1,9 +1,22 @@
 import { db, connectToDatabase } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { seedOfficialScoringRules } from './sports-rules';
 
 export async function seedMongoDatabase() {
   console.log('Connecting to MongoDB for seeding...');
   await connectToDatabase();
+
+  console.log('0. Cleaning temporary matches and test points...');
+  if (db.awardAllocation) await db.awardAllocation.deleteMany({});
+  if (db.pointsHistory) await db.pointsHistory.deleteMany({});
+  if (db.clubPointAllocation) await db.clubPointAllocation.deleteMany({});
+  if (db.pointsDistribution) await db.pointsDistribution.deleteMany({});
+  if (db.matchResult) await db.matchResult.deleteMany({});
+  if (db.playerPerformance) await db.playerPerformance.deleteMany({});
+  if (db.matchParticipantPlayer) await db.matchParticipantPlayer.deleteMany({});
+  if (db.matchParticipant) await db.matchParticipant.deleteMany({});
+  if (db.matchReferee) await db.matchReferee.deleteMany({});
+  if (db.match) await db.match.deleteMany({});
 
   console.log('1. Seeding Roles...');
   const superAdminRole = await db.role.upsert({
@@ -37,7 +50,7 @@ export async function seedMongoDatabase() {
   for (const c of clubsData) {
     const club = await db.club.upsert({
       where: { code: c.code },
-      update: { name: c.name, logoUrl: c.logoUrl, captainName: c.captainName, viceCaptainName: c.viceCaptainName },
+      update: { name: c.name, logoUrl: c.logoUrl, captainName: c.captainName, viceCaptainName: c.viceCaptainName, totalPoints: 0.0 },
       create: { ...c, totalPoints: 0.0, currentRank: 1 },
     });
     clubs.push(club);
@@ -90,10 +103,10 @@ export async function seedMongoDatabase() {
       maxParticipants: 4,
       allowsMixedClubs: false,
       pointsEntryMethod: 'POSITION',
-      positionPoints: JSON.stringify({ '1': 50, '2': 30, '3': 20 }),
-      scoringConfig: JSON.stringify({ type: 'board_points', boards: 3, categories: ['Singles', 'Doubles', 'Mixed Doubles'] }),
+      positionPoints: JSON.stringify({ '1': 10, '2': 7, '3': 5 }),
+      scoringConfig: JSON.stringify({ type: 'board_points', categories: ["Men's singles / doubles", "Women's singles / doubles", 'Mixed', 'MD', 'WD'] }),
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
-      subCategories: ['Singles', 'Doubles', 'Mixed Doubles'],
+      subCategories: ["Men's singles / doubles", "Women's singles / doubles", 'Mixed', 'MD', 'WD'],
     },
     {
       name: 'Badminton',
@@ -103,10 +116,10 @@ export async function seedMongoDatabase() {
       maxParticipants: 4,
       allowsMixedClubs: false,
       pointsEntryMethod: 'BOTH',
-      positionPoints: JSON.stringify({ '1': 50, '2': 30, '3': 20 }),
-      scoringConfig: JSON.stringify({ type: 'sets', setsToWin: 2, pointsPerSet: 21, categories: ['Singles', 'Doubles', 'Mixed Doubles'] }),
+      positionPoints: JSON.stringify({ '1': 10, '2': 7, '3': 5 }),
+      scoringConfig: JSON.stringify({ type: 'sets', categories: ["Men's singles / doubles", "Women's singles / doubles", 'Mixed', 'MD', 'WD'] }),
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
-      subCategories: ['Singles', 'Doubles', 'Mixed Doubles'],
+      subCategories: ["Men's singles / doubles", "Women's singles / doubles", 'Mixed', 'MD', 'WD'],
     },
     {
       name: 'Chess',
@@ -301,6 +314,9 @@ export async function seedMongoDatabase() {
     update: {},
     create: { key: 'CURRENT_ROTATION_INDEX', value: '0', description: 'Deterministic remainder rotation' },
   });
+
+  console.log('6. Seeding Official Sports Points Distribution Rules (PDF)...');
+  await seedOfficialScoringRules();
 
   console.log('MongoDB House Championship Baseline Seeding completed successfully!');
 }

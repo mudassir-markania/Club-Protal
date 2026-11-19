@@ -148,6 +148,7 @@ const MatchSchema = createSchema({
   sportId: { type: String, required: true },
   round: { type: String, required: true },
   stageName: { type: String },
+  stageType: { type: String, default: 'NORMAL' }, // NORMAL | FINAL | THIRD_PLACE | SEMI_FINAL
   matchCategory: { type: String, default: 'Singles' },
   matchDate: { type: String, required: true },
   matchTime: { type: String, required: true },
@@ -156,6 +157,7 @@ const MatchSchema = createSchema({
   notes: { type: String },
   starPlayerId: { type: String },
   starPlayerPoints: { type: Number, default: 0 },
+  totalTeamsParticipating: { type: Number },
 });
 
 // 12. MatchParticipant
@@ -197,6 +199,9 @@ const MatchResultSchema = createSchema({
   refereeNotes: { type: String },
   starPlayerId: { type: String },
   starPlayerPoints: { type: Number, default: 0 },
+  stageType: { type: String },
+  eventCategory: { type: String },
+  resultPayload: { type: String },
   status: { type: String, default: 'PENDING_APPROVAL' },
   approvedByUserId: { type: String },
   approvedAt: { type: Date },
@@ -357,6 +362,39 @@ const TournamentSettingSchema = createSchema({
   description: { type: String },
 });
 
+// 27. SportScoringRule
+const SportScoringRuleSchema = createSchema({
+  sport: { type: String, required: true },
+  ruleCode: { type: String, required: true, unique: true },
+  ruleName: { type: String, required: true },
+  category: { type: String },
+  awardType: { type: String, default: 'TEAM' },
+  isTournamentLevel: { type: Boolean, default: false },
+  points: { type: Number, required: true },
+  description: { type: String },
+  conditions: { type: String },
+  enabled: { type: Boolean, default: true },
+});
+
+// 28. AwardAllocation
+const AwardAllocationSchema = createSchema({
+  matchId: { type: String },
+  sportId: { type: String },
+  sportName: { type: String, required: true },
+  awardKey: { type: String, required: true },
+  awardTitle: { type: String, required: true },
+  awardType: { type: String, default: 'INDIVIDUAL' }, // INDIVIDUAL | TEAM_PLACEMENT
+  playerId: { type: String },
+  playerName: { type: String },
+  clubId: { type: String, required: true },
+  clubName: { type: String },
+  points: { type: Number, required: true },
+  status: { type: String, default: 'PENDING_APPROVAL' }, // PENDING_APPROVAL | APPROVED | REJECTED
+  approvedAt: { type: Date },
+  approvedByUserId: { type: String },
+  notes: { type: String },
+});
+
 // Helper to get or create model safely in Next.js hot reloading
 function getModel(name: string, schema: Schema): Model<any> {
   if (mongoose.models[name]) {
@@ -392,6 +430,8 @@ export const SynchronizationLogModel: Model<any> = getModel('SynchronizationLog'
 export const NotificationModel: Model<any> = getModel('Notification', NotificationSchema);
 export const AuditLogModel: Model<any> = getModel('AuditLog', AuditLogSchema);
 export const TournamentSettingModel: Model<any> = getModel('TournamentSetting', TournamentSettingSchema);
+export const SportScoringRuleModel: Model<any> = getModel('SportScoringRule', SportScoringRuleSchema);
+export const AwardAllocationModel: Model<any> = getModel('AwardAllocation', AwardAllocationSchema);
 
 export const models: Record<string, Model<any>> = {
   Role: RoleModel,
@@ -421,5 +461,7 @@ export const models: Record<string, Model<any>> = {
   Notification: NotificationModel,
   AuditLog: AuditLogModel,
   TournamentSetting: TournamentSettingModel,
+  SportScoringRule: SportScoringRuleModel,
+  AwardAllocation: AwardAllocationModel,
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import RefereeLayout from '@/components/layout/RefereeLayout';
@@ -21,10 +21,19 @@ import {
   MapPin,
   HelpCircle,
   FileText,
-  Star,
+  Medal,
+  Award,
+  Flame,
+  ChevronDown,
+  Info,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
-import { calculateClubPointsDistribution } from '@/lib/points-distribution';
+import {
+  normalizeSportKey,
+  calculateMatchPoints,
+  MatchCalculationInput,
+  OFFICIAL_CATEGORY_LABELS,
+} from '@/lib/sports-rules';
 
 export default function RefereeMatchSheetPage() {
   const params = useParams();
@@ -35,22 +44,51 @@ export default function RefereeMatchSheetPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form states per participant: { [participantId]: { pointsEarned: number, rank?: number, isWinner: boolean } }
-  const [entryResults, setEntryResults] = useState<
-    Record<string, { pointsEarned: number; rank?: number; isWinner: boolean }>
-  >({});
+  // Form states
+  const [stageType, setStageType] = useState<'NORMAL' | 'FINAL' | 'THIRD_PLACE'>('NORMAL');
+  const [eventCategory, setEventCategory] = useState<string>("Men's singles / doubles");
+  const [scoresSummary, setScoresSummary] = useState('');
   const [refereeNotes, setRefereeNotes] = useState('');
 
-  // Star Player Form States (Mandatory 1:1 rule)
-  const [selectedStarPlayerId, setSelectedStarPlayerId] = useState('');
-  const [starPlayerPoints, setStarPlayerPoints] = useState<number | string>('');
+  // Football
+  const [winnerParticipantId, setWinnerParticipantId] = useState('');
+  const [loserParticipantId, setLoserParticipantId] = useState('');
+  const [topScorerPlayerId, setTopScorerPlayerId] = useState('');
 
-  // Modals
+  // BGMI
+  const [isBgmiTournamentPlacement, setIsBgmiTournamentPlacement] = useState(false);
+  const [totalTeamsParticipating, setTotalTeamsParticipating] = useState<number>(7);
+  const [bgmiFirstPlaceId, setBgmiFirstPlaceId] = useState('');
+  const [bgmiSecondPlaceId, setBgmiSecondPlaceId] = useState('');
+  const [bgmiThirdPlaceId, setBgmiThirdPlaceId] = useState('');
+  const [bgmiMvpPlayerId, setBgmiMvpPlayerId] = useState('');
+
+  // Cricket
+  const [bestBatsmanMenPlayerId, setBestBatsmanMenPlayerId] = useState('');
+  const [bestBatsmanWomenPlayerId, setBestBatsmanWomenPlayerId] = useState('');
+  const [bestBowlerMenPlayerId, setBestBowlerMenPlayerId] = useState('');
+  const [bestBowlerWomenPlayerId, setBestBowlerWomenPlayerId] = useState('');
+  const [bestFielderMenPlayerId, setBestFielderMenPlayerId] = useState('');
+  const [bestFielderWomenPlayerId, setBestFielderWomenPlayerId] = useState('');
+  const [mostFoursPlayerId, setMostFoursPlayerId] = useState('');
+  const [mostSixesPlayerId, setMostSixesPlayerId] = useState('');
+  const [motmMenPlayerId, setMotmMenPlayerId] = useState('');
+  const [motmWomenPlayerId, setMotmWomenPlayerId] = useState('');
+
+  // Badminton / Carrom / Chess Placements
+  const [firstPlaceParticipantId, setFirstPlaceParticipantId] = useState('');
+  const [secondPlaceParticipantId, setSecondPlaceParticipantId] = useState('');
+  const [thirdPlaceParticipantId, setThirdPlaceParticipantId] = useState('');
+
+  // Modals & Messages
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
   const [disputeCategory, setDisputeCategory] = useState('RULES_DISAGREEMENT');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Live calculation preview state
+  const [previewCalculation, setPreviewCalculation] = useState<any | null>(null);
 
   useEffect(() => {
     if (matchId) fetchMatchDetails();
@@ -65,27 +103,52 @@ export default function RefereeMatchSheetPage() {
 
       setMatch(data);
 
-      // Initialize results mapping from participants
-      const initialMap: Record<string, { pointsEarned: number; rank?: number; isWinner: boolean }> = {};
-      if (data.participants && Array.isArray(data.participants)) {
-        data.participants.forEach((p: any) => {
-          initialMap[p.id] = {
-            pointsEarned: p.score || 0,
-            rank: p.rank || undefined,
-            isWinner: p.isWinner || false,
-          };
-        });
-      }
-      setEntryResults(initialMap);
-
-      if (data.starPlayerId) setSelectedStarPlayerId(data.starPlayerId);
-      if (data.starPlayerPoints !== undefined && data.starPlayerPoints !== null) {
-        setStarPlayerPoints(data.starPlayerPoints);
-      } else if (data.results?.[0]?.starPlayerPoints !== undefined) {
-        setStarPlayerPoints(data.results[0].starPlayerPoints);
-      }
-
+      if (data.stageType) setStageType(data.stageType);
+      if (data.matchCategory) setEventCategory(data.matchCategory);
       if (data.notes) setRefereeNotes(data.notes);
+
+      // Check if previous submitted result exists
+      const latestResult = data.results?.[0];
+      if (latestResult) {
+        if (latestResult.scoresSummary) setScoresSummary(latestResult.scoresSummary);
+        if (latestResult.refereeNotes) setRefereeNotes(latestResult.refereeNotes);
+        if (latestResult.stageType) setStageType(latestResult.stageType);
+        if (latestResult.eventCategory) setEventCategory(latestResult.eventCategory);
+
+        if (latestResult.resultPayload) {
+          try {
+            const p = JSON.parse(latestResult.resultPayload);
+            if (p.winnerParticipantId) setWinnerParticipantId(p.winnerParticipantId);
+            if (p.loserParticipantId) setLoserParticipantId(p.loserParticipantId);
+            if (p.topScorerPlayerId) setTopScorerPlayerId(p.topScorerPlayerId);
+            if (p.isTournamentPlacement) setIsBgmiTournamentPlacement(p.isTournamentPlacement);
+            if (p.totalTeamsParticipating) setTotalTeamsParticipating(p.totalTeamsParticipating);
+            if (p.firstPlaceParticipantId) {
+              setFirstPlaceParticipantId(p.firstPlaceParticipantId);
+              setBgmiFirstPlaceId(p.firstPlaceParticipantId);
+            }
+            if (p.secondPlaceParticipantId) {
+              setSecondPlaceParticipantId(p.secondPlaceParticipantId);
+              setBgmiSecondPlaceId(p.secondPlaceParticipantId);
+            }
+            if (p.thirdPlaceParticipantId) {
+              setThirdPlaceParticipantId(p.thirdPlaceParticipantId);
+              setBgmiThirdPlaceId(p.thirdPlaceParticipantId);
+            }
+            if (p.bgmiMvpPlayerId) setBgmiMvpPlayerId(p.bgmiMvpPlayerId);
+            if (p.bestBatsmanMenPlayerId) setBestBatsmanMenPlayerId(p.bestBatsmanMenPlayerId);
+            if (p.bestBatsmanWomenPlayerId) setBestBatsmanWomenPlayerId(p.bestBatsmanWomenPlayerId);
+            if (p.bestBowlerMenPlayerId) setBestBowlerMenPlayerId(p.bestBowlerMenPlayerId);
+            if (p.bestBowlerWomenPlayerId) setBestBowlerWomenPlayerId(p.bestBowlerWomenPlayerId);
+            if (p.bestFielderMenPlayerId) setBestFielderMenPlayerId(p.bestFielderMenPlayerId);
+            if (p.bestFielderWomenPlayerId) setBestFielderWomenPlayerId(p.bestFielderWomenPlayerId);
+            if (p.mostFoursPlayerId) setMostFoursPlayerId(p.mostFoursPlayerId);
+            if (p.mostSixesPlayerId) setMostSixesPlayerId(p.mostSixesPlayerId);
+            if (p.manOfTheTournamentMenPlayerId) setMotmMenPlayerId(p.manOfTheTournamentMenPlayerId);
+            if (p.manOfTheTournamentWomenPlayerId) setMotmWomenPlayerId(p.manOfTheTournamentWomenPlayerId);
+          } catch (e) {}
+        }
+      }
     } catch (err: any) {
       console.error(err);
       setMessage({ type: 'error', text: err.message });
@@ -94,63 +157,148 @@ export default function RefereeMatchSheetPage() {
     }
   };
 
-  const updateParticipantPoints = (participantId: string, points: number) => {
-    setEntryResults((prev) => ({
-      ...prev,
-      [participantId]: {
-        ...(prev[participantId] || { isWinner: false }),
-        pointsEarned: Math.max(0, points),
-      },
-    }));
-  };
+  const sportKey = useMemo(() => {
+    return normalizeSportKey(match?.sport?.name);
+  }, [match?.sport?.name]);
 
-  const updateParticipantRank = (participantId: string, rankNum: number, positionPointsMap?: Record<string, number>) => {
-    let autoPoints = entryResults[participantId]?.pointsEarned ?? 0;
-    if (positionPointsMap && positionPointsMap[rankNum.toString()] !== undefined) {
-      autoPoints = positionPointsMap[rankNum.toString()];
-    }
+  // All eligible players from participating rosters/houses
+  const eligiblePlayers = useMemo(() => {
+    return match?.eligibleStarPlayers || [];
+  }, [match?.eligibleStarPlayers]);
 
-    setEntryResults((prev) => ({
-      ...prev,
-      [participantId]: {
-        ...(prev[participantId] || { isWinner: false }),
-        rank: rankNum,
-        pointsEarned: autoPoints,
-        isWinner: rankNum === 1,
-      },
-    }));
-  };
+  const participants = useMemo(() => {
+    return match?.participants || [];
+  }, [match?.participants]);
+
+  // Recalculate automatic preview whenever inputs change
+  useEffect(() => {
+    if (!match || !sportKey) return;
+
+    let isMounted = true;
+    const calcInput: MatchCalculationInput = {
+      sportName: match.sport?.name || sportKey,
+      stageType,
+      eventCategory,
+      winnerParticipantId: winnerParticipantId || undefined,
+      loserParticipantId: loserParticipantId || undefined,
+      firstPlaceParticipantId: (sportKey === 'BGMI' ? bgmiFirstPlaceId : firstPlaceParticipantId) || undefined,
+      secondPlaceParticipantId: (sportKey === 'BGMI' ? bgmiSecondPlaceId : secondPlaceParticipantId) || undefined,
+      thirdPlaceParticipantId: (sportKey === 'BGMI' ? bgmiThirdPlaceId : thirdPlaceParticipantId) || undefined,
+      isTournamentPlacement: isBgmiTournamentPlacement,
+      totalTeamsParticipating: Number(totalTeamsParticipating) || participants.length,
+      bgmiMvpPlayerId: bgmiMvpPlayerId || undefined,
+      topScorerPlayerId: topScorerPlayerId || undefined,
+      bestBatsmanMenPlayerId: bestBatsmanMenPlayerId || undefined,
+      bestBatsmanWomenPlayerId: bestBatsmanWomenPlayerId || undefined,
+      bestBowlerMenPlayerId: bestBowlerMenPlayerId || undefined,
+      bestBowlerWomenPlayerId: bestBowlerWomenPlayerId || undefined,
+      bestFielderMenPlayerId: bestFielderMenPlayerId || undefined,
+      bestFielderWomenPlayerId: bestFielderWomenPlayerId || undefined,
+      mostFoursPlayerId: mostFoursPlayerId || undefined,
+      mostSixesPlayerId: mostSixesPlayerId || undefined,
+      manOfTheTournamentMenPlayerId: motmMenPlayerId || undefined,
+      manOfTheTournamentWomenPlayerId: motmWomenPlayerId || undefined,
+      scoresSummary,
+      refereeNotes,
+    };
+
+    calculateMatchPoints(calcInput, participants, eligiblePlayers, 0)
+      .then((res) => {
+        if (isMounted) setPreviewCalculation(res);
+      })
+      .catch((e) => console.error('Preview error:', e));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    match,
+    sportKey,
+    stageType,
+    eventCategory,
+    winnerParticipantId,
+    loserParticipantId,
+    topScorerPlayerId,
+    isBgmiTournamentPlacement,
+    totalTeamsParticipating,
+    bgmiFirstPlaceId,
+    bgmiSecondPlaceId,
+    bgmiThirdPlaceId,
+    bgmiMvpPlayerId,
+    bestBatsmanMenPlayerId,
+    bestBatsmanWomenPlayerId,
+    bestBowlerMenPlayerId,
+    bestBowlerWomenPlayerId,
+    bestFielderMenPlayerId,
+    bestFielderWomenPlayerId,
+    mostFoursPlayerId,
+    mostSixesPlayerId,
+    motmMenPlayerId,
+    motmWomenPlayerId,
+    firstPlaceParticipantId,
+    secondPlaceParticipantId,
+    thirdPlaceParticipantId,
+    scoresSummary,
+    refereeNotes,
+    participants,
+    eligiblePlayers,
+  ]);
 
   const handleSubmitResult = async () => {
-    if (!selectedStarPlayerId) {
-      alert('Star Player of the Match is mandatory! Please select exactly one participating player.');
-      return;
-    }
-
-    const pts = parseFloat(String(starPlayerPoints));
-    if (isNaN(pts) || pts < 0) {
-      alert('Please enter valid non-negative performance points for the Star Player.');
+    if (!scoresSummary.trim()) {
+      alert('Please enter a brief final match result summary (e.g. 2 - 1, or 21-18, 21-16).');
       return;
     }
 
     setSubmitting(true);
     try {
-      const formattedResults = Object.entries(entryResults).map(([pId, val]) => ({
-        participantId: pId,
-        pointsEarned: val.pointsEarned,
-        rank: val.rank,
-        isWinner: val.isWinner,
-      }));
+      const payload: any = {
+        sportName: match.sport?.name,
+        stageType,
+        eventCategory,
+        scoresSummary: scoresSummary.trim(),
+        refereeNotes: refereeNotes.trim(),
+      };
+
+      if (sportKey === 'FOOTBALL') {
+        payload.winnerParticipantId = winnerParticipantId || null;
+        payload.loserParticipantId = loserParticipantId || null;
+        payload.topScorerPlayerId = topScorerPlayerId || null;
+      } else if (sportKey === 'BGMI') {
+        payload.winnerParticipantId = winnerParticipantId || null;
+        payload.isTournamentPlacement = isBgmiTournamentPlacement;
+        payload.totalTeamsParticipating = Number(totalTeamsParticipating) || participants.length;
+        payload.firstPlaceParticipantId = bgmiFirstPlaceId || null;
+        payload.secondPlaceParticipantId = bgmiSecondPlaceId || null;
+        payload.thirdPlaceParticipantId = bgmiThirdPlaceId || null;
+        payload.bgmiMvpPlayerId = bgmiMvpPlayerId || null;
+      } else if (sportKey === 'CRICKET') {
+        payload.winnerParticipantId = winnerParticipantId || null;
+        payload.loserParticipantId = loserParticipantId || null;
+        payload.bestBatsmanMenPlayerId = bestBatsmanMenPlayerId || null;
+        payload.bestBatsmanWomenPlayerId = bestBatsmanWomenPlayerId || null;
+        payload.bestBowlerMenPlayerId = bestBowlerMenPlayerId || null;
+        payload.bestBowlerWomenPlayerId = bestBowlerWomenPlayerId || null;
+        payload.bestFielderMenPlayerId = bestFielderMenPlayerId || null;
+        payload.bestFielderWomenPlayerId = bestFielderWomenPlayerId || null;
+        payload.mostFoursPlayerId = mostFoursPlayerId || null;
+        payload.mostSixesPlayerId = mostSixesPlayerId || null;
+        payload.manOfTheTournamentMenPlayerId = motmMenPlayerId || null;
+        payload.manOfTheTournamentWomenPlayerId = motmWomenPlayerId || null;
+      } else if (sportKey === 'BADMINTON' || sportKey === 'CARROM') {
+        payload.eventCategory = eventCategory;
+        payload.firstPlaceParticipantId = firstPlaceParticipantId || null;
+        payload.secondPlaceParticipantId = secondPlaceParticipantId || null;
+        payload.thirdPlaceParticipantId = thirdPlaceParticipantId || null;
+      } else if (sportKey === 'CHESS') {
+        payload.firstPlaceParticipantId = firstPlaceParticipantId || null;
+        payload.secondPlaceParticipantId = secondPlaceParticipantId || null;
+      }
 
       const res = await fetch(`/api/matches/${match.id}/submit-result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          entryResults: formattedResults,
-          refereeNotes,
-          starPlayerId: selectedStarPlayerId,
-          starPlayerPoints: pts,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -203,17 +351,11 @@ export default function RefereeMatchSheetPage() {
     );
   }
 
-  // Parse sport configuration
-  let positionPointsMap: Record<string, number> | undefined;
-  try {
-    if (match.sport?.positionPoints) {
-      positionPointsMap = JSON.parse(match.sport.positionPoints);
-    }
-  } catch (e) {}
-
   const isSubmitted = match.status === 'SUBMITTED';
   const isCompleted = match.status === 'COMPLETED';
   const isReadOnly = isSubmitted || isCompleted;
+  const latestResult = match.results?.[0];
+  const isRejected = latestResult?.status === 'REJECTED' || match.notes?.includes('[Rejected by Admin]');
 
   return (
     <RefereeLayout>
@@ -258,6 +400,19 @@ export default function RefereeMatchSheetPage() {
           </div>
         )}
 
+        {/* If Rejected Alert */}
+        {isRejected && (
+          <div className="p-4 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-xs space-y-1">
+            <div className="flex items-center gap-2 font-extrabold text-amber-800">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <span>Submission Returned / Rejected by Admin</span>
+            </div>
+            <p className="text-amber-800/90 font-medium">
+              {latestResult?.rejectionReason || 'Please review the result entry, verify award recipients, and resubmit.'}
+            </p>
+          </div>
+        )}
+
         {/* Match Header Overview */}
         <div className="bg-navy-950 text-white rounded-2xl p-6 border border-navy-800 shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-navy-800 pb-4">
@@ -271,6 +426,16 @@ export default function RefereeMatchSheetPage() {
                   <span>{match.sport?.name}</span>
                 </span>
                 <span className="text-xs text-navy-400">• {match.round}</span>
+                {stageType === 'FINAL' && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-navy-950">
+                    Championship Final
+                  </span>
+                )}
+                {stageType === 'THIRD_PLACE' && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-700 text-amber-300">
+                    3rd Place Playoff
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-3 text-xs text-navy-300">
@@ -303,480 +468,971 @@ export default function RefereeMatchSheetPage() {
 
           <div className="mt-4 text-xs text-navy-300 flex items-center justify-between flex-wrap gap-2">
             <span>
-              <strong>Note:</strong> Live scoring is completed on the scoring platform. Record final points or positions earned below.
+              <strong>Official Scoring:</strong> Matches are officiated on ground. Select the final match result below — points are calculated and distributed across unique clubs automatically.
             </span>
-            <span className="text-[11px] text-amber-400 font-medium">
-              Points will be automatically distributed equally among unique participating clubs.
+            <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1">
+              <Shield className="w-3.5 h-3.5" />
+              Source of Truth: sports_points_distribution.pdf
             </span>
           </div>
         </div>
 
-        {/* Participating Entries & Unique-Club Points Distribution */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-navy-950 tracking-tight flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-600" />
-              <span>Participating Squads & Final Points Earned</span>
-            </h2>
-            <span className="text-xs text-slate-500">
-              {match.participants?.length || 0} Participating Entry/Entries
-            </span>
+        {/* SPORT-SPECIFIC RESULT ENTRY FORM */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h2 className="text-base font-extrabold text-navy-950 tracking-tight flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-600" />
+                <span>{match.sport?.name} Official Result Entry</span>
+              </h2>
+              <p className="text-xs text-slate-500">
+                Enter match outcome and award winners. Points will be automatically allocated by the backend.
+              </p>
+            </div>
+
+            {/* Stage Selector (League / Final / 3rd Place) */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-500 uppercase">Stage:</span>
+              <select
+                disabled={isReadOnly}
+                value={stageType}
+                onChange={(e) => setStageType(e.target.value as any)}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 text-navy-950 focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+              >
+                <option value="NORMAL">Normal Match / League</option>
+                <option value="FINAL">Championship Final (Placement Pts)</option>
+                <option value="THIRD_PLACE">3rd Place Playoff</option>
+              </select>
+            </div>
           </div>
 
-          {match.participants?.map((participant: any, index: number) => {
-            const resultState = entryResults[participant.id] || { pointsEarned: 0, rank: undefined, isWinner: false };
-            const pointsEarned = resultState.pointsEarned || 0;
+          {/* 1. FOOTBALL FORM */}
+          {sportKey === 'FOOTBALL' && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Winning Team *
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={winnerParticipantId}
+                    onChange={(e) => {
+                      const wId = e.target.value;
+                      setWinnerParticipantId(wId);
+                      // Auto-select other as loser if 2 teams
+                      if (participants.length === 2) {
+                        const other = participants.find((p: any) => p.id !== wId);
+                        if (other) setLoserParticipantId(other.id);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+                  >
+                    <option value="">-- Select Winner --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.club?.name} ({p.club?.code || 'Club'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            // Extract players and their club affiliations
-            const players = (participant.players || []).map((mpp: any) => ({
-              playerId: mpp.playerId,
-              playerName: mpp.player?.name,
-              clubId: mpp.clubId,
-              clubName: mpp.club?.name || 'Club',
-              clubCode: mpp.club?.code,
-            }));
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Losing Team
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={loserParticipantId}
+                    onChange={(e) => setLoserParticipantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+                  >
+                    <option value="">-- Select Loser (if decisive) --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.club?.name} ({p.club?.code || 'Club'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-            // Fallback for single club team or cricket team
-            if (players.length === 0 && participant.club) {
-              players.push({
-                playerId: participant.playerId || 'team',
-                playerName: participant.teamName || participant.club.name,
-                clubId: participant.clubId,
-                clubName: participant.club.name,
-                clubCode: participant.club.code,
-              });
-            }
-
-            // Real-time calculation using the reusable distribution engine
-            const dist = calculateClubPointsDistribution(pointsEarned, players, index);
-
-            return (
-              <div
-                key={participant.id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5"
-              >
-                {/* Entry Title & Roster Breakdown */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center font-black text-sm text-slate-700">
-                      {participant.rank ? `#${participant.rank}` : `E${index + 1}`}
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-base text-navy-950 flex items-center gap-2">
-                        <span>{participant.teamName || participant.club?.name || `Entry ${index + 1}`}</span>
-                        {participant.cricketTeam && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">
-                            Parent Club: {participant.club?.name}
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        {players.length} participating athlete{players.length === 1 ? '' : 's'} •{' '}
-                        <strong className="text-slate-700">{dist.uniqueClubCount} unique club{dist.uniqueClubCount === 1 ? '' : 's'}</strong>
-                      </p>
-                    </div>
+              {/* Top Scorer Award */}
+              <div className="p-4 rounded-xl bg-amber-50/40 border border-amber-200/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Medal className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-extrabold text-amber-950 uppercase">
+                      Top Scorer Award (15 Points)
+                    </span>
                   </div>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                    Official PDF Award
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800/80">
+                  Select the participating athlete who earned the tournament Top Scorer award. Points credit directly to their club.
+                </p>
+                <select
+                  disabled={isReadOnly}
+                  value={topScorerPlayerId}
+                  onChange={(e) => setTopScorerPlayerId(e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-200 rounded-xl bg-white text-xs font-bold text-navy-950 focus:ring-2 focus:ring-amber-500 outline-none disabled:opacity-60"
+                >
+                  <option value="">-- Optional: No Top Scorer Award for this Match --</option>
+                  {eligiblePlayers.map((pl: any) => (
+                    <option key={pl.id} value={pl.id}>
+                      {pl.name} — House {pl.clubName} ({pl.teamName || pl.clubCode})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
-                  {/* Points Input Control */}
-                  <div className="flex items-center gap-3 self-end sm:self-auto">
-                    {positionPointsMap && (
-                      <div className="flex items-center gap-1 text-xs">
-                        <span className="font-bold text-slate-500">Position:</span>
-                        <select
-                          disabled={isReadOnly}
-                          value={resultState.rank || ''}
-                          onChange={(e) =>
-                            updateParticipantRank(
-                              participant.id,
-                              parseInt(e.target.value, 10),
-                              positionPointsMap
-                            )
-                          }
-                          className="px-2.5 py-1.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-800 font-bold text-xs outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-60"
-                        >
-                          <option value="">Select Rank</option>
-                          {Object.keys(positionPointsMap).map((pos) => (
-                            <option key={pos} value={pos}>
-                              #{pos} ({positionPointsMap[pos]} pts)
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+          {/* 2. BGMI FORM */}
+          {sportKey === 'BGMI' && (
+            <div className="space-y-5">
+              {/* Placement Toggle */}
+              <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/80 flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <span className="text-xs font-extrabold text-blue-950 uppercase block">
+                    Tournament Placement Mode
+                  </span>
+                  <span className="text-[11px] text-blue-800/80">
+                    Toggle ON if this match decides the overall championship podium (1st 20 pts, 2nd 12 pts, 3rd 8 pts if 7 teams).
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    disabled={isReadOnly}
+                    checked={isBgmiTournamentPlacement}
+                    onChange={(e) => setIsBgmiTournamentPlacement(e.target.checked)}
+                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-bold text-blue-900">Award Overall Placements</span>
+                </label>
+              </div>
 
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-                        Points Earned:
-                      </span>
+              {/* Normal match winner */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  Match Winner (WWCD — 8 Points) *
+                </label>
+                <select
+                  disabled={isReadOnly}
+                  value={winnerParticipantId}
+                  onChange={(e) => setWinnerParticipantId(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+                >
+                  <option value="">-- Select Match Winner (WWCD) --</option>
+                  {participants.map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.teamName || p.club?.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Overall Tournament Placements */}
+              {isBgmiTournamentPlacement && (
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 pb-2">
+                    <span className="text-xs font-extrabold text-navy-950 uppercase">
+                      Overall Tournament Placements (Podium)
+                    </span>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-bold text-slate-600">Total Teams:</span>
                       <input
                         type="number"
-                        step="0.01"
-                        min="0"
                         disabled={isReadOnly}
-                        value={pointsEarned}
-                        onChange={(e) =>
-                          updateParticipantPoints(participant.id, parseFloat(e.target.value) || 0)
-                        }
-                        className="w-28 px-3 py-1.5 border border-slate-200 rounded-lg text-navy-950 font-mono font-black text-right text-base outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-60 bg-slate-50"
+                        value={totalTeamsParticipating}
+                        onChange={(e) => setTotalTeamsParticipating(parseInt(e.target.value, 10) || 0)}
+                        className="w-16 px-2 py-1 text-xs font-bold border border-slate-300 rounded bg-white"
+                        min="1"
+                        max="20"
                       />
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-amber-700 uppercase mb-1">
+                        Overall Winner (20 pts)
+                      </label>
+                      <select
+                        disabled={isReadOnly}
+                        value={bgmiFirstPlaceId}
+                        onChange={(e) => setBgmiFirstPlaceId(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white text-xs font-bold text-navy-950"
+                      >
+                        <option value="">-- 1st Place --</option>
+                        {participants.map((p: any) => (
+                          <option key={p.id} value={p.id}>
+                            {p.teamName || p.club?.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                        Runner-Up (12 pts)
+                      </label>
+                      <select
+                        disabled={isReadOnly}
+                        value={bgmiSecondPlaceId}
+                        onChange={(e) => setBgmiSecondPlaceId(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white text-xs font-bold text-navy-950"
+                      >
+                        <option value="">-- 2nd Place --</option>
+                        {participants.map((p: any) => (
+                          <option key={p.id} value={p.id}>
+                            {p.teamName || p.club?.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-amber-900 uppercase mb-1">
+                        3rd Place (8 pts if 7 teams)
+                      </label>
+                      <select
+                        disabled={isReadOnly || totalTeamsParticipating !== 7}
+                        value={bgmiThirdPlaceId}
+                        onChange={(e) => setBgmiThirdPlaceId(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white text-xs font-bold text-navy-950 disabled:opacity-40"
+                      >
+                        <option value="">-- 3rd Place --</option>
+                        {participants.map((p: any) => (
+                          <option key={p.id} value={p.id}>
+                            {p.teamName || p.club?.name}
+                          </option>
+                        ))}
+                      </select>
+                      {totalTeamsParticipating !== 7 && (
+                        <span className="text-[10px] text-slate-400 mt-1 block">
+                          Only awarded if exactly 7 teams participate (current: {totalTeamsParticipating}).
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* BGMI MVP */}
+              <div className="p-4 rounded-xl bg-amber-50/40 border border-amber-200/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Medal className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-extrabold text-amber-950 uppercase">
+                      Tournament MVP Award (5 Points)
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                    Official PDF Award
+                  </span>
+                </div>
+                <select
+                  disabled={isReadOnly}
+                  value={bgmiMvpPlayerId}
+                  onChange={(e) => setBgmiMvpPlayerId(e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-200 rounded-xl bg-white text-xs font-bold text-navy-950 focus:ring-2 focus:ring-amber-500 outline-none disabled:opacity-60"
+                >
+                  <option value="">-- Optional: No MVP Award for this Match --</option>
+                  {eligiblePlayers.map((pl: any) => (
+                    <option key={pl.id} value={pl.id}>
+                      {pl.name} — House {pl.clubName} ({pl.teamName || pl.clubCode})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* 3. CRICKET FORM */}
+          {sportKey === 'CRICKET' && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Winning Team *
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={winnerParticipantId}
+                    onChange={(e) => {
+                      const wId = e.target.value;
+                      setWinnerParticipantId(wId);
+                      if (participants.length === 2) {
+                        const other = participants.find((p: any) => p.id !== wId);
+                        if (other) setLoserParticipantId(other.id);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+                  >
+                    <option value="">-- Select Winner --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.cricketTeam?.name || p.club?.name} ({p.club?.name || 'House'})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Participating Players with Club Affiliations */}
-                {participant.players && participant.players.length > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Losing Team
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={loserParticipantId}
+                    onChange={(e) => setLoserParticipantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+                  >
+                    <option value="">-- Select Loser --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.cricketTeam?.name || p.club?.name} ({p.club?.name || 'House'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Cricket Individual Awards */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <h3 className="text-xs font-extrabold text-navy-950 uppercase flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-500" />
+                    <span>Cricket Individual Awards (PDF Rules)</span>
+                  </h3>
+                  <span className="text-[10px] text-slate-500 font-semibold">
+                    Points credit directly to recipient&apos;s house
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
-                      Participating Players & Respective Club Affiliations:
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
-                      {participant.players.map((mpp: any) => (
-                        <div
-                          key={mpp.id}
-                          className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs"
-                        >
-                          <span className="font-bold text-slate-800 truncate mr-2">
-                            {mpp.player?.name}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-white border border-slate-200 text-slate-700 shrink-0">
-                            {mpp.club?.name}
-                          </span>
-                        </div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Best Batsman — Men (10 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={bestBatsmanMenPlayerId}
+                      onChange={(e) => setBestBatsmanMenPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
                       ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Best Batsman — Women (5 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={bestBatsmanWomenPlayerId}
+                      onChange={(e) => setBestBatsmanWomenPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Best Bowler — Men (10 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={bestBowlerMenPlayerId}
+                      onChange={(e) => setBestBowlerMenPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Best Bowler — Women (5 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={bestBowlerWomenPlayerId}
+                      onChange={(e) => setBestBowlerWomenPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Best Fielder — Men (10 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={bestFielderMenPlayerId}
+                      onChange={(e) => setBestFielderMenPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Best Fielder — Women (5 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={bestFielderWomenPlayerId}
+                      onChange={(e) => setBestFielderWomenPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Most Fours (5 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={mostFoursPlayerId}
+                      onChange={(e) => setMostFoursPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Most Sixes (5 pts)
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={mostSixesPlayerId}
+                      onChange={(e) => setMostSixesPlayerId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white"
+                    >
+                      <option value="">-- None / Not Applicable --</option>
+                      {eligiblePlayers.map((pl: any) => (
+                        <option key={pl.id} value={pl.id}>
+                          {pl.name} ({pl.clubName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Tournament Level Man of Tournament (Finals) */}
+                {stageType === 'FINAL' && (
+                  <div className="pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-amber-700 mb-1">
+                        Man of the Tournament — Men (15 pts)
+                      </label>
+                      <select
+                        disabled={isReadOnly}
+                        value={motmMenPlayerId}
+                        onChange={(e) => setMotmMenPlayerId(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-amber-300 rounded-lg bg-white text-xs font-bold"
+                      >
+                        <option value="">-- Select Player --</option>
+                        {eligiblePlayers.map((pl: any) => (
+                          <option key={pl.id} value={pl.id}>
+                            {pl.name} ({pl.clubName})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-amber-700 mb-1">
+                        Man of the Tournament — Women (10 pts)
+                      </label>
+                      <select
+                        disabled={isReadOnly}
+                        value={motmWomenPlayerId}
+                        onChange={(e) => setMotmWomenPlayerId(e.target.value)}
+                        className="w-full px-2.5 py-1.5 border border-amber-300 rounded-lg bg-white text-xs font-bold"
+                      >
+                        <option value="">-- Select Player --</option>
+                        {eligiblePlayers.map((pl: any) => (
+                          <option key={pl.id} value={pl.id}>
+                            {pl.name} ({pl.clubName})
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
 
-                {/* AUTOMATIC CLUB-WISE POINTS DISTRIBUTION PREVIEW TABLE */}
-                <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-navy-950 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Automatic Unique-Club Points Distribution Calculation:</span>
-                    </span>
-                    <span className="font-mono text-xs font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                      Formula: {pointsEarned.toFixed(2)} pts ÷ {dist.uniqueClubCount} unique club{dist.uniqueClubCount === 1 ? '' : 's'}
-                    </span>
-                  </div>
+          {/* 4. BADMINTON & CARROM FORM */}
+          {(sportKey === 'BADMINTON' || sportKey === 'CARROM') && (
+            <div className="space-y-5">
+              {/* Event Category Selector */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <label className="block text-xs font-extrabold text-navy-950 uppercase">
+                  Event Category (Official PDF Matrix) *
+                </label>
+                <select
+                  disabled={isReadOnly}
+                  value={eventCategory}
+                  onChange={(e) => setEventCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white text-xs font-bold text-navy-950 outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-60"
+                >
+                  <option value="Men's singles / doubles">Men&apos;s singles / doubles (1st: 10, 2nd: 7, 3rd: 5)</option>
+                  <option value="Women's singles / doubles">Women&apos;s singles / doubles (1st: 10, 2nd: 7, 3rd: 5)</option>
+                  <option value="Mixed">Mixed (1st: 20, 2nd: 14, 3rd: 10)</option>
+                  <option value="MD">MD — Official Category Label (1st: 20, 2nd: 14, 3rd: 10)</option>
+                  <option value="WD">WD — Official Category Label (1st: 20, 2nd: 14, 3rd: 10)</option>
+                </select>
+                <span className="text-[11px] text-slate-500 block">
+                  {OFFICIAL_CATEGORY_LABELS[eventCategory] || 'Official championship category from sports_points_distribution.pdf'}
+                </span>
+              </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead className="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-200">
-                        <tr>
-                          <th className="py-1.5 px-3">Unique Club</th>
-                          <th className="py-1.5 px-3 text-center">Players Contributed</th>
-                          <th className="py-1.5 px-3 text-right">Distributed Points</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {dist.allocations.map((alloc) => (
-                          <tr key={alloc.clubId} className="hover:bg-white/60">
-                            <td className="py-2 px-3 font-bold text-slate-800 flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                              <span>{alloc.clubName}</span>
-                            </td>
-                            <td className="py-2 px-3 text-center font-mono text-slate-600">
-                              {alloc.playersContributed} athlete{alloc.playersContributed === 1 ? '' : 's'}
-                            </td>
-                            <td className="py-2 px-3 text-right font-mono font-black text-navy-950">
-                              {alloc.pointsFormatted} pts
-                              {alloc.isRemainderWinner && (
-                                <span className="ml-1 text-[10px] text-amber-600 font-bold" title="Fair remainder cent (+0.01)">
-                                  (+0.01 rot)
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr className="border-t border-slate-200 font-extrabold text-navy-950">
-                          <td className="py-2 px-3">Sum Total Distributed:</td>
-                          <td className="py-2 px-3 text-center font-mono">{dist.totalPlayers} total</td>
-                          <td className="py-2 px-3 text-right font-mono text-emerald-600">
-                            {dist.totalDistributed.toFixed(2)} pts
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
+              {/* Placement selection */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-amber-700 uppercase mb-1">
+                    1st Place (Champion) *
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={firstPlaceParticipantId}
+                    onChange={(e) => setFirstPlaceParticipantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950"
+                  >
+                    <option value="">-- Select 1st Place --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.club?.name || `Entry ${p.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  <p className="text-[11px] text-slate-500 italic">{dist.explanation}</p>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+                    2nd Place (Runner-up) *
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={secondPlaceParticipantId}
+                    onChange={(e) => setSecondPlaceParticipantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950"
+                  >
+                    <option value="">-- Select 2nd Place --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.club?.name || `Entry ${p.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-amber-900 uppercase mb-1">
+                    3rd Place (Bronze / Playoff)
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={thirdPlaceParticipantId}
+                    onChange={(e) => setThirdPlaceParticipantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950"
+                  >
+                    <option value="">-- Optional: 3rd Place --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.club?.name || `Entry ${p.id}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          )}
 
-        {/* ⭐ STAR PLAYER OF THE MATCH (Mandatory 1:1 Rule) */}
-        <div className="bg-gradient-to-br from-[#141822] to-[#0A0D14] text-white rounded-2xl border border-[#C6A04A]/50 shadow-lg p-6 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#C6A04A]/20 border border-[#C6A04A]/60 flex items-center justify-center text-[#C6A04A]">
-                <Star className="w-5 h-5 fill-[#C6A04A]" />
+          {/* 5. CHESS FORM */}
+          {sportKey === 'CHESS' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-amber-700 uppercase mb-1">
+                    1st Place Winner (10 Points) *
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={firstPlaceParticipantId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setFirstPlaceParticipantId(id);
+                      if (participants.length === 2) {
+                        const other = participants.find((p: any) => p.id !== id);
+                        if (other) setSecondPlaceParticipantId(other.id);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950"
+                  >
+                    <option value="">-- Select 1st Place (10 pts) --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.player?.name || p.club?.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+                    2nd Place Winner (5 Points) *
+                  </label>
+                  <select
+                    disabled={isReadOnly}
+                    value={secondPlaceParticipantId}
+                    onChange={(e) => setSecondPlaceParticipantId(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950"
+                  >
+                    <option value="">-- Select 2nd Place (5 pts) --</option>
+                    {participants.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.teamName || p.player?.name || p.club?.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-                  <span>Star Player of the Match</span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#C6A04A] text-[#0A0D14]">
-                    Mandatory • Exactly 1 Athlete
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-300">
-                  Nominate exactly ONE standout athlete from the participating squads/teams of this match.
-                </p>
-              </div>
             </div>
+          )}
 
-            <div className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px] text-amber-300 font-semibold self-start sm:self-auto flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-[#C6A04A]" />
-              <span>Individual Player Leaderboard</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Star Player Dropdown */}
+          {/* Common Result Summary & Notes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
             <div>
-              <label className="block text-xs font-bold text-[#F3D787] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" />
-                <span>Nominate Star Player *</span>
-              </label>
-              <select
-                disabled={isReadOnly}
-                value={selectedStarPlayerId}
-                onChange={(e) => setSelectedStarPlayerId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#080A0E] border border-white/20 text-white font-bold text-xs focus:ring-2 focus:ring-[#C6A04A] focus:border-[#C6A04A] outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <option value="">-- Select Participating Athlete --</option>
-                {(match.eligibleStarPlayers || []).map((pl: any) => (
-                  <option key={pl.id} value={pl.id}>
-                    {pl.name} — House {pl.clubName || pl.clubCode} ({pl.teamName})
-                  </option>
-                ))}
-              </select>
-              <p className="text-[10px] text-slate-400 mt-1">
-                Filter strictly displays only players who participated in this specific fixture. Unrelated house athletes are excluded.
-              </p>
-            </div>
-
-            {/* Individual Performance Points Input */}
-            <div>
-              <label className="block text-xs font-bold text-[#F3D787] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#C6A04A]" />
-                <span>Star Player Individual Performance Points *</span>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                Match Result / Score Summary *
               </label>
               <input
-                type="number"
-                step="0.5"
-                min="0"
+                type="text"
                 disabled={isReadOnly}
-                placeholder="e.g. 45"
-                value={starPlayerPoints}
-                onChange={(e) => setStarPlayerPoints(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#080A0E] border border-white/20 text-[#F3D787] font-mono font-black text-sm focus:ring-2 focus:ring-[#C6A04A] focus:border-[#C6A04A] outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                value={scoresSummary}
+                onChange={(e) => setScoresSummary(e.target.value)}
+                placeholder="e.g. 2 - 1 (FT), or 21-18, 21-16, or Nex Blitz won by 14 runs"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
               />
-              <p className="text-[10px] text-slate-400 mt-1">
-                Points awarded strictly to this individual athlete. Must be greater than or equal to 0.
-              </p>
             </div>
-          </div>
 
-          {/* Point System Isolation Notice */}
-          <div className="p-3.5 rounded-xl bg-white/[0.04] border border-[#C6A04A]/30 text-xs text-slate-200 flex items-start gap-2.5">
-            <Shield className="w-4 h-4 text-[#C6A04A] shrink-0 mt-0.5" />
-            <div className="text-[11px] leading-relaxed">
-              <strong className="text-white">Strict Point Isolation Rule:</strong> Individual performance points belong exclusively to this player&apos;s personal season record. They are <strong>NEVER added or mixed with House Championship points</strong>. The automatic house championship points distribution shown above continues independently.
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                Referee Officiating Notes (Optional)
+              </label>
+              <input
+                type="text"
+                disabled={isReadOnly}
+                value={refereeNotes}
+                onChange={(e) => setRefereeNotes(e.target.value)}
+                placeholder="Official notes, incident logs, or ground conditions"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs text-navy-950 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
+              />
             </div>
           </div>
         </div>
 
-        {/* Referee Official Observations & Submit Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
+        {/* AUTOMATIC POINT CALCULATION PREVIEW */}
+        {previewCalculation && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <h3 className="text-sm font-extrabold text-navy-950 uppercase tracking-wider">
+                  Automatic Point Calculation & Club Distribution Preview
+                </h3>
+              </div>
+              <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                Official PDF Logic Applied
+              </span>
+            </div>
+
+            {/* Team/Squad Distributions */}
+            <div className="space-y-3">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                1. Team Points & Unique-Club Distribution:
+              </span>
+              {previewCalculation.calculatedDistributions.length === 0 ? (
+                <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-500 text-center font-medium">
+                  Select a winning participant or placement above to preview automatic point calculation.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {previewCalculation.calculatedDistributions.map((dist: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    >
+                      <div>
+                        <div className="font-extrabold text-navy-950 flex items-center gap-2">
+                          <span>{dist.teamName}</span>
+                          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono font-bold text-[11px]">
+                            {dist.originalPoints} pts earned
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{dist.explanation}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {dist.allocations.map((alloc: any, aIdx: number) => (
+                          <div
+                            key={aIdx}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs text-[11px] font-bold flex items-center gap-1.5"
+                          >
+                            <span className="text-slate-700">{alloc.clubName}:</span>
+                            <span className="font-mono text-navy-950 font-black">{alloc.pointsFormatted} pts</span>
+                            {alloc.isRemainderWinner && (
+                              <span className="text-[9px] text-amber-600 font-extrabold" title="Fair Remainder Cent">
+                                (+0.01¢)
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Individual Awards Allocation */}
+            {previewCalculation.individualAwards.length > 0 && (
+              <div className="space-y-3 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                  2. Individual Award Allocations:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {previewCalculation.individualAwards.map((aw: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/40 flex items-center justify-between"
+                    >
+                      <div>
+                        <span className="font-extrabold text-amber-950 block">{aw.awardTitle}</span>
+                        <span className="text-[11px] text-slate-600">
+                          {aw.playerName} (House {aw.clubName})
+                        </span>
+                      </div>
+                      <span className="font-mono text-sm font-black text-amber-900 bg-amber-100 px-2.5 py-1 rounded-lg">
+                        +{aw.points} pts
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Total Club Points Breakdown */}
+            {Object.keys(previewCalculation.clubPointsBreakdown).length > 0 && (
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                  3. Total Points Credited to Houses:
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                  {Object.entries(previewCalculation.clubPointsBreakdown).map(([cId, cInfo]: [string, any]) => (
+                    <div key={cId} className="p-3 rounded-xl bg-navy-950 text-white flex flex-col justify-between">
+                      <span className="text-[11px] font-bold text-slate-300 truncate">{cInfo.clubName}</span>
+                      <div className="mt-1 flex items-baseline justify-between">
+                        <span className="font-mono text-base font-black text-amber-400">
+                          {cInfo.totalPoints.toFixed(2)}
+                        </span>
+                        <span className="text-[9px] text-slate-400 uppercase font-semibold">pts</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Submit Actions */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex items-center justify-between flex-wrap gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Referee Official Notes & Match Summary
-            </label>
-            <textarea
-              rows={3}
-              disabled={isReadOnly}
-              value={refereeNotes}
-              onChange={(e) => setRefereeNotes(e.target.value)}
-              placeholder="e.g. Competition conducted under official house championship rules. No technical infractions."
-              className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 outline-none disabled:bg-slate-50"
-            />
+            <h4 className="text-xs font-bold text-navy-950">
+              {isSubmitted ? 'Result Submitted for Verification' : isCompleted ? 'Result Approved & Finalized' : 'Ready to Submit Match Result?'}
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              {isSubmitted
+                ? 'This match result is currently awaiting Admin approval.'
+                : isCompleted
+                ? 'Points have been approved and posted to the official club leaderboard.'
+                : 'Backend will verify points against official rules and notify tournament admins for verification.'}
+            </p>
           </div>
 
           {!isReadOnly && (
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
-              <span className="text-xs text-slate-500">
-                Submitted result and Star Player nomination will be routed to the Tournament Director / Admin for verification.
-              </span>
-
-              <button
-                type="button"
-                onClick={() => setIsConfirmModalOpen(true)}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-2 transition"
-              >
-                <Check className="w-4 h-4 text-white" />
-                <span>Submit Result for Admin Review</span>
-              </button>
-            </div>
-          )}
-
-          {isSubmitted && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Result and nominated Star Player have been submitted. Awaiting Admin review and final approval.</span>
-            </div>
-          )}
-
-          {isCompleted && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Match completed! Official points approved by Admin and credited to both the House Leaderboard and the Player Leaderboard.</span>
-            </div>
+            <button
+              onClick={() => setIsConfirmModalOpen(true)}
+              disabled={submitting}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md transition disabled:opacity-50"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{submitting ? 'Submitting Result...' : 'Submit Result for Admin Approval'}</span>
+            </button>
           )}
         </div>
 
         {/* Confirmation Modal */}
         {isConfirmModalOpen && (
           <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
-              <div className="p-5 bg-navy-950 text-white flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                  <h3 className="font-bold text-sm">Confirm Result Submission</h3>
-                </div>
-                <button onClick={() => setIsConfirmModalOpen(false)} className="text-slate-300 hover:text-white p-1">
-                  <X className="w-5 h-5" />
-                </button>
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+              <div className="flex items-center gap-2 text-navy-950 font-extrabold text-sm border-b border-slate-100 pb-3">
+                <Shield className="w-4 h-4 text-blue-600" />
+                <span>Confirm Official Match Result Submission</span>
               </div>
 
-              <div className="p-6 space-y-4 text-xs">
-                <p className="text-slate-600 leading-relaxed">
-                  Are you ready to submit the final points for <strong>{match.matchCode} ({match.sport?.name})</strong>?
+              <div className="text-xs text-slate-600 space-y-2">
+                <p>
+                  You are submitting the official match result for <strong>{match.matchCode}</strong> ({match.sport?.name}).
                 </p>
-
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                  {Object.entries(entryResults).map(([pId, val]) => {
-                    const part = match.participants?.find((p: any) => p.id === pId);
-                    return (
-                      <div key={pId} className="flex items-center justify-between">
-                        <span className="font-medium text-slate-700">{part?.teamName || part?.club?.name}</span>
-                        <span className="font-mono font-bold text-navy-950">{val.pointsEarned.toFixed(2)} pts</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Star Player Nomination Summary */}
-                {selectedStarPlayerId && (
-                  <div className="p-3 bg-gradient-to-r from-[#141822] to-[#0A0D14] border border-[#C6A04A]/40 rounded-xl text-white space-y-1">
-                    <div className="flex items-center gap-1.5 text-[#F3D787] font-bold text-[11px]">
-                      <Star className="w-3.5 h-3.5 fill-[#C6A04A] text-[#C6A04A]" />
-                      <span>Nominated Star Player:</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs pt-0.5">
-                      <span className="font-semibold text-slate-200">
-                        {match.eligibleStarPlayers?.find((pl: any) => pl.id === selectedStarPlayerId)?.name || 'Selected Athlete'}
-                        <span className="text-[10px] text-slate-400 block">
-                          House: {match.eligibleStarPlayers?.find((pl: any) => pl.id === selectedStarPlayerId)?.clubName}
-                        </span>
-                      </span>
-                      <span className="font-mono font-black text-[#F3D787] text-sm">
-                        {starPlayerPoints} individual pts
-                      </span>
-                    </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] space-y-1">
+                  <div>
+                    <strong>Summary:</strong> {scoresSummary || 'N/A'}
                   </div>
-                )}
-
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] flex items-start gap-2">
-                  <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                  <span>
-                    This submission will be forwarded to the Admin panel. Both House Championship points and Star Player individual points will be officially credited immediately upon Admin approval.
-                  </span>
+                  <div>
+                    <strong>Stage:</strong> {stageType}
+                  </div>
+                  {eventCategory && (
+                    <div>
+                      <strong>Category:</strong> {eventCategory}
+                    </div>
+                  )}
                 </div>
+                <p className="text-slate-500 text-[11px]">
+                  Points will be calculated automatically according to official PDF rules and submitted to Administrators for approval.
+                </p>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsConfirmModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 text-xs"
+                  disabled={submitting}
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
-                  Back to Edit
+                  Cancel
                 </button>
                 <button
                   type="button"
-                  disabled={submitting}
                   onClick={handleSubmitResult}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs shadow-sm flex items-center gap-1.5 disabled:opacity-60"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white rounded-xl text-xs font-extrabold shadow-sm transition"
                 >
-                  <Check className="w-4 h-4" />
-                  {submitting ? 'Submitting...' : 'Confirm & Submit'}
+                  {submitting ? 'Submitting...' : 'Confirm & Submit to Admin'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Dispute Reporting Modal */}
+        {/* Dispute Modal */}
         {isDisputeModalOpen && (
           <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
-              <div className="p-5 bg-red-950 text-white flex items-center justify-between border-b border-red-900">
-                <div className="flex items-center gap-2">
-                  <Flag className="w-5 h-5 text-red-400" />
-                  <h3 className="font-bold text-sm">Report Match Issue / Dispute</h3>
-                </div>
-                <button onClick={() => setIsDisputeModalOpen(false)} className="text-slate-300 hover:text-white p-1">
-                  <X className="w-5 h-5" />
-                </button>
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+              <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm border-b border-slate-100 pb-3">
+                <Flag className="w-4 h-4 text-red-600" />
+                <span>Report Match Issue or Technical Dispute</span>
               </div>
 
-              <div className="p-6 space-y-4 text-xs">
+              <div className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Issue Classification:</label>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                    Dispute Category
+                  </label>
                   <select
                     value={disputeCategory}
                     onChange={(e) => setDisputeCategory(e.target.value)}
-                    className="w-full p-2 border border-slate-200 rounded-lg text-xs font-medium"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs font-bold"
                   >
-                    <option value="RULES_DISAGREEMENT">Rules Disagreement / Rule Challenge</option>
-                    <option value="UNSPORTSMANLIKE_CONDUCT">Unsportsmanlike Conduct</option>
-                    <option value="TECHNICAL_INCIDENT">Technical / Network Glitch (Esports)</option>
-                    <option value="EQUIPMENT_FAILURE">Equipment or Venue Issue</option>
-                    <option value="ELIGIBILITY_PROTEST">Player Eligibility Protest</option>
+                    <option value="RULES_DISAGREEMENT">Rules Disagreement / Interpretation</option>
+                    <option value="PLAYER_INELIGIBILITY">Player Ineligibility / Roster Issue</option>
+                    <option value="EQUIPMENT_GROUND_FAILURE">Weather / Equipment / Ground Failure</option>
+                    <option value="MISCONDUCT">Unsportsmanlike Conduct / Foul Play</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Incident Details:</label>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                    Detailed Notes *
+                  </label>
                   <textarea
-                    rows={4}
+                    rows={3}
                     value={disputeReason}
                     onChange={(e) => setDisputeReason(e.target.value)}
-                    placeholder="Provide details about the incident, teams involved, and actions taken..."
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="Provide detailed incident summary for tournament director..."
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs"
                   />
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsDisputeModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-100 text-xs"
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleReportDispute}
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-lg text-xs shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-extrabold shadow-sm transition"
                 >
-                  <Flag className="w-4 h-4" />
-                  Submit Report
+                  Submit Dispute
                 </button>
               </div>
             </div>
