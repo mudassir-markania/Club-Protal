@@ -285,18 +285,16 @@ const HERO_SPORTS = [
 ];
 
 export default function HomePage() {
-  // Multi-Sport Hero Carousel State
+  // Multi-Sport Hero Carousel State (Fast 2.5s cycle for snappy showcase)
   const [heroIndex, setHeroIndex] = useState(0);
-  const [isHeroPaused, setIsHeroPaused] = useState(false);
   const activeHero = HERO_SPORTS[heroIndex];
 
   useEffect(() => {
-    if (isHeroPaused) return;
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % HERO_SPORTS.length);
-    }, 6000);
+    }, 2500);
     return () => clearInterval(interval);
-  }, [isHeroPaused]);
+  }, []);
 
   // UI interactive state
   const [selectedHouse, setSelectedHouse] = useState<(typeof HOUSES_DATA)[0] | null>(null);
@@ -329,16 +327,25 @@ export default function HomePage() {
           {/* 2. HERO SECTION (MULTI-SPORT STADIUM SHOWCASE - H-SCREEN) */}
           {/* ======================================================== */}
           <section
-            onMouseEnter={() => setIsHeroPaused(true)}
-            onMouseLeave={() => setIsHeroPaused(false)}
             className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
           >
-            {/* Multi-Sport Stadium Backgrounds with Smooth Cross-Fade */}
+            {/* Live Fast Progress Bar Indicator */}
+            <div className="absolute top-0 left-0 right-0 z-30 h-1 bg-white/10 overflow-hidden">
+              <div
+                key={heroIndex}
+                className="h-full bg-gradient-to-r from-[#eb6905] via-[#0051d5] to-[#eb6905]"
+                style={{
+                  animation: 'heroProgress 2.5s linear forwards',
+                }}
+              />
+            </div>
+
+            {/* Multi-Sport Stadium Backgrounds with Fast Snappy 500ms Cross-Fade */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               {HERO_SPORTS.map((sport, idx) => (
                 <img
                   key={sport.id}
-                  className={`absolute inset-0 w-full h-full object-cover object-center scale-105 transition-all duration-1000 ease-in-out ${
+                  className={`absolute inset-0 w-full h-full object-cover object-center scale-105 transition-all duration-500 ease-out ${
                     idx === heroIndex ? 'opacity-90 scale-100' : 'opacity-0 scale-105 pointer-events-none'
                   }`}
                   alt={sport.name}
@@ -391,20 +398,26 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Discipline Switcher Pill Dock */}
+              {/* Discipline Switcher Pill Dock with Chevron Arrows */}
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
                 <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#808dc2] font-manrope mr-1 hidden md:inline">
                   Select Discipline:
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setHeroIndex((prev) => (prev - 1 + HERO_SPORTS.length) % HERO_SPORTS.length)}
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer mr-0.5"
+                  title="Previous Sport"
+                  aria-label="Previous Sport"
+                >
+                  <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+                </button>
                 {HERO_SPORTS.map((s, idx) => {
                   const active = idx === heroIndex;
                   return (
                     <button
                       key={s.id}
-                      onClick={() => {
-                        setHeroIndex(idx);
-                        setIsHeroPaused(true);
-                      }}
+                      onClick={() => setHeroIndex(idx)}
                       className={`px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-manrope font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                         active
                           ? 'bg-white text-[#000f3f] shadow-lg scale-105 ring-2 ring-white/50'
@@ -416,6 +429,15 @@ export default function HomePage() {
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => setHeroIndex((prev) => (prev + 1) % HERO_SPORTS.length)}
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer ml-0.5"
+                  title="Next Sport"
+                  aria-label="Next Sport"
+                >
+                  <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                </button>
               </div>
 
               {/* Action Tiers & Dynamic Clashing Card */}

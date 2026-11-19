@@ -55,6 +55,15 @@ body {
   }
 }
 
+@keyframes heroProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
 @keyframes crown-bob {
   0%, 100% {
     transform: translateY(0) rotate(0deg);
