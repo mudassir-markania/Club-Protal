@@ -222,8 +222,8 @@ export default function ScoringRuleFormModal({ open, onClose, onSaved, editing =
                   ))}
                 </select>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  {RULE_TRIGGERS.find((t) => t.id === trigger)?.hint}. The winning player or team earns these points; if its players
-                  come from several clubs, every club gets an equal share.
+                  {RULE_TRIGGERS.find((t) => t.id === trigger)?.hint}. The winning player or team earns these points; if it has
+                  several players, they share the points equally and each share goes to that player&apos;s club.
                 </p>
               </div>
               <div>

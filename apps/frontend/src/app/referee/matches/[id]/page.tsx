@@ -478,7 +478,7 @@ export default function RefereeMatchSheetPage() {
 
           <div className="mt-4 text-xs text-navy-300 flex items-center justify-between flex-wrap gap-2">
             <span>
-              <strong>Official Scoring:</strong> Matches are officiated on ground. Select the final match result below — points are calculated and distributed across unique clubs automatically.
+              <strong>Official Scoring:</strong> Matches are officiated on ground. Select the final match result below — points are calculated automatically, shared equally between the players and credited to each player's club.
             </span>
             <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1">
               <Shield className="w-3.5 h-3.5" />

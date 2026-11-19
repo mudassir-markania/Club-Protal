@@ -843,7 +843,7 @@ A referee result is awaiting approval and will be discarded.`
                           <div className="flex items-center justify-between text-[11px] text-slate-600 font-semibold border-b border-slate-100 pb-1">
                             <span>Points Distribution Formula:</span>
                             <span className="font-mono text-blue-700 font-bold">
-                              {dist.calculationNote || `${p.score} pts ÷ ${dist.uniqueClubCount} unique clubs`}
+                              {dist.calculationNote || `${p.score} pts split equally between the players, credited to their clubs`}
                             </span>
                           </div>
                           <div className="space-y-1">

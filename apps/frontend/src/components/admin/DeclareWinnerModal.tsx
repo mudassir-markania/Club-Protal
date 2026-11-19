@@ -276,7 +276,7 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
                 <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 space-y-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-blue-800">
                     Club credit for {winnerName}
-                    {winnerDist.uniqueClubCount > 1 ? ` (split equally across ${winnerDist.uniqueClubCount} clubs)` : ''}
+                    {winnerDist.allocations.reduce((n: number, a: any) => n + a.playersContributed, 0) > 1 ? ' (split equally between its players, credited to their clubs)' : ''}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {winnerDist.allocations.map((a: any) => (

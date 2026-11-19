@@ -608,13 +608,13 @@ export default function RefereeDashboardPage() {
                   Core Rule: Points Divided by UNIQUE Clubs (Not Players)
                 </span>
                 <p className="text-[11px]">
-                  Points earned by a squad are divided equally among the number of unique clubs represented in that squad, regardless of how many players each club contributed.
+                  Points earned by a squad are divided equally between its players, and each player's share is credited to that player's own club (a club with two players gets two shares).
                 </p>
                 <div className="mt-2 text-[11px] font-mono bg-white/80 p-2 rounded border border-amber-300/60">
-                  Example: 100 points earned by a BGMI squad with 2 Mavericks, 1 Dominator, 1 Alpha (3 unique clubs):<br />
-                  • Mavericks: 33.33 pts<br />
-                  • Dominator: 33.33 pts<br />
-                  • Alpha: 33.34 pts (remainder allocated fairly)
+                  Example: 8 points earned by a BGMI squad with 2 Mavericks, 1 Dominator, 1 Alpha players (4 players, 2 pts each):<br />
+                  • Mavericks: 4.00 pts (2 players)<br />
+                  • Dominator: 2.00 pts<br />
+                  • Alpha: 2.00 pts
                 </div>
               </div>
 

@@ -510,7 +510,7 @@ export default function AdminDashboardPage() {
                   Automatic Unique-Club Point Allocation:
                 </span>
                 <p className="text-[11px] text-blue-800 leading-relaxed">
-                  Approving this result will immediately divide points equally among unique represented clubs and credit them to the official House Championship Leaderboard.
+                  Approving this result will immediately divide the team's points equally between its players and credit each player's share to that player's club on to the official House Championship Leaderboard.
                 </p>
               </div>
 

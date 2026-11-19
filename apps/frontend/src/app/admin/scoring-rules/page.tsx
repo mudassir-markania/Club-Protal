@@ -270,7 +270,7 @@ Matches calculated after this will no longer award these points. Past results ar
               </span>
               <h3 className="text-base font-extrabold">APL Season 9 House Championship Matrix</h3>
               <p className="text-xs text-slate-300 max-w-2xl">
-                Normal matches award match win points. Finals award final winner / runner-up points. Individual awards (Top Scorer, MVP, Best Batsman/Bowler, MOTM) are credited directly to the athlete&apos;s house. Team squad points are divided equally among unique participating houses.
+                Normal matches award match win points. Finals award final winner / runner-up points. Individual awards (Top Scorer, MVP, Best Batsman/Bowler, MOTM) are credited directly to the athlete&apos;s house. Team points are divided equally between the team&apos;s players, and each player&apos;s share goes to that player&apos;s house.
               </p>
             </div>
             <div className="shrink-0 flex items-center gap-2">

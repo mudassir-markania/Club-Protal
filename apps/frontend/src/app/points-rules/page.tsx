@@ -355,7 +355,7 @@ export default function PointsRulesPage() {
           </div>
 
           <p className="text-xs text-slate-400">
-            Build a mock squad below to witness how the backend divides points equally among unique houses (not by player headcount) with fair remainder rotation.
+            Build a mock squad below to witness how the backend divides a squad's points equally between its players and credits each player's share to that player's house, with fair remainder rotation.
           </p>
 
           {/* Squad Roster Editor */}
