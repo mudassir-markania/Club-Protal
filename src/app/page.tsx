@@ -396,7 +396,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setHeroIndex((prev) => (prev - 1 + HERO_SPORTS.length) % HERO_SPORTS.length)}
-                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer mr-0.5"
+                  className="w-[34px] h-[34px] rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer mr-0.5 shrink-0"
                   title="Previous Sport"
                   aria-label="Previous Sport"
                 >
@@ -408,25 +408,27 @@ export default function HomePage() {
                     <button
                       key={s.id}
                       onClick={() => setHeroIndex(idx)}
-                      className={`px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-manrope font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                      className={`h-[34px] px-3.5 rounded-full text-[11px] sm:text-xs font-manrope font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer inline-flex items-center gap-2 ${
                         active
                           ? 'bg-white text-[#000f3f] shadow-lg scale-105 ring-2 ring-white/50'
                           : 'bg-white/10 hover:bg-white/20 text-[#dce1ff] border border-white/10'
                       }`}
                     >
-                      {s.icon === 'carrom' ? (
-                        <CarromIcon className="w-[18px] h-[18px] shrink-0" />
-                      ) : (
-                        <span className="material-symbols-outlined text-[17px]">{s.icon}</span>
-                      )}
-                      <span>{s.shortName}</span>
+                      <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                        {s.icon === 'carrom' ? (
+                          <CarromIcon className="w-4 h-4 shrink-0" />
+                        ) : (
+                          <span className="material-symbols-outlined text-[16px] leading-none select-none">{s.icon}</span>
+                        )}
+                      </span>
+                      <span className="leading-none">{s.shortName}</span>
                     </button>
                   );
                 })}
                 <button
                   type="button"
                   onClick={() => setHeroIndex((prev) => (prev + 1) % HERO_SPORTS.length)}
-                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer ml-0.5"
+                  className="w-[34px] h-[34px] rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer ml-0.5 shrink-0"
                   title="Next Sport"
                   aria-label="Next Sport"
                 >
