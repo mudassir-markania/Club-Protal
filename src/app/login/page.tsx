@@ -84,7 +84,7 @@ export default function UnifiedOfficialLoginPage() {
   const handleSelectOfficial = (official: QuickOfficial) => {
     setSelectedOfficialId(official.id);
     setIdentifier(official.username);
-    setPassword(official.role === 'SUPER_ADMIN' ? 'admin123' : 'referee123');
+    setPassword(official.id === 'admin' ? 'admin123' : official.id === 'marcus' ? 'marcus123' : 'referee123');
     setError(null);
   };
 

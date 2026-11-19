@@ -477,6 +477,101 @@ export default function RefereeMatchSheetPage() {
           </div>
         </div>
 
+        {/* SCHEDULED PARTICIPANTS OVERVIEW (Section 10 Compliant) */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-extrabold text-navy-950 flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-600" />
+                <span>Configured Competition Participants</span>
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Official fixture roster scheduled by Admin. Point distributions are automatically calculated based on these athletes and houses.
+              </p>
+            </div>
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
+              <Check className="w-3 h-3 text-blue-600" />
+              <span>Admin Verified Roster</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {participants.map((p: any, idx: number) => {
+              const playersList = p.players || [];
+              const uniqueHouses = new Set<string>();
+              if (p.club?.name) uniqueHouses.add(p.club.name);
+              playersList.forEach((mpp: any) => {
+                if (mpp.club?.name) uniqueHouses.add(mpp.club.name);
+              });
+
+              return (
+                <div
+                  key={p.id || idx}
+                  className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      {p.club ? (
+                        <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+                          <ClubBadge code={p.club.code} name={p.club.name} className="w-4 h-4" />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-extrabold text-xs flex items-center justify-center shrink-0">
+                          #{idx + 1}
+                        </div>
+                      )}
+                      <div>
+                        <span className="font-extrabold text-xs text-navy-950 block">
+                          {p.teamName || p.cricketTeam?.name || p.player?.name || p.club?.name || `Entry ${idx + 1}`}
+                        </span>
+                        {p.cricketTeam ? (
+                          <span className="text-[10px] text-blue-700 font-semibold block">
+                            Parent House: {p.club?.name} ({p.club?.code})
+                          </span>
+                        ) : p.player ? (
+                          <span className="text-[10px] text-slate-500 font-medium block">
+                            House: {p.player.club?.name || p.club?.name} ({p.player.club?.code || p.club?.code})
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-500 font-medium block">
+                            {playersList.length > 0
+                              ? `${playersList.length} Athletes • ${uniqueHouses.size} Unique House${uniqueHouses.size !== 1 ? 's' : ''}`
+                              : `House: ${p.club?.name || 'Assigned'}`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">
+                      Entry {idx + 1}
+                    </span>
+                  </div>
+
+                  {/* If Squad or Doubles Players */}
+                  {playersList.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-2 border-t border-slate-200/80">
+                      {playersList.map((mpp: any, pIdx: number) => (
+                        <div
+                          key={mpp.id || pIdx}
+                          className="px-2 py-1 bg-white rounded-lg border border-slate-200/80 flex items-center justify-between text-[10px]"
+                        >
+                          <div className="flex items-center gap-1.5 truncate">
+                            <ClubBadge code={mpp.club?.code} name={mpp.club?.name} className="w-3 h-3 shrink-0" />
+                            <span className="font-bold text-slate-800 truncate">{mpp.player?.name || 'Athlete'}</span>
+                          </div>
+                          <span className="font-mono text-[9px] font-extrabold text-slate-500 px-1 rounded bg-slate-100">
+                            {mpp.club?.code}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* SPORT-SPECIFIC RESULT ENTRY FORM */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">

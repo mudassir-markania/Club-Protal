@@ -19,11 +19,11 @@ export async function POST(req: Request) {
     if (['admin', 'director', 'superadmin', 'administrator'].includes(cleanInput)) {
       searchEmails.push('admin@sportsportal.com');
     } else if (['marcus', 'ref.marcus', 'referee.marcus'].includes(cleanInput)) {
-      searchEmails.push('ref.marcus@sportsportal.com');
+      searchEmails.push('ref.marcus@sportsportal.com', 'marcus@gmail.com');
     } else if (['sarah', 'ref.sarah', 'referee.sarah'].includes(cleanInput)) {
-      searchEmails.push('ref.sarah@sportsportal.com');
+      searchEmails.push('ref.sarah@sportsportal.com', 'sarah@gmail.com');
     } else if (['david', 'ref.david', 'referee.david'].includes(cleanInput)) {
-      searchEmails.push('ref.david@sportsportal.com');
+      searchEmails.push('ref.david@sportsportal.com', 'david@gmail.com');
     }
 
     const user = await db.user.findFirst({
