@@ -367,7 +367,7 @@ export default function HomePage() {
               </div>
 
               {/* Discipline Switcher Pill Dock with Chevron Arrows */}
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
+              <div className="hidden sm:flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
                 <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#808dc2] font-manrope mr-1 hidden md:inline">
                   Select Discipline:
                 </span>
@@ -451,7 +451,7 @@ export default function HomePage() {
             </div>
 
             {/* Stadium Telemetry Stats Ribbon Pinned to Bottom */}
-            <div className="w-full bg-[#172554] text-[#808dc2] py-3 sm:py-3.5 relative z-10 border-t border-white/10 shrink-0">
+            <div className="hidden sm:block w-full bg-[#172554] text-[#808dc2] py-3 sm:py-3.5 relative z-10 border-t border-white/10 shrink-0">
               <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-wrap items-center justify-between gap-y-2 gap-x-6 text-center lg:text-left">
                 <div className="flex items-center gap-3">
                   <span className="text-xs uppercase text-white font-extrabold tracking-widest font-manrope">
