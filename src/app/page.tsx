@@ -120,7 +120,7 @@ const HOUSES_DATA = [
   },
 ];
 
-// Exact 8 Disciplines matching Stitch
+// Exact 6 Disciplines strictly organized by the championship
 const DISCIPLINES_DATA = [
   {
     id: 'cricket',
@@ -129,8 +129,8 @@ const DISCIPLINES_DATA = [
     icon: 'sports_cricket',
     pointsMax: '100 PTS MAX',
     fixturesCount: '10 Fixtures',
-    description: '10 overs per side, 60 balls of high-octane power hitting under lights.',
-    rules: 'FIBA standard equipment, 10 overs per innings, maximum 2 overs per bowler, powerplay overs 1-3.',
+    description: '10 overs per side, 60 balls of high-octane power hitting under full stadium floodlights.',
+    rules: 'Official T10 rules, 10 overs per innings, maximum 2 overs per bowler, powerplay overs 1-3.',
   },
   {
     id: 'football',
@@ -139,8 +139,8 @@ const DISCIPLINES_DATA = [
     icon: 'sports_soccer',
     pointsMax: '90 PTS MAX',
     fixturesCount: '8 Fixtures',
-    description: 'Full 11v11 knockout format with golden goal extra time rules.',
-    rules: '45-minute halves, rolling substitutions permitted, direct penalty shootouts in knockout draws.',
+    description: 'High-intensity knockout format with golden goal extra time and direct penalty shootouts.',
+    rules: 'Rolling substitutions permitted, direct free kicks, direct penalty shootouts in knockout draws.',
   },
   {
     id: 'badminton',
@@ -149,7 +149,7 @@ const DISCIPLINES_DATA = [
     icon: 'sports_tennis',
     pointsMax: '60 PTS MAX',
     fixturesCount: '12 Fixtures',
-    description: 'Singles and Mixed Doubles best of 3 sets on synthetic indoor courts.',
+    description: 'Men’s Singles and Doubles best of 3 sets on synthetic indoor championship courts.',
     rules: 'BWF standard rules, 21-point rally scoring system, sudden death deuce up to 30 points.',
   },
   {
@@ -169,91 +169,54 @@ const DISCIPLINES_DATA = [
     icon: 'chess',
     pointsMax: '50 PTS MAX',
     fixturesCount: '16 Fixtures',
-    description: '5-minute rapid chess tournament with international FIDE arbiters.',
+    description: '5-minute rapid & blitz chess tournament with international FIDE arbiters.',
     rules: 'FIDE Rapid Rules, 5 mins + 3s increment per move, electronic DGT sensory boards.',
   },
   {
-    id: 'basketball',
-    name: 'Basketball',
-    category: 'Basketball',
-    icon: 'sports_basketball',
-    pointsMax: '80 PTS MAX',
-    fixturesCount: '10 Fixtures',
-    description: 'FIBA regulation 4-quarter matches with shot-clock integration.',
-    rules: '10-minute stopped clock quarters, 24-second shot clock, 5 personal fouls limit.',
-  },
-  {
-    id: 'athletics',
-    name: 'Track & Field',
-    category: 'Athletics',
-    icon: 'sprint',
-    pointsMax: '120 PTS MAX',
-    fixturesCount: '8 Events',
-    description: '100m, 400m, 4x100m Relays, Long Jump, and Shot Put disciplines.',
-    rules: 'IAAF electronic laser finish timing, wind assistance monitoring, lane draw seeding.',
-  },
-  {
-    id: 'esports',
+    id: 'bgmi',
     name: 'BGMI Esports',
     category: 'Esports',
     icon: 'sports_esports',
     pointsMax: '75 PTS MAX',
     fixturesCount: '6 Maps',
-    description: 'Squad battle royale battles in Erangel & Miramar with live casting.',
-    rules: 'Official BGIS tournament point matrix: 10 pts per WWCD + 1 pt per elimination.',
+    description: 'Squad battle royale battles in Erangel & Miramar with live LAN casting.',
+    rules: 'Official BGIS tournament point matrix: 10 pts per WWCD + 1 pt per verified elimination.',
   },
 ];
 
-// Featured Multi-Sport Showcase for Hero (Dynamic Carousel & Discipline Switcher)
+// Featured 6 Disciplines for Hero Carousel & Discipline Switcher
 const HERO_SPORTS = [
   {
-    id: 'multi',
-    badge: 'MULTI-SPORT INTER-HOUSE MEET',
-    name: 'All 8 Disciplines',
-    shortName: 'All 8 Sports',
-    icon: 'emoji_events',
-    tagline: '8 OLYMPIC & COLLEGIATE DISCIPLINES • 5 HOUSES • 42 FIXTURES',
-    headline: 'FIVE HOUSES.',
-    headlineAccent: 'ONE ARENA.',
+    id: 'cricket',
+    badge: 'FLOODLIT CRICKET T10',
+    name: 'Cricket T10',
+    shortName: 'Cricket',
+    icon: 'sports_cricket',
+    tagline: '10 OVERS • 60 BALLS PER SIDE • UNDER FLOODLIGHTS',
+    headline: 'THE ARENA',
+    headlineAccent: 'IS YOURS.',
     description:
-      'Where institutional pride meets multi-sport athletic glory. Track live sets, finish line laser times, and certified referee decisions across Football, Track & Field, Basketball, Cricket, Badminton, Esports, Table Tennis, and Blitz Chess.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAYgHttvkcX2GSBqMH7qDXIXjYFRis-CkG6x5RDFd3GFuBWpIzt_EKbjvSMgvjlxLuYpWP2mSRvnL08kYqR6kU8563xCiTz3R8QdH8MoO-MlJM7u6XxejdweTTxlkylbYLP0rfpNp1d3yumZaMwyDRMT6DJuKhBKlVZaAsSdSzQemlyuo8Ew9PQI6c1Wkg2b80TF0Kk1mW_AaDX4jhNRcXwnX3uE1CZ93xu9wPUZ04S',
-    clashTitle: 'Multi-Sport Fixtures Live',
-    clashMatch: '42 MATCHES ACROSS 8 SPORTS',
-    clashSub: 'Central Sports Complex • Live Decision Feeds',
+      'High-octane power hitting under international stadium floodlights with live ball tracker, electronic scoreboard, and certified umpire feeds.',
+    image: '/cricket.jpg',
+    clashTitle: 'Cricket Marquee Opener',
+    clashMatch: 'MAV v DOM • T10 CRICKET',
+    clashSub: 'Main Oval Stadium • Nov 26',
   },
   {
     id: 'football',
-    badge: 'COLLEGIATE FOOTBALL 11v11',
+    badge: 'COLLEGIATE TURF FOOTBALL',
     name: 'Football',
     shortName: 'Football',
     icon: 'sports_soccer',
-    tagline: 'FULL-PITCH 11v11 KNOCKOUT • 45-MIN HALVES',
+    tagline: 'HIGH-INTENSITY KNOCKOUT • GOLDEN GOAL',
     headline: 'EVERY GOAL.',
     headlineAccent: 'EVERY TACKLE.',
     description:
-      'High-stakes 11v11 collegiate football under 1,000-watt international floodlights. Golden goal extra time rules and direct penalty shootouts in knockout draws.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAYgHttvkcX2GSBqMH7qDXIXjYFRis-CkG6x5RDFd3GFuBWpIzt_EKbjvSMgvjlxLuYpWP2mSRvnL08kYqR6kU8563xCiTz3R8QdH8MoO-MlJM7u6XxejdweTTxlkylbYLP0rfpNp1d3yumZaMwyDRMT6DJuKhBKlVZaAsSdSzQemlyuo8Ew9PQI6c1Wkg2b80TF0Kk1mW_AaDX4jhNRcXwnX3uE1CZ93xu9wPUZ04S',
+      'High-stakes collegiate football under perimeter floodlights. Fast transitions, clinical finishing, and sudden-death penalty shootouts.',
+    image: '/football.jpg',
     clashTitle: 'Upcoming Football Marquee',
     clashMatch: 'ALPHAS v PHOENIX • SEMI-FINAL',
     clashSub: 'Main Turf Stadium • Today 15:30',
-  },
-  {
-    id: 'athletics',
-    badge: 'IAAF TRACK & FIELD SPRINT',
-    name: 'Track & Field',
-    shortName: 'Athletics',
-    icon: 'sprint',
-    tagline: '100M • 400M • 4x100M RELAYS • LONG JUMP',
-    description:
-      'IAAF electronic laser finish timing, wind assistance monitoring, and house lane draw seeding across 8 varsity track & field medal disciplines.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuATP42Sfu3lffWOxOPFEGm1S_9k8tfnGu_z0HEjaERDGY0NtQRoPDozZja1mdCqEyYdVf2F849G2NiXvKDCw9K7KEExLkxN982wUQ0vf_GIBO9qrW2AWrXknjlfq9EmVWOoOUws587WQ_ufk9PIrK1vI4CcCw6UR4E5P-72SgfZpBxGFZOcdh3VqhXLV4WCqMbX0JabrfgxJcP_PjqWfp8Aok2Fq1bxVV7hPSx3GO6L',
-    clashTitle: 'Laser Finish Sprint Final',
-    clashMatch: '100M SPRINT • ALL 5 HOUSES',
-    clashSub: 'Olympic Synthetic Track • 18:00',
   },
   {
     id: 'badminton',
@@ -262,28 +225,62 @@ const HERO_SPORTS = [
     shortName: 'Badminton',
     icon: 'sports_tennis',
     tagline: '21-POINT RALLY SCORING • SINGLES & DOUBLES',
+    headline: 'BLISTERING SMASHES.',
+    headlineAccent: 'SURGICAL TOUCH.',
     description:
-      'Rapid 300 km/h shuttlecock action on synthetic championship courts. Best of 3 sets with sudden death deuces up to 30 points.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCZbzJg5oKtlxpOehYLTEvAp0HiHFCemm7g-x2tD8jxZkXAp8IJri9Ntm8oY1APVlhbLIo3D2M_lubOE5MNbyssJN481nHgQXeMBodJp9TJe4FNGyznhvDp81WPXvuZbDHWDJ3mUUdB5M_7XzTnJ9QKAISW-7CW7Sli3kwkwMvBmoVQ5pjgnDBvCGFLIRbjApNbtaJen8Z2edWq1vBXXae91XTNcsnPjV2vAo_vt_8d',
+      'Rapid 300+ km/h shuttlecock action on synthetic championship courts. Best of 3 sets with sudden death deuces up to 30 points.',
+    image: '/badminton.jpg',
     clashTitle: 'Badminton Trophy Match',
-    clashMatch: 'SPARTANS v MAV • MIXED DOUBLES',
-    clashSub: 'Indoor Sports Arena • Tomorrow',
+    clashMatch: 'SPARTANS v MAV • MEN’S DOUBLES',
+    clashSub: 'Indoor Sports Complex • Tomorrow',
   },
   {
-    id: 'cricket',
-    badge: 'FLOODLIT CRICKET T10',
-    name: 'Cricket T10',
-    shortName: 'Cricket',
-    icon: 'sports_cricket',
-    tagline: '10 OVERS • 60 BALLS PER SIDE • UNDER LIGHTS',
+    id: 'carrom',
+    badge: 'CHAMPIONSHIP PRECISION CARROM',
+    name: 'Carrom',
+    shortName: 'Carrom',
+    icon: 'sports_kabaddi',
+    tagline: 'QUEEN COVER • ACCURACY • PURE FINESSE',
+    headline: 'PINPOINT STRIKES.',
+    headlineAccent: 'MASTER POCKETING.',
     description:
-      'High-octane power hitting under international stadium floodlights with live commentary, over ball tracker, and referee decisions.',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBET2OC-cxivK7TuB_cYyVjBbonubElBM-vuAQK2wGviPSsXm2tYeGhZ_OVaRe8YJN0HMh7ke6LSyWwHHbG-Ik8Xv7fpT_ejUbTw1ds9uCDLY5I3Nh0BUqJpQX0roLWFPQXCEfZg_Z9SyULT64KwYvvxV2Z9kWAxajFVcgYrEOZ9YHDh8vF3BxAfJQldHVhz9IZv2MkUYjANPW_xTuRtXMooiNkGHHmHobIF6YUMjuz',
-    clashTitle: 'Cricket Marquee Opener',
-    clashMatch: 'MAV v DOM • T10 CRICKET',
-    clashSub: 'Main Oval Stadium • Nov 26',
+      'Classic tournament board warfare with precision rebounds, white & black piece accumulation, and high-tension queen confirmation pocketing.',
+    image: '/carrom.jpg',
+    clashTitle: 'Carrom Board Finals',
+    clashMatch: 'DOMINATORS v ALPHAS • DOUBLES',
+    clashSub: 'Indoor Rec Center • Court 1',
+  },
+  {
+    id: 'chess',
+    badge: 'FIDE BLITZ CHESS ARENA',
+    name: 'Blitz Chess',
+    shortName: 'Chess',
+    icon: 'chess',
+    tagline: '5 MINS + 3 SECS INCREMENT • DGT SENSORY BOARDS',
+    headline: 'STRATEGIC MIND.',
+    headlineAccent: 'UNYIELDING FOCUS.',
+    description:
+      'Grandmaster-level tactical confrontations with digital clock timers and FIDE Swiss pairing in an acoustic, sound-dampened auditorium.',
+    image: '/chess.jpg',
+    clashTitle: 'Chess Championship Board 1',
+    clashMatch: 'MAVERICKS v SPARTANS • BLITZ',
+    clashSub: 'Mind Sports Auditorium • Today 16:00',
+  },
+  {
+    id: 'bgmi',
+    badge: 'BGMI ESPORTS LAN CLASH',
+    name: 'BGMI Esports',
+    shortName: 'BGMI',
+    icon: 'sports_esports',
+    tagline: 'BATTLE ROYALE • ERANGEL & MIRAMAR • 4-MAN SQUADS',
+    headline: 'TACTICAL ROTATION.',
+    headlineAccent: 'CHICKEN DINNER.',
+    description:
+      'High-adrenaline mobile esports battle royale on campus dedicated LAN servers with live casting, zone shifts, and squad clutch plays.',
+    image: '/bgmi.jpg',
+    clashTitle: 'Esports Grand Finals Map 4',
+    clashMatch: 'ALL 5 HOUSES • ERANGEL SHOWDOWN',
+    clashSub: 'Esports LAN Dome • Nov 28',
   },
 ];
 
@@ -306,7 +303,7 @@ export default function HomePage() {
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
-  const [sportsTab, setSportsTab] = useState<'All' | 'Cricket' | 'Football' | 'Basketball' | 'Esports'>('All');
+  const [sportsTab, setSportsTab] = useState<'All' | 'Cricket' | 'Football' | 'Badminton' | 'Carrom' | 'Chess' | 'BGMI'>('All');
   const [reminderSet, setReminderSet] = useState<string | null>(null);
 
   // SMS / WhatsApp alert form
@@ -334,22 +331,23 @@ export default function HomePage() {
           <section
             onMouseEnter={() => setIsHeroPaused(true)}
             onMouseLeave={() => setIsHeroPaused(false)}
-            className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#000f3f] text-white select-none"
+            className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
           >
             {/* Multi-Sport Stadium Backgrounds with Smooth Cross-Fade */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               {HERO_SPORTS.map((sport, idx) => (
                 <img
                   key={sport.id}
-                  className={`absolute inset-0 w-full h-full object-cover object-center mix-blend-luminosity scale-105 transition-all duration-1000 ease-in-out ${
-                    idx === heroIndex ? 'opacity-45 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+                  className={`absolute inset-0 w-full h-full object-cover object-center scale-105 transition-all duration-1000 ease-in-out ${
+                    idx === heroIndex ? 'opacity-90 scale-100' : 'opacity-0 scale-105 pointer-events-none'
                   }`}
                   alt={sport.name}
                   src={sport.image}
                 />
               ))}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f] via-[#000f3f]/75 to-[#000f3f]/30" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#000f3f] via-[#000f3f]/60 to-transparent" />
+              {/* Neutral black scrim for high contrast without blue overlay wash */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/25 pointer-events-none" />
             </div>
 
             {/* Live Telemetry Watermark & Centered Content */}
@@ -372,7 +370,7 @@ export default function HomePage() {
 
                 <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0051d5]/30 border border-[#0051d5]/40 text-[#dbe1ff] text-[10px] uppercase font-extrabold tracking-wider font-manrope">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
-                  <span>8 Olympic Disciplines</span>
+                  <span>6 Championship Disciplines</span>
                 </div>
               </div>
 
@@ -426,7 +424,7 @@ export default function HomePage() {
                   href="#championship-overview"
                   className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-lg bg-[#eb6905] hover:bg-[#783200] text-white text-xs sm:text-sm uppercase tracking-wider font-bold transition-all duration-200 shadow-xl shadow-[#eb6905]/25 font-manrope cursor-pointer"
                 >
-                  <span>EXPLORE 8 DISCIPLINES</span>
+                  <span>EXPLORE 6 DISCIPLINES</span>
                   <span className="material-symbols-outlined text-[20px]">north_east</span>
                 </a>
 
@@ -472,7 +470,7 @@ export default function HomePage() {
                     <span className="text-[#808dc2]">HOUSES</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-white text-lg sm:text-xl font-extrabold">8</span>
+                    <span className="text-white text-lg sm:text-xl font-extrabold">6</span>
                     <span className="text-[#808dc2]">DISCIPLINES</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -521,17 +519,17 @@ export default function HomePage() {
                   <div className="relative h-[320px] sm:h-[360px] w-full overflow-hidden">
                     <img
                       className="w-full h-full object-cover"
-                      alt="Collegiate track and field runners sprinting past the finish line during twilight championship under arena floodlights"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuATP42Sfu3lffWOxOPFEGm1S_9k8tfnGu_z0HEjaERDGY0NtQRoPDozZja1mdCqEyYdVf2F849G2NiXvKDCw9K7KEExLkxN982wUQ0vf_GIBO9qrW2AWrXknjlfq9EmVWOoOUws587WQ_ufk9PIrK1vI4CcCw6UR4E5P-72SgfZpBxGFZOcdh3VqhXLV4WCqMbX0JabrfgxJcP_PjqWfp8Aok2Fq1bxVV7hPSx3GO6L"
+                      alt="Collegiate cricket batsman playing shot under stadium floodlights"
+                      src="/cricket.jpg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f] via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
                       <div>
                         <span className="px-2.5 py-1 rounded bg-[#0051d5] text-white text-[11px] uppercase tracking-wider font-extrabold font-manrope">
-                          ATHLETICS RELAY 4x100M
+                          CRICKET T10 POWERPLAY
                         </span>
                         <p className="text-xl sm:text-2xl font-bold text-white mt-2 uppercase font-manrope">
-                          Record Shattered: 41.82s
+                          Record Partnership: 142 Runs
                         </p>
                       </div>
                       <span className="text-5xl font-black text-white/20 font-manrope">
@@ -632,7 +630,7 @@ export default function HomePage() {
                     <img
                       className="w-full h-full object-cover"
                       alt="Collegiate football match under bright evening lights, player shooting the ball into the top corner"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYgHttvkcX2GSBqMH7qDXIXjYFRis-CkG6x5RDFd3GFuBWpIzt_EKbjvSMgvjlxLuYpWP2mSRvnL08kYqR6kU8563xCiTz3R8QdH8MoO-MlJM7u6XxejdweTTxlkylbYLP0rfpNp1d3yumZaMwyDRMT6DJuKhBKlVZaAsSdSzQemlyuo8Ew9PQI6c1Wkg2b80TF0Kk1mW_AaDX4jhNRcXwnX3uE1CZ93xu9wPUZ04S"
+                      src="/football.jpg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f]/90 via-[#000f3f]/30 to-transparent flex items-end p-4">
                       <div className="flex items-center justify-between w-full">
@@ -767,7 +765,7 @@ export default function HomePage() {
 
                 {/* Filter Tabs */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar">
-                  {(['All', 'Cricket', 'Football', 'Basketball', 'Esports'] as const).map((tab) => (
+                  {(['All', 'Cricket', 'Football', 'Badminton', 'Carrom', 'Chess', 'BGMI'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setSportsTab(tab)}
@@ -894,7 +892,7 @@ export default function HomePage() {
                           <h5 className="text-base font-bold text-[#000f3f] uppercase font-manrope">
                             Alphas
                           </h5>
-                          <span className="text-xs text-[#45464f]">Pranav &amp; Riddhi</span>
+                          <span className="text-xs text-[#45464f]">Pranav &amp; Rohan</span>
                         </div>
                       </div>
 
@@ -1229,8 +1227,8 @@ export default function HomePage() {
                   <div className="relative h-64 overflow-hidden">
                     <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      alt="Intense portrait of collegiate male cricket all-rounder athlete holding bat with sports tape"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIG6DMWFm9dfJ9dxTrmcNGGX08bbB2F6tklEZt8PeCwEPZoWY_Pb6NIQyij8jEZZ6DEdxMCgNfJicwT3_4J7F7iHw1Yv72C04pQ-dzt--ylj1BE_MxWV7Bx0r-525V59F2_ozV_uYPSClPDR2cyToqyzmC6f7B3qgSL3qtW1OJw1oF24rhkYAr-JYm9y3iwAMzbCErCotXgj6nLNw3OfB4rZ4bAKYfumfH18eP7M2v"
+                      alt="Intense portrait of collegiate male cricket all-rounder athlete holding bat"
+                      src="/cricket.jpg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#172554] via-transparent to-transparent" />
                     <span className="absolute top-4 left-4 px-2.5 py-1 rounded bg-[#0051d5] text-white text-[10px] uppercase font-extrabold font-manrope">
@@ -1268,13 +1266,13 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Player 2: Football Goalkeeper */}
+                {/* Player 2: Football Star */}
                 <div className="bg-[#172554] rounded-xl overflow-hidden shadow-xl flex flex-col justify-between group border border-white/10">
                   <div className="relative h-64 overflow-hidden">
                     <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      alt="Athletic collegiate goalkeeper wearing gloves and red jersey making agile diving save"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1FV2cjbPdf4qiCUL16nk1MPB0ZHJmulgzuTqZHrIFMjxTE9VZMRE6bs-IAFf9-XPOU29nHXHMRj-zqw5Ig-rNEAvt5M0GNhdyX0b7f6a6Z-JJ-88nXnOUA_lR0vGVjuko_sf4Zk3_gaCzK-snwjASQL1WMxdMs21UkyoxSnUMwz0TcmqDsp80-XxlOJydEzv4AUyEw5IjmJuMeypdfW41o_NVAKIfBS2h8zldpN6U"
+                      alt="Athletic collegiate male striker volleying ball into top corner"
+                      src="/football.jpg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#172554] via-transparent to-transparent" />
                     <span className="absolute top-4 left-4 px-2.5 py-1 rounded bg-[#ba1a1a] text-white text-[10px] uppercase font-extrabold font-manrope">
@@ -1285,7 +1283,7 @@ export default function HomePage() {
                   <div className="p-6 flex flex-col justify-between flex-grow">
                     <div>
                       <span className="text-[11px] text-[#ffdad6] uppercase font-bold font-manrope">
-                        Golden Glove Contender
+                        Golden Boot Contender
                       </span>
                       <h4 className="font-manrope text-xl font-extrabold text-white uppercase mt-1">
                         Rohit Deshmukh
@@ -1297,16 +1295,16 @@ export default function HomePage() {
 
                     <div className="grid grid-cols-3 gap-2 mt-6 bg-[#000f3f]/60 p-3 rounded-lg text-center border border-white/10">
                       <div>
-                        <span className="text-[10px] text-[#808dc2] uppercase font-bold">Clean Sheets</span>
-                        <p className="font-manrope text-xl font-bold text-white">3</p>
+                        <span className="text-[10px] text-[#808dc2] uppercase font-bold">Goals</span>
+                        <p className="font-manrope text-xl font-bold text-white">7</p>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#808dc2] uppercase font-bold">Saves</span>
-                        <p className="font-manrope text-xl font-bold text-[#ba1a1a]">14</p>
+                        <span className="text-[10px] text-[#808dc2] uppercase font-bold">Assists</span>
+                        <p className="font-manrope text-xl font-bold text-[#ba1a1a]">5</p>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#808dc2] uppercase font-bold">Penalties</span>
-                        <p className="font-manrope text-xl font-bold text-[#ffdbca]">2</p>
+                        <span className="text-[10px] text-[#808dc2] uppercase font-bold">Matches</span>
+                        <p className="font-manrope text-xl font-bold text-[#ffdbca]">4</p>
                       </div>
                     </div>
                   </div>
@@ -1317,11 +1315,11 @@ export default function HomePage() {
                   <div className="relative h-64 overflow-hidden">
                     <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      alt="Female collegiate badminton athlete mid-air smashing a shuttlecock with high velocity"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZbzJg5oKtlxpOehYLTEvAp0HiHFCemm7g-x2tD8jxZkXAp8IJri9Ntm8oY1APVlhbLIo3D2M_lubOE5MNbyssJN481nHgQXeMBodJp9TJe4FNGyznhvDp81WPXvuZbDHWDJ3mUUdB5M_7XzTnJ9QKAISW-7CW7Sli3kwkwMvBmoVQ5pjgnDBvCGFLIRbjApNbtaJen8Z2edWq1vBXXae91XTNcsnPjV2vAo_vt_8d"
+                      alt="Collegiate male badminton player mid-air smash with high velocity"
+                      src="/badminton.jpg"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#172554] via-transparent to-transparent" />
-                    <span className="absolute top-4 left-4 px-2.5 py-1 rounded bg-[#eb6905] text-white text-[10px] uppercase font-extrabold font-manrope">
+                    <span className="absolute top-4 left-4 px-2.5 py-1 rounded bg-[#eb6905] text-white text-[10px] uppercase font-manrope">
                       ALPHAS BADMINTON
                     </span>
                   </div>
@@ -1332,7 +1330,7 @@ export default function HomePage() {
                         Undefeated Shuttler
                       </span>
                       <h4 className="font-manrope text-xl font-extrabold text-white uppercase mt-1">
-                        Riddhi Sen
+                        Rohan Sen
                       </h4>
                       <p className="text-xs text-[#808dc2] mt-0.5">
                         Second Year, Electronics &amp; Comm.
@@ -1767,7 +1765,7 @@ export default function HomePage() {
               <img
                 className="w-full h-full object-cover opacity-60"
                 alt="Live match stadium view"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBET2OC-cxivK7TuB_cYyVjBbonubElBM-vuAQK2wGviPSsXm2tYeGhZ_OVaRe8YJN0HMh7ke6LSyWwHHbG-Ik8Xv7fpT_ejUbTw1ds9uCDLY5I3Nh0BUqJpQX0roLWFPQXCEfZg_Z9SyULT64KwYvvxV2Z9kWAxajFVcgYrEOZ9YHDh8vF3BxAfJQldHVhz9IZv2MkUYjANPW_xTuRtXMooiNkGHHmHobIF6YUMjuz"
+                src="/cricket.jpg"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="material-symbols-outlined text-white text-6xl drop-shadow-lg animate-pulse">
