@@ -20,6 +20,8 @@ import {
   Medal,
   Shield,
   Trophy,
+  Pencil,
+  RefreshCw,
   MapPin,
   Sparkles,
   FileCheck2,
@@ -30,12 +32,11 @@ import {
   Flame,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
-
-interface BgmiSquadInput {
-  id: string;
-  name: string;
-  playerIds: [string, string, string, string];
-}
+import ScheduleMatchModal from '@/components/admin/ScheduleMatchModal';
+import { categoryDisplayName, matchFormatKey, MatchFormatKey } from '@/lib/match-scheduling';
+import MatchFormatFilter from '@/components/admin/MatchFormatFilter';
+import EditMatchModal from '@/components/admin/EditMatchModal';
+import DeclareWinnerModal, { participantName } from '@/components/admin/DeclareWinnerModal';
 
 export default function MatchesPage() {
   const [mounted, setMounted] = useState(false);
@@ -43,6 +44,7 @@ export default function MatchesPage() {
   const [sports, setSports] = useState<any[]>([]);
   const [clubs, setClubs] = useState<any[]>([]);
   const [cricketTeams, setCricketTeams] = useState<any[]>([]);
+  const [bgmiTeams, setBgmiTeams] = useState<any[]>([]);
   const [venues, setVenues] = useState<any[]>([]);
   const [referees, setReferees] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
@@ -51,6 +53,7 @@ export default function MatchesPage() {
   // Filters
   const [search, setSearch] = useState('');
   const [selectedSport, setSelectedSport] = useState('');
+  const [formatFilter, setFormatFilter] = useState<MatchFormatKey | ''>('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'SUBMITTED' | 'SCHEDULED' | 'COMPLETED'>('ALL');
 
   // Modals
@@ -63,68 +66,27 @@ export default function MatchesPage() {
   const [approving, setApproving] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
+  const [editMatch, setEditMatch] = useState<any | null>(null);
+  const [winTarget, setWinTarget] = useState<{ match: any; participant: any } | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // New Match Form State
-  const [formData, setFormData] = useState({
-    sportId: '',
-    matchCategory: "Men's singles / doubles",
-    stageType: 'NORMAL',
-    round: 'League Match',
-    stageName: 'Championship Round',
-    matchDate: '2026-11-26',
-    matchTime: '15:00',
-    venueId: '',
-    notes: '',
-    refereeId: '',
-  });
-
-  // Dynamic Sport-Specific Participant State
-  const [bgmiSquads, setBgmiSquads] = useState<BgmiSquadInput[]>([
-    { id: '1', name: 'Squad 1', playerIds: ['', '', '', ''] },
-    { id: '2', name: 'Squad 2', playerIds: ['', '', '', ''] },
-  ]);
-
-  // Cricket
-  const [cricketTeamAId, setCricketTeamAId] = useState('');
-  const [cricketTeamBId, setCricketTeamBId] = useState('');
-
-  // Football
-  const [footballClubAId, setFootballClubAId] = useState('');
-  const [footballClubBId, setFootballClubBId] = useState('');
-
-  // Chess
-  const [chessPlayerAId, setChessPlayerAId] = useState('');
-  const [chessPlayerBId, setChessPlayerBId] = useState('');
-
-  // Badminton & Carrom
-  const [badmintonCarromFormat, setBadmintonCarromFormat] = useState<'SINGLES' | 'DOUBLES'>('SINGLES');
-  const [badmintonPlayerAId, setBadmintonPlayerAId] = useState('');
-  const [badmintonPlayerBId, setBadmintonPlayerBId] = useState('');
-  const [sideAPlayer1Id, setSideAPlayer1Id] = useState('');
-  const [sideAPlayer2Id, setSideAPlayer2Id] = useState('');
-  const [sideBPlayer1Id, setSideBPlayer1Id] = useState('');
-  const [sideBPlayer2Id, setSideBPlayer2Id] = useState('');
 
   useEffect(() => {
     setMounted(true);
     fetchData();
-  }, [selectedSport]);
+  }, []); // everything is loaded once; the sport tabs filter locally
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (selectedSport) params.append('sportId', selectedSport);
-
-      const [matchesRes, sportsRes, clubsRes, crickRes, venuesRes, refRes, playersRes] = await Promise.all([
-        fetch(`/api/matches?${params.toString()}`),
+      const [matchesRes, sportsRes, clubsRes, crickRes, venuesRes, refRes, playersRes, bgmiRes] = await Promise.all([
+        fetch('/api/matches'),
         fetch('/api/sports'),
         fetch('/api/clubs'),
         fetch('/api/cricket-teams'),
         fetch('/api/venues'),
         fetch('/api/referees'),
         fetch('/api/players'),
+        fetch('/api/bgmi-teams'),
       ]);
 
       const matchesData = await matchesRes.json();
@@ -134,6 +96,7 @@ export default function MatchesPage() {
       const venuesData = await venuesRes.json();
       const refData = await refRes.json();
       const playersData = await playersRes.json();
+      const bgmiData = await bgmiRes.json();
 
       setMatches(Array.isArray(matchesData) ? matchesData : []);
       setSports(Array.isArray(sportsData) ? sportsData : []);
@@ -142,6 +105,7 @@ export default function MatchesPage() {
       setVenues(Array.isArray(venuesData) ? venuesData : []);
       setReferees(Array.isArray(refData) ? refData : []);
       setPlayers(Array.isArray(playersData) ? playersData : []);
+      setBgmiTeams(Array.isArray(bgmiData) ? bgmiData : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -154,304 +118,8 @@ export default function MatchesPage() {
   const getCricketTeam = (id: string) => cricketTeams.find((ct) => ct.id === id);
 
   const handleOpenCreate = () => {
-    const defaultSport = sports[0]?.id || '';
-    const sp = sports[0];
-    const spKey = sp?.name ? sp.name.toUpperCase() : '';
-
-    setFormData({
-      sportId: defaultSport,
-      matchCategory:
-        spKey === 'BGMI'
-          ? 'Squad'
-          : spKey === 'CRICKET'
-          ? 'T10'
-          : spKey === 'FOOTBALL'
-          ? '11v11'
-          : spKey === 'CHESS'
-          ? 'Classical'
-          : "Men's singles / doubles",
-      stageType: 'NORMAL',
-      round: 'League Match',
-      stageName: 'Championship Round',
-      matchDate: new Date().toISOString().slice(0, 10),
-      matchTime: '15:00',
-      venueId: venues[0]?.id || '',
-      notes: '',
-      refereeId: referees[0]?.id || '',
-    });
-
-    if (cricketTeams.length >= 2) {
-      setCricketTeamAId(cricketTeams[0].id);
-      setCricketTeamBId(cricketTeams[1].id);
-    }
-    if (clubs.length >= 2) {
-      setFootballClubAId(clubs[0].id);
-      setFootballClubBId(clubs[1].id);
-    }
-    if (players.length >= 2) {
-      setChessPlayerAId(players[0].id);
-      setChessPlayerBId(players[1].id);
-      setBadmintonPlayerAId(players[0].id);
-      setBadmintonPlayerBId(players[1].id);
-    }
-    if (players.length >= 4) {
-      setSideAPlayer1Id(players[0].id);
-      setSideAPlayer2Id(players[1].id);
-      setSideBPlayer1Id(players[2].id);
-      setSideBPlayer2Id(players[3].id);
-    }
-    if (players.length >= 8) {
-      setBgmiSquads([
-        { id: '1', name: 'Squad 1', playerIds: [players[0].id, players[1].id, players[2].id, players[3].id] },
-        { id: '2', name: 'Squad 2', playerIds: [players[4].id, players[5].id, players[6].id, players[7].id] },
-      ]);
-    } else {
-      setBgmiSquads([
-        { id: '1', name: 'Squad 1', playerIds: ['', '', '', ''] },
-        { id: '2', name: 'Squad 2', playerIds: ['', '', '', ''] },
-      ]);
-    }
-    setBadmintonCarromFormat('SINGLES');
-    setError(null);
-    setIsCreateModalOpen(true);
-  };
-
-  const handleSportChange = (newSportId: string) => {
-    const sp = sports.find((s) => s.id === newSportId);
-    const spName = sp?.name || '';
-    const spKey = spName.toUpperCase();
-
-    let cat = "Men's singles / doubles";
-    let rnd = 'League Match';
-
-    if (spKey === 'BGMI') {
-      cat = 'Squad';
-      rnd = 'Squad Battle';
-    } else if (spKey === 'CRICKET') {
-      cat = 'T10';
-      rnd = 'House Derby';
-    } else if (spKey === 'FOOTBALL') {
-      cat = '11v11';
-      rnd = 'Championship Match';
-    } else if (spKey === 'CHESS') {
-      cat = 'Classical';
-      rnd = 'Classical 1v1';
-    } else if (spKey === 'BADMINTON' || spKey === 'CARROM') {
-      cat = "Men's singles / doubles";
-      rnd = "Men's Singles";
-      setBadmintonCarromFormat('SINGLES');
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      sportId: newSportId,
-      matchCategory: cat,
-      round: rnd,
-    }));
-  };
-
-  const handleAddBgmiSquad = () => {
-    setBgmiSquads((prev) => [
-      ...prev,
-      {
-        id: String(Date.now()),
-        name: `Squad ${prev.length + 1}`,
-        playerIds: ['', '', '', ''],
-      },
-    ]);
-  };
-
-  const handleRemoveBgmiSquad = (idx: number) => {
-    if (bgmiSquads.length <= 2) return;
-    setBgmiSquads((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleUpdateBgmiSquadName = (idx: number, name: string) => {
-    setBgmiSquads((prev) => {
-      const copy = [...prev];
-      copy[idx] = { ...copy[idx], name };
-      return copy;
-    });
-  };
-
-  const handleUpdateBgmiSquadPlayer = (squadIdx: number, slotIdx: number, playerId: string) => {
-    setBgmiSquads((prev) => {
-      const copy = [...prev];
-      const pIds = [...copy[squadIdx].playerIds] as [string, string, string, string];
-      pIds[slotIdx] = playerId;
-      copy[squadIdx] = { ...copy[squadIdx], playerIds: pIds };
-      return copy;
-    });
-  };
-
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
     setSuccess(null);
-
-    const sp = sports.find((s) => s.id === formData.sportId);
-    const spKey = sp?.name ? sp.name.toUpperCase() : '';
-
-    let participantsPayload: any[] = [];
-
-    if (spKey === 'BGMI') {
-      if (bgmiSquads.length < 2) {
-        setError('BGMI requires at least 2 participating squads');
-        return;
-      }
-      const allPlayersInMatch = new Set<string>();
-      for (let i = 0; i < bgmiSquads.length; i++) {
-        const sq = bgmiSquads[i];
-        if (!sq.name.trim()) {
-          setError(`Please provide a squad name for Squad #${i + 1}`);
-          return;
-        }
-        const validIds = sq.playerIds.filter(Boolean);
-        if (validIds.length !== 4) {
-          setError(`Squad "${sq.name}" must have exactly 4 registered players selected`);
-          return;
-        }
-        const squadSet = new Set<string>();
-        for (const pid of validIds) {
-          if (squadSet.has(pid)) {
-            setError(`Squad "${sq.name}" contains duplicate player selection (${getPlayer(pid)?.name || pid})`);
-            return;
-          }
-          squadSet.add(pid);
-          if (allPlayersInMatch.has(pid)) {
-            setError(`Player ${getPlayer(pid)?.name || pid} is selected in multiple squads in this match`);
-            return;
-          }
-          allPlayersInMatch.add(pid);
-        }
-      }
-      participantsPayload = bgmiSquads.map((sq) => ({
-        teamName: sq.name.trim(),
-        playerIds: sq.playerIds,
-      }));
-    } else if (spKey === 'CRICKET') {
-      if (!cricketTeamAId || !cricketTeamBId) {
-        setError('Please select both cricket teams');
-        return;
-      }
-      if (cricketTeamAId === cricketTeamBId) {
-        setError('Please select two distinct cricket teams');
-        return;
-      }
-      const tA = getCricketTeam(cricketTeamAId);
-      const tB = getCricketTeam(cricketTeamBId);
-      participantsPayload = [
-        { cricketTeamId: tA?.id, clubId: tA?.clubId, teamName: tA?.name },
-        { cricketTeamId: tB?.id, clubId: tB?.clubId, teamName: tB?.name },
-      ];
-    } else if (spKey === 'FOOTBALL') {
-      if (!footballClubAId || !footballClubBId) {
-        setError('Please select both competing houses');
-        return;
-      }
-      if (footballClubAId === footballClubBId) {
-        setError('Please select two distinct houses');
-        return;
-      }
-      const cA = getClub(footballClubAId);
-      const cB = getClub(footballClubBId);
-      participantsPayload = [
-        { clubId: cA?.id, teamName: cA?.name },
-        { clubId: cB?.id, teamName: cB?.name },
-      ];
-    } else if (spKey === 'CHESS') {
-      if (!chessPlayerAId || !chessPlayerBId) {
-        setError('Please select both competing players for Chess');
-        return;
-      }
-      if (chessPlayerAId === chessPlayerBId) {
-        setError('Please select two distinct players for Chess');
-        return;
-      }
-      const pA = getPlayer(chessPlayerAId);
-      const pB = getPlayer(chessPlayerBId);
-      participantsPayload = [
-        { playerId: pA?.id, clubId: pA?.clubId, teamName: pA?.name, playerIds: [pA?.id] },
-        { playerId: pB?.id, clubId: pB?.clubId, teamName: pB?.name, playerIds: [pB?.id] },
-      ];
-    } else if (spKey === 'BADMINTON' || spKey === 'CARROM') {
-      if (badmintonCarromFormat === 'SINGLES') {
-        if (!badmintonPlayerAId || !badmintonPlayerBId) {
-          setError('Please select both players for Singles');
-          return;
-        }
-        if (badmintonPlayerAId === badmintonPlayerBId) {
-          setError('Please select two distinct players');
-          return;
-        }
-        const pA = getPlayer(badmintonPlayerAId);
-        const pB = getPlayer(badmintonPlayerBId);
-        participantsPayload = [
-          { playerId: pA?.id, clubId: pA?.clubId, teamName: pA?.name, playerIds: [pA?.id] },
-          { playerId: pB?.id, clubId: pB?.clubId, teamName: pB?.name, playerIds: [pB?.id] },
-        ];
-      } else {
-        if (!sideAPlayer1Id || !sideAPlayer2Id || !sideBPlayer1Id || !sideBPlayer2Id) {
-          setError('Please select all 4 players for Doubles (2 on Side A, 2 on Side B)');
-          return;
-        }
-        const allFour = [sideAPlayer1Id, sideAPlayer2Id, sideBPlayer1Id, sideBPlayer2Id];
-        if (new Set(allFour).size !== 4) {
-          setError('All 4 players in doubles must be distinct — no duplicate player on either side');
-          return;
-        }
-        const pA1 = getPlayer(sideAPlayer1Id);
-        const pA2 = getPlayer(sideAPlayer2Id);
-        const pB1 = getPlayer(sideBPlayer1Id);
-        const pB2 = getPlayer(sideBPlayer2Id);
-        participantsPayload = [
-          {
-            teamName: `${pA1?.name || 'Player 1'} & ${pA2?.name || 'Player 2'}`,
-            playerIds: [sideAPlayer1Id, sideAPlayer2Id],
-          },
-          {
-            teamName: `${pB1?.name || 'Player 1'} & ${pB2?.name || 'Player 2'}`,
-            playerIds: [sideBPlayer1Id, sideBPlayer2Id],
-          },
-        ];
-      }
-    } else {
-      participantsPayload = [
-        { clubId: clubs[0]?.id },
-        { clubId: clubs[1]?.id },
-      ];
-    }
-
-    const payload = {
-      sportId: formData.sportId,
-      matchCategory: formData.matchCategory || 'Singles',
-      stageType: formData.stageType || 'NORMAL',
-      round: formData.round,
-      stageName: formData.stageName,
-      matchDate: formData.matchDate,
-      matchTime: formData.matchTime,
-      venueId: formData.venueId || null,
-      notes: formData.notes,
-      participants: participantsPayload,
-      refereeIds: formData.refereeId ? [formData.refereeId] : [],
-    };
-
-    try {
-      const res = await fetch('/api/matches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create fixture');
-
-      setSuccess(`Fixture ${data.matchCode} scheduled successfully!`);
-      setIsCreateModalOpen(false);
-      fetchData();
-    } catch (err: any) {
-      setError(err.message);
-    }
+    setIsCreateModalOpen(true);
   };
 
   const handleOpenReview = async (match: any) => {
@@ -544,15 +212,40 @@ export default function MatchesPage() {
     }
   };
 
-  const handleDeleteMatch = async (id: string, code: string) => {
-    if (!confirm(`Are you sure you want to cancel and delete match fixture ${code}?`)) return;
+  const handleUndoResult = async (match: any) => {
+    if (!confirm(`Undo the result of ${match.matchCode}?
+
+The awarded points will be removed from the clubs and the match returns to Scheduled.`)) return;
+    try {
+      const res = await fetch(`/api/matches/${match.id}/declare-winner`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setSuccess(data.message);
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteMatch = async (id: string, code: string, status?: string) => {
+    const warning =
+      status === 'COMPLETED'
+        ? `
+
+This match has awarded points. They will be removed from the clubs and the leaderboard will be updated.`
+        : status === 'SUBMITTED'
+        ? `
+
+A referee result is awaiting approval and will be discarded.`
+        : '';
+    if (!confirm(`Delete match ${code}? This cannot be undone.${warning}`)) return;
 
     try {
       const res = await fetch(`/api/matches/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setSuccess(`Fixture ${code} deleted.`);
+      setSuccess(data.message || `Fixture ${code} deleted.`);
       fetchData();
     } catch (err: any) {
       alert(err.message);
@@ -560,6 +253,11 @@ export default function MatchesPage() {
   };
 
   const filteredMatches = matches.filter((m) => {
+    // Sport filter (instant, no reload)
+    if (selectedSport && m.sportId !== selectedSport) return false;
+    // Format filter: Singles / Men's Doubles / Women's Doubles / Mixed Doubles
+    if (formatFilter && matchFormatKey(m.matchCategory) !== formatFilter) return false;
+
     // Tab filter
     if (activeTab === 'SUBMITTED' && m.status !== 'SUBMITTED') return false;
     if (activeTab === 'SCHEDULED' && m.status !== 'SCHEDULED' && m.status !== 'IN_PROGRESS') return false;
@@ -583,6 +281,9 @@ export default function MatchesPage() {
 
     return true;
   });
+
+  // matches narrowed by the sport tab only (used for the format tab counts)
+  const sportMatches = matches.filter((m) => !selectedSport || m.sportId === selectedSport);
 
   const pendingCount = matches.filter((m) => m.status === 'SUBMITTED').length;
 
@@ -619,10 +320,12 @@ export default function MatchesPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={fetchData}
-              className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg transition"
-              title="Refresh Fixtures"
+              disabled={loading}
+              className="p-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg transition disabled:opacity-60"
+              title="Reload fixtures"
+              aria-label="Reload fixtures"
             >
-              <Check className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={handleOpenCreate}
@@ -709,7 +412,10 @@ export default function MatchesPage() {
           <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100 text-xs">
             <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mr-1 shrink-0">Sport:</span>
             <button
-              onClick={() => setSelectedSport('')}
+              onClick={() => {
+                setSelectedSport('');
+                setFormatFilter('');
+              }}
               className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition shrink-0 ${
                 selectedSport === ''
                   ? 'bg-navy-950 text-white shadow-2xs'
@@ -721,7 +427,10 @@ export default function MatchesPage() {
             {sports.map((sp) => (
               <button
                 key={sp.id}
-                onClick={() => setSelectedSport(sp.id)}
+                onClick={() => {
+                  setSelectedSport(sp.id);
+                  setFormatFilter('');
+                }}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition shrink-0 flex items-center gap-1.5 ${
                   selectedSport === sp.id
                     ? 'bg-blue-600 text-white shadow-2xs'
@@ -733,6 +442,11 @@ export default function MatchesPage() {
               </button>
             ))}
           </div>
+
+          {/* Format tabs (Singles / Doubles / Mixed) for sports that have these formats */}
+          {sportMatches.some((m) => matchFormatKey(m.matchCategory)) && (
+            <MatchFormatFilter value={formatFilter} onChange={setFormatFilter} matches={sportMatches} />
+          )}
         </div>
 
         {/* Matches Grid */}
@@ -748,6 +462,7 @@ export default function MatchesPage() {
               const participants = match.participants || [];
               const isSubmitted = match.status === 'SUBMITTED';
               const isCompleted = match.status === 'COMPLETED';
+              const isScheduled = match.status === 'SCHEDULED' || match.status === 'IN_PROGRESS';
 
               return (
                 <div
@@ -767,7 +482,7 @@ export default function MatchesPage() {
                         </span>
                         {match.matchCategory && match.matchCategory !== 'Singles' && (
                           <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
-                            {match.matchCategory}
+                            {categoryDisplayName(match.matchCategory)}
                           </span>
                         )}
                         <span className="text-[10px] text-slate-400 font-medium">• {match.round}</span>
@@ -852,7 +567,21 @@ export default function MatchesPage() {
                             </div>
 
                             <div className="text-right">
-                              {p.score !== null && p.score !== undefined ? (
+                              {isScheduled ? (
+                                <button
+                                  onClick={() => setWinTarget({ match, participant: p })}
+                                  title={`Declare ${participantName(p, idx)} the winner`}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold transition"
+                                >
+                                  <Trophy className="w-3.5 h-3.5" />
+                                  Win
+                                </button>
+                              ) : p.isWinner ? (
+                                <span className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                  <Trophy className="w-3 h-3" />
+                                  {p.score} pts
+                                </span>
+                              ) : p.score !== null && p.score !== undefined ? (
                                 <span className="font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                                   {p.score} pts
                                 </span>
@@ -897,13 +626,24 @@ export default function MatchesPage() {
 
                   {/* Actions */}
                   <div className="pt-3.5 mt-3 border-t border-slate-100 flex items-center justify-between">
-                    <button
-                      onClick={() => handleDeleteMatch(match.id, match.matchCode)}
-                      className="text-slate-400 hover:text-red-600 p-1 rounded transition"
-                      title="Cancel / Delete Fixture"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {isScheduled && (
+                        <button
+                          onClick={() => setEditMatch(match)}
+                          className="text-slate-400 hover:text-amber-600 p-1 rounded transition"
+                          title="Edit match details"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteMatch(match.id, match.matchCode, match.status)}
+                        className="text-slate-400 hover:text-red-600 p-1 rounded transition"
+                        title="Delete match"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
                     <div className="flex items-center gap-2">
                       {isSubmitted ? (
@@ -915,6 +655,7 @@ export default function MatchesPage() {
                           Review & Approve Result
                         </button>
                       ) : isCompleted ? (
+                        <>
                         <button
                           onClick={() => handleOpenReview(match)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
@@ -922,6 +663,14 @@ export default function MatchesPage() {
                           <Eye className="w-3.5 h-3.5 text-slate-500" />
                           View Approved Points
                         </button>
+                        <button
+                          onClick={() => handleUndoResult(match)}
+                          title="Undo result and remove the awarded points"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-lg border border-red-200 text-red-700 hover:bg-red-50 transition"
+                        >
+                          Undo result
+                        </button>
+                        </>
                       ) : (
                         <span className="text-[11px] text-slate-400 font-medium">
                           Assigned to {match.referees?.[0]?.referee?.name || 'Official'}
@@ -936,1037 +685,43 @@ export default function MatchesPage() {
         </div>
       </div>
 
-      {/* Modal: Schedule New Match (Sport-Specific Participant Configuration) */}
-      {mounted && isCreateModalOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in duration-200">
-            {/* Modal Header */}
-            <div className="p-5 bg-navy-950 text-white flex items-center justify-between shrink-0 border-b border-navy-800">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-400">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-sm sm:text-base text-white tracking-tight">
-                    Schedule Competition Fixture
-                  </h3>
-                  <span className="text-xs text-blue-300 font-medium">
-                    APL Season 9 • Dynamic Sport-Specific Rosters
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-navy-900 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <EditMatchModal
+        match={editMatch}
+        venues={venues}
+        referees={referees}
+        onClose={() => setEditMatch(null)}
+        onSaved={(message) => {
+          setSuccess(message);
+          fetchData();
+        }}
+      />
 
-            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 text-xs">
-              {error && (
-                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-xl font-semibold flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
+      <DeclareWinnerModal
+        match={winTarget?.match || null}
+        participant={winTarget?.participant || null}
+        onClose={() => setWinTarget(null)}
+        onDone={(message) => {
+          setSuccess(message);
+          fetchData();
+        }}
+      />
 
-              {/* SECTION 1: SPORT & STAGE SELECTION */}
-              <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                    <span>1. Sport & Stage Selection</span>
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    Step 1 of 3
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Sport Dropdown */}
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
-                      Select Sport *
-                    </label>
-                    <select
-                      required
-                      value={formData.sportId}
-                      onChange={(e) => handleSportChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-600 shadow-2xs"
-                    >
-                      {sports.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name} ({s.category} • {s.sportType})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Stage Type Picker */}
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
-                      Competition Stage *
-                    </label>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {[
-                        { id: 'NORMAL', label: 'League / Regular' },
-                        { id: 'FINAL', label: 'Championship Final' },
-                        { id: 'THIRD_PLACE', label: '3rd Place Playoff' },
-                      ].map((st) => (
-                        <button
-                          key={st.id}
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              stageType: st.id,
-                              round: st.label,
-                            }))
-                          }
-                          className={`py-2 px-1.5 rounded-lg text-[10px] font-extrabold border transition text-center truncate ${
-                            formData.stageType === st.id
-                              ? 'bg-navy-950 text-white border-navy-950 shadow-xs'
-                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {st.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sport Category Configuration */}
-                {(() => {
-                  const sp = sports.find((s) => s.id === formData.sportId);
-                  const spKey = sp?.name ? sp.name.toUpperCase() : '';
-
-                  if (spKey === 'BADMINTON' || spKey === 'CARROM') {
-                    const isDoublesLocked =
-                      formData.matchCategory === 'Mixed' ||
-                      formData.matchCategory === 'MD' ||
-                      formData.matchCategory === 'WD';
-
-                    return (
-                      <div className="pt-3 border-t border-slate-200/60 space-y-3">
-                        <div className="flex items-center justify-between flex-wrap gap-2">
-                          <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px] block">
-                            Category & Format (PDF Official Rules)
-                          </label>
-                          <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-slate-200">
-                            <button
-                              type="button"
-                              disabled={isDoublesLocked}
-                              onClick={() => setBadmintonCarromFormat('SINGLES')}
-                              className={`px-2.5 py-1 rounded text-[10px] font-bold transition ${
-                                badmintonCarromFormat === 'SINGLES' && !isDoublesLocked
-                                  ? 'bg-blue-600 text-white shadow-2xs'
-                                  : 'text-slate-600 hover:text-slate-900 disabled:opacity-40'
-                              }`}
-                            >
-                              Singles (1v1)
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setBadmintonCarromFormat('DOUBLES')}
-                              className={`px-2.5 py-1 rounded text-[10px] font-bold transition ${
-                                badmintonCarromFormat === 'DOUBLES' || isDoublesLocked
-                                  ? 'bg-blue-600 text-white shadow-2xs'
-                                  : 'text-slate-600 hover:text-slate-900'
-                              }`}
-                            >
-                              Doubles (2v2)
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Category selection buttons */}
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-                          {[
-                            { code: "Men's singles / doubles", label: "Men's S/D", pts: '10/7/5' },
-                            { code: "Women's singles / doubles", label: "Women's S/D", pts: '10/7/5' },
-                            { code: 'Mixed', label: 'Mixed', pts: '20/14/10' },
-                            { code: 'MD', label: 'MD (Men)', pts: '20/14/10' },
-                            { code: 'WD', label: 'WD (Women)', pts: '20/14/10' },
-                          ].map((cat) => {
-                            const isSelected = formData.matchCategory === cat.code;
-                            return (
-                              <button
-                                key={cat.code}
-                                type="button"
-                                onClick={() => {
-                                  const autoDoubles =
-                                    cat.code === 'Mixed' || cat.code === 'MD' || cat.code === 'WD';
-                                  if (autoDoubles) setBadmintonCarromFormat('DOUBLES');
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    matchCategory: cat.code,
-                                    round: `${cat.label} ${prev.stageType === 'FINAL' ? 'Final' : 'Match'}`,
-                                  }));
-                                }}
-                                className={`p-2 rounded-xl text-left border transition ${
-                                  isSelected
-                                    ? 'bg-blue-50 border-blue-500 text-blue-900 ring-1 ring-blue-500 shadow-2xs'
-                                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                                }`}
-                              >
-                                <span className="block font-bold text-[11px] truncate">{cat.label}</span>
-                                <span className="text-[9px] text-slate-500 font-semibold">{cat.pts} pts</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  if (spKey === 'BGMI') {
-                    return (
-                      <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-slate-600">Competition Format:</span>
-                        <span className="px-2.5 py-0.5 rounded-full font-extrabold bg-blue-100 text-blue-800 border border-blue-200">
-                          Squad Battle (4 Players per Squad • Multi-House Allowed)
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  if (spKey === 'CRICKET') {
-                    return (
-                      <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-slate-600">Format:</span>
-                        <div className="flex gap-1">
-                          {['T10', 'T20', 'House Derby'].map((f) => (
-                            <button
-                              key={f}
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, matchCategory: f }))}
-                              className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
-                                formData.matchCategory === f
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-white border border-slate-200 text-slate-600'
-                              }`}
-                            >
-                              {f}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return null;
-                })()}
-              </div>
-
-              {/* SECTION 2: DYNAMIC PARTICIPANT SELECTION */}
-              {(() => {
-                const sp = sports.find((s) => s.id === formData.sportId);
-                const spKey = sp?.name ? sp.name.toUpperCase() : '';
-
-                // A. BGMI SQUAD-BASED SCHEDULING
-                if (spKey === 'BGMI') {
-                  return (
-                    <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-2xs">
-                      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
-                        <div>
-                          <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                            <Users className="w-4 h-4 text-blue-600" />
-                            <span>Participating BGMI Squads (Multi-Squad Lobby)</span>
-                          </h4>
-                          <p className="text-[11px] text-slate-500 mt-0.5">
-                            Each squad requires exactly 4 registered players. Players may come from different houses.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleAddBgmiSquad}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add Squad</span>
-                        </button>
-                      </div>
-
-                      <div className="space-y-4">
-                        {bgmiSquads.map((squad, sqIdx) => {
-                          const squadUniqueClubs = new Set<string>();
-                          squad.playerIds.filter(Boolean).forEach((pid) => {
-                            const pl = getPlayer(pid);
-                            if (pl?.club?.code) squadUniqueClubs.add(pl.club.code);
-                          });
-
-                          return (
-                            <div
-                              key={squad.id || sqIdx}
-                              className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3"
-                            >
-                              <div className="flex items-center justify-between flex-wrap gap-2">
-                                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-                                  <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-navy-950 text-white">
-                                    Squad #{sqIdx + 1}
-                                  </span>
-                                  <input
-                                    type="text"
-                                    required
-                                    placeholder="Squad Name (e.g. Squad Alpha, Team Soul)"
-                                    value={squad.name}
-                                    onChange={(e) => handleUpdateBgmiSquadName(sqIdx, e.target.value)}
-                                    className="px-2.5 py-1 border border-slate-200 rounded-lg bg-white font-bold text-xs text-navy-950 flex-1 max-w-[260px] outline-none focus:ring-2 focus:ring-blue-600"
-                                  />
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200">
-                                    {squadUniqueClubs.size} Unique House{squadUniqueClubs.size !== 1 ? 's' : ''}
-                                    {squadUniqueClubs.size > 0 && ` (${Array.from(squadUniqueClubs).join(', ')})`}
-                                  </span>
-                                  {bgmiSquads.length > 2 && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveBgmiSquad(sqIdx)}
-                                      className="p-1 text-slate-400 hover:text-red-600 rounded transition"
-                                      title="Remove Squad"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* 4 Player Slots */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
-                                {[0, 1, 2, 3].map((slotIdx) => {
-                                  const selectedPlayerId = squad.playerIds[slotIdx] || '';
-                                  const selectedPlayer = getPlayer(selectedPlayerId);
-
-                                  return (
-                                    <div key={slotIdx} className="bg-white p-2 rounded-lg border border-slate-200">
-                                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                                        Player {slotIdx + 1} *
-                                      </label>
-                                      <select
-                                        required
-                                        value={selectedPlayerId}
-                                        onChange={(e) =>
-                                          handleUpdateBgmiSquadPlayer(sqIdx, slotIdx, e.target.value)
-                                        }
-                                        className="w-full px-2 py-1 text-xs border border-slate-200 rounded-md bg-white font-semibold text-slate-900 outline-none focus:ring-1 focus:ring-blue-600 truncate"
-                                      >
-                                        <option value="">-- Choose Athlete --</option>
-                                        {players.map((p) => (
-                                          <option key={p.id} value={p.id}>
-                                            {p.name} ({p.club?.name || 'House'} • {p.club?.code})
-                                          </option>
-                                        ))}
-                                      </select>
-
-                                      {/* Auto-retrieved House Badge */}
-                                      {selectedPlayer ? (
-                                        <div className="mt-1.5 flex items-center justify-between text-[10px] pt-1 border-t border-slate-100">
-                                          <div className="flex items-center gap-1 truncate">
-                                            <ClubBadge
-                                              code={selectedPlayer.club?.code}
-                                              name={selectedPlayer.club?.name}
-                                              className="w-3 h-3 shrink-0"
-                                            />
-                                            <span className="font-bold text-slate-800 truncate">
-                                              {selectedPlayer.club?.name}
-                                            </span>
-                                          </div>
-                                          <span className="font-mono font-extrabold text-[9px] px-1 rounded bg-slate-100 text-slate-600">
-                                            {selectedPlayer.club?.code}
-                                          </span>
-                                        </div>
-                                      ) : (
-                                        <div className="mt-1.5 text-[9px] text-slate-400 italic">
-                                          Select player
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-
-                              {/* Squad Participant Summary Table */}
-                              <div className="bg-white p-2 rounded-lg border border-slate-200/80 text-[11px] flex items-center justify-between flex-wrap gap-2">
-                                <span className="font-medium text-slate-500">
-                                  <strong>Points Split Rule:</strong> Calculated championship points for{' '}
-                                  <span className="text-navy-950 font-bold">{squad.name || `Squad ${sqIdx + 1}`}</span>{' '}
-                                  will be divided equally among its unique registered houses.
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                }
-
-                // B. CRICKET HOUSE-BASED TEAM SCHEDULING
-                if (spKey === 'CRICKET') {
-                  const teamA = getCricketTeam(cricketTeamAId);
-                  const teamB = getCricketTeam(cricketTeamBId);
-
-                  return (
-                    <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-2xs">
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                          <Flame className="w-4 h-4 text-amber-500" />
-                          <span>House-Based Cricket Team Matchup</span>
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Select the two competing cricket teams. Match points will automatically roll up to their registered parent house.
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Team A */}
-                        <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                          <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                            Cricket Team A *
-                          </label>
-                          <select
-                            required
-                            value={cricketTeamAId}
-                            onChange={(e) => setCricketTeamAId(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                          >
-                            <option value="">-- Select Team A --</option>
-                            {cricketTeams.map((ct) => (
-                              <option key={ct.id} value={ct.id}>
-                                {ct.name} (Parent House: {ct.club?.name} • {ct.club?.code})
-                              </option>
-                            ))}
-                          </select>
-
-                          {teamA && (
-                            <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <ClubBadge code={teamA.club?.code} name={teamA.club?.name} className="w-5 h-5" />
-                                <div>
-                                  <span className="font-extrabold text-xs text-navy-950 block">
-                                    {teamA.name}
-                                  </span>
-                                  <span className="text-[10px] text-slate-500 font-medium">
-                                    Parent House: {teamA.club?.name} ({teamA.club?.code})
-                                  </span>
-                                </div>
-                              </div>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                Team A
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Team B */}
-                        <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                          <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                            Cricket Team B *
-                          </label>
-                          <select
-                            required
-                            value={cricketTeamBId}
-                            onChange={(e) => setCricketTeamBId(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                          >
-                            <option value="">-- Select Team B --</option>
-                            {cricketTeams.map((ct) => (
-                              <option key={ct.id} value={ct.id}>
-                                {ct.name} (Parent House: {ct.club?.name} • {ct.club?.code})
-                              </option>
-                            ))}
-                          </select>
-
-                          {teamB && (
-                            <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <ClubBadge code={teamB.club?.code} name={teamB.club?.name} className="w-5 h-5" />
-                                <div>
-                                  <span className="font-extrabold text-xs text-navy-950 block">
-                                    {teamB.name}
-                                  </span>
-                                  <span className="text-[10px] text-slate-500 font-medium">
-                                    Parent House: {teamB.club?.name} ({teamB.club?.code})
-                                  </span>
-                                </div>
-                              </div>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                Team B
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                // C. BADMINTON & CARROM CATEGORY-BASED SCHEDULING
-                if (spKey === 'BADMINTON' || spKey === 'CARROM') {
-                  const isSingles = badmintonCarromFormat === 'SINGLES';
-
-                  return (
-                    <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-2xs">
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                          <Shield className="w-4 h-4 text-blue-600" />
-                          <span>
-                            {sp.name} — {isSingles ? 'Singles (1 vs 1)' : 'Doubles (2 vs 2)'} Matchup
-                          </span>
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          {isSingles
-                            ? 'Select 1 registered player for Side A and 1 for Side B. Houses are retrieved automatically.'
-                            : 'Select 2 registered players per side. Pairs may belong to mixed houses; points will split accordingly.'}
-                        </p>
-                      </div>
-
-                      {isSingles ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* Side A Singles */}
-                          <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                            <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                              Side A Player *
-                            </label>
-                            <select
-                              required
-                              value={badmintonPlayerAId}
-                              onChange={(e) => setBadmintonPlayerAId(e.target.value)}
-                              className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                            >
-                              <option value="">-- Select Side A Player --</option>
-                              {players.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                  {p.name} ({p.club?.name || 'House'} • {p.club?.code})
-                                </option>
-                              ))}
-                            </select>
-
-                            {getPlayer(badmintonPlayerAId) && (
-                              <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <ClubBadge
-                                    code={getPlayer(badmintonPlayerAId)?.club?.code}
-                                    name={getPlayer(badmintonPlayerAId)?.club?.name}
-                                    className="w-5 h-5"
-                                  />
-                                  <div>
-                                    <span className="font-extrabold text-xs text-navy-950 block">
-                                      {getPlayer(badmintonPlayerAId)?.name}
-                                    </span>
-                                    <span className="text-[10px] text-slate-500 font-medium">
-                                      House: {getPlayer(badmintonPlayerAId)?.club?.name} (
-                                      {getPlayer(badmintonPlayerAId)?.club?.code})
-                                    </span>
-                                  </div>
-                                </div>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                  Side A
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Side B Singles */}
-                          <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                            <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                              Side B Player *
-                            </label>
-                            <select
-                              required
-                              value={badmintonPlayerBId}
-                              onChange={(e) => setBadmintonPlayerBId(e.target.value)}
-                              className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                            >
-                              <option value="">-- Select Side B Player --</option>
-                              {players.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                  {p.name} ({p.club?.name || 'House'} • {p.club?.code})
-                                </option>
-                              ))}
-                            </select>
-
-                            {getPlayer(badmintonPlayerBId) && (
-                              <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <ClubBadge
-                                    code={getPlayer(badmintonPlayerBId)?.club?.code}
-                                    name={getPlayer(badmintonPlayerBId)?.club?.name}
-                                    className="w-5 h-5"
-                                  />
-                                  <div>
-                                    <span className="font-extrabold text-xs text-navy-950 block">
-                                      {getPlayer(badmintonPlayerBId)?.name}
-                                    </span>
-                                    <span className="text-[10px] text-slate-500 font-medium">
-                                      House: {getPlayer(badmintonPlayerBId)?.club?.name} (
-                                      {getPlayer(badmintonPlayerBId)?.club?.code})
-                                    </span>
-                                  </div>
-                                </div>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                  Side B
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        /* Doubles / Mixed (2 Players on Side A, 2 on Side B) */
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* Side A Pair */}
-                          <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[11px] font-extrabold text-slate-700 uppercase">
-                                Side A (Pair 1) *
-                              </label>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-                                2 Players
-                              </span>
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] font-bold text-slate-500 mb-1">
-                                Player 1:
-                              </label>
-                              <select
-                                required
-                                value={sideAPlayer1Id}
-                                onChange={(e) => setSideAPlayer1Id(e.target.value)}
-                                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                              >
-                                <option value="">-- Choose Athlete --</option>
-                                {players.map((p) => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.name} ({p.club?.name} • {p.club?.code})
-                                  </option>
-                                ))}
-                              </select>
-                              {getPlayer(sideAPlayer1Id) && (
-                                <div className="mt-1 flex items-center gap-1.5 text-[10px] text-slate-600 font-medium">
-                                  <ClubBadge code={getPlayer(sideAPlayer1Id)?.club?.code} name={getPlayer(sideAPlayer1Id)?.club?.name} className="w-3.5 h-3.5" />
-                                  <span>House: {getPlayer(sideAPlayer1Id)?.club?.name} ({getPlayer(sideAPlayer1Id)?.club?.code})</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] font-bold text-slate-500 mb-1">
-                                Player 2:
-                              </label>
-                              <select
-                                required
-                                value={sideAPlayer2Id}
-                                onChange={(e) => setSideAPlayer2Id(e.target.value)}
-                                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                              >
-                                <option value="">-- Choose Athlete --</option>
-                                {players.map((p) => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.name} ({p.club?.name} • {p.club?.code})
-                                  </option>
-                                ))}
-                              </select>
-                              {getPlayer(sideAPlayer2Id) && (
-                                <div className="mt-1 flex items-center gap-1.5 text-[10px] text-slate-600 font-medium">
-                                  <ClubBadge code={getPlayer(sideAPlayer2Id)?.club?.code} name={getPlayer(sideAPlayer2Id)?.club?.name} className="w-3.5 h-3.5" />
-                                  <span>House: {getPlayer(sideAPlayer2Id)?.club?.name} ({getPlayer(sideAPlayer2Id)?.club?.code})</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Side B Pair */}
-                          <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[11px] font-extrabold text-slate-700 uppercase">
-                                Side B (Pair 2) *
-                              </label>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800">
-                                2 Players
-                              </span>
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] font-bold text-slate-500 mb-1">
-                                Player 1:
-                              </label>
-                              <select
-                                required
-                                value={sideBPlayer1Id}
-                                onChange={(e) => setSideBPlayer1Id(e.target.value)}
-                                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                              >
-                                <option value="">-- Choose Athlete --</option>
-                                {players.map((p) => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.name} ({p.club?.name} • {p.club?.code})
-                                  </option>
-                                ))}
-                              </select>
-                              {getPlayer(sideBPlayer1Id) && (
-                                <div className="mt-1 flex items-center gap-1.5 text-[10px] text-slate-600 font-medium">
-                                  <ClubBadge code={getPlayer(sideBPlayer1Id)?.club?.code} name={getPlayer(sideBPlayer1Id)?.club?.name} className="w-3.5 h-3.5" />
-                                  <span>House: {getPlayer(sideBPlayer1Id)?.club?.name} ({getPlayer(sideBPlayer1Id)?.club?.code})</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] font-bold text-slate-500 mb-1">
-                                Player 2:
-                              </label>
-                              <select
-                                required
-                                value={sideBPlayer2Id}
-                                onChange={(e) => setSideBPlayer2Id(e.target.value)}
-                                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                              >
-                                <option value="">-- Choose Athlete --</option>
-                                {players.map((p) => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.name} ({p.club?.name} • {p.club?.code})
-                                  </option>
-                                ))}
-                              </select>
-                              {getPlayer(sideBPlayer2Id) && (
-                                <div className="mt-1 flex items-center gap-1.5 text-[10px] text-slate-600 font-medium">
-                                  <ClubBadge code={getPlayer(sideBPlayer2Id)?.club?.code} name={getPlayer(sideBPlayer2Id)?.club?.name} className="w-3.5 h-3.5" />
-                                  <span>House: {getPlayer(sideBPlayer2Id)?.club?.name} ({getPlayer(sideBPlayer2Id)?.club?.code})</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                // D. CHESS INDIVIDUAL SCHEDULING
-                if (spKey === 'CHESS') {
-                  const pA = getPlayer(chessPlayerAId);
-                  const pB = getPlayer(chessPlayerBId);
-
-                  return (
-                    <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-2xs">
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                          <Medal className="w-4 h-4 text-amber-500" />
-                          <span>Chess Individual Matchup (Player A vs Player B)</span>
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Select the two competing chess athletes. Houses are retrieved automatically from registered player records.
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Player A */}
-                        <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                          <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                            Player A *
-                          </label>
-                          <select
-                            required
-                            value={chessPlayerAId}
-                            onChange={(e) => setChessPlayerAId(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                          >
-                            <option value="">-- Select Player A --</option>
-                            {players.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name} ({p.club?.name || 'House'} • {p.club?.code})
-                              </option>
-                            ))}
-                          </select>
-
-                          {pA && (
-                            <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <ClubBadge code={pA.club?.code} name={pA.club?.name} className="w-5 h-5" />
-                                <div>
-                                  <span className="font-extrabold text-xs text-navy-950 block">
-                                    {pA.name}
-                                  </span>
-                                  <span className="text-[10px] text-slate-500 font-medium">
-                                    House: {pA.club?.name} ({pA.club?.code})
-                                  </span>
-                                </div>
-                              </div>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                White / A
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Player B */}
-                        <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                          <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                            Player B *
-                          </label>
-                          <select
-                            required
-                            value={chessPlayerBId}
-                            onChange={(e) => setChessPlayerBId(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                          >
-                            <option value="">-- Select Player B --</option>
-                            {players.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name} ({p.club?.name || 'House'} • {p.club?.code})
-                              </option>
-                            ))}
-                          </select>
-
-                          {pB && (
-                            <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <ClubBadge code={pB.club?.code} name={pB.club?.name} className="w-5 h-5" />
-                                <div>
-                                  <span className="font-extrabold text-xs text-navy-950 block">
-                                    {pB.name}
-                                  </span>
-                                  <span className="text-[10px] text-slate-500 font-medium">
-                                    House: {pB.club?.name} ({pB.club?.code})
-                                  </span>
-                                </div>
-                              </div>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                Black / B
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                // E. FOOTBALL TEAM-BASED SCHEDULING
-                return (
-                  <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-2xs">
-                    <div>
-                      <h4 className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                        <Trophy className="w-4 h-4 text-blue-600" />
-                        <span>Football Team-Based Matchup</span>
-                      </h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Select the two competing houses. Match win and final placement points will be credited automatically.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Team A */}
-                      <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                        <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                          House Team A *
-                        </label>
-                        <select
-                          required
-                          value={footballClubAId}
-                          onChange={(e) => setFootballClubAId(e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                        >
-                          <option value="">-- Select House A --</option>
-                          {clubs.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name} ({c.code})
-                            </option>
-                          ))}
-                        </select>
-
-                        {getClub(footballClubAId) && (
-                          <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <ClubBadge
-                                code={getClub(footballClubAId)?.code}
-                                name={getClub(footballClubAId)?.name}
-                                className="w-5 h-5"
-                              />
-                              <span className="font-extrabold text-xs text-navy-950">
-                                {getClub(footballClubAId)?.name} ({getClub(footballClubAId)?.code})
-                              </span>
-                            </div>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                              Side A
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Team B */}
-                      <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-2.5">
-                        <label className="block text-[11px] font-extrabold text-slate-700 uppercase">
-                          House Team B *
-                        </label>
-                        <select
-                          required
-                          value={footballClubBId}
-                          onChange={(e) => setFootballClubBId(e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-white font-bold text-xs text-navy-950 outline-none focus:ring-2 focus:ring-blue-600"
-                        >
-                          <option value="">-- Select House B --</option>
-                          {clubs.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name} ({c.code})
-                            </option>
-                          ))}
-                        </select>
-
-                        {getClub(footballClubBId) && (
-                          <div className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <ClubBadge
-                                code={getClub(footballClubBId)?.code}
-                                name={getClub(footballClubBId)?.name}
-                                className="w-5 h-5"
-                              />
-                              <span className="font-extrabold text-xs text-navy-950">
-                                {getClub(footballClubBId)?.name} ({getClub(footballClubBId)?.code})
-                              </span>
-                            </div>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                              Side B
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* SECTION 3: DATE, TIME, VENUE & REFEREE */}
-              <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-4">
-                <span className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                  <span>3. Match Details & Official Assignment</span>
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                      Match Date *
-                    </label>
-                    <input
-                      type="date"
-                      required
-                      value={formData.matchDate}
-                      onChange={(e) => setFormData({ ...formData, matchDate: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                      Match Time *
-                    </label>
-                    <input
-                      type="time"
-                      required
-                      value={formData.matchTime}
-                      onChange={(e) => setFormData({ ...formData, matchTime: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                      Venue *
-                    </label>
-                    <select
-                      value={formData.venueId}
-                      onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs truncate"
-                    >
-                      {venues.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                      Assigned Referee
-                    </label>
-                    <select
-                      value={formData.refereeId}
-                      onChange={(e) => setFormData({ ...formData, refereeId: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs truncate"
-                    >
-                      <option value="">-- Choose Referee --</option>
-                      {referees.map((r) => (
-                        <option key={r.id} value={r.id}>
-                          {r.name} ({r.refereeCode})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                      Round / Match Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.round}
-                      onChange={(e) => setFormData({ ...formData, round: e.target.value })}
-                      placeholder="e.g. League Match, Grand Finals"
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                      Special Instructions / Notes
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Optional referee instructions"
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white font-semibold text-xs"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 shrink-0">
-                <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-                  Participants will be locked for the referee to record official scores.
-                </span>
-                <div className="flex items-center gap-2 ml-auto">
-                  <button
-                    type="button"
-                    onClick={() => setIsCreateModalOpen(false)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-bold transition text-xs"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-extrabold rounded-xl shadow-sm transition text-xs flex items-center gap-1.5"
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>Schedule Competition</span>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
+      <ScheduleMatchModal
+        open={mounted && isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onScheduled={(m) => {
+          setSuccess(`Fixture ${m.matchCode} scheduled successfully!`);
+          fetchData();
+        }}
+        sports={sports}
+        clubs={clubs}
+        cricketTeams={cricketTeams}
+        bgmiTeams={bgmiTeams}
+        onTeamCreated={(t) => setBgmiTeams((prev) => [...prev.filter((x) => x.id !== t.id), t])}
+        venues={venues}
+        referees={referees}
+        players={players}
+      />
 
       {/* Modal: Result Review & Approval Workflow (Section 6 Compliant) */}
       {mounted && isReviewModalOpen && selectedMatch && createPortal(

@@ -1,5 +1,6 @@
 'use client';
 
+import ClubRoster from '@/components/admin/ClubRoster';
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import {
@@ -221,18 +222,35 @@ export default function ClubsPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
-      return;
-    }
+    if (!confirm(`Delete the club "${name}"?`)) return;
 
     try {
-      const res = await fetch(`/api/clubs/${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      let res = await fetch(`/api/clubs/${id}`, { method: 'DELETE' });
+      let data = await res.json();
+
+      // The club still has players: ask before deleting them together with the club
+      if (res.status === 409 && data.code === 'PLAYERS_EXIST') {
+        const ok = confirm(
+          `"${name}" has ${data.playerCount} registered player(s).
+
+Deleting the club will permanently delete these players and their sport registrations. This cannot be undone.
+
+Delete the club and its players?`
+        );
+        if (!ok) return;
+        res = await fetch(`/api/clubs/${id}?deletePlayers=true`, { method: 'DELETE' });
+        data = await res.json();
+      }
+
       if (!res.ok) {
         alert(data.error || 'Failed to delete club');
         return;
       }
-      setSuccess('Club deleted successfully');
+      setSuccess(
+        data.playersDeleted
+          ? `Club "${name}" and its ${data.playersDeleted} player(s) deleted.`
+          : `Club "${name}" deleted successfully.`
+      );
       fetchData();
     } catch (err: any) {
       alert(err.message);
@@ -504,6 +522,13 @@ export default function ClubsPage() {
                               className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition"
                             >
                               <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(club.id, club.name)}
+                              title="Delete House"
+                              className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                            >
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -830,44 +855,8 @@ export default function ClubsPage() {
                   </div>
                 </div>
 
-                {/* Registered Player Roster */}
-                <div>
-                  <h4 className="font-bold text-navy-950 uppercase tracking-wider text-xs mb-3 flex items-center justify-between">
-                    <span>Registered Player Roster ({clubDetails.players?.length || 0})</span>
-                  </h4>
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
-                        <tr>
-                          <th className="py-2 px-3">Reg ID</th>
-                          <th className="py-2 px-3">Name</th>
-                          <th className="py-2 px-3">Email</th>
-                          <th className="py-2 px-3">Assigned Sports</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {!clubDetails.players || clubDetails.players.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="py-4 text-center text-slate-400 italic">
-                              No players registered for this house.
-                            </td>
-                          </tr>
-                        ) : (
-                          clubDetails.players.map((p: any) => (
-                            <tr key={p.id} className="hover:bg-slate-50">
-                              <td className="py-2 px-3 font-mono font-medium">{p.registrationId}</td>
-                              <td className="py-2 px-3 font-bold text-slate-800">{p.name}</td>
-                              <td className="py-2 px-3 text-slate-500">{p.email}</td>
-                              <td className="py-2 px-3 text-blue-600">
-                                {p.sports?.map((s: any) => s.sport?.name || s.sport).join(', ') || 'None'}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                {/* Registered Player Roster (API-filtered by club and sport) */}
+                <ClubRoster clubId={clubDetails.id} />
               </div>
 
               {/* Footer */}

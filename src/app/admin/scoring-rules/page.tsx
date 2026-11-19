@@ -16,8 +16,14 @@ import {
   Flame,
   Info,
   Check,
+  Plus,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
+import ScoringRuleFormModal from '@/components/admin/ScoringRuleFormModal';
+import { toEffectiveRule, triggerLabel } from '@/lib/scoring-triggers';
+import { categoryDisplayName } from '@/lib/match-scheduling';
 
 export default function AdminScoringRulesPage() {
   const [rules, setRules] = useState<any[]>([]);
@@ -28,6 +34,11 @@ export default function AdminScoringRulesPage() {
 
   // Filter sport tab
   const [selectedSport, setSelectedSport] = useState<string>('ALL');
+
+  // Create / edit rule modal
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<any | null>(null);
+  const [isAdmin, setIsAdmin] = useState(true);
 
   useEffect(() => {
     fetchRules();
@@ -41,6 +52,7 @@ export default function AdminScoringRulesPage() {
       if (!res.ok) throw new Error(data.error);
       setRules(data.rules || []);
       setCategoryLabels(data.categoryLabels || {});
+      if (typeof data.isAdmin === 'boolean') setIsAdmin(data.isAdmin);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -105,6 +117,66 @@ export default function AdminScoringRulesPage() {
     }
   };
 
+  const openCreate = () => {
+    setEditingRule(null);
+    setFormOpen(true);
+  };
+
+  const openEdit = (rule: any) => {
+    setEditingRule(rule);
+    setFormOpen(true);
+  };
+
+  const handleDeleteRule = async (rule: any) => {
+    if (!confirm(`Delete rule ${rule.ruleCode} ("${rule.ruleName}")?
+
+Matches calculated after this will no longer award these points. Past results are not changed.`)) return;
+    try {
+      const res = await fetch(`/api/admin/scoring-rules/${encodeURIComponent(rule.ruleCode)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete rule');
+      setMessage({ type: 'success', text: data.message || 'Rule deleted.' });
+      fetchRules();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const scope = selectedSport === 'ALL' ? 'ALL' : selectedSport;
+    const label = scope === 'ALL' ? 'ALL scoring rules for every sport' : `all ${scope} scoring rules`;
+    const count = scope === 'ALL' ? rules.length : rules.filter((r) => r.sport === scope).length;
+    if (count === 0) return;
+
+    const typed = window.prompt(
+      `This will permanently delete ${label} (${count} rule${count !== 1 ? 's' : ''}).
+
+` +
+        `Matches calculated afterwards will award no points from these rules until you restore them with "Reset to PDF Defaults". Past results are not changed.
+
+` +
+        `Type DELETE to confirm:`
+    );
+    if (typed === null) return;
+    if (typed.trim() !== 'DELETE') {
+      setMessage({ type: 'error', text: 'Bulk delete cancelled: confirmation text did not match.' });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/scoring-rules?sport=${encodeURIComponent(scope)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete rules');
+      setMessage({ type: 'success', text: data.message || 'Rules deleted.' });
+      fetchRules();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const sportsList = ['ALL', 'FOOTBALL', 'BGMI', 'CRICKET', 'BADMINTON', 'CARROM', 'CHESS'];
 
   const filteredRules = rules.filter((r) => {
@@ -133,6 +205,24 @@ export default function AdminScoringRulesPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={openCreate}
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-2xs transition disabled:opacity-50"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Rule
+            </button>
+            {isAdmin && filteredRules.length > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold rounded-xl shadow-2xs transition disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                {selectedSport === 'ALL' ? 'Delete All Rules' : `Delete All ${selectedSport} Rules`}
+              </button>
+            )}
             <button
               onClick={handleResetToPdf}
               disabled={saving}
@@ -224,6 +314,11 @@ export default function AdminScoringRulesPage() {
           </div>
 
           <div className="divide-y divide-slate-100">
+            {!loading && filteredRules.length === 0 && (
+              <p className="p-8 text-center text-xs text-slate-400">
+                No rules for this sport yet. Use <strong>Add Rule</strong> to create one.
+              </p>
+            )}
             {filteredRules.map((rule) => (
               <div
                 key={rule.ruleCode}
@@ -238,7 +333,7 @@ export default function AdminScoringRulesPage() {
                     <span className="text-xs font-bold text-slate-500">• {rule.sport}</span>
                     {rule.category && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                        {rule.category}
+                        {categoryDisplayName(toEffectiveRule(rule).category || rule.category)}
                       </span>
                     )}
                     <span
@@ -253,6 +348,17 @@ export default function AdminScoringRulesPage() {
                     {rule.isTournamentLevel && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700">
                         Tournament Level
+                      </span>
+                    )}
+                    {toEffectiveRule(rule).trigger && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        On: {triggerLabel(toEffectiveRule(rule).trigger)}
+                        {toEffectiveRule(rule).minTeams ? ` (${toEffectiveRule(rule).minTeams}+ teams)` : ''}
+                      </span>
+                    )}
+                    {rule.enabled === false && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+                        Disabled
                       </span>
                     )}
                   </div>
@@ -275,11 +381,40 @@ export default function AdminScoringRulesPage() {
                     />
                     <span className="text-xs font-bold text-slate-500">pts</span>
                   </div>
+                  {isAdmin && rule.id && (
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        onClick={() => openEdit(rule)}
+                        title="Edit rule"
+                        className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-md transition"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRule(rule)}
+                        title="Delete rule"
+                        className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        <ScoringRuleFormModal
+          open={formOpen}
+          onClose={() => setFormOpen(false)}
+          editing={editingRule}
+          defaultSport={selectedSport !== 'ALL' ? selectedSport : undefined}
+          onSaved={(text) => {
+            setMessage({ type: 'success', text });
+            fetchRules();
+          }}
+        />
 
         {/* Category Labels Configuration Section */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">

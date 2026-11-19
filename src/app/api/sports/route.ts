@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { normalizeSportKey, DEFAULT_OFFICIAL_RULES } from '@/lib/sports-rules';
+import { getPurgedSports } from '@/lib/sports-rules-server';
 
 export async function GET() {
   try {
@@ -14,30 +15,36 @@ export async function GET() {
             referee: true,
           },
         },
-        _count: {
-          select: {
-            players: true,
-            matches: true,
-          },
-        },
       },
     });
+
+    // Real counts (the Mongo adapter has no _count support)
+    const [playerRegs, allMatches] = await Promise.all([db.playerSport.findMany({}), db.match.findMany({})]);
+    const countBy = (rows: any[]) => {
+      const m = new Map<string, number>();
+      rows.forEach((r) => m.set(r.sportId, (m.get(r.sportId) || 0) + 1));
+      return m;
+    };
+    const playerCounts = countBy(playerRegs);
+    const matchCounts = countBy(allMatches);
 
     // Attach sport-specific scoring rules from DB
     const allRules = await db.sportScoringRule.findMany({
       where: { enabled: true },
     });
 
+    const purgedSports = await getPurgedSports();
     const enrichedSports = sports.map((s: any) => {
       const sportKey = normalizeSportKey(s.name);
       let rules = sportKey ? allRules.filter((r: any) => r.sport === sportKey) : [];
-      if ((!rules || rules.length === 0) && sportKey) {
+      if ((!rules || rules.length === 0) && sportKey && !purgedSports.has(sportKey)) {
         rules = DEFAULT_OFFICIAL_RULES.filter((r: any) => r.sport === sportKey);
       }
       return {
         ...s,
         sportKey,
         scoringRules: rules,
+        _count: { players: playerCounts.get(s.id) || 0, matches: matchCounts.get(s.id) || 0 },
       };
     });
 

@@ -1,5 +1,7 @@
 import { calculateClubPointsDistribution, PlayerContribution } from './points-distribution';
 export * from './sports-rules-definitions';
+export * from './scoring-triggers';
+import { toEffectiveRule, findRuleForTrigger, triggerLabel, RuleTrigger } from './scoring-triggers';
 import {
   SportScoringRuleDef,
   DEFAULT_OFFICIAL_RULES,
@@ -18,7 +20,7 @@ export function getSportRules(sportName: string): SportScoringRuleDef[] {
 
 export interface MatchCalculationInput {
   sportName: string;
-  stageType?: 'NORMAL' | 'FINAL' | 'THIRD_PLACE' | 'SEMI_FINAL';
+  stageType?: 'NORMAL' | 'FINAL' | 'THIRD_PLACE' | 'SEMI_FINAL' | 'QUARTER_FINAL';
   eventCategory?: string; // For Badminton/Carrom
 
   // Common match results
@@ -106,14 +108,15 @@ export async function calculateMatchPoints(
   participants: any[], // Array of MatchParticipant with club, cricketTeam, and players
   allPlayers: any[] = [], // Optional lookup array of players
   rotationOffset: number = 0,
-  customRuleMap?: Map<string, number>
+  customRuleMap?: Map<string, number>,
+  rulesOverride?: SportScoringRuleDef[] // rules loaded from the database; when given they replace the PDF defaults
 ): Promise<CalculatedMatchResult> {
   const sportKey = normalizeSportKey(input.sportName);
   if (!sportKey) {
     throw new Error(`Unsupported sport: "${input.sportName}"`);
   }
 
-  const rules = await getSportRules(sportKey);
+  const rules = rulesOverride !== undefined ? rulesOverride : await getSportRules(sportKey);
   const ruleMap = new Map<string, number>();
   rules.forEach((r) => ruleMap.set(r.ruleCode, r.points));
 
@@ -167,7 +170,9 @@ export async function calculateMatchPoints(
     const player = findPlayerDetails(playerId);
     if (!player) return;
 
-    const points = ruleMap.get(ruleCode) ?? defaultPoints;
+    const configured = ruleMap.get(ruleCode);
+    if (configured === undefined) return; // rule deleted or disabled: nothing to award
+    const points = configured;
     const clubId = player.clubId || player.club?.id;
     const clubName = player.club?.name || 'Club';
 
@@ -183,294 +188,106 @@ export async function calculateMatchPoints(
     });
   };
 
-  // 1. FOOTBALL
-  if (sportKey === 'FOOTBALL') {
-    const isFinal = input.stageType === 'FINAL';
+  // ---- TEAM / INDIVIDUAL-ENTRY POINTS: driven by the scoring rules ----
+  // A participant is one player or one team. Its points come from the rule whose trigger matches what it achieved
+  // in this match (win, final winner, 1st place, ...). They are then split equally across the unique clubs of its players.
+  const effectiveRules = rules
+    .map((r) => {
+      const e = toEffectiveRule(r);
+      const override = customRuleMap?.get(e.ruleCode);
+      return override !== undefined ? { ...e, points: Number(override) || 0 } : e;
+    })
+    .filter((r) => r.trigger && (!r.sport || r.sport === sportKey));
+  const teamCount = Number(input.totalTeamsParticipating) || participants.length;
 
-    if (isFinal) {
-      // In the final: 50 pts to winner, 25 pts to loser
-      if (input.winnerParticipantId) {
-        const winnerPts = ruleMap.get('FT_FINAL_WINNER') ?? 50;
-        teamPoints.push({
-          participantId: input.winnerParticipantId,
-          teamName: getParticipantName(input.winnerParticipantId),
-          points: winnerPts,
-          reason: `Football Final Winner (${winnerPts} pts)`,
-          isWinner: true,
-          rank: 1,
-        });
-      }
+  const awardTeam = (
+    participantId: string | undefined,
+    trigger: RuleTrigger,
+    isWinner: boolean,
+    rank: number,
+    opts: { fallback?: RuleTrigger; skipIfNoRule?: boolean } = {}
+  ) => {
+    if (!participantId) return;
+    let rule = findRuleForTrigger(effectiveRules, trigger, input.eventCategory, teamCount);
+    if (!rule && opts.fallback) rule = findRuleForTrigger(effectiveRules, opts.fallback, input.eventCategory, teamCount);
+    if (!rule && opts.skipIfNoRule) return;
 
-      if (input.loserParticipantId) {
-        const loserPts = ruleMap.get('FT_FINAL_LOSER') ?? 25;
-        teamPoints.push({
-          participantId: input.loserParticipantId,
-          teamName: getParticipantName(input.loserParticipantId),
-          points: loserPts,
-          reason: `Football Final Loser (${loserPts} pts)`,
-          isWinner: false,
-          rank: 2,
-        });
-      }
-    } else {
-      // Normal match: 10 pts per match win
-      if (input.winnerParticipantId) {
-        const winPts = ruleMap.get('FT_MATCH_WIN') ?? 10;
-        teamPoints.push({
-          participantId: input.winnerParticipantId,
-          teamName: getParticipantName(input.winnerParticipantId),
-          points: winPts,
-          reason: `Football Match Win (${winPts} pts)`,
-          isWinner: true,
-          rank: 1,
-        });
-      }
-      if (input.loserParticipantId) {
-        teamPoints.push({
-          participantId: input.loserParticipantId,
-          teamName: getParticipantName(input.loserParticipantId),
-          points: 0,
-          reason: `Football Match Loss (0 pts)`,
-          isWinner: false,
-          rank: 2,
-        });
-      }
+    const label = triggerLabel(trigger);
+    const points = rule?.points ?? 0;
+    const catSuffix = rule?.category ? ` (${rule.category})` : '';
+    const zeroByDesign =
+      trigger === 'MATCH_LOSS' || trigger === 'THIRD_PLACE_LOSER' || trigger === 'QUARTER_FINAL_LOSS' || trigger === 'SEMI_FINAL_LOSS';
+    teamPoints.push({
+      participantId,
+      teamName: getParticipantName(participantId),
+      points,
+      reason: rule
+        ? `${input.sportName} ${label}${catSuffix}: ${points} pts`
+        : zeroByDesign
+        ? `${input.sportName} ${label}: 0 pts`
+        : `${input.sportName} ${label}: no scoring rule configured (0 pts)`,
+      isWinner,
+      rank,
+    });
+  };
+
+  const stage = input.stageType || 'NORMAL';
+  const winnerId = input.winnerParticipantId;
+  const loserId = input.loserParticipantId;
+
+  if (sportKey === 'BADMINTON' || sportKey === 'CARROM' || sportKey === 'CHESS') {
+    // Badminton / Carrom / Chess: NO points per match. Points come from the event standings: when an admin finalizes an
+    // event, the 1st / 2nd / 3rd place rules are paid to the top three (see event-standings.ts).
+    const note = 'no points per match - awarded when the event is finalized from the standings';
+    if (winnerId) {
+      teamPoints.push({ participantId: winnerId, teamName: getParticipantName(winnerId), points: 0, reason: `${input.sportName} match win: ${note}`, isWinner: true, rank: 1 });
     }
-
-    // Individual award: Top Scorer (15 pts)
-    addIndividualAward('TOP_SCORER', 'Top Scorer', 'FT_TOP_SCORER', input.topScorerPlayerId, 15);
-  }
-
-  // 2. BGMI
-  else if (sportKey === 'BGMI') {
-    // Per match win: 8 points
-    if (input.winnerParticipantId) {
-      const matchWinPts = ruleMap.get('BGMI_MATCH_WIN') ?? 8;
-      teamPoints.push({
-        participantId: input.winnerParticipantId,
-        teamName: getParticipantName(input.winnerParticipantId),
-        points: matchWinPts,
-        reason: `BGMI Match Win (WWCD) (${matchWinPts} pts)`,
-        isWinner: true,
-        rank: 1,
-      });
+    if (loserId) {
+      teamPoints.push({ participantId: loserId, teamName: getParticipantName(loserId), points: 0, reason: `${input.sportName} match loss: 0 pts`, isWinner: false, rank: 2 });
     }
-
-    // Tournament Placements (if final/tournament level)
+  } else if (sportKey === 'BGMI') {
+    // Every match: the winning team earns the match-win rule
+    awardTeam(winnerId, 'MATCH_WIN', true, 1);
+    // Tournament placements (only when this result is a tournament placement)
     if (input.isTournamentPlacement) {
-      if (input.firstPlaceParticipantId) {
-        const overallWinPts = ruleMap.get('BGMI_OVERALL_WINNER') ?? 20;
-        teamPoints.push({
-          participantId: input.firstPlaceParticipantId,
-          teamName: getParticipantName(input.firstPlaceParticipantId),
-          points: overallWinPts,
-          reason: `BGMI Overall Winner (${overallWinPts} pts)`,
-          isWinner: true,
-          rank: 1,
-        });
-      }
-
-      if (input.secondPlaceParticipantId) {
-        const runnerUpPts = ruleMap.get('BGMI_RUNNER_UP') ?? 12;
-        teamPoints.push({
-          participantId: input.secondPlaceParticipantId,
-          teamName: getParticipantName(input.secondPlaceParticipantId),
-          points: runnerUpPts,
-          reason: `BGMI Runner-Up (${runnerUpPts} pts)`,
-          isWinner: false,
-          rank: 2,
-        });
-      }
-
-      // Third place: 8 points, ONLY if 7 teams participate
-      const totalTeams = Number(input.totalTeamsParticipating) || participants.length;
-      if (input.thirdPlaceParticipantId && totalTeams === 7) {
-        const thirdPlacePts = ruleMap.get('BGMI_THIRD_PLACE') ?? 8;
-        teamPoints.push({
-          participantId: input.thirdPlaceParticipantId,
-          teamName: getParticipantName(input.thirdPlaceParticipantId),
-          points: thirdPlacePts,
-          reason: `BGMI Third Place (7 teams participated) (${thirdPlacePts} pts)`,
-          isWinner: false,
-          rank: 3,
-        });
-      }
+      awardTeam(input.firstPlaceParticipantId, 'TOURNAMENT_WINNER', true, 1, { skipIfNoRule: true });
+      awardTeam(input.secondPlaceParticipantId, 'TOURNAMENT_RUNNER_UP', false, 2, { skipIfNoRule: true });
+      awardTeam(input.thirdPlaceParticipantId, 'TOURNAMENT_THIRD', false, 3, { skipIfNoRule: true }); // honours "min teams" condition
     }
-
-    // MVP: 5 points
-    addIndividualAward('BGMI_MVP', 'MVP', 'BGMI_MVP', input.bgmiMvpPlayerId, 5);
-  }
-
-  // 3. CRICKET
-  else if (sportKey === 'CRICKET') {
-    if (input.stageType === 'FINAL') {
-      if (input.winnerParticipantId) {
-        const winPts = ruleMap.get('CRICK_FINAL_WINNER') ?? 50;
-        teamPoints.push({
-          participantId: input.winnerParticipantId,
-          teamName: getParticipantName(input.winnerParticipantId),
-          points: winPts,
-          reason: `Cricket Final Winner (${winPts} pts)`,
-          isWinner: true,
-          rank: 1,
-        });
-      }
-      if (input.loserParticipantId) {
-        const losePts = ruleMap.get('CRICK_FINAL_LOSER') ?? 25;
-        teamPoints.push({
-          participantId: input.loserParticipantId,
-          teamName: getParticipantName(input.loserParticipantId),
-          points: losePts,
-          reason: `Cricket Final Loser (${losePts} pts)`,
-          isWinner: false,
-          rank: 2,
-        });
-      }
-    } else if (input.stageType === 'THIRD_PLACE') {
-      if (input.winnerParticipantId) {
-        const thirdPts = ruleMap.get('CRICK_THIRD_PLACE') ?? 20;
-        teamPoints.push({
-          participantId: input.winnerParticipantId,
-          teamName: getParticipantName(input.winnerParticipantId),
-          points: thirdPts,
-          reason: `Cricket Third Place (${thirdPts} pts)`,
-          isWinner: true,
-          rank: 3,
-        });
-      }
-      if (input.loserParticipantId) {
-        teamPoints.push({
-          participantId: input.loserParticipantId,
-          teamName: getParticipantName(input.loserParticipantId),
-          points: 0,
-          reason: `Cricket Fourth Place (0 pts)`,
-          isWinner: false,
-          rank: 4,
-        });
-      }
+  } else {
+    // Head-to-head sports (Football, Cricket): by stage
+    if (stage === 'FINAL') {
+      awardTeam(winnerId, 'FINAL_WINNER', true, 1);
+      awardTeam(loserId, 'FINAL_LOSER', false, 2);
+    } else if (stage === 'THIRD_PLACE') {
+      awardTeam(winnerId, 'THIRD_PLACE_WINNER', true, 3, { fallback: 'MATCH_WIN' });
+      awardTeam(loserId, 'THIRD_PLACE_LOSER', false, 4, { fallback: 'MATCH_LOSS' });
+    } else if (stage === 'QUARTER_FINAL' || stage === 'SEMI_FINAL') {
+      const q = stage === 'QUARTER_FINAL';
+      awardTeam(winnerId, q ? 'QUARTER_FINAL_WIN' : 'SEMI_FINAL_WIN', true, 1, { fallback: 'MATCH_WIN' });
+      awardTeam(loserId, q ? 'QUARTER_FINAL_LOSS' : 'SEMI_FINAL_LOSS', false, 2, { fallback: 'MATCH_LOSS' });
     } else {
-      // Normal Match win: 10 pts
-      if (input.winnerParticipantId) {
-        const winPts = ruleMap.get('CRICK_MATCH_WIN') ?? 10;
-        teamPoints.push({
-          participantId: input.winnerParticipantId,
-          teamName: getParticipantName(input.winnerParticipantId),
-          points: winPts,
-          reason: `Cricket Match Win (${winPts} pts)`,
-          isWinner: true,
-          rank: 1,
-        });
-      }
-      if (input.loserParticipantId) {
-        teamPoints.push({
-          participantId: input.loserParticipantId,
-          teamName: getParticipantName(input.loserParticipantId),
-          points: 0,
-          reason: `Cricket Match Loss (0 pts)`,
-          isWinner: false,
-          rank: 2,
-        });
-      }
-    }
-
-    // Individual Awards
-    addIndividualAward('BEST_BATSMAN_MEN', 'Best batsman — Men', 'CRICK_BEST_BATSMAN_MEN', input.bestBatsmanMenPlayerId, 10);
-    addIndividualAward('BEST_BATSMAN_WOMEN', 'Best batsman — Women', 'CRICK_BEST_BATSMAN_WOMEN', input.bestBatsmanWomenPlayerId, 5);
-    addIndividualAward('BEST_BOWLER_MEN', 'Best bowler — Men', 'CRICK_BEST_BOWLER_MEN', input.bestBowlerMenPlayerId, 10);
-    addIndividualAward('BEST_BOWLER_WOMEN', 'Best bowler — Women', 'CRICK_BEST_BOWLER_WOMEN', input.bestBowlerWomenPlayerId, 5);
-    addIndividualAward('BEST_FIELDER_MEN', 'Best fielder — Men', 'CRICK_BEST_FIELDER_MEN', input.bestFielderMenPlayerId, 10);
-    addIndividualAward('BEST_FIELDER_WOMEN', 'Best fielder — Women', 'CRICK_BEST_FIELDER_WOMEN', input.bestFielderWomenPlayerId, 5);
-    addIndividualAward('MOST_FOURS', 'Most fours', 'CRICK_MOST_FOURS', input.mostFoursPlayerId, 5);
-    addIndividualAward('MOST_SIXES', 'Most sixes', 'CRICK_MOST_SIXES', input.mostSixesPlayerId, 5);
-
-    // Tournament-level awards
-    addIndividualAward('MOTM_MEN', 'Man of the Tournament — Men', 'CRICK_MOTM_MEN', input.manOfTheTournamentMenPlayerId, 15);
-    addIndividualAward('MOTM_WOMEN', 'Man of the Tournament — Women', 'CRICK_MOTM_WOMEN', input.manOfTheTournamentWomenPlayerId, 10);
-  }
-
-  // 4. BADMINTON & CARROM
-  else if (sportKey === 'BADMINTON' || sportKey === 'CARROM') {
-    const cat = input.eventCategory || "Men's singles / doubles";
-    const prefix = sportKey === 'BADMINTON' ? 'BADM' : 'CARROM';
-
-    // Determine point values for 1st, 2nd, 3rd from category rules
-    let pts1st = 10;
-    let pts2nd = 7;
-    let pts3rd = 5;
-
-    if (cat === 'Mixed' || cat === 'MD' || cat === 'WD') {
-      pts1st = 20;
-      pts2nd = 14;
-      pts3rd = 10;
-    }
-
-    const firstPlaceId = input.firstPlaceParticipantId || input.winnerParticipantId;
-    const secondPlaceId = input.secondPlaceParticipantId || input.loserParticipantId;
-    const thirdPlaceId = input.thirdPlaceParticipantId;
-
-    if (firstPlaceId) {
-      teamPoints.push({
-        participantId: firstPlaceId,
-        teamName: getParticipantName(firstPlaceId),
-        points: pts1st,
-        reason: `${input.sportName} 1st Place (${cat}): ${pts1st} pts`,
-        isWinner: true,
-        rank: 1,
-      });
-    }
-
-    if (secondPlaceId) {
-      teamPoints.push({
-        participantId: secondPlaceId,
-        teamName: getParticipantName(secondPlaceId),
-        points: pts2nd,
-        reason: `${input.sportName} 2nd Place (${cat}): ${pts2nd} pts`,
-        isWinner: false,
-        rank: 2,
-      });
-    }
-
-    if (thirdPlaceId) {
-      teamPoints.push({
-        participantId: thirdPlaceId,
-        teamName: getParticipantName(thirdPlaceId),
-        points: pts3rd,
-        reason: `${input.sportName} 3rd Place (${cat}): ${pts3rd} pts`,
-        isWinner: false,
-        rank: 3,
-      });
+      awardTeam(winnerId, 'MATCH_WIN', true, 1);
+      awardTeam(loserId, 'MATCH_LOSS', false, 2);
     }
   }
 
-  // 5. CHESS
-  else if (sportKey === 'CHESS') {
-    const pts1st = ruleMap.get('CHESS_1ST') ?? 10;
-    const pts2nd = ruleMap.get('CHESS_2ND') ?? 5;
-
-    const firstPlaceId = input.firstPlaceParticipantId || input.winnerParticipantId;
-    const secondPlaceId = input.secondPlaceParticipantId || input.loserParticipantId;
-
-    if (firstPlaceId) {
-      teamPoints.push({
-        participantId: firstPlaceId,
-        teamName: getParticipantName(firstPlaceId),
-        points: pts1st,
-        reason: `Chess 1st Place (${pts1st} pts)`,
-        isWinner: true,
-        rank: 1,
-      });
-    }
-
-    if (secondPlaceId) {
-      teamPoints.push({
-        participantId: secondPlaceId,
-        teamName: getParticipantName(secondPlaceId),
-        points: pts2nd,
-        reason: `Chess 2nd Place (${pts2nd} pts)`,
-        isWinner: false,
-        rank: 2,
-      });
-    }
+  // ---- INDIVIDUAL AWARDS (points come from the INDIVIDUAL rules; the player's own club is credited) ----
+  if (sportKey === 'FOOTBALL') {
+    addIndividualAward('TOP_SCORER', 'Top Scorer', 'FT_TOP_SCORER', input.topScorerPlayerId);
+  } else if (sportKey === 'BGMI') {
+    addIndividualAward('BGMI_MVP', 'MVP', 'BGMI_MVP', input.bgmiMvpPlayerId);
+  } else if (sportKey === 'CRICKET') {
+    addIndividualAward('BEST_BATSMAN_MEN', 'Best batsman — Men', 'CRICK_BEST_BATSMAN_MEN', input.bestBatsmanMenPlayerId);
+    addIndividualAward('BEST_BATSMAN_WOMEN', 'Best batsman — Women', 'CRICK_BEST_BATSMAN_WOMEN', input.bestBatsmanWomenPlayerId);
+    addIndividualAward('BEST_BOWLER_MEN', 'Best bowler — Men', 'CRICK_BEST_BOWLER_MEN', input.bestBowlerMenPlayerId);
+    addIndividualAward('BEST_BOWLER_WOMEN', 'Best bowler — Women', 'CRICK_BEST_BOWLER_WOMEN', input.bestBowlerWomenPlayerId);
+    addIndividualAward('BEST_FIELDER_MEN', 'Best fielder — Men', 'CRICK_BEST_FIELDER_MEN', input.bestFielderMenPlayerId);
+    addIndividualAward('BEST_FIELDER_WOMEN', 'Best fielder — Women', 'CRICK_BEST_FIELDER_WOMEN', input.bestFielderWomenPlayerId);
+    addIndividualAward('MOST_FOURS', 'Most fours', 'CRICK_MOST_FOURS', input.mostFoursPlayerId);
+    addIndividualAward('MOST_SIXES', 'Most sixes', 'CRICK_MOST_SIXES', input.mostSixesPlayerId);
+    addIndividualAward('MOTM_MEN', 'Man of the Tournament — Men', 'CRICK_MOTM_MEN', input.manOfTheTournamentMenPlayerId);
+    addIndividualAward('MOTM_WOMEN', 'Man of the Tournament — Women', 'CRICK_MOTM_WOMEN', input.manOfTheTournamentWomenPlayerId);
   }
 
   // Now, calculate the automatic unique-club points distribution for each team/participant

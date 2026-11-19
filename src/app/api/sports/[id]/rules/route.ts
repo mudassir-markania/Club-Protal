@@ -9,6 +9,7 @@ import {
 import {
   getSportRules,
   seedOfficialScoringRules,
+  getPurgedSports,
 } from '@/lib/sports-rules-server';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -35,8 +36,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     let rules = await getSportRules(sportKey);
     if (!rules || rules.length === 0) {
-      await seedOfficialScoringRules();
-      rules = await getSportRules(sportKey);
+      // do not bring back rules an admin deliberately deleted
+      if (!(await getPurgedSports()).has(sportKey)) {
+        await seedOfficialScoringRules();
+        rules = await getSportRules(sportKey);
+      }
     }
 
     return NextResponse.json({

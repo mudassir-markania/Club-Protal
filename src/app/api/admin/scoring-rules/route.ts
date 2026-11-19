@@ -3,7 +3,10 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { DEFAULT_OFFICIAL_RULES, OFFICIAL_CATEGORY_LABELS } from '@/lib/sports-rules';
-import { seedOfficialScoringRules } from '@/lib/sports-rules-server';
+import { seedOfficialScoringRules, getPurgedSports, setSportPurged } from '@/lib/sports-rules-server';
+import { RULE_SPORTS } from '@/lib/scoring-rule-validation';
+import { validateRule } from '@/lib/scoring-rule-validation';
+import { findRuleConflict } from '@/lib/scoring-rule-conflicts';
 
 export async function GET(req: Request) {
   try {
@@ -11,8 +14,10 @@ export async function GET(req: Request) {
     const user = await requireAuth();
 
     // Ensure initial rules are in DB
+    // Seed defaults only on a fresh database, never after an admin deliberately deleted rules
     const count = await db.sportScoringRule.count();
-    if (count === 0) {
+    const purged = await getPurgedSports();
+    if (count === 0 && purged.size === 0) {
       await seedOfficialScoringRules();
     }
 
@@ -36,7 +41,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      rules: rules.length > 0 ? rules : DEFAULT_OFFICIAL_RULES,
+      rules: rules.length > 0 || purged.size > 0 ? rules : DEFAULT_OFFICIAL_RULES,
       categoryLabels,
       officialDefaults: DEFAULT_OFFICIAL_RULES,
       isAdmin: user.role === 'ADMIN' || user.role === 'SUPER_ADMIN',
@@ -52,6 +57,30 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const { action, rules, categoryLabels } = body;
+
+    // Create a new scoring rule
+    if (action === 'CREATE') {
+      const { error, value } = validateRule(body.rule || {}, false);
+      if (error) return NextResponse.json({ error }, { status: 400 });
+
+      const clash = await db.sportScoringRule.findUnique({ where: { ruleCode: value.ruleCode } });
+      if (clash) return NextResponse.json({ error: `A rule with code ${value.ruleCode} already exists` }, { status: 409 });
+
+      const conflict = await findRuleConflict({ sport: value.sport, ruleCode: value.ruleCode, trigger: value.trigger, category: value.category, awardType: value.awardType, enabled: value.enabled ?? true });
+      if (conflict) return NextResponse.json({ error: conflict }, { status: 409 });
+
+      const created = await db.sportScoringRule.create({
+        data: {
+          description: '',
+          enabled: true,
+          isTournamentLevel: false,
+          category: null,
+          ...value,
+        },
+      });
+      await createAuditLog({ user, action: 'CREATE_SCORING_RULE', entity: 'SportScoringRule', recordId: value.ruleCode, updatedValue: created });
+      return NextResponse.json({ success: true, rule: created }, { status: 201 });
+    }
 
     if (action === 'RESET_TO_PDF') {
       await seedOfficialScoringRules();
@@ -128,3 +157,45 @@ export async function POST(req: Request) {
   }
 }
 
+/**
+ * Bulk delete: DELETE /api/admin/scoring-rules?sport=ALL | FOOTBALL | BGMI | ...
+ * The affected sports are marked as deliberately cleared so defaults are not re-applied.
+ * "Reset to PDF Defaults" restores them.
+ */
+export async function DELETE(req: Request) {
+  try {
+    const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
+    const sport = (new URL(req.url).searchParams.get('sport') || '').toUpperCase();
+
+    const targets = sport === 'ALL' ? [...RULE_SPORTS] : (RULE_SPORTS as readonly string[]).includes(sport) ? [sport] : null;
+    if (!targets) {
+      return NextResponse.json({ error: `sport must be ALL or one of ${RULE_SPORTS.join(', ')}` }, { status: 400 });
+    }
+
+    let deleted = 0;
+    for (const sp of targets) {
+      const { count } = await db.sportScoringRule.deleteMany({ where: { sport: sp } });
+      deleted += count || 0;
+      await setSportPurged(sp, true);
+    }
+
+    await createAuditLog({
+      user,
+      action: 'BULK_DELETE_SCORING_RULES',
+      entity: 'SportScoringRule',
+      recordId: sport,
+      updatedValue: { sports: targets, deleted },
+    });
+
+    return NextResponse.json({
+      success: true,
+      deleted,
+      message: `${deleted} rule(s) deleted${sport === 'ALL' ? '' : ` for ${sport}`}. Use "Reset to PDF Defaults" to restore the official rules.`,
+    });
+  } catch (error: any) {
+    if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

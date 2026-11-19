@@ -188,44 +188,67 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
+    const deletePlayers = new URL(req.url).searchParams.get('deletePlayers') === 'true';
 
-    const club = await db.club.findUnique({
-      where: { id: params.id },
-      include: {
-        _count: {
-          select: {
-            players: true,
-            matchParticipants: true,
-          },
-        },
-      },
-    });
-
+    const club = await db.club.findUnique({ where: { id: params.id } });
     if (!club) {
       return NextResponse.json({ error: 'Club not found' }, { status: 404 });
     }
 
-    // Check dependency safety
-    if (club._count.matchParticipants > 0) {
+    // Matches: a club that has played / is scheduled is part of the competition record
+    const matchEntries = await db.matchParticipant.count({ where: { clubId: params.id } });
+    const matchPlayerEntries = await db.matchParticipantPlayer.count({ where: { clubId: params.id } });
+    if (matchEntries > 0 || matchPlayerEntries > 0) {
       return NextResponse.json(
-        { error: `Cannot delete club because it is already participating in ${club._count.matchParticipants} scheduled/completed matches.` },
-        { status: 400 }
+        { error: `Cannot delete "${club.name}": it or its players take part in scheduled/completed matches. Delete or reschedule those matches first.`, code: 'IN_MATCHES' },
+        { status: 409 }
       );
     }
 
-    await db.club.delete({
-      where: { id: params.id },
-    });
+    const players = await db.player.findMany({ where: { clubId: params.id } });
+    if (players.length > 0 && !deletePlayers) {
+      return NextResponse.json(
+        {
+          error: `"${club.name}" has ${players.length} registered player(s). Deleting the club also deletes them.`,
+          code: 'PLAYERS_EXIST',
+          playerCount: players.length,
+        },
+        { status: 409 }
+      );
+    }
+
+    // Players on BGMI / doubles teams must be removed from those teams first
+    if (players.length > 0) {
+      const ids = new Set<string>(players.map((p: any) => p.id));
+      const [bgmiTeams, doublesTeams] = await Promise.all([db.bgmiTeam.findMany({}), db.doublesTeam.findMany({})]);
+      const blocking = [...bgmiTeams, ...doublesTeams].filter((t: any) => (t.playerIds || []).some((pid: string) => ids.has(pid)));
+      if (blocking.length > 0) {
+        return NextResponse.json(
+          {
+            error: `Cannot delete "${club.name}": its players are on team(s) ${blocking.map((t: any) => `"${t.name}"`).join(', ')}. Edit or delete those teams first.`,
+            code: 'IN_TEAMS',
+          },
+          { status: 409 }
+        );
+      }
+      await db.playerSport.deleteMany({ where: { playerId: { in: Array.from(ids) } } });
+      await db.player.deleteMany({ where: { clubId: params.id } });
+    }
+
+    // Club-owned records
+    await db.cricketTeam.deleteMany({ where: { clubId: params.id } });
+    await db.leaderboardEntry.deleteMany({ where: { clubId: params.id } });
+    await db.club.delete({ where: { id: params.id } });
 
     await createAuditLog({
       user,
       action: 'DELETE_CLUB',
       entity: 'Club',
       recordId: params.id,
-      previousValue: club,
+      previousValue: { ...club, playersDeleted: players.length },
     });
 
-    return NextResponse.json({ success: true, message: 'Club deleted successfully' });
+    return NextResponse.json({ success: true, message: 'Club deleted successfully', playersDeleted: players.length });
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
       return NextResponse.json({ error: error.message }, { status: 403 });
@@ -233,4 +256,3 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

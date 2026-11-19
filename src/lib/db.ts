@@ -7,7 +7,7 @@ declare global {
   var mongoDbClient: any | undefined;
 }
 
-if (!global.mongoDbClient || !global.mongoDbClient.playerPerformance || !global.mongoDbClient.sportScoringRule || !global.mongoDbClient.awardAllocation) {
+if (!global.mongoDbClient || !global.mongoDbClient.playerPerformance || !global.mongoDbClient.sportScoringRule || !global.mongoDbClient.awardAllocation || !global.mongoDbClient.bgmiTeam || !global.mongoDbClient.doublesTeam || !global.mongoDbClient.eventResult) {
   global.mongoDbClient = createMongoClient();
 }
 

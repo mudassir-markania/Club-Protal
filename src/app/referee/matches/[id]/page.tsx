@@ -41,11 +41,13 @@ export default function RefereeMatchSheetPage() {
   const matchId = params?.id as string;
 
   const [match, setMatch] = useState<any | null>(null);
+  // Scoring rules from the database (so the live preview matches what the server will award)
+  const [sportRules, setSportRules] = useState<any[] | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   // Form states
-  const [stageType, setStageType] = useState<'NORMAL' | 'FINAL' | 'THIRD_PLACE'>('NORMAL');
+  const [stageType, setStageType] = useState<'NORMAL' | 'QUARTER_FINAL' | 'SEMI_FINAL' | 'FINAL' | 'THIRD_PLACE'>('NORMAL');
   const [eventCategory, setEventCategory] = useState<string>("Men's singles / doubles");
   const [scoresSummary, setScoresSummary] = useState('');
   const [refereeNotes, setRefereeNotes] = useState('');
@@ -89,6 +91,18 @@ export default function RefereeMatchSheetPage() {
 
   // Live calculation preview state
   const [previewCalculation, setPreviewCalculation] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!match?.sportId) return;
+    let cancelled = false;
+    fetch(`/api/sports/${match.sportId}/rules`)
+      .then((r) => r.json())
+      .then((d) => !cancelled && Array.isArray(d?.rules) && setSportRules(d.rules))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [match?.sportId]);
 
   useEffect(() => {
     if (matchId) fetchMatchDetails();
@@ -202,7 +216,7 @@ export default function RefereeMatchSheetPage() {
       refereeNotes,
     };
 
-    calculateMatchPoints(calcInput, participants, eligiblePlayers, 0)
+    calculateMatchPoints(calcInput, participants, eligiblePlayers, 0, undefined, sportRules)
       .then((res) => {
         if (isMounted) setPreviewCalculation(res);
       })
@@ -213,6 +227,7 @@ export default function RefereeMatchSheetPage() {
     };
   }, [
     match,
+    sportRules,
     sportKey,
     stageType,
     eventCategory,
@@ -594,7 +609,9 @@ export default function RefereeMatchSheetPage() {
                 onChange={(e) => setStageType(e.target.value as any)}
                 className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 text-navy-950 focus:ring-2 focus:ring-blue-600 outline-none disabled:opacity-60"
               >
-                <option value="NORMAL">Normal Match / League</option>
+                <option value="NORMAL">Normal Match / League (winner only)</option>
+                <option value="QUARTER_FINAL">Quarter Final</option>
+                <option value="SEMI_FINAL">Semi Final</option>
                 <option value="FINAL">Championship Final (Placement Pts)</option>
                 <option value="THIRD_PLACE">3rd Place Playoff</option>
               </select>

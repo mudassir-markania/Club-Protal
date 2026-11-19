@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { validateSportIds, findSportByName } from '@/lib/player-eligibility';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -76,6 +77,28 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       sportIds,
     } = body;
 
+    if (clubId !== undefined && clubId !== existing.clubId) {
+      const club = await db.club.findUnique({ where: { id: clubId } });
+      if (!club) return NextResponse.json({ error: 'Selected club does not exist' }, { status: 400 });
+    }
+
+    let newSportIds: string[] | null = null;
+    if (sportIds !== undefined) {
+      const sportCheck = await validateSportIds(sportIds, { requireAtLeastOne: true });
+      if ('error' in sportCheck) return NextResponse.json({ error: sportCheck.error }, { status: 400 });
+      newSportIds = sportCheck.ids;
+    }
+
+    // A player on a BGMI team must stay in that club and keep BGMI registration
+    const bgmiTeams = (await db.bgmiTeam.findMany({})).filter((t: any) => (t.playerIds || []).includes(params.id));
+    if (bgmiTeams.length > 0) {
+      const names = bgmiTeams.map((t: any) => `"${t.name}"`).join(', ');
+      const bgmi = await findSportByName('BGMI');
+      if (bgmi && newSportIds && !newSportIds.includes(bgmi.id)) {
+        return NextResponse.json({ error: `Player is on BGMI team ${names}. Remove them from the team before removing BGMI.` }, { status: 409 });
+      }
+    }
+
     const updated = await db.player.update({
       where: { id: params.id },
       data: {
@@ -93,12 +116,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     });
 
     // Update sports if provided
-    if (sportIds && Array.isArray(sportIds)) {
+    if (newSportIds) {
       await db.playerSport.deleteMany({
         where: { playerId: params.id },
       });
 
-      for (const sId of sportIds) {
+      for (const sId of newSportIds) {
         await db.playerSport.create({
           data: {
             playerId: params.id,

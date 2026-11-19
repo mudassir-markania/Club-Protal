@@ -20,16 +20,32 @@ export async function GET() {
             status: true,
           },
         },
-        _count: {
-          select: {
-            matches: true,
-            results: true,
-          },
-        },
       },
     });
 
-    return NextResponse.json(referees);
+    // Real counts (the Mongo adapter has no _count support).
+    // assigned = matches in the referee's sports plus matches assigned directly; officiated = those already completed.
+    const [matches, assignments, results] = await Promise.all([
+      db.match.findMany({}),
+      db.matchReferee.findMany({}),
+      db.matchResult.findMany({}),
+    ]);
+
+    const withCounts = referees.map((r: any) => {
+      const sportIds = new Set<string>((r.sports || []).map((s: any) => s.sportId));
+      const direct = new Set<string>(assignments.filter((a: any) => a.refereeId === r.id).map((a: any) => a.matchId));
+      const inScope = matches.filter((m: any) => sportIds.has(m.sportId) || direct.has(m.id));
+      return {
+        ...r,
+        _count: {
+          matches: inScope.length,
+          officiated: inScope.filter((m: any) => m.status === 'COMPLETED').length,
+          results: results.filter((x: any) => x.submittedByRefereeId === r.id).length,
+        },
+      };
+    });
+
+    return NextResponse.json(withCounts);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

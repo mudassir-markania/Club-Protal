@@ -74,6 +74,28 @@ const CricketTeamSchema = createSchema({
   status: { type: String, default: 'ACTIVE' },
 });
 
+// 4b. BgmiTeam (named roster of players from one club, entered into BGMI matches as a unit)
+const BgmiTeamSchema = createSchema({
+  name: { type: String, required: true },
+  clubId: { type: String, required: true }, // primary club (first player's club)
+  clubIds: { type: [String], default: [] }, // every club represented in the team (derived)
+  playerIds: { type: [String], default: [] },
+  status: { type: String, default: 'ACTIVE' },
+});
+BgmiTeamSchema.index({ clubId: 1, name: 1 }, { unique: true });
+
+// 4c. DoublesTeam (registered pair of players from one club for a doubles-capable sport)
+const DoublesTeamSchema = createSchema({
+  name: { type: String, required: true },
+  clubId: { type: String, required: true }, // primary club (first player's club)
+  clubIds: { type: [String], default: [] }, // every club represented in the team (derived)
+  sportId: { type: String, required: true },
+  category: { type: String, enum: ['DOUBLES', 'MIXED_DOUBLES'], required: true },
+  playerIds: { type: [String], default: [] },
+  status: { type: String, default: 'ACTIVE' },
+});
+DoublesTeamSchema.index({ clubId: 1, name: 1 }, { unique: true });
+
 // 5. Sport
 const SportSchema = createSchema({
   name: { type: String, required: true, unique: true },
@@ -148,7 +170,7 @@ const MatchSchema = createSchema({
   sportId: { type: String, required: true },
   round: { type: String, required: true },
   stageName: { type: String },
-  stageType: { type: String, default: 'NORMAL' }, // NORMAL | FINAL | THIRD_PLACE | SEMI_FINAL
+  stageType: { type: String, default: 'NORMAL' }, // NORMAL | QUARTER_FINAL | SEMI_FINAL | FINAL | THIRD_PLACE
   matchCategory: { type: String, default: 'Singles' },
   matchDate: { type: String, required: true },
   matchTime: { type: String, required: true },
@@ -166,6 +188,8 @@ const MatchParticipantSchema = createSchema({
   clubId: { type: String },
   playerId: { type: String },
   cricketTeamId: { type: String },
+  bgmiTeamId: { type: String },
+  doublesTeamId: { type: String },
   teamName: { type: String },
   score: { type: Number, default: 0.0 },
   scoreDetail: { type: String },
@@ -264,10 +288,21 @@ const PointsHistorySchema = createSchema({
   sportId: { type: String, required: true },
   matchId: { type: String },
   distributionId: { type: String },
+  eventKey: { type: String }, // set for points awarded by finalizing an event
   points: { type: Number, required: true },
   reason: { type: String, required: true },
   recordedAt: { type: Date, default: Date.now },
   recordedByUserId: { type: String },
+});
+
+// 19B. EventResult (a finalized Badminton / Carrom event: placements and the points awarded)
+const EventResultSchema = createSchema({
+  eventKey: { type: String, required: true, unique: true }, // "<sportId>|<category>"
+  sportId: { type: String, required: true },
+  category: { type: String, required: true },
+  placements: { type: String, required: true }, // JSON: [{ position, key, name, points, clubs: [{clubId, points}] }]
+  finalizedByUserId: { type: String },
+  finalizedAt: { type: Date, default: Date.now },
 });
 
 // 20. LeaderboardEntry
@@ -373,6 +408,7 @@ const SportScoringRuleSchema = createSchema({
   points: { type: Number, required: true },
   description: { type: String },
   conditions: { type: String },
+  trigger: { type: String }, // when the rule applies; inferred from ruleCode for official rules
   enabled: { type: Boolean, default: true },
 });
 
@@ -407,6 +443,9 @@ export const RoleModel: Model<any> = getModel('Role', RoleSchema);
 export const UserModel: Model<any> = getModel('User', UserSchema);
 export const ClubModel: Model<any> = getModel('Club', ClubSchema);
 export const CricketTeamModel: Model<any> = getModel('CricketTeam', CricketTeamSchema);
+export const BgmiTeamModel: Model<any> = getModel('BgmiTeam', BgmiTeamSchema);
+export const DoublesTeamModel: Model<any> = getModel('DoublesTeam', DoublesTeamSchema);
+export const EventResultModel: Model<any> = getModel('EventResult', EventResultSchema);
 export const SportModel: Model<any> = getModel('Sport', SportSchema);
 export const PlayerModel: Model<any> = getModel('Player', PlayerSchema);
 export const PlayerSportModel: Model<any> = getModel('PlayerSport', PlayerSportSchema);
@@ -438,6 +477,9 @@ export const models: Record<string, Model<any>> = {
   User: UserModel,
   Club: ClubModel,
   CricketTeam: CricketTeamModel,
+  BgmiTeam: BgmiTeamModel,
+  EventResult: EventResultModel,
+  DoublesTeam: DoublesTeamModel,
   Sport: SportModel,
   Player: PlayerModel,
   PlayerSport: PlayerSportModel,

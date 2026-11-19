@@ -117,7 +117,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         match.participants,
         allPlayers,
         currentRotation,
-        customRuleMap
+        customRuleMap,
+        dbRules
       );
     } else {
       // Fallback for legacy entryResults format

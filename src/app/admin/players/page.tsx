@@ -161,6 +161,15 @@ export default function PlayersPage() {
     setError(null);
     setSuccess(null);
 
+    if (!formData.clubId) {
+      setError('Select the house / club this athlete belongs to.');
+      return;
+    }
+    if (formData.sportIds.length === 0) {
+      setError('Select at least one participating sport.');
+      return;
+    }
+
     try {
       const url = selectedPlayer ? `/api/players/${selectedPlayer.id}` : '/api/players';
       const method = selectedPlayer ? 'PUT' : 'POST';
@@ -673,7 +682,7 @@ export default function PlayersPage() {
                   {/* Multiple Sports Assignment */}
                   <div>
                     <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Participating Sports
+                      Participating Sports * <span className="normal-case font-medium text-slate-400">(select one or more)</span>
                     </label>
                     <div className="grid grid-cols-2 gap-2 border border-slate-200 p-2.5 rounded-lg bg-slate-50 max-h-48 overflow-y-auto">
                       {sports.map((s) => {

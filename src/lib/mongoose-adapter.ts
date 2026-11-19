@@ -18,6 +18,9 @@ const RELATIONS: Record<
     club: { model: 'Club', foreignKey: '_id', localKey: 'clubId' },
     participants: { model: 'MatchParticipant', foreignKey: 'cricketTeamId', isArray: true },
   },
+  BgmiTeam: {
+    club: { model: 'Club', foreignKey: '_id', localKey: 'clubId' },
+  },
   Club: {
     players: { model: 'Player', foreignKey: 'clubId', isArray: true },
     cricketTeams: { model: 'CricketTeam', foreignKey: 'clubId', isArray: true },
@@ -463,6 +466,9 @@ export function createMongoClient() {
     user: createCollectionDelegate('User'),
     club: createCollectionDelegate('Club'),
     cricketTeam: createCollectionDelegate('CricketTeam'),
+    bgmiTeam: createCollectionDelegate('BgmiTeam'),
+    eventResult: createCollectionDelegate('EventResult'),
+    doublesTeam: createCollectionDelegate('DoublesTeam'),
     sport: createCollectionDelegate('Sport'),
     player: createCollectionDelegate('Player'),
     playerSport: createCollectionDelegate('PlayerSport'),

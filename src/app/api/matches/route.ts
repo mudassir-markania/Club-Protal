@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, getSessionUser } from '@/lib/auth';
+import { getRefereeScope } from '@/lib/referee-access';
 import { createAuditLog } from '@/lib/audit';
+import { assertPlayersEligible } from '@/lib/player-eligibility';
+import { categoryRules, categoryDisplayName } from '@/lib/match-scheduling';
 import { normalizeSportKey } from '@/lib/sports-rules';
 
 export async function GET(req: Request) {
@@ -20,11 +23,25 @@ export async function GET(req: Request) {
     if (date) where.matchDate = date;
 
     if (refereeId) {
-      where.referees = {
-        some: {
-          refereeId,
+      // matches directly assigned to this referee
+      const assigned = await db.matchReferee.findMany({ where: { refereeId } });
+      where.id = { in: assigned.map((r: any) => r.matchId) };
+    }
+
+    // A signed-in referee only ever sees matches of their assigned sports (plus matches assigned to them directly)
+    const session = await getSessionUser();
+    if (session?.role === 'REFEREE') {
+      if (!session.refereeId) return NextResponse.json([]);
+      const scope = await getRefereeScope(session.refereeId);
+      where.AND = [
+        {
+          OR: [
+            ...(scope.sportIds.length ? [{ sportId: { in: scope.sportIds } }] : []),
+            ...(scope.matchIds.length ? [{ id: { in: scope.matchIds } }] : []),
+          ],
         },
-      };
+      ];
+      if (where.AND[0].OR.length === 0) return NextResponse.json([]);
     }
 
     if (clubId) {
@@ -122,26 +139,33 @@ export async function POST(req: Request) {
 
     // Sport-Specific Backend Validation
     if (sportKey === 'BGMI') {
+      // BGMI is team-based: every participant must be a registered BGMI team.
       if (participants.length < 2) {
-        return NextResponse.json({ error: 'BGMI match requires at least 2 participating squads' }, { status: 400 });
+        return NextResponse.json({ error: 'BGMI match requires at least 2 participating teams' }, { status: 400 });
       }
+      const teamIds: string[] = participants.map((p: any) => p.bgmiTeamId).filter(Boolean);
+      if (teamIds.length !== participants.length) {
+        return NextResponse.json({ error: 'Only registered BGMI teams can participate. Select teams, not individual players.' }, { status: 400 });
+      }
+      if (new Set(teamIds).size !== teamIds.length) {
+        return NextResponse.json({ error: 'The same BGMI team cannot be selected twice' }, { status: 400 });
+      }
+      const teams = await db.bgmiTeam.findMany({ where: { id: { in: teamIds } } });
+      if (teams.length !== teamIds.length) {
+        return NextResponse.json({ error: 'One or more selected BGMI teams no longer exist' }, { status: 400 });
+      }
+      if (teams.some((t: any) => t.status !== 'ACTIVE')) {
+        return NextResponse.json({ error: 'Inactive BGMI teams cannot be scheduled' }, { status: 400 });
+      }
+      // Roster comes from the team record, never from the client
       const allPlayersInMatch = new Set<string>();
-      for (let i = 0; i < participants.length; i++) {
-        const p = participants[i];
-        if (!p.teamName || !p.teamName.trim()) {
-          return NextResponse.json({ error: `Squad #${i + 1} requires a squad name` }, { status: 400 });
-        }
-        if (!p.playerIds || !Array.isArray(p.playerIds) || p.playerIds.filter(Boolean).length !== 4) {
-          return NextResponse.json({ error: `Squad "${p.teamName}" must contain exactly 4 registered players` }, { status: 400 });
-        }
-        const squadPlayers = new Set<string>();
-        for (const plId of p.playerIds.filter(Boolean)) {
-          if (squadPlayers.has(plId)) {
-            return NextResponse.json({ error: `Squad "${p.teamName}" contains duplicate player selection` }, { status: 400 });
-          }
-          squadPlayers.add(plId);
+      for (const p of participants) {
+        const team = teams.find((t: any) => t.id === p.bgmiTeamId);
+        p.teamName = team.name;
+        p.playerIds = [...(team.playerIds || [])];
+        for (const plId of p.playerIds) {
           if (allPlayersInMatch.has(plId)) {
-            return NextResponse.json({ error: 'A player cannot be registered in multiple squads in the same match' }, { status: 400 });
+            return NextResponse.json({ error: 'A player cannot be in more than one selected team in the same match' }, { status: 400 });
           }
           allPlayersInMatch.add(plId);
         }
@@ -184,6 +208,45 @@ export async function POST(req: Request) {
       if (participants.length !== 2) {
         return NextResponse.json({ error: `${sport.name} requires exactly 2 competing sides` }, { status: 400 });
       }
+      // Doubles / mixed doubles are played by registered doubles teams (roster comes from the team record)
+      const looksLikeDoubles = participants.some(
+        (p: any) => p.doublesTeamId || (p.playerIds || []).filter(Boolean).length === 2
+      );
+      if (looksLikeDoubles) {
+        const teamIds: string[] = participants.map((p: any) => p.doublesTeamId).filter(Boolean);
+        if (teamIds.length !== participants.length) {
+          return NextResponse.json({ error: 'Doubles matches need registered doubles teams on both sides' }, { status: 400 });
+        }
+        if (new Set(teamIds).size !== teamIds.length) {
+          return NextResponse.json({ error: 'The same doubles team cannot be selected on both sides' }, { status: 400 });
+        }
+        const teams = await db.doublesTeam.findMany({ where: { id: { in: teamIds } } });
+        if (teams.length !== teamIds.length) {
+          return NextResponse.json({ error: 'One or more selected doubles teams no longer exist' }, { status: 400 });
+        }
+        const wantedCategory = categoryRules(matchCategory)?.format === 'MIXED_DOUBLES' ? 'MIXED_DOUBLES' : 'DOUBLES';
+        for (const t of teams) {
+          if (t.status !== 'ACTIVE') {
+            return NextResponse.json({ error: `Team "${t.name}" is inactive` }, { status: 400 });
+          }
+          if (t.sportId !== sportId) {
+            return NextResponse.json({ error: `Team "${t.name}" is not a ${sport.name} team` }, { status: 400 });
+          }
+          if (t.category !== wantedCategory) {
+            return NextResponse.json(
+              { error: `Team "${t.name}" is a ${t.category === 'MIXED_DOUBLES' ? 'mixed doubles' : 'doubles'} team and cannot play in this category` },
+              { status: 400 }
+            );
+          }
+        }
+        for (const p of participants) {
+          const team = teams.find((t: any) => t.id === p.doublesTeamId);
+          p.teamName = team.name;
+          p.playerIds = [...(team.playerIds || [])];
+          delete p.playerId;
+        }
+      }
+
       const sideAPlayers: string[] = (participants[0].playerIds || []).filter(Boolean);
       const sideBPlayers: string[] = (participants[1].playerIds || []).filter(Boolean);
       if (participants[0].playerId && sideAPlayers.length === 0) sideAPlayers.push(participants[0].playerId);
@@ -198,6 +261,64 @@ export async function POST(req: Request) {
       const allPlayers = [...sideAPlayers, ...sideBPlayers];
       if (new Set(allPlayers).size !== allPlayers.length) {
         return NextResponse.json({ error: 'A player cannot be selected more than once or appear on both sides of a match' }, { status: 400 });
+      }
+    }
+
+    // Every selected player must be registered for THIS sport (Club + Sport -> eligible players)
+    const eligibilityError = await assertPlayersEligible(
+      participants.flatMap((p: any) => [...(p.playerIds || []), p.playerId].filter(Boolean)),
+      sportId,
+      { sportName: sport.name }
+    );
+    if (eligibilityError) {
+      return NextResponse.json({ error: eligibilityError }, { status: 400 });
+    }
+
+    // Badminton / Carrom: the category must fit the format (Singles / Doubles / Mixed Doubles) and the players' gender
+    if (sportKey === 'BADMINTON' || sportKey === 'CARROM') {
+      const rules = categoryRules(matchCategory);
+      if (!rules) {
+        return NextResponse.json({ error: "Choose a valid category: Men's/Women's Singles, Men's/Women's Doubles or Mixed Doubles" }, { status: 400 });
+      }
+      const sideSizes = participants.map((p: any) => (p.playerIds || []).filter(Boolean).length || (p.playerId ? 1 : 0));
+      const isDoublesMatch = sideSizes.every((n: number) => n === 2);
+      const isSinglesMatch = sideSizes.every((n: number) => n === 1);
+      if (rules.format === 'SINGLES' && !isSinglesMatch) {
+        return NextResponse.json({ error: `${categoryDisplayName(matchCategory)} is a singles category: each side needs exactly 1 player` }, { status: 400 });
+      }
+      if (rules.format !== 'SINGLES' && !isDoublesMatch) {
+        return NextResponse.json({ error: `${categoryDisplayName(matchCategory)} is a doubles category: each side needs a doubles team of 2 players` }, { status: 400 });
+      }
+
+      const ids = participants.flatMap((p: any) => [...(p.playerIds || []), p.playerId].filter(Boolean));
+      const people = await db.player.findMany({ where: { id: { in: Array.from(new Set(ids)) } } });
+      if (rules.gender !== 'MIXED') {
+        const wrong = people.find((pl: any) => String(pl.gender || '').toUpperCase() !== rules.gender);
+        if (wrong) {
+          return NextResponse.json(
+            { error: `${wrong.name} cannot play in ${categoryDisplayName(matchCategory)} (${rules.gender === 'MALE' ? 'male' : 'female'} players only)` },
+            { status: 400 }
+          );
+        }
+      } else {
+        for (const p of participants) {
+          const g = (p.playerIds || []).map((id: string) => String(people.find((pl: any) => pl.id === id)?.gender || '').toUpperCase()).sort();
+          if (g[0] !== 'FEMALE' || g[1] !== 'MALE') {
+            return NextResponse.json({ error: 'Mixed Doubles teams need one male and one female player' }, { status: 400 });
+          }
+        }
+      }
+    }
+
+    // Players must exist; players on the same Badminton/Carrom side must share a club
+    const referencedPlayerIds: string[] = participants.flatMap((p: any) =>
+      [...(p.playerIds || []), p.playerId].filter(Boolean)
+    );
+    if (referencedPlayerIds.length > 0) {
+      const uniqueIds = Array.from(new Set(referencedPlayerIds));
+      const found = await db.player.findMany({ where: { id: { in: uniqueIds } } });
+      if (found.length !== uniqueIds.length) {
+        return NextResponse.json({ error: 'One or more selected players no longer exist' }, { status: 400 });
       }
     }
 
@@ -247,6 +368,8 @@ export async function POST(req: Request) {
             clubId: assignedClubId,
             playerId: primaryPlayerId || null,
             cricketTeamId: p.cricketTeamId || null,
+            bgmiTeamId: p.bgmiTeamId || null,
+            doublesTeamId: p.doublesTeamId || null,
             teamName: p.teamName || (p.cricketTeamId ? undefined : `Entry ${i + 1}`),
             score: 0,
             rank: null,

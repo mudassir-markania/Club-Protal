@@ -1,5 +1,6 @@
 'use client';
 
+import SportPlayersModal from '@/components/admin/SportPlayersModal';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -39,6 +40,8 @@ export default function SportsPage() {
   const [mounted, setMounted] = useState(false);
   const [sports, setSports] = useState<any[]>([]);
   const [referees, setReferees] = useState<any[]>([]);
+  const [clubs, setClubs] = useState<any[]>([]);
+  const [playersSport, setPlayersSport] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,12 +96,15 @@ export default function SportsPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [sportsRes, refRes] = await Promise.all([
+      const [sportsRes, refRes, clubsRes] = await Promise.all([
         fetch('/api/sports'),
         fetch('/api/referees'),
+        fetch('/api/clubs'),
       ]);
       const sportsData = await sportsRes.json();
       const refData = await refRes.json();
+      const clubsData = await clubsRes.json();
+      setClubs(Array.isArray(clubsData) ? clubsData : []);
 
       setSports(Array.isArray(sportsData) ? sportsData : []);
       setReferees(Array.isArray(refData) ? refData : []);
@@ -470,7 +476,14 @@ export default function SportsPage() {
                 <div>
                   {/* Top Bar */}
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setPlayersSport(sport)}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setPlayersSport(sport)}
+                      title={`View ${sport.name} players`}
+                      className="flex items-center gap-3 cursor-pointer rounded-lg -m-1 p-1 hover:bg-slate-50 transition"
+                    >
                       <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-navy-800 flex items-center justify-center">
                         <SportIcon name={sport.name} className="w-6 h-6" />
                       </div>
@@ -645,10 +658,15 @@ export default function SportsPage() {
                 {/* Footer Actions */}
                 <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <span className="flex items-center gap-1 font-semibold text-slate-700 text-[11px]">
-                      <Users className="w-3 h-3 text-slate-400" />
-                      {sport._count?.players || 0}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPlayersSport(sport)}
+                      title={`View ${sport.name} players`}
+                      className="flex items-center gap-1 font-semibold text-blue-700 hover:text-blue-900 hover:underline text-[11px]"
+                    >
+                      <Users className="w-3 h-3" />
+                      {sport._count?.players || 0} players
+                    </button>
                     <span className="flex items-center gap-1 font-semibold text-slate-700 text-[11px]">
                       <Calendar className="w-3 h-3 text-slate-400" />
                       {sport._count?.matches || 0}
@@ -684,6 +702,8 @@ export default function SportsPage() {
             );
           })}
         </div>
+
+        <SportPlayersModal sport={playersSport} clubs={clubs} onClose={() => setPlayersSport(null)} />
 
         {/* Modal: Add / Configure Sport Scoring */}
         {mounted && isModalOpen && createPortal(

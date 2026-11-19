@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { validateSportIds, eligiblePlayerIds } from '@/lib/player-eligibility';
 
 export async function GET(req: Request) {
   try {
@@ -30,11 +31,10 @@ export async function GET(req: Request) {
     }
 
     if (sportId) {
-      where.sports = {
-        some: {
-          sportId,
-        },
-      };
+      // Club + Sport -> eligible players, resolved in the database via PlayerSport rows
+      const ids = await eligiblePlayerIds(sportId, clubId);
+      if (ids.length === 0) return NextResponse.json([]);
+      where.id = { in: ids };
     }
 
     const players = await db.player.findMany({
@@ -79,6 +79,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Participant Name and Assigned Club/House are required' }, { status: 400 });
     }
 
+    const club = await db.club.findUnique({ where: { id: clubId } });
+    if (!club) {
+      return NextResponse.json({ error: 'Selected club does not exist' }, { status: 400 });
+    }
+
+    const sportCheck = await validateSportIds(sportIds, { requireAtLeastOne: true });
+    if ('error' in sportCheck) {
+      return NextResponse.json({ error: sportCheck.error }, { status: 400 });
+    }
+
     // Auto generate unique registration ID and internal identifier email if not provided
     const cleanName = typeof name === 'string' ? name.trim() : '';
     const nameSlug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'athlete';
@@ -116,8 +126,8 @@ export async function POST(req: Request) {
     });
 
     // Assign sports
-    if (sportIds && Array.isArray(sportIds)) {
-      for (const sId of sportIds) {
+    if (sportCheck.ids) {
+      for (const sId of sportCheck.ids) {
         await db.playerSport.create({
           data: {
             playerId: player.id,

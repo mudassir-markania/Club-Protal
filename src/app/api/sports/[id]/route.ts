@@ -129,27 +129,29 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
 
-    const sport = await db.sport.findUnique({
-      where: { id: params.id },
-      include: {
-        _count: {
-          select: {
-            matches: true,
-          },
-        },
-      },
-    });
+    const sport = await db.sport.findUnique({ where: { id: params.id } });
 
     if (!sport) {
       return NextResponse.json({ error: 'Sport not found' }, { status: 404 });
     }
 
-    if (sport._count.matches > 0) {
+    const matchCount = await db.match.count({ where: { sportId: params.id } });
+    if (matchCount > 0) {
       return NextResponse.json(
-        { error: `Cannot delete sport because it has ${sport._count.matches} matches scheduled/completed.` },
+        { error: `Cannot delete sport because it has ${matchCount} matches scheduled/completed.` },
         { status: 400 }
       );
     }
+
+    const playerCount = await db.playerSport.count({ where: { sportId: params.id } });
+    if (playerCount > 0) {
+      return NextResponse.json(
+        { error: `Cannot delete sport because ${playerCount} player(s) are registered for it. Remove the registrations first, or set the sport to inactive.` },
+        { status: 400 }
+      );
+    }
+
+    await db.refereeSport.deleteMany({ where: { sportId: params.id } });
 
     await db.sport.delete({
       where: { id: params.id },

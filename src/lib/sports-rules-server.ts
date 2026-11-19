@@ -6,8 +6,25 @@ import {
   normalizeSportKey,
 } from './sports-rules';
 
+const PURGE_PREFIX = 'SCORING_RULES_PURGED_';
+const RULE_SPORT_KEYS = ['FOOTBALL', 'BGMI', 'CRICKET', 'BADMINTON', 'CARROM', 'CHESS'];
+
+/** Sports whose rules an admin deliberately deleted: defaults must NOT be re-applied for them. */
+export async function getPurgedSports(): Promise<Set<string>> {
+  const rows = await db.tournamentSetting.findMany({ where: { key: { startsWith: PURGE_PREFIX } } });
+  return new Set(rows.filter((r: any) => r.value === 'true').map((r: any) => String(r.key).slice(PURGE_PREFIX.length)));
+}
+
+export async function setSportPurged(sport: string, purged: boolean) {
+  await db.tournamentSetting.upsert({
+    where: { key: `${PURGE_PREFIX}${sport}` },
+    update: { value: String(purged) },
+    create: { key: `${PURGE_PREFIX}${sport}`, value: String(purged), description: `Scoring rules for ${sport} were deliberately cleared` },
+  });
+}
+
 /**
- * Fetch all rules for a sport from MongoDB (falls back to defaults)
+ * Fetch all rules for a sport from MongoDB (falls back to defaults, unless the rules were deliberately deleted)
  */
 export async function getSportRules(sportName: string): Promise<SportScoringRuleDef[]> {
   const norm = normalizeSportKey(sportName);
@@ -18,8 +35,11 @@ export async function getSportRules(sportName: string): Promise<SportScoringRule
       where: { sport: norm },
     });
     if (dbRules && dbRules.length > 0) {
-      return dbRules.map((r: any) => ({
+      return dbRules
+        .filter((r: any) => r.enabled !== false)
+        .map((r: any) => ({
         sport: r.sport,
+        trigger: r.trigger || undefined,
         ruleCode: r.ruleCode,
         ruleName: r.ruleName,
         category: r.category,
@@ -34,6 +54,8 @@ export async function getSportRules(sportName: string): Promise<SportScoringRule
           : undefined,
       }));
     }
+    // no DB rules: only fall back to the PDF defaults when nobody deleted them on purpose
+    if ((await getPurgedSports()).has(norm)) return [];
   } catch (e) {
     // Fall back to constants
   }
@@ -57,6 +79,7 @@ export async function seedOfficialScoringRules() {
         points: def.points,
         description: def.description,
         conditions: def.conditions ? JSON.stringify(def.conditions) : null,
+        enabled: true,
       },
       create: {
         ruleCode: def.ruleCode,
@@ -71,6 +94,9 @@ export async function seedOfficialScoringRules() {
       },
     });
   }
+
+  // Restoring defaults clears any "deliberately deleted" markers
+  for (const sport of RULE_SPORT_KEYS) await setSportPurged(sport, false);
 
   // Seed category labels configuration in tournament settings
   for (const [key, label] of Object.entries(OFFICIAL_CATEGORY_LABELS)) {

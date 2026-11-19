@@ -79,8 +79,14 @@ export async function POST(req: Request) {
     let importedCount = 0;
     let duplicateCount = 0;
     let failedCount = 0;
+    const failures: { row: number; name: string; reason: string }[] = [];
+    const fail = (idx: number, name: string, reason: string) => {
+      failedCount++;
+      failures.push({ row: idx + 2, name, reason }); // +2 = header line + 1-based
+    };
 
-    for (const row of records) {
+    for (let rowIdx = 0; rowIdx < records.length; rowIdx++) {
+      const row = records[rowIdx];
       try {
         // Extract Name from common header variations
         const cleanName = getField(row, [
@@ -92,7 +98,7 @@ export async function POST(req: Request) {
         ]);
 
         if (!cleanName) {
-          failedCount++;
+          fail(rowIdx, '', 'Missing participant name (expected a "Participant Name" column)');
           continue;
         }
 
@@ -111,7 +117,7 @@ export async function POST(req: Request) {
 
         const club = normalizeClub(houseInput) || clubs[0];
         if (!club) {
-          failedCount++;
+          fail(rowIdx, cleanName, 'No matching house/club found');
           continue;
         }
 
@@ -125,6 +131,31 @@ export async function POST(req: Request) {
 
         if (existing) {
           duplicateCount++;
+          continue;
+        }
+
+        // Resolve participating sports first: every athlete needs at least one valid sport
+        const rawSportsCell = getField(row, ['participatingsports', 'participatingsport', 'sportsselected', 'sports', 'sport']);
+        const resolvedSportIds = new Set<string>();
+        if (rawSportsCell && typeof rawSportsCell === 'string') {
+          for (const token of rawSportsCell.split(/[,;/]+/).map((x) => x.trim().toLowerCase()).filter(Boolean)) {
+            const m = sports.find((s: any) => {
+              const sName = (s.name || '').toLowerCase();
+              if (sName === token) return true;
+              if (token === 'tt' && sName.includes('table tennis')) return true;
+              return sName.includes(token) || token.includes(sName);
+            });
+            if (m) resolvedSportIds.add(m.id);
+          }
+        }
+        if (resolvedSportIds.size === 0) {
+          fail(
+            rowIdx,
+            cleanName,
+            rawSportsCell
+              ? `Unrecognised sport "${rawSportsCell}"`
+              : 'No sport given (add a "Participating Sports" column, e.g. "Badminton, Cricket")'
+          );
           continue;
         }
 
@@ -156,40 +187,14 @@ export async function POST(req: Request) {
           },
         });
 
-        // Extract and assign participating sports if provided
-        const rawSports = getField(row, [
-          'participatingsports',
-          'participatingsport',
-          'sportsselected',
-          'sports',
-          'sport',
-        ]);
-
-        if (rawSports && typeof rawSports === 'string') {
-          const sportTokens = rawSports.split(/[,;/]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);
-          for (const token of sportTokens) {
-            const matchedSport = sports.find((s: any) => {
-              const sName = (s.name || '').toLowerCase();
-              if (sName === token) return true;
-              if (token === 'tt' && sName.includes('table tennis')) return true;
-              if (sName.includes(token) || token.includes(sName)) return true;
-              return false;
-            });
-            if (matchedSport) {
-              await db.playerSport.create({
-                data: {
-                  playerId: player.id,
-                  sportId: matchedSport.id,
-                },
-              }).catch(() => {}); // ignore duplicates
-            }
-          }
+        for (const sportId of Array.from(resolvedSportIds)) {
+          await db.playerSport.create({ data: { playerId: player.id, sportId } }).catch(() => {}); // ignore duplicates
         }
 
         importedCount++;
       } catch (err) {
         console.error('Error importing row:', err);
-        failedCount++;
+        fail(rowIdx, '', err instanceof Error ? err.message : 'Unexpected error');
       }
     }
 
@@ -203,12 +208,17 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Import complete: ${importedCount} athletes added successfully, ${duplicateCount} duplicates skipped, ${failedCount} errors.`,
+      message:
+        `Import complete: ${importedCount} athletes added successfully, ${duplicateCount} duplicates skipped, ${failedCount} errors.` +
+        (failures.length
+          ? ` Examples: ${failures.slice(0, 3).map((f) => `row ${f.row}${f.name ? ` (${f.name})` : ''}: ${f.reason}`).join(' | ')}`
+          : ''),
       summary: {
         totalFound: records.length,
         importedCount,
         duplicateCount,
         failedCount,
+        failures: failures.slice(0, 50),
       },
     });
   } catch (error: any) {

@@ -80,7 +80,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       match.participants,
       allPlayers,
       currentRotation,
-      customRuleMap
+      customRuleMap,
+      dbRules
     );
 
     return NextResponse.json({

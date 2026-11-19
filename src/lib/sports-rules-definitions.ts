@@ -8,6 +8,7 @@ export interface SportScoringRuleDef {
   points: number;
   description: string;
   conditions?: Record<string, any>;
+  trigger?: string; // when the rule applies (see scoring-triggers.ts); inferred for the official rules
 }
 
 /**

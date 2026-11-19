@@ -9,6 +9,7 @@ import {
   Edit2,
   Trash2,
   Eye,
+  EyeOff,
   Lock,
   Medal,
   Calendar,
@@ -27,6 +28,7 @@ export default function RefereesPage() {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReferee, setSelectedReferee] = useState<any | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -66,6 +68,7 @@ export default function RefereesPage() {
 
   const handleOpenCreate = () => {
     setSelectedReferee(null);
+    setShowPassword(false);
     setFormData({
       name: '',
       refereeCode: `REF-${Math.floor(100 + Math.random() * 900)}`,
@@ -82,6 +85,7 @@ export default function RefereesPage() {
 
   const handleOpenEdit = (ref: any) => {
     setSelectedReferee(ref);
+    setShowPassword(false);
     const assigned = ref.sports?.map((s: any) => s.sportId || s.sport?.id) || [];
     setFormData({
       name: ref.name,
@@ -284,7 +288,9 @@ export default function RefereesPage() {
               {/* Footer */}
               <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="text-slate-500 font-medium">
-                  Matches Officiated: <strong className="text-navy-900">{ref._count?.matches || 0}</strong>
+                  Matches Assigned: <strong className="text-navy-900">{ref._count?.matches || 0}</strong>
+                  <span className="mx-1.5 text-slate-300">•</span>
+                  Officiated: <strong className="text-navy-900">{ref._count?.officiated || 0}</strong>
                 </span>
                 <div className="flex items-center gap-1">
                   <button
@@ -392,14 +398,26 @@ export default function RefereesPage() {
                     <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
                       {selectedReferee ? 'Reset Password (Leave blank to keep)' : 'Portal Password *'}
                     </label>
-                    <input
-                      type="password"
-                      required={!selectedReferee}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required={!selectedReferee}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="w-full pl-3 pr-10 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                        className="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-700"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
