@@ -39,26 +39,26 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#faf8ff]/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#e2e7ff]/60">
-      <div className="h-16 sm:h-20 max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-12 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="h-16 sm:h-20 max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-12 flex items-center justify-between gap-3">
         {/* Brand Crest & Title */}
-        <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 shrink">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group">
             {/* Crest Logo */}
             <img
               alt="Apex Arena Crest Logo"
               className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsYOXH0JYiyX1rmUrq9scGTZImP9xqWivkekIWmx1Ruo3otUd9tF9VRe8WIEtDDPKFqcNYPrtpXTIXrhPILhl9C2Uw5zIvtHrgYGOblFU_y9Yhx0x9Afb48VKHwvWODlmjYpYUyz_3yPcHKJKV9F_uUUhRi2EmHmOnbK1FUcl9_CtwK5i8ia2Y4vQEOzSc86Qw-nN0mJFIxB1L5GZVK5OaxLk0RGsSzIYuMPIrLWbc"
             />
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="font-manrope text-base sm:text-xl font-bold uppercase tracking-tight text-[#000f3f] leading-none whitespace-nowrap">
                   Apex Arena
                 </span>
-                <span className="px-1.5 py-0.5 rounded bg-[#dae2fd] text-[#000f3f] text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider font-manrope shrink-0">
+                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[#dae2fd] text-[#000f3f] text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider font-manrope shrink-0">
                   APL S9
                 </span>
               </div>
-              <span className="text-[9px] sm:text-[10px] font-bold text-[#45464f] tracking-wider uppercase font-manrope mt-0.5 truncate hidden xs:block">
+              <span className="text-[9px] sm:text-[10px] font-bold text-[#45464f] tracking-wider uppercase font-manrope mt-0.5 truncate hidden sm:block">
                 NexCore Institute of Technology
               </span>
             </div>

@@ -869,9 +869,9 @@ export default function HomePage() {
                 {/* Right Side: 2 Upcoming Fixture Cards */}
                 <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-6">
                   {/* Upcoming Match 1: Badminton */}
-                  <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between border border-[#e2e7ff]">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-0.5 rounded bg-[#e2e7ff] text-[#000f3f] text-[10px] uppercase font-black font-manrope">
+                  <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between border border-[#e2e7ff] overflow-hidden">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3">
+                      <span className="px-2 py-0.5 rounded bg-[#e2e7ff] text-[#000f3f] text-[10px] uppercase font-black font-manrope">
                         TODAY • 17:30 IST
                       </span>
                       <span className="text-[10px] text-[#45464f] uppercase font-bold font-manrope">
@@ -879,96 +879,106 @@ export default function HomePage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center gap-3">
-                        <span className="w-10 h-10 rounded-lg bg-[#ffdbca] text-[#783200] flex items-center justify-center font-manrope text-lg font-black">
+                    <div className="grid grid-cols-7 items-center py-2.5 sm:py-3 gap-1">
+                      {/* Team 1 */}
+                      <div className="col-span-3 flex items-center gap-2 min-w-0">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#ffdbca] text-[#783200] flex items-center justify-center font-manrope text-sm sm:text-lg font-black shrink-0">
                           A
                         </span>
-                        <div>
-                          <h5 className="text-base font-bold text-[#000f3f] uppercase font-manrope">
+                        <div className="min-w-0 overflow-hidden">
+                          <h5 className="text-xs sm:text-base font-bold text-[#000f3f] uppercase font-manrope truncate">
                             Alphas
                           </h5>
-                          <span className="text-xs text-[#45464f]">Pranav &amp; Rohan</span>
+                          <span className="text-[10px] sm:text-xs text-[#45464f] truncate block">Pranav &amp; Rohan</span>
                         </div>
                       </div>
 
-                      <span className="text-base font-bold text-[#45464f] font-manrope">
-                        VS
-                      </span>
+                      {/* VS */}
+                      <div className="col-span-1 flex items-center justify-center">
+                        <span className="px-1.5 py-0.5 rounded bg-[#f2f3ff] text-[10px] sm:text-xs font-black text-[#45464f] font-manrope">
+                          VS
+                        </span>
+                      </div>
 
-                      <div className="flex items-center gap-3 text-right">
-                        <div>
-                          <h5 className="text-base font-bold text-[#000f3f] uppercase font-manrope">
+                      {/* Team 2 */}
+                      <div className="col-span-3 flex items-center justify-end gap-2 text-right min-w-0">
+                        <div className="min-w-0 overflow-hidden">
+                          <h5 className="text-xs sm:text-base font-bold text-[#000f3f] uppercase font-manrope truncate">
                             Spartans
                           </h5>
-                          <span className="text-xs text-[#45464f]">Dev &amp; Tanmay</span>
+                          <span className="text-[10px] sm:text-xs text-[#45464f] truncate block">Dev &amp; Tanmay</span>
                         </div>
-                        <span className="w-10 h-10 rounded-lg bg-[#dae2fd] text-[#000f3f] flex items-center justify-center font-manrope text-lg font-black">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#dae2fd] text-[#000f3f] flex items-center justify-center font-manrope text-sm sm:text-lg font-black shrink-0">
                           S
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-3 border-t border-[#e2e7ff] text-xs text-[#45464f]">
-                      <span>Indoor Sports Complex Court 2</span>
+                      <span className="text-[11px] sm:text-xs truncate mr-2">Indoor Sports Complex Court 2</span>
                       <button
                         onClick={() => {
                           setReminderSet('Badminton Doubles Semi');
                           setTimeout(() => setReminderSet(null), 3500);
                         }}
-                        className="text-[11px] text-[#0051d5] uppercase font-bold font-manrope hover:underline cursor-pointer"
+                        className="text-[11px] text-[#0051d5] uppercase font-bold font-manrope hover:underline cursor-pointer shrink-0"
                       >
                         {reminderSet === 'Badminton Doubles Semi' ? '✓ Reminder Active' : 'Set Reminder'}
                       </button>
                     </div>
                   </div>
 
-                  {/* Upcoming Match 2: Basketball */}
-                  <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between border border-[#e2e7ff]">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-0.5 rounded bg-[#e2e7ff] text-[#000f3f] text-[10px] uppercase font-black font-manrope">
-                        TOMORROW • 10:00 IST
+                  {/* Upcoming Match 2: Chess Blitz */}
+                  <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between border border-[#e2e7ff] overflow-hidden">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3">
+                      <span className="px-2 py-0.5 rounded bg-[#e2e7ff] text-[#000f3f] text-[10px] uppercase font-black font-manrope">
+                        TOMORROW • 16:00 IST
                       </span>
                       <span className="text-[10px] text-[#45464f] uppercase font-bold font-manrope">
-                        BASKETBALL MEN&apos;S FINAL
+                        CHESS BLITZ BOARD 1
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center gap-3">
-                        <span className="w-10 h-10 rounded-lg bg-[#ffdbca] text-[#eb6905] flex items-center justify-center font-manrope text-lg font-black">
+                    <div className="grid grid-cols-7 items-center py-2.5 sm:py-3 gap-1">
+                      {/* Team 1 */}
+                      <div className="col-span-3 flex items-center gap-2 min-w-0">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#ffdbca] text-[#eb6905] flex items-center justify-center font-manrope text-sm sm:text-lg font-black shrink-0">
                           P
                         </span>
-                        <div>
-                          <h5 className="text-base font-bold text-[#000f3f] uppercase font-manrope">
+                        <div className="min-w-0 overflow-hidden">
+                          <h5 className="text-xs sm:text-base font-bold text-[#000f3f] uppercase font-manrope truncate">
                             Phoenix
                           </h5>
-                          <span className="text-xs text-[#45464f]">Win Streak: 4</span>
+                          <span className="text-[10px] sm:text-xs text-[#45464f] truncate block">Streak: 4W</span>
                         </div>
                       </div>
 
-                      <span className="text-base font-bold text-[#45464f] font-manrope">
-                        VS
-                      </span>
+                      {/* VS */}
+                      <div className="col-span-1 flex items-center justify-center">
+                        <span className="px-1.5 py-0.5 rounded bg-[#f2f3ff] text-[10px] sm:text-xs font-black text-[#45464f] font-manrope">
+                          VS
+                        </span>
+                      </div>
 
-                      <div className="flex items-center gap-3 text-right">
-                        <div>
-                          <h5 className="text-base font-bold text-[#000f3f] uppercase font-manrope">
+                      {/* Team 2 */}
+                      <div className="col-span-3 flex items-center justify-end gap-2 text-right min-w-0">
+                        <div className="min-w-0 overflow-hidden">
+                          <h5 className="text-xs sm:text-base font-bold text-[#000f3f] uppercase font-manrope truncate">
                             Mavericks
                           </h5>
-                          <span className="text-xs text-[#45464f]">Win Streak: 5</span>
+                          <span className="text-[10px] sm:text-xs text-[#45464f] truncate block">Streak: 5W</span>
                         </div>
-                        <span className="w-10 h-10 rounded-lg bg-[#dbe1ff] text-[#000f3f] flex items-center justify-center font-manrope text-lg font-black">
+                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#dbe1ff] text-[#000f3f] flex items-center justify-center font-manrope text-sm sm:text-lg font-black shrink-0">
                           M
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-3 border-t border-[#e2e7ff] text-xs text-[#45464f]">
-                      <span>Apex Main Arena Court A</span>
+                      <span className="text-[11px] sm:text-xs truncate mr-2">Mind Sports Auditorium</span>
                       <Link
                         href="/schedule"
-                        className="text-[11px] text-[#0051d5] uppercase font-bold font-manrope hover:underline cursor-pointer"
+                        className="text-[11px] text-[#0051d5] uppercase font-bold font-manrope hover:underline cursor-pointer shrink-0"
                       >
                         Match Preview
                       </Link>
