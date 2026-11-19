@@ -75,35 +75,39 @@ export async function POST(req: Request) {
       sportIds,
     } = body;
 
-    if (!name || !email || !clubId) {
-      return NextResponse.json({ error: 'Name, Email, and Club are required' }, { status: 400 });
+    if (!name || !clubId) {
+      return NextResponse.json({ error: 'Participant Name and Assigned Club/House are required' }, { status: 400 });
     }
 
-    // Auto generate registration ID if not provided
-    const regId = registrationId || `REG-${Date.now().toString().slice(-6)}`;
+    // Auto generate unique registration ID and internal identifier email if not provided
+    const cleanName = typeof name === 'string' ? name.trim() : '';
+    const nameSlug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'athlete';
+    const uniqueSuffix = `${Date.now().toString().slice(-5)}${Math.floor(100 + Math.random() * 900)}`;
+    const regId = (registrationId && registrationId.trim()) || `REG-${uniqueSuffix}`;
+    const cleanEmail = (email && email.trim()?.toLowerCase()) || `${nameSlug}.${uniqueSuffix}@apl.internal`;
 
     // Check duplicate
     const existing = await db.player.findFirst({
-      where: {
-        OR: [{ registrationId: regId }, { email: email.toLowerCase().trim() }],
-      },
+      where: email
+        ? { OR: [{ registrationId: regId }, { email: cleanEmail }] }
+        : { name: { equals: cleanName, mode: 'insensitive' }, clubId },
     });
 
     if (existing) {
       return NextResponse.json(
-        { error: 'A player with this Registration ID or Email already exists' },
+        { error: 'An athlete with this name in this house already exists' },
         { status: 409 }
       );
     }
 
     const player = await db.player.create({
       data: {
-        name,
+        name: cleanName,
         registrationId: regId,
-        email: email.toLowerCase().trim(),
-        phone,
+        email: cleanEmail,
+        phone: phone || null,
         gender: gender || 'MALE',
-        age: age ? parseInt(age) : null,
+        age: age ? parseInt(age) : 22,
         clubId,
         teamName,
         status: status || 'APPROVED',
