@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { calculateMatchPoints } from '@/lib/sports-rules';
+import { getSportRules } from '@/lib/sports-rules-server';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -43,9 +44,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
     const currentRotation = parseInt(rotationSetting?.value || '0', 10) || 0;
 
+    // Load active sport scoring rules from DB (custom configurations)
+    const sportName = match.sport?.name || body.sportName;
+    const dbRules = await getSportRules(sportName);
+    const customRuleMap = new Map<string, number>();
+    dbRules.forEach((r) => customRuleMap.set(r.ruleCode, r.points));
+
     const calculation = await calculateMatchPoints(
       {
-        sportName: match.sport?.name || body.sportName,
+        sportName,
         stageType: body.stageType || match.stageType || 'NORMAL',
         eventCategory: body.eventCategory || match.matchCategory,
         winnerParticipantId: body.winnerParticipantId,
@@ -72,7 +79,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       },
       match.participants,
       allPlayers,
-      currentRotation
+      currentRotation,
+      customRuleMap
     );
 
     return NextResponse.json({

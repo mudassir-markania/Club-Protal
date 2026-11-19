@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { normalizeSportKey, DEFAULT_OFFICIAL_RULES } from '@/lib/sports-rules';
 
 export async function GET() {
   try {
@@ -22,7 +23,25 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(sports);
+    // Attach sport-specific scoring rules from DB
+    const allRules = await db.sportScoringRule.findMany({
+      where: { enabled: true },
+    });
+
+    const enrichedSports = sports.map((s: any) => {
+      const sportKey = normalizeSportKey(s.name);
+      let rules = sportKey ? allRules.filter((r: any) => r.sport === sportKey) : [];
+      if ((!rules || rules.length === 0) && sportKey) {
+        rules = DEFAULT_OFFICIAL_RULES.filter((r: any) => r.sport === sportKey);
+      }
+      return {
+        ...s,
+        sportKey,
+        scoringRules: rules,
+      };
+    });
+
+    return NextResponse.json(enrichedSports);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

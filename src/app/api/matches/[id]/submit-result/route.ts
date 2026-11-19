@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { calculateMatchPoints } from '@/lib/sports-rules';
+import { getSportRules } from '@/lib/sports-rules-server';
 import { calculateClubPointsDistribution } from '@/lib/points-distribution';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
@@ -78,10 +79,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     let calculationResult: any;
 
     if (isStructuredPayload) {
-      // Execute the automatic sports scoring rules calculation
+      // Execute the automatic sports scoring rules calculation using active DB configured rules
+      const sportName = match.sport?.name || body.sportName;
+      const dbRules = await getSportRules(sportName);
+      const customRuleMap = new Map<string, number>();
+      dbRules.forEach((r) => customRuleMap.set(r.ruleCode, r.points));
+
       calculationResult = await calculateMatchPoints(
         {
-          sportName: match.sport?.name || body.sportName,
+          sportName,
           stageType: body.stageType || match.stageType || 'NORMAL',
           eventCategory: body.eventCategory || match.matchCategory,
           winnerParticipantId: body.winnerParticipantId,
@@ -110,7 +116,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         },
         match.participants,
         allPlayers,
-        currentRotation
+        currentRotation,
+        customRuleMap
       );
     } else {
       // Fallback for legacy entryResults format
