@@ -226,8 +226,8 @@ const HERO_SPORTS = [
     shortName: 'Badminton',
     icon: 'sports_tennis',
     tagline: '21-POINT RALLY SCORING • SINGLES & DOUBLES',
-    headline: 'RAPID SMASH.',
-    headlineAccent: 'PURE TOUCH.',
+    headline: 'BLISTERING SMASHES.',
+    headlineAccent: 'SURGICAL TOUCH.',
     description:
       'Rapid 300+ km/h shuttlecock action on synthetic championship courts. Best of 3 sets with sudden death deuces up to 30 points.',
     image: '/badminton.jpg',
@@ -242,8 +242,8 @@ const HERO_SPORTS = [
     shortName: 'Carrom',
     icon: 'carrom',
     tagline: 'QUEEN COVER • ACCURACY • PURE FINESSE',
-    headline: 'CLEAN STRIKE.',
-    headlineAccent: 'QUEEN POCKET.',
+    headline: 'PINPOINT STRIKES.',
+    headlineAccent: 'MASTER POCKETING.',
     description:
       'Classic tournament board warfare with precision rebounds, white & black piece accumulation, and high-tension queen confirmation pocketing.',
     image: '/carrom.jpg',
@@ -258,8 +258,8 @@ const HERO_SPORTS = [
     shortName: 'Chess',
     icon: 'chess',
     tagline: '5 MINS + 3 SECS INCREMENT • DGT SENSORY BOARDS',
-    headline: 'SHARP MIND.',
-    headlineAccent: 'TACTICAL FOCUS.',
+    headline: 'STRATEGIC MIND.',
+    headlineAccent: 'UNYIELDING FOCUS.',
     description:
       'Grandmaster-level tactical confrontations with digital clock timers and FIDE Swiss pairing in an acoustic, sound-dampened auditorium.',
     image: '/chess.jpg',
@@ -274,7 +274,7 @@ const HERO_SPORTS = [
     shortName: 'BGMI',
     icon: 'sports_esports',
     tagline: 'BATTLE ROYALE • ERANGEL & MIRAMAR • 4-MAN SQUADS',
-    headline: 'BATTLE ROYALE.',
+    headline: 'TACTICAL ROTATION.',
     headlineAccent: 'CHICKEN DINNER.',
     description:
       'High-adrenaline mobile esports battle royale on campus dedicated LAN servers with live casting, zone shifts, and squad clutch plays.',
