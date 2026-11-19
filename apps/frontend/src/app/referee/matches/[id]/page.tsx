@@ -458,11 +458,6 @@ export default function RefereeMatchSheetPage() {
                   <Calendar className="w-3.5 h-3.5 text-navy-400" />
                   {match.matchDate} at {match.matchTime}
                 </span>
-                <span className="text-navy-600">•</span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-navy-400" />
-                  {match.venue?.name || 'Olympic Arena'}
-                </span>
               </div>
             </div>
 

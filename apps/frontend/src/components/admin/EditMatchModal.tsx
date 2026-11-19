@@ -7,7 +7,6 @@ import { STAGE_OPTIONS } from '@club-portal/shared';
 
 interface Props {
   match: any | null;
-  venues: any[];
   referees: any[];
   onClose: () => void;
   onSaved: (message: string) => void;
@@ -23,13 +22,12 @@ const Label = ({ children, required }: { children: React.ReactNode; required?: b
 );
 
 /** Edit the schedule details of a match that has no result yet. Participants are fixed once scheduled. */
-export default function EditMatchModal({ match, venues, referees, onClose, onSaved }: Props) {
+export default function EditMatchModal({ match, referees, onClose, onSaved }: Props) {
   const [mounted, setMounted] = useState(false);
   const [stageType, setStageType] = useState('NORMAL');
   const [round, setRound] = useState('');
   const [matchDate, setMatchDate] = useState('');
   const [matchTime, setMatchTime] = useState('');
-  const [venueId, setVenueId] = useState('');
   const [refereeId, setRefereeId] = useState('');
   const [status, setStatus] = useState('SCHEDULED');
   const [notes, setNotes] = useState('');
@@ -44,7 +42,6 @@ export default function EditMatchModal({ match, venues, referees, onClose, onSav
     setRound(match.round || '');
     setMatchDate(match.matchDate || '');
     setMatchTime(match.matchTime || '');
-    setVenueId(match.venueId || '');
     setRefereeId(match.referees?.[0]?.refereeId || '');
     setStatus(match.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'SCHEDULED');
     setNotes(match.notes || '');
@@ -67,7 +64,6 @@ export default function EditMatchModal({ match, venues, referees, onClose, onSav
     if (!round.trim()) return setError('Enter a match title.');
     if (!matchDate) return setError('Select a match date.');
     if (!matchTime) return setError('Select a start time.');
-    if (!venueId) return setError('Select a venue.');
 
     setSaving(true);
     try {
@@ -79,7 +75,6 @@ export default function EditMatchModal({ match, venues, referees, onClose, onSav
           round: round.trim(),
           matchDate,
           matchTime,
-          venueId,
           status,
           notes: notes.trim(),
           refereeIds: refereeId ? [refereeId] : [],
@@ -164,17 +159,6 @@ export default function EditMatchModal({ match, venues, referees, onClose, onSav
             <div>
               <Label required>Start time</Label>
               <input type="time" value={matchTime} onChange={(e) => setMatchTime(e.target.value)} className={inputCls} />
-            </div>
-            <div>
-              <Label required>Venue</Label>
-              <select value={venueId} onChange={(e) => setVenueId(e.target.value)} className={inputCls}>
-                <option value="">Select venue</option>
-                {venues.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
             </div>
             <div>
               <Label>Referee</Label>

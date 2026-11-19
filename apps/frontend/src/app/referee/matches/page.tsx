@@ -98,13 +98,12 @@ export default function RefereeMatchesPage() {
       const q = search.toLowerCase();
       const code = m.matchCode?.toLowerCase() || '';
       const sName = m.sport?.name?.toLowerCase() || '';
-      const vName = m.venue?.name?.toLowerCase() || '';
       const pStr = (m.participants || [])
         .map((p: any) => `${p.teamName} ${p.club?.name} ${p.cricketTeam?.name}`)
         .join(' ')
         .toLowerCase();
 
-      if (!code.includes(q) && !sName.includes(q) && !vName.includes(q) && !pStr.includes(q)) {
+      if (!code.includes(q) && !sName.includes(q) && !pStr.includes(q)) {
         return false;
       }
     }
@@ -159,7 +158,7 @@ export default function RefereeMatchesPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by code, club, venue..."
+                placeholder="Search by code, club, sport..."
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-xs"
               />
             </div>
@@ -350,10 +349,6 @@ export default function RefereeMatchesPage() {
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>{m.matchDate} at {m.matchTime}</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{m.venue?.name || 'Olympic Arena'}</span>
                       </span>
                     </div>
                   </div>

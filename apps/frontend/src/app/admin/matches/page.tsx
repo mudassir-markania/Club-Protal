@@ -45,7 +45,6 @@ export default function MatchesPage() {
   const [clubs, setClubs] = useState<any[]>([]);
   const [cricketTeams, setCricketTeams] = useState<any[]>([]);
   const [bgmiTeams, setBgmiTeams] = useState<any[]>([]);
-  const [venues, setVenues] = useState<any[]>([]);
   const [referees, setReferees] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,12 +77,11 @@ export default function MatchesPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [matchesRes, sportsRes, clubsRes, crickRes, venuesRes, refRes, playersRes, bgmiRes] = await Promise.all([
+      const [matchesRes, sportsRes, clubsRes, crickRes, refRes, playersRes, bgmiRes] = await Promise.all([
         fetch('/api/matches'),
         fetch('/api/sports'),
         fetch('/api/clubs'),
         fetch('/api/cricket-teams'),
-        fetch('/api/venues'),
         fetch('/api/referees'),
         fetch('/api/players'),
         fetch('/api/bgmi-teams'),
@@ -93,7 +91,6 @@ export default function MatchesPage() {
       const sportsData = await sportsRes.json();
       const clubsData = await clubsRes.json();
       const crickData = await crickRes.json();
-      const venuesData = await venuesRes.json();
       const refData = await refRes.json();
       const playersData = await playersRes.json();
       const bgmiData = await bgmiRes.json();
@@ -102,7 +99,6 @@ export default function MatchesPage() {
       setSports(Array.isArray(sportsData) ? sportsData : []);
       setClubs(Array.isArray(clubsData) ? clubsData : []);
       setCricketTeams(Array.isArray(crickData) ? crickData : []);
-      setVenues(Array.isArray(venuesData) ? venuesData : []);
       setReferees(Array.isArray(refData) ? refData : []);
       setPlayers(Array.isArray(playersData) ? playersData : []);
       setBgmiTeams(Array.isArray(bgmiData) ? bgmiData : []);
@@ -268,13 +264,12 @@ A referee result is awaiting approval and will be discarded.`
       const q = search.toLowerCase();
       const code = m.matchCode?.toLowerCase() || '';
       const sName = m.sport?.name?.toLowerCase() || '';
-      const vName = m.venue?.name?.toLowerCase() || '';
       const pStr = (m.participants || [])
         .map((p: any) => `${p.teamName} ${p.club?.name} ${p.cricketTeam?.name}`)
         .join(' ')
         .toLowerCase();
 
-      if (!code.includes(q) && !sName.includes(q) && !vName.includes(q) && !pStr.includes(q)) {
+      if (!code.includes(q) && !sName.includes(q) && !pStr.includes(q)) {
         return false;
       }
     }
@@ -347,7 +342,7 @@ A referee result is awaiting approval and will be discarded.`
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search match code, house, venue..."
+                placeholder="Search match code, house, sport..."
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-xs"
               />
             </div>
@@ -617,10 +612,6 @@ A referee result is awaiting approval and will be discarded.`
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>{match.matchDate} at {match.matchTime}</span>
                       </span>
-                      <span className="flex items-center gap-1 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{match.venue?.name || 'Grand Arena'}</span>
-                      </span>
                     </div>
                   </div>
 
@@ -687,7 +678,6 @@ A referee result is awaiting approval and will be discarded.`
 
       <EditMatchModal
         match={editMatch}
-        venues={venues}
         referees={referees}
         onClose={() => setEditMatch(null)}
         onSaved={(message) => {
@@ -718,7 +708,6 @@ A referee result is awaiting approval and will be discarded.`
         cricketTeams={cricketTeams}
         bgmiTeams={bgmiTeams}
         onTeamCreated={(t) => setBgmiTeams((prev) => [...prev.filter((x) => x.id !== t.id), t])}
-        venues={venues}
         referees={referees}
         players={players}
       />

@@ -196,12 +196,8 @@ export default function ResultsPage() {
                     </div>
                   )}
 
-                  {/* Venue & Date */}
+                  {/* Date */}
                   <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#C6A04A]" />
-                      <span>{m.venue?.name || 'Main Arena'}</span>
-                    </span>
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-[#C6A04A]" />
                       <span>{new Date(m.matchDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>

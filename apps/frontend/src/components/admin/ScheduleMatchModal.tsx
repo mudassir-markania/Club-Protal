@@ -24,7 +24,6 @@ export interface ScheduleMatchModalProps {
   cricketTeams: any[];
   bgmiTeams?: any[];
   onTeamCreated?: (team: any) => void;
-  venues: any[];
   referees: any[];
   players: any[];
 }
@@ -77,7 +76,6 @@ export default function ScheduleMatchModal({
   cricketTeams,
   bgmiTeams = [],
   onTeamCreated,
-  venues,
   referees,
   players,
 }: ScheduleMatchModalProps) {
@@ -89,7 +87,6 @@ export default function ScheduleMatchModal({
   const [round, setRound] = useState('');
   const [matchDate, setMatchDate] = useState(todayStr());
   const [matchTime, setMatchTime] = useState('15:00');
-  const [venueId, setVenueId] = useState('');
   const [refereeId, setRefereeId] = useState('');
   const [notes, setNotes] = useState('');
   const [sides, setSides] = useState<[Side, Side]>([emptySide(), emptySide()]);
@@ -127,7 +124,6 @@ export default function ScheduleMatchModal({
     setRound('');
     setMatchDate(todayStr());
     setMatchTime('15:00');
-    setVenueId(venues[0]?.id || '');
     setRefereeId('');
     setNotes('');
     setSides([emptySide(), emptySide()]);
@@ -231,7 +227,6 @@ export default function ScheduleMatchModal({
     if (!matchDate) e.matchDate = 'Select a match date.';
     else if (matchDate < todayStr()) e.matchDate = 'Date is in the past. Choose today or a future date.';
     if (!matchTime) e.matchTime = 'Select a start time.';
-    if (!venueId) e.venueId = 'Select a venue.';
 
     if (config.mode === 'CLUBS') {
       if (!sides[0].clubId) e.sideA = 'Select the first club.';
@@ -312,7 +307,6 @@ export default function ScheduleMatchModal({
           stageName: 'Championship Round',
           matchDate,
           matchTime,
-          venueId,
           notes: notes.trim(),
           participants: buildParticipants(),
           refereeIds: refereeId ? [refereeId] : [],
@@ -860,7 +854,7 @@ export default function ScheduleMatchModal({
                 {/* 4. Schedule */}
                 <section className="space-y-3">
                   <h4 className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider">4. When & Where</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Field label="Date" required error={errors.matchDate}>
                       <input
                         type="date"
@@ -877,20 +871,6 @@ export default function ScheduleMatchModal({
                         onChange={(e) => setMatchTime(e.target.value)}
                         className={`${inputCls} ${borderFor(errors.matchTime)}`}
                       />
-                    </Field>
-                    <Field label="Venue" required error={errors.venueId}>
-                      <select
-                        value={venueId}
-                        onChange={(e) => setVenueId(e.target.value)}
-                        className={`${inputCls} ${borderFor(errors.venueId)}`}
-                      >
-                        <option value="">Select venue</option>
-                        {venues.map((v) => (
-                          <option key={v.id} value={v.id}>
-                            {v.name}
-                          </option>
-                        ))}
-                      </select>
                     </Field>
                     <Field label="Referee">
                       <select

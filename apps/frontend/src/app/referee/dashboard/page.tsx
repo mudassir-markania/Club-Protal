@@ -162,13 +162,12 @@ export default function RefereeDashboardPage() {
       const q = search.toLowerCase();
       const matchCode = m.matchCode?.toLowerCase() || '';
       const sportName = m.sport?.name?.toLowerCase() || '';
-      const venueName = m.venue?.name?.toLowerCase() || '';
       const participantsStr = (m.participants || [])
         .map((p: any) => `${p.teamName} ${p.club?.name} ${p.cricketTeam?.name}`)
         .join(' ')
         .toLowerCase();
 
-      if (!matchCode.includes(q) && !sportName.includes(q) && !venueName.includes(q) && !participantsStr.includes(q)) {
+      if (!matchCode.includes(q) && !sportName.includes(q) && !participantsStr.includes(q)) {
         return false;
       }
     }
@@ -294,7 +293,7 @@ export default function RefereeDashboardPage() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search match code, house, venue..."
+                  placeholder="Search match code, house, sport..."
                   className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-xs"
                 />
               </div>
@@ -529,15 +528,11 @@ export default function RefereeDashboardPage() {
                         })}
                       </div>
 
-                      {/* Date & Venue Footer */}
+                      {/* Date Footer */}
                       <div className="mt-3 text-[11px] text-slate-500 flex items-center justify-between">
                         <span className="flex items-center gap-1.5 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           <span>{match.matchDate} at {match.matchTime}</span>
-                        </span>
-                        <span className="flex items-center gap-1.5 font-medium">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{match.venue?.name || 'Olympic Arena'}</span>
                         </span>
                       </div>
                     </div>
