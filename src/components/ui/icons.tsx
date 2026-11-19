@@ -156,16 +156,17 @@ export function CarromIcon({ className = 'w-4 h-4', size }: IconProps) {
       width={size}
       height={size}
     >
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <circle cx="12" cy="12" r="3" />
-      <circle cx="6" cy="6" r="1" fill="currentColor" />
-      <circle cx="18" cy="6" r="1" fill="currentColor" />
-      <circle cx="6" cy="18" r="1" fill="currentColor" />
-      <circle cx="18" cy="18" r="1" fill="currentColor" />
-      <line x1="8" y1="8" x2="10" y2="10" />
-      <line x1="16" y1="8" x2="14" y2="10" />
-      <line x1="8" y1="16" x2="10" y2="14" />
-      <line x1="16" y1="16" x2="14" y2="14" />
+      <rect x="2.5" y="2.5" width="19" height="19" rx="2.5" />
+      <circle cx="5.5" cy="5.5" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="18.5" cy="5.5" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="5.5" cy="18.5" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="18.5" cy="18.5" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="3.2" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <line x1="8.5" y1="8.5" x2="6.8" y2="6.8" strokeWidth="1.4" />
+      <line x1="15.5" y1="8.5" x2="17.2" y2="6.8" strokeWidth="1.4" />
+      <line x1="8.5" y1="15.5" x2="6.8" y2="17.2" strokeWidth="1.4" />
+      <line x1="15.5" y1="15.5" x2="17.2" y2="17.2" strokeWidth="1.4" />
     </svg>
   );
 }

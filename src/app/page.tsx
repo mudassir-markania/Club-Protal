@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
+import { CarromIcon } from '@/components/ui/icons';
 import {
   Trophy,
   X,
@@ -156,7 +157,7 @@ const DISCIPLINES_DATA = [
     id: 'carrom',
     name: 'Carrom',
     category: 'Indoor',
-    icon: 'sports_kabaddi',
+    icon: 'carrom',
     pointsMax: '40 PTS MAX',
     fixturesCount: '12 Fixtures',
     description: 'Classic precision board championship featuring singles, doubles, and queen cover point systems.',
@@ -239,7 +240,7 @@ const HERO_SPORTS = [
     badge: 'CHAMPIONSHIP PRECISION CARROM',
     name: 'Carrom',
     shortName: 'Carrom',
-    icon: 'sports_kabaddi',
+    icon: 'carrom',
     tagline: 'QUEEN COVER • ACCURACY • PURE FINESSE',
     headline: 'PINPOINT STRIKES.',
     headlineAccent: 'MASTER POCKETING.',
@@ -292,7 +293,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % HERO_SPORTS.length);
-    }, 2500);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -424,7 +425,11 @@ export default function HomePage() {
                           : 'bg-white/10 hover:bg-white/20 text-[#dce1ff] border border-white/10'
                       }`}
                     >
-                      <span className="material-symbols-outlined text-[15px]">{s.icon}</span>
+                      {s.icon === 'carrom' ? (
+                        <CarromIcon className="w-3.5 h-3.5 shrink-0" />
+                      ) : (
+                        <span className="material-symbols-outlined text-[15px]">{s.icon}</span>
+                      )}
                       <span>{s.shortName}</span>
                     </button>
                   );
@@ -1039,7 +1044,11 @@ export default function HomePage() {
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <span className="w-12 h-12 rounded-lg bg-[#e2e7ff] text-[#000f3f] flex items-center justify-center group-hover:bg-[#000f3f] group-hover:text-white transition-colors">
-                          <span className="material-symbols-outlined text-2xl">{sport.icon}</span>
+                          {sport.icon === 'carrom' ? (
+                            <CarromIcon className="w-6 h-6 shrink-0" />
+                          ) : (
+                            <span className="material-symbols-outlined text-2xl">{sport.icon}</span>
+                          )}
                         </span>
                         <span className="text-[10px] text-[#45464f] uppercase font-extrabold font-manrope">
                           {sport.pointsMax}
@@ -1718,7 +1727,11 @@ export default function HomePage() {
 
             <div className="flex items-center gap-4 mb-4">
               <span className="w-14 h-14 rounded-xl bg-[#000f3f] text-white flex items-center justify-center shadow-sm">
-                <span className="material-symbols-outlined text-3xl">{selectedSport.icon}</span>
+                {selectedSport.icon === 'carrom' ? (
+                  <CarromIcon className="w-8 h-8 shrink-0" />
+                ) : (
+                  <span className="material-symbols-outlined text-3xl">{selectedSport.icon}</span>
+                )}
               </span>
               <div>
                 <h3 className="text-2xl font-black text-[#000f3f] uppercase font-manrope">
