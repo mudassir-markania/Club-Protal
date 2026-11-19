@@ -6,20 +6,15 @@ import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Lock,
-  Mail,
-  AlertCircle,
-  ArrowRight,
+  User,
   Eye,
   EyeOff,
-  ShieldCheck,
-  CheckCircle2,
+  LogIn,
+  AlertCircle,
   Crown,
+  CheckCircle2,
   Trophy,
   Sparkles,
-  Users,
-  Target,
-  Gamepad2,
-  Zap,
 } from 'lucide-react';
 
 interface QuickAccount {
@@ -30,7 +25,6 @@ interface QuickAccount {
   email: string;
   sports: string;
   icon: string;
-  targetRoute: string;
 }
 
 const QUICK_ACCOUNTS: QuickAccount[] = [
@@ -39,10 +33,9 @@ const QUICK_ACCOUNTS: QuickAccount[] = [
     name: 'Championship Director',
     role: 'SUPER_ADMIN',
     roleLabel: 'Admin Portal',
-    email: 'admin@sportsportal.com',
+    email: 'admin',
     sports: 'All Sports & Rules',
     icon: '👑',
-    targetRoute: '/admin/dashboard',
   },
   {
     id: 'marcus',
@@ -52,7 +45,6 @@ const QUICK_ACCOUNTS: QuickAccount[] = [
     email: 'ref.marcus@sportsportal.com',
     sports: 'BGMI • Cricket • Football',
     icon: '⚽',
-    targetRoute: '/referee/dashboard',
   },
   {
     id: 'sarah',
@@ -62,7 +54,6 @@ const QUICK_ACCOUNTS: QuickAccount[] = [
     email: 'ref.sarah@sportsportal.com',
     sports: 'Badminton • Carrom',
     icon: '🏸',
-    targetRoute: '/referee/dashboard',
   },
   {
     id: 'david',
@@ -72,38 +63,23 @@ const QUICK_ACCOUNTS: QuickAccount[] = [
     email: 'ref.david@sportsportal.com',
     sports: 'Chess • BGMI • Football',
     icon: '♟️',
-    targetRoute: '/referee/dashboard',
   },
 ];
 
-const HOUSES_PREVIEW = [
-  { name: 'Blue', code: 'MAV', bg: 'bg-blue-600', ring: 'ring-blue-400' },
-  { name: 'Red', code: 'DOM', bg: 'bg-rose-600', ring: 'ring-rose-400' },
-  { name: 'Green', code: 'ALP', bg: 'bg-emerald-600', ring: 'ring-emerald-400' },
-  { name: 'Purple', code: 'RYL', bg: 'bg-purple-600', ring: 'ring-purple-400' },
-  { name: 'Yellow', code: 'CRW', bg: 'bg-amber-500', ring: 'ring-amber-300' },
-];
-
-export default function UnifiedLoginPage() {
+export default function AccountPortalLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState<'signin' | 'quick'>('signin');
+  const [email, setEmail] = useState('admin');
+  const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedQuickId, setSelectedQuickId] = useState<string | null>(null);
-
-  const handleSelectQuickAccount = (account: QuickAccount) => {
-    setSelectedQuickId(account.id);
-    setEmail(account.email);
-    setPassword(account.role === 'SUPER_ADMIN' ? 'admin123' : 'referee123');
-    setError(null);
-  };
+  const [forgotNotice, setForgotNotice] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setForgotNotice(null);
     setLoading(true);
 
     try {
@@ -118,7 +94,7 @@ export default function UnifiedLoginPage() {
         throw new Error(data.error || 'Authentication failed. Please verify credentials.');
       }
 
-      // Automatic role-based routing from database
+      // Automatic role-based routing
       const userRole = data.user?.role;
       if (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN') {
         router.push('/admin/dashboard');
@@ -134,233 +110,208 @@ export default function UnifiedLoginPage() {
     }
   };
 
+  const selectQuickAccount = (acc: QuickAccount) => {
+    setEmail(acc.email);
+    setPassword(acc.role === 'SUPER_ADMIN' ? 'admin123' : 'referee123');
+    setActiveTab('signin');
+    setError(null);
+  };
+
   return (
-    <div className="min-h-screen w-full bg-[#f8fafc] text-[#0f172a] flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
-      {/* Top Header Navigation */}
-      <header className="h-16 shrink-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shadow-xs">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#000f3f] to-[#0051d5] flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
-            <Trophy className="w-5 h-5 text-amber-300" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-base sm:text-lg font-black tracking-tight text-[#000f3f] leading-none uppercase">
-                APEX ARENA
+    <div className="min-h-screen w-full flex flex-col lg:flex-row relative overflow-x-hidden font-sans select-none bg-[#090b11]">
+      {/* =========================================================================
+          LEFT PANEL: Dark Diagonal Section with Golden Trophy & League Branding
+          ========================================================================= */}
+      <div className="relative w-full lg:w-[46%] xl:w-[44%] min-h-[380px] lg:min-h-screen shrink-0 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-14 z-20 overflow-hidden bg-[#07090e]">
+        {/* Angled Red/Crimson Accent Stripe on the right edge */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-[#8f1624] via-[#6f111c] to-[#3a080f] pointer-events-none hidden lg:block z-0"
+          style={{
+            clipPath: 'polygon(0 0, 100% 0, 86% 100%, 0 100%)',
+          }}
+        />
+
+        {/* Dark Interior Fill overlay */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-[#090b11] via-[#07090e] to-[#040508] pointer-events-none hidden lg:block z-10"
+          style={{
+            clipPath: 'polygon(0 0, calc(100% - 5px) 0, calc(86% - 5px) 100%, 0 100%)',
+          }}
+        />
+
+        {/* Top Header Link */}
+        <div className="relative z-20">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-medium text-slate-300/80 hover:text-white px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all shadow-sm"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Tournament Home</span>
+          </Link>
+        </div>
+
+        {/* Center Hero: Trophy + Gold Branding */}
+        <div className="relative z-20 my-auto py-8 text-center flex flex-col items-center">
+          {/* Golden Trophy with Star Emblem */}
+          <div className="relative mb-3 flex flex-col items-center group">
+            <svg
+              className="w-16 h-16 xl:w-20 xl:h-20 drop-shadow-[0_10px_25px_rgba(217,119,6,0.35)] transition-transform duration-300 group-hover:scale-105"
+              viewBox="0 0 100 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="trophyGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fef08a" />
+                  <stop offset="30%" stopColor="#fbbf24" />
+                  <stop offset="70%" stopColor="#d97706" />
+                  <stop offset="100%" stopColor="#78350f" />
+                </linearGradient>
+                <linearGradient id="innerGold" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#fef9c3" />
+                  <stop offset="100%" stopColor="#b45309" />
+                </linearGradient>
+              </defs>
+              {/* Handles */}
+              <path
+                d="M30 24C18 24 16 38 24 48C30 55 38 56 40 56M70 24C82 24 84 38 76 48C70 55 62 56 60 56"
+                stroke="url(#trophyGold)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              {/* Cup Body */}
+              <path
+                d="M32 20C32 20 28 50 50 62C72 50 68 20 68 20L32 20Z"
+                fill="url(#trophyGold)"
+              />
+              {/* Star inside cup */}
+              <polygon
+                points="50,28 53,37 62,37 55,42 58,51 50,46 42,51 45,42 38,37 47,37"
+                fill="#fef08a"
+              />
+              {/* Cup Stem & Base */}
+              <path d="M47 62L45 74L55 74L53 62Z" fill="url(#trophyGold)" />
+              <path d="M38 74H62L66 84H34L38 74Z" fill="url(#innerGold)" />
+              <rect x="30" y="84" width="40" height="4" rx="2" fill="url(#trophyGold)" />
+            </svg>
+
+            {/* APL SEASON 9 Gold Label */}
+            <div className="mt-2 text-center">
+              <span className="block text-sm xl:text-base font-black tracking-[0.3em] text-[#d4af37] leading-none uppercase">
+                A P L
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black uppercase tracking-wider">
-                APL Season 9
+              <span className="block text-[9px] xl:text-[10px] font-extrabold tracking-[0.25em] text-[#d4af37]/75 uppercase mt-1">
+                SEASON 9
               </span>
             </div>
-            <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-0.5">
-              NexCore Institute of Technology
-            </span>
           </div>
-        </Link>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-600 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 transition-all shadow-2xs group"
-        >
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-          <span>Back to Arena</span>
-        </Link>
-      </header>
+          {/* Subtitle Tracking */}
+          <span className="text-[10px] xl:text-[11px] font-extrabold tracking-[0.28em] text-[#d4af37]/70 uppercase mt-4 block">
+            WELCOME TO
+          </span>
 
-      {/* Main Split Layout */}
-      <div className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-        <div className="w-full grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left Column: Championship Showcase (Desktop) */}
-          <div className="hidden lg:flex lg:col-span-5 flex-col justify-between rounded-3xl bg-gradient-to-br from-[#000f3f] via-[#071746] to-[#0b192c] text-white p-8 xl:p-10 shadow-2xl relative overflow-hidden border border-blue-900/40 min-h-[620px]">
-            {/* Background Decorative Light Beams */}
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Main Account Portal Heading */}
+          <h1 className="font-serif text-3xl sm:text-4xl xl:text-5xl font-medium tracking-wide text-white mt-1 leading-tight">
+            Account Portal
+          </h1>
 
-            {/* Top Brand & Badge */}
-            <div className="relative z-10 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-bold text-amber-300">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Official Scoring & House Portal</span>
-              </div>
+          {/* Alliance Premier League Sub-heading */}
+          <h2 className="font-serif text-lg sm:text-xl xl:text-2xl text-[#d4af37] font-normal tracking-wide mt-1">
+            Alliance Premier League
+          </h2>
 
-              <h1 className="text-3xl xl:text-4xl font-black tracking-tight leading-tight uppercase font-heading">
-                Enter The House Arena
-              </h1>
+          {/* Descriptive text */}
+          <p className="text-xs sm:text-sm text-slate-400 max-w-sm mt-4 leading-relaxed font-normal">
+            One portal for Players, Referees and League Admins — manage live scoring, squads, and house points distribution.
+          </p>
+        </div>
 
-              <p className="text-sm text-slate-300 leading-relaxed">
-                The centralized portal for championship match officiating, sports point distributions, and live house standings.
+        {/* Bottom Silhouette / House Badges */}
+        <div className="relative z-20 pt-4 flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5">
+          <span className="tracking-wide text-slate-400">APL Season 9 • Official House Championship</span>
+          <span className="text-[#d4af37]/80 font-semibold tracking-wider">NexCore</span>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          RIGHT PANEL: Clean Silver/Warm Gray Background with Modern Floating Card
+          ========================================================================= */}
+      <div className="flex-1 w-full min-h-screen bg-gradient-to-br from-[#dfe3e8] via-[#d5d9df] to-[#c9ced6] flex items-center justify-center p-4 sm:p-8 lg:p-12 relative z-10">
+        <div className="w-full max-w-[440px] flex flex-col items-center">
+          {/* Floating Authentication Card */}
+          <div className="w-full bg-[#f4f6f8]/95 backdrop-blur-xl rounded-[28px] sm:rounded-[32px] p-7 sm:p-9 shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-white/70 relative">
+            {/* Title & Subtitle */}
+            <div className="mb-6">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Sign In
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+                Sign in with your Player, Referee or Admin account
               </p>
             </div>
 
-            {/* Middle Feature Highlights */}
-            <div className="relative z-10 my-8 space-y-4">
-              {/* 5 Houses Pill Row */}
-              <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-blue-400" />
-                    <span>The 5 Houses</span>
-                  </span>
-                  <span className="text-[11px] text-amber-300 font-extrabold">10 Teams</span>
-                </div>
-                <div className="flex items-center gap-2 pt-1">
-                  {HOUSES_PREVIEW.map((h) => (
-                    <div
-                      key={h.code}
-                      className="flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/10 border border-white/10 text-center"
-                    >
-                      <span className={`w-2.5 h-2.5 rounded-full ${h.bg} mb-1`} />
-                      <span className="text-[11px] font-black">{h.name}</span>
-                      <span className="text-[9px] text-slate-400 font-medium">{h.code}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 6 Championship Sports Matrix */}
-              <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5">
-                    <Target className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>6 Official Sports</span>
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-semibold">PDF Rules Active</span>
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 text-[11px] text-slate-300 font-semibold pt-1">
-                  <span className="px-2 py-1 rounded-lg bg-white/5 flex items-center gap-1.5">⚽ Football</span>
-                  <span className="px-2 py-1 rounded-lg bg-white/5 flex items-center gap-1.5">🏏 Cricket</span>
-                  <span className="px-2 py-1 rounded-lg bg-white/5 flex items-center gap-1.5">🏸 Badminton</span>
-                  <span className="px-2 py-1 rounded-lg bg-white/5 flex items-center gap-1.5">🎯 Carrom</span>
-                  <span className="px-2 py-1 rounded-lg bg-white/5 flex items-center gap-1.5"><Gamepad2 className="w-3 h-3 text-cyan-400" /> BGMI</span>
-                  <span className="px-2 py-1 rounded-lg bg-white/5 flex items-center gap-1.5">♟️ Chess</span>
-                </div>
-              </div>
-
-              {/* Automatic Calculation Banner */}
-              <div className="p-3.5 rounded-2xl bg-blue-600/20 border border-blue-400/30 flex items-start gap-3">
-                <Zap className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
-                <p className="text-xs text-blue-100 leading-snug">
-                  <strong>Automatic Point Engine:</strong> Match results calculate unique-club splits and individual player awards instantly upon submission.
-                </p>
-              </div>
+            {/* Segmented Pill Toggle: [Sign In] [Quick Accounts] */}
+            <div className="bg-[#d3d8df] p-1 rounded-2xl flex items-center mb-6">
+              <button
+                type="button"
+                onClick={() => setActiveTab('signin')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center ${
+                  activeTab === 'signin'
+                    ? 'bg-[#500c16] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('quick')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 ${
+                  activeTab === 'quick'
+                    ? 'bg-[#500c16] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Crown className="w-3.5 h-3.5" />
+                <span>Quick Accounts</span>
+              </button>
             </div>
 
-            {/* Bottom Security Footer */}
-            <div className="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Verified SSL 256-bit Session</span>
-              </span>
-              <span>APL Season 9</span>
-            </div>
-          </div>
-
-          {/* Right Column: Unified Authentication Form */}
-          <div className="lg:col-span-7 w-full max-w-xl mx-auto">
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_20px_60px_-15px_rgba(0,15,63,0.12)] p-6 sm:p-9 md:p-10 relative overflow-hidden">
-              {/* Subtle top accent gradient bar */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-700 via-indigo-600 to-amber-500" />
-
-              {/* Form Title & Introduction */}
-              <div className="space-y-2 mb-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-xs font-black uppercase tracking-wider">
-                  <Lock className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Authorized Personnel Sign In</span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#000f3f] tracking-tight uppercase">
-                  Welcome to Portal
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Referees and Tournament Directors sign in here. The portal automatically detects your role and navigates to your workspace.
-                </p>
+            {/* Error Banner */}
+            {error && (
+              <div
+                role="alert"
+                aria-live="polite"
+                className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+              >
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span className="leading-snug">{error}</span>
               </div>
+            )}
 
-              {/* Quick Sign-In Preset Selector (Fast Testing & Referees) */}
-              <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <Crown className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Quick Sign-In Selector (1-Click Test)</span>
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-600">Select any user:</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {QUICK_ACCOUNTS.map((acc) => {
-                    const isSelected = selectedQuickId === acc.id;
-                    return (
-                      <button
-                        key={acc.id}
-                        type="button"
-                        onClick={() => handleSelectQuickAccount(acc)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-blue-600 border-blue-600 text-white shadow-sm ring-2 ring-blue-400/40'
-                            : 'bg-white border-slate-200 text-slate-800 hover:border-blue-400 hover:bg-blue-50/50'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full mb-1">
-                          <span className="text-base">{acc.icon}</span>
-                          <span
-                            className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
-                              isSelected
-                                ? 'bg-white/20 text-white'
-                                : acc.role === 'SUPER_ADMIN'
-                                ? 'bg-amber-100 text-amber-900'
-                                : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            {acc.role === 'SUPER_ADMIN' ? 'Admin' : 'Referee'}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="text-xs font-black truncate">{acc.name.split(' ')[0]}</div>
-                          <div
-                            className={`text-[9px] truncate font-medium ${
-                              isSelected ? 'text-blue-100' : 'text-slate-500'
-                            }`}
-                          >
-                            {acc.sports}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedQuickId && (
-                  <div className="pt-1 flex items-center justify-between text-[11px] font-semibold text-blue-700">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Credentials loaded for {QUICK_ACCOUNTS.find((a) => a.id === selectedQuickId)?.name}</span>
-                    </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
-                      Routes to {QUICK_ACCOUNTS.find((a) => a.id === selectedQuickId)?.roleLabel}
-                    </span>
-                  </div>
-                )}
+            {/* Forgot Password Notice */}
+            {forgotNotice && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2 animate-in fade-in"
+              >
+                <Sparkles className="w-4 h-4 shrink-0 text-amber-600" />
+                <span className="leading-snug">{forgotNotice}</span>
               </div>
+            )}
 
-              {/* Error Alert Banner */}
-              {error && (
-                <div
-                  role="alert"
-                  aria-live="polite"
-                  className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1"
-                >
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-                  <span className="leading-snug">{error}</span>
-                </div>
-              )}
-
-              {/* Semantic Form compliant with Modern Web Guidance */}
+            {/* TAB 1: Main Sign In Form (Matching the Reference UI) */}
+            {activeTab === 'signin' && (
               <form method="POST" onSubmit={handleSubmit} noValidate className="space-y-4">
-                {/* Username / Email field */}
+                {/* Username Input */}
                 <div>
                   <label
                     htmlFor="username"
-                    className="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5 font-heading"
+                    className="block text-[11px] font-bold text-slate-700 tracking-wide mb-1.5"
                   >
-                    Email / Username <span className="text-rose-500">*</span>
+                    Email, Mobile, or Admin Username
                   </label>
                   <div className="relative">
                     <input
@@ -375,28 +326,22 @@ export default function UnifiedLoginPage() {
                       required
                       aria-invalid={!!error}
                       value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setSelectedQuickId(null);
-                      }}
-                      placeholder="e.g. admin or ref.marcus@sportsportal.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50/80 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15 transition-all font-medium"
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="admin or ref.marcus@sportsportal.com"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#cdd2da]/55 border border-[#bcc2cb] text-slate-900 text-sm placeholder:text-slate-500 outline-none focus:bg-white focus:border-[#500c16] focus:ring-2 focus:ring-[#500c16]/15 transition-all font-medium"
                     />
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                    <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
                   </div>
                 </div>
 
-                {/* Password field */}
+                {/* Password Input */}
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label
-                      htmlFor="password"
-                      className="block text-xs font-black text-slate-800 uppercase tracking-wider font-heading"
-                    >
-                      Password <span className="text-rose-500">*</span>
-                    </label>
-                    <span className="text-[11px] text-slate-500 font-medium">Default: admin123 / referee123</span>
-                  </div>
+                  <label
+                    htmlFor="password"
+                    className="block text-[11px] font-bold text-slate-700 tracking-wide mb-1.5"
+                  >
+                    Password
+                  </label>
                   <div className="relative">
                     <input
                       id="password"
@@ -409,88 +354,119 @@ export default function UnifiedLoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-3 rounded-xl bg-slate-50/80 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15 transition-all font-medium"
+                      className="w-full pl-10 pr-10 py-3 rounded-xl bg-[#cdd2da]/55 border border-[#bcc2cb] text-slate-900 text-sm placeholder:text-slate-500 outline-none focus:bg-white focus:border-[#500c16] focus:ring-2 focus:ring-[#500c16]/15 transition-all font-medium"
                     />
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md p-0.5"
+                      className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer p-0.5 rounded"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                {/* Remember Me & Security Status */}
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
-                    />
-                    <span className="font-semibold text-xs">Remember this device</span>
-                  </label>
-
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Encrypted Session</span>
-                  </div>
+                {/* Helper text row */}
+                <div className="flex items-center justify-between text-[11px] pt-0.5">
+                  <span className="text-slate-500 font-medium">
+                    Players: email or mobile • Admins: username
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForgotNotice(
+                        'To reset credentials, please contact the Championship Director or Super Admin (admin@sportsportal.com).'
+                      )
+                    }
+                    className="font-bold text-[#6f111c] hover:underline cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
                 </div>
 
-                {/* Primary Submit Button */}
+                {/* Primary Pill Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#000f3f] to-[#0051d5] hover:from-[#00175a] hover:to-[#0042b3] active:from-[#000a28] active:to-[#003185] text-white font-black text-sm uppercase tracking-wider transition-all duration-150 shadow-lg shadow-blue-950/20 disabled:opacity-50 flex items-center justify-center gap-2.5 cursor-pointer mt-3 group"
+                  className="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#500c16] via-[#5a0e1a] to-[#6d1020] hover:from-[#620f1b] hover:to-[#781223] active:from-[#450a13] text-white font-extrabold text-sm tracking-wide transition-all shadow-md shadow-[#500c16]/25 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer group"
                 >
                   {loading ? (
                     <>
                       <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Authenticating Credentials...</span>
+                      <span>Signing in...</span>
                     </>
                   ) : (
                     <>
-                      <span>Sign In to Arena</span>
-                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      <LogIn className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                      <span>Sign In</span>
                     </>
                   )}
                 </button>
               </form>
+            )}
 
-              {/* Portal Roles Guide */}
-              <div className="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3 text-[11px] text-slate-500">
-                <div className="flex items-start gap-2">
-                  <Crown className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-slate-800 block">Administrators</strong>
-                    <span>Full match fixture control, rule tuning & point approvals.</span>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-slate-800 block">Referees</strong>
-                    <span>Officiate assigned games and submit match scores & awards.</span>
-                  </div>
-                </div>
+            {/* TAB 2: Quick Accounts (1-Click Fill for Easy Testing) */}
+            {activeTab === 'quick' && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-600 font-medium mb-2">
+                  Click any account below to instantly pre-fill credentials and sign in:
+                </p>
+
+                {QUICK_ACCOUNTS.map((acc) => (
+                  <button
+                    key={acc.id}
+                    type="button"
+                    onClick={() => selectQuickAccount(acc)}
+                    className="w-full p-3 rounded-xl border border-slate-300 bg-white hover:border-[#500c16] hover:bg-slate-50 transition-all text-left flex items-center justify-between group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl">{acc.icon}</span>
+                      <div>
+                        <div className="text-xs font-black text-slate-900 group-hover:text-[#500c16]">
+                          {acc.name}
+                        </div>
+                        <div className="text-[10px] text-slate-500 font-medium">{acc.sports}</div>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 group-hover:bg-[#500c16] group-hover:text-white transition-colors">
+                      {acc.roleLabel}
+                    </span>
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('signin')}
+                  className="w-full mt-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 text-center block"
+                >
+                  &larr; Back to standard form
+                </button>
               </div>
-            </div>
+            )}
+          </div>
+
+          {/* Under Card Links (Matching Reference UI) */}
+          <div className="w-full mt-6 px-2 flex items-center justify-between text-xs font-bold text-slate-600">
+            <Link
+              href="/"
+              className="hover:text-[#500c16] transition-colors flex items-center gap-1 group"
+            >
+              <span>Watch Cricket Live</span>
+              <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </Link>
+
+            <Link
+              href="/leaderboard"
+              className="hover:text-[#500c16] transition-colors flex items-center gap-1 group"
+            >
+              <span>Leaderboards</span>
+              <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </Link>
           </div>
         </div>
       </div>
-
-      {/* Bottom Footer */}
-      <footer className="h-12 shrink-0 z-20 border-t border-slate-200 bg-white/80 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between text-xs text-slate-500 font-medium">
-        <span>© 2026 NexCore Institute of Technology • APL Season 9 House Championship</span>
-        <div className="flex items-center gap-2 text-slate-700 font-bold">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Role-Based Authentication Engine</span>
-        </div>
-      </footer>
     </div>
   );
 }
