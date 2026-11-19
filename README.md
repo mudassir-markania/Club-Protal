@@ -61,7 +61,7 @@ Create the env files (the real ones are git-ignored):
 | File | Content |
 |------|---------|
 | `apps/backend/.env` | copy `apps/backend/.env.example`: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN` |
-| `apps/frontend/.env.local` | `BACKEND_URL=http://localhost:5000` |
+| `apps/frontend/.env.local` | `BACKEND_URL=http://localhost:5022` |
 
 ### 2. Seed the database (MongoDB Atlas, Mongoose)
 ```bash
@@ -72,16 +72,16 @@ npm run seed:roster               # houses, teams, sports and players
 
 ### 3. Run in development
 ```bash
-npm run dev                       # frontend on :3000 and backend on :5000 together (Turborepo)
+npm run dev                       # frontend on :3022 and backend on :5022 together (Turborepo)
 npm run dev:backend               # or one at a time
 npm run dev:frontend
 ```
-Open **[http://localhost:3000](http://localhost:3000)**. The API answers on `http://localhost:5000/api/health`.
+Open **[http://localhost:3022](http://localhost:3022)**. The API answers on `http://localhost:5022/api/health`.
 
 ### 4. Production build
 ```bash
 npm run build                     # frontend (.next) and backend (apps/backend/dist/server.js)
-npm run start                     # frontend :3000, backend :5000
+npm run start                     # frontend :3022, backend :5022
 npm run typecheck                 # all three packages
 ```
 

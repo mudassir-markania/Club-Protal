@@ -16,7 +16,7 @@ module.exports = {
     {
       name: 'house-system-frontend',
       cwd: './apps/frontend',
-      script: 'node_modules/next/dist/bin/next',
+      script: '../../node_modules/next/dist/bin/next',
       args: 'start -p 3022',
       instances: 1,
       autorestart: true,

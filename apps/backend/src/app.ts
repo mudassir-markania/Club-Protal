@@ -8,7 +8,7 @@ const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 export function createApp() {
   const app = express();
 
-  const origins = (process.env.CORS_ORIGIN || 'http://localhost:3000').split(',').map((s) => s.trim());
+  const origins = (process.env.CORS_ORIGIN || 'http://localhost:3022').split(',').map((s) => s.trim());
   app.use(cors({ origin: origins, credentials: true }));
   app.use(express.json({ limit: '10mb' })); // CSV imports send whole rosters as JSON
 

@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { createApp } from './app';
 import { connectToDatabase } from './lib/mongodb';
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5022;
 
 async function start() {
   try {

@@ -4,9 +4,9 @@
   "private": true,
   "description": "Club Portal web app (Next.js). All data comes from the backend API.",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3022",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start -p 3022",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
