@@ -12,6 +12,7 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
+  Trophy,
   ArrowRight,
   Crown,
   Sparkles,
@@ -143,10 +144,21 @@ export default function UnifiedOfficialLoginPage() {
           </span>
         </div>
 
-        {/* Center: Prestigious Typography */}
+        {/* Center: Prestigious Emblem & Typography */}
         <div className="relative z-10 my-auto py-8 lg:py-0 flex flex-col items-center text-center">
+          {/* Official APL Season 9 Trophy Logo */}
+          <div className="relative mb-5 flex flex-col items-center">
+            <div className="w-36 h-36 sm:w-44 sm:h-44 lg:w-48 lg:h-48 relative flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="APL Season 9 Official Trophy Logo"
+                className="w-full h-full object-contain filter drop-shadow-[0_12px_30px_rgba(245,158,11,0.4)]"
+              />
+            </div>
+          </div>
+
           {/* Heading Block */}
-          <div className="space-y-3 max-w-md">
+          <div className="space-y-2 max-w-md">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.35em] text-slate-400 block font-heading">
               CHAMPIONSHIP ACCESS GATEWAY
             </span>
