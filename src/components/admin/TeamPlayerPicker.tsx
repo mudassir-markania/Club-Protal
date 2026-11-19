@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { ClubBadge } from '@/components/ui/icons';
 import SearchableSelect, { SelectOption } from '@/components/ui/SearchableSelect';
 
@@ -17,6 +17,7 @@ export interface PickerProps {
   slotGenders?: (string | null)[];
   slotLabels?: string[];
   sportLabel?: string;
+  minSlotsRequired?: number;
 }
 
 const selectCls =
@@ -37,6 +38,7 @@ export default function TeamPlayerPicker({
   slotGenders,
   slotLabels,
   sportLabel = 'this sport',
+  minSlotsRequired,
 }: PickerProps) {
   const [byClub, setByClub] = useState<Record<string, any[]>>({});
 
@@ -101,11 +103,22 @@ export default function TeamPlayerPicker({
 
       <div className="space-y-2">
         <label className="block font-bold text-slate-700 uppercase tracking-wider text-[10px]">
-          Players ({slotCount}) <span className="text-red-500">*</span>
+          {minSlotsRequired !== undefined && minSlotsRequired < slotCount ? (
+            <>
+              Players ({minSlotsRequired} to {slotCount} players) <span className="text-red-500">*</span>{' '}
+              <span className="normal-case font-medium text-slate-400">(4 players not mandatory)</span>
+            </>
+          ) : (
+            <>
+              Players ({slotCount}) <span className="text-red-500">*</span>
+            </>
+          )}
         </label>
         {slots.slice(0, slotCount).map((value, i) => {
           const gender = slotGenders?.[i] || null;
           const disabled = clubIds.length === 0 || !sportId;
+          const isOptional = minSlotsRequired !== undefined && i >= minSlotsRequired;
+          const defaultPlaceholder = isOptional ? `Player ${i + 1} (Optional)` : `Player ${i + 1}`;
           const options: SelectOption[] = selectedClubs.flatMap((c) =>
             playersOf(c.id)
               .filter((p) => !gender || String(p.gender || '').toUpperCase() === gender)
@@ -118,19 +131,32 @@ export default function TeamPlayerPicker({
               }))
           );
           return (
-            <SearchableSelect
-              key={i}
-              disabled={disabled}
-              value={value}
-              onChange={(v) => setSlot(i, v)}
-              options={options}
-              placeholder={disabled ? 'Select sport and at least one club first' : slotLabels?.[i] || `Player ${i + 1}`}
-              searchPlaceholder="Search player name…"
-              emptyText="No players match your search"
-            />
+            <div key={i} className="flex items-center gap-1.5">
+              <div className="flex-1">
+                <SearchableSelect
+                  disabled={disabled}
+                  value={value}
+                  onChange={(v) => setSlot(i, v)}
+                  options={options}
+                  placeholder={disabled ? 'Select sport and at least one club first' : slotLabels?.[i] || defaultPlaceholder}
+                  searchPlaceholder="Search player name…"
+                  emptyText="No players match your search"
+                />
+              </div>
+              {value && (
+                <button
+                  type="button"
+                  onClick={() => setSlot(i, '')}
+                  title="Clear player slot"
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           );
         })}
-        {clubIds.length > 0 && sportId && allEligible.length < slotCount && (
+        {clubIds.length > 0 && sportId && allEligible.length < (minSlotsRequired ?? slotCount) && (
           <p className="text-[11px] text-amber-700 font-medium">
             Only {allEligible.length} player(s) in the selected clubs are registered for {sportLabel}. Select more clubs or
             register more players.

@@ -60,15 +60,16 @@ export default function BgmiTeamFormModal({ open, onClose, onSaved, clubs, bgmiS
     setError(null);
     if (!name.trim()) return setError('Enter a team name.');
     if (clubIds.length === 0) return setError('Select at least one club.');
-    if (slots.some((s) => !s)) return setError(`Select all ${BGMI_TEAM_SIZE} players.`);
-    if (new Set(slots).size !== slots.length) return setError('A player cannot be added twice.');
+    const activePlayerIds = slots.filter(Boolean);
+    if (activePlayerIds.length === 0) return setError('Select at least 1 player for the BGMI team.');
+    if (new Set(activePlayerIds).size !== activePlayerIds.length) return setError('A player cannot be added twice.');
 
     setSaving(true);
     try {
       const res = await fetch(editing ? `/api/bgmi-teams/${editing.id}` : '/api/bgmi-teams', {
         method: editing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), playerIds: slots }),
+        body: JSON.stringify({ name: name.trim(), playerIds: activePlayerIds }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save team');
@@ -117,11 +118,18 @@ export default function BgmiTeamFormModal({ open, onClose, onSaved, clubs, bgmiS
             clubs={clubs}
             sportId={bgmiSportId}
             slotCount={BGMI_TEAM_SIZE}
+            minSlotsRequired={1}
             slots={slots}
             onSlotsChange={setSlots}
             clubIds={clubIds}
             onClubIdsChange={setClubIds}
             sportLabel="BGMI"
+            slotLabels={[
+              'Player 1 (Required)',
+              'Player 2 (Optional)',
+              'Player 3 (Optional)',
+              'Player 4 (Optional)',
+            ]}
           />
         </div>
         <div className="p-3 border-t border-slate-100 flex justify-end gap-2">

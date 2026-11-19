@@ -594,7 +594,12 @@ export default function ScheduleMatchModal({
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-extrabold text-xs text-navy-950 truncate">{t.name}</span>
+                    <span className="font-extrabold text-xs text-navy-950 truncate">
+                      {t.name}{' '}
+                      <span className="text-[10px] font-medium text-slate-400">
+                        ({(t.players || []).length} player{(t.players || []).length !== 1 ? 's' : ''})
+                      </span>
+                    </span>
                     {isSel ? (
                       <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3" />

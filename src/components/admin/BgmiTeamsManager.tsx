@@ -85,7 +85,7 @@ export default function BgmiTeamsManager({ clubs, search = '' }: Props) {
         <div>
           <span className="text-xs font-bold text-navy-950 uppercase tracking-wider block">BGMI Teams</span>
           <span className="text-[11px] text-slate-500">
-            Each team is {BGMI_TEAM_SIZE} players, who may come from different clubs. Teams are scheduled into BGMI matches as a unit.
+            Teams can have 1 to {BGMI_TEAM_SIZE} players (4 players are not mandatory) and may include players from different clubs. Teams are scheduled into BGMI matches as a unit.
           </span>
         </div>
         <button
@@ -118,7 +118,12 @@ export default function BgmiTeamsManager({ clubs, search = '' }: Props) {
               <div key={t.id} className="p-3.5 rounded-xl border border-slate-200 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <span className="font-extrabold text-sm text-navy-950 block truncate">{t.name}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-extrabold text-sm text-navy-950 block truncate">{t.name}</span>
+                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                        {(t.players || []).length} player{(t.players || []).length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
                     <span className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] font-bold text-blue-700">
                       {(t.clubs?.length ? t.clubs : t.club ? [t.club] : []).map((c: any) => (
                         <span key={c.id} className="inline-flex items-center gap-1">

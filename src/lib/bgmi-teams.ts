@@ -15,10 +15,16 @@ export async function validateBgmiTeam(name: unknown, playerIds: unknown, exclud
   const fail = (error: string): ValidatedTeam => ({ error, clubIds: [] });
 
   if (typeof name !== 'string' || !name.trim()) return fail('Team name is required');
-  if (!Array.isArray(playerIds) || playerIds.filter(Boolean).length !== BGMI_TEAM_SIZE) {
-    return fail(`A BGMI team needs exactly ${BGMI_TEAM_SIZE} players`);
+  if (!Array.isArray(playerIds)) {
+    return fail('Player list is required');
   }
   const ids = playerIds.filter(Boolean) as string[];
+  if (ids.length < 1) {
+    return fail('A BGMI team requires at least 1 player');
+  }
+  if (ids.length > BGMI_TEAM_SIZE) {
+    return fail(`A BGMI team cannot exceed ${BGMI_TEAM_SIZE} players`);
+  }
   if (new Set(ids).size !== ids.length) return fail('A player cannot be added to the team twice');
 
   const bgmi = await findSportByName('BGMI');
