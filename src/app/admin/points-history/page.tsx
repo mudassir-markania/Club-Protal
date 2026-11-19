@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
 import {
   History,
@@ -29,6 +30,27 @@ export default function PointsHistoryPage() {
   const [sportFilter, setSportFilter] = useState('');
   const [search, setSearch] = useState('');
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (selectedTx) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedTx(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedTx]);
 
   useEffect(() => {
     fetchClubsAndSports();
@@ -74,9 +96,9 @@ export default function PointsHistoryPage() {
     const q = search.toLowerCase();
     const clubName = item.club?.name?.toLowerCase() || '';
     const sportName = item.sport?.name?.toLowerCase() || '';
-    const matchCode = item.match?.matchCode?.toLowerCase() || '';
+    const round = item.match?.round?.toLowerCase() || '';
     const reason = item.reason?.toLowerCase() || '';
-    return clubName.includes(q) || sportName.includes(q) || matchCode.includes(q) || reason.includes(q);
+    return clubName.includes(q) || sportName.includes(q) || round.includes(q) || reason.includes(q);
   });
 
   const totalPointsAwarded = filteredHistory.reduce((acc, h) => acc + (h.points || 0), 0);
@@ -147,7 +169,7 @@ export default function PointsHistoryPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search club, sport, match code, or reason..."
+                placeholder="Search by house, sport, stage, or description..."
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-xs"
               />
             </div>
@@ -206,7 +228,7 @@ export default function PointsHistoryPage() {
                   <th className="py-3 px-4">Timestamp</th>
                   <th className="py-3 px-4">House (Club)</th>
                   <th className="py-3 px-4">Sport & Discipline</th>
-                  <th className="py-3 px-4">Match / Event</th>
+                  <th className="py-3 px-4">Stage / Event</th>
                   <th className="py-3 px-4">Description / Calculation</th>
                   <th className="py-3 px-4 text-right">Points Credited</th>
                   <th className="py-3 px-4 text-center">Inspect</th>
@@ -238,10 +260,10 @@ export default function PointsHistoryPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="font-mono font-bold text-navy-950">
-                          {item.match?.matchCode || 'EVENT'}
-                        </div>
-                        <div className="text-[10px] text-slate-400">{item.match?.round}</div>
+                        <span className="font-bold text-slate-900 block text-xs">
+                          {item.match?.round || 'Championship Match'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium">Official Result</span>
                       </td>
                       <td className="py-3 px-4 max-w-xs truncate text-slate-600 font-medium">
                         {item.reason || 'Unique-club points distribution'}
@@ -267,10 +289,15 @@ export default function PointsHistoryPage() {
         </div>
       </div>
 
-      {/* Transaction Inspection Modal */}
-      {selectedTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      {/* Transaction Inspection Modal (Portalled to document.body) */}
+      {mounted && selectedTx && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-navy-950/80 backdrop-blur-sm overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedTx(null);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-auto animate-in fade-in duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-500" />
@@ -280,7 +307,7 @@ export default function PointsHistoryPage() {
               </div>
               <button
                 onClick={() => setSelectedTx(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -306,8 +333,8 @@ export default function PointsHistoryPage() {
                   <span className="font-bold text-slate-800">{selectedTx.sport?.name}</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-slate-400 block font-semibold">Match Code:</span>
-                  <span className="font-mono font-bold text-slate-800">{selectedTx.match?.matchCode || 'N/A'}</span>
+                  <span className="text-slate-400 block font-semibold">Stage / Event:</span>
+                  <span className="font-bold text-slate-800">{selectedTx.match?.round || 'Championship Match'}</span>
                 </div>
               </div>
 
@@ -355,7 +382,8 @@ export default function PointsHistoryPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </AdminLayout>
   );
