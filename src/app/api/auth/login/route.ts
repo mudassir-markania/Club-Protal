@@ -18,12 +18,8 @@ export async function POST(req: Request) {
     const searchEmails = [cleanInput];
     if (['admin', 'director', 'superadmin', 'administrator'].includes(cleanInput)) {
       searchEmails.push('admin@sportsportal.com');
-    } else if (['marcus', 'ref.marcus', 'referee.marcus'].includes(cleanInput)) {
-      searchEmails.push('ref.marcus@sportsportal.com');
-    } else if (['sarah', 'ref.sarah', 'referee.sarah'].includes(cleanInput)) {
-      searchEmails.push('ref.sarah@sportsportal.com');
-    } else if (['david', 'ref.david', 'referee.david'].includes(cleanInput)) {
-      searchEmails.push('ref.david@sportsportal.com');
+    } else if (['marcus', 'ref.marcus', 'referee.marcus', 'marcus@gmail.com'].includes(cleanInput)) {
+      searchEmails.push('marcus@gmail.com');
     }
 
     const user = await db.user.findFirst({

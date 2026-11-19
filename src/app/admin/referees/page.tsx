@@ -71,7 +71,7 @@ export default function RefereesPage() {
       refereeCode: `REF-${Math.floor(100 + Math.random() * 900)}`,
       email: '',
       phone: '',
-      password: 'referee123',
+      password: 'marcus123',
       availability: 'AVAILABLE',
       status: 'ACTIVE',
       sportIds: [],

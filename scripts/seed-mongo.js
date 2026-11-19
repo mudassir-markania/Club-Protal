@@ -102,19 +102,40 @@ async function seed() {
     await Venue.findOneAndUpdate({ name: 'Esports Center' }, { _id: 'ven-2', name: 'Esports Center', location: 'Tech Building, 3rd Floor', capacity: 300, status: 'ACTIVE' }, { upsert: true, new: true }),
   ];
 
-  console.log('Seeding Users & Referees...');
+  console.log('Seeding Users & Single Official Referee (Marcus)...');
   const adminPassword = await bcrypt.hash('admin123', 10);
-  const refereePassword = await bcrypt.hash('referee123', 10);
+  const marcusPassword = await bcrypt.hash('marcus123', 10);
 
-  await User.findOneAndUpdate({ email: 'admin@sportsportal.com' }, { _id: 'user-admin', email: 'admin@sportsportal.com', passwordHash: adminPassword, name: 'Championship Director', roleId: superAdminRole._id, status: 'ACTIVE' }, { upsert: true });
+  // Clean out legacy referees
+  await Referee.deleteMany({});
+  await RefereeSport.deleteMany({});
+  await User.deleteMany({ roleId: refereeRole._id });
 
-  const ref1 = await Referee.findOneAndUpdate({ refereeCode: 'REF-001' }, { _id: 'ref-001', refereeCode: 'REF-001', name: 'Marcus Sterling', email: 'ref.marcus@sportsportal.com', phone: '+1 555-0192', availability: 'AVAILABLE', status: 'ACTIVE' }, { upsert: true, new: true });
-  const ref2 = await Referee.findOneAndUpdate({ refereeCode: 'REF-002' }, { _id: 'ref-002', refereeCode: 'REF-002', name: 'Sarah Jenkins', email: 'ref.sarah@sportsportal.com', phone: '+1 555-0193', availability: 'AVAILABLE', status: 'ACTIVE' }, { upsert: true, new: true });
-  const ref3 = await Referee.findOneAndUpdate({ refereeCode: 'REF-003' }, { _id: 'ref-003', refereeCode: 'REF-003', name: 'David Okafor', email: 'ref.david@sportsportal.com', phone: '+1 555-0194', availability: 'AVAILABLE', status: 'ACTIVE' }, { upsert: true, new: true });
+  await User.findOneAndUpdate(
+    { email: 'admin@sportsportal.com' },
+    { _id: 'user-admin', email: 'admin@sportsportal.com', passwordHash: adminPassword, name: 'Championship Director', roleId: superAdminRole._id, status: 'ACTIVE' },
+    { upsert: true }
+  );
 
-  await User.findOneAndUpdate({ email: 'ref.marcus@sportsportal.com' }, { _id: 'user-ref-marcus', email: 'ref.marcus@sportsportal.com', passwordHash: refereePassword, name: 'Marcus Sterling', roleId: refereeRole._id, refereeId: ref1._id, status: 'ACTIVE' }, { upsert: true });
-  await User.findOneAndUpdate({ email: 'ref.sarah@sportsportal.com' }, { _id: 'user-ref-sarah', email: 'ref.sarah@sportsportal.com', passwordHash: refereePassword, name: 'Sarah Jenkins', roleId: refereeRole._id, refereeId: ref2._id, status: 'ACTIVE' }, { upsert: true });
-  await User.findOneAndUpdate({ email: 'ref.david@sportsportal.com' }, { _id: 'user-ref-david', email: 'ref.david@sportsportal.com', passwordHash: refereePassword, name: 'David Okafor', roleId: refereeRole._id, refereeId: ref3._id, status: 'ACTIVE' }, { upsert: true });
+  const ref1 = await Referee.findOneAndUpdate(
+    { email: 'marcus@gmail.com' },
+    { _id: 'ref-001', refereeCode: 'REF-001', name: 'Marcus Sterling', email: 'marcus@gmail.com', phone: '+1 555-0192', availability: 'AVAILABLE', status: 'ACTIVE' },
+    { upsert: true, new: true }
+  );
+
+  await User.findOneAndUpdate(
+    { email: 'marcus@gmail.com' },
+    { _id: 'user-ref-marcus', email: 'marcus@gmail.com', passwordHash: marcusPassword, name: 'Marcus Sterling', roleId: refereeRole._id, refereeId: ref1._id, status: 'ACTIVE' },
+    { upsert: true }
+  );
+
+  for (const s of sports) {
+    await RefereeSport.findOneAndUpdate(
+      { refereeId: ref1._id, sportId: s._id },
+      { _id: `rs-${ref1._id}-${s._id}`, refereeId: ref1._id, sportId: s._id },
+      { upsert: true }
+    );
+  }
 
   // Athletes
   const p1 = await Player.findOneAndUpdate({ registrationId: 'REG-MAV-101' }, { _id: 'ply-1', registrationId: 'REG-MAV-101', name: 'Alex Rivera', email: 'alex.rivera@housechampionship.com', clubId: 'club-mav', status: 'APPROVED' }, { upsert: true, new: true });

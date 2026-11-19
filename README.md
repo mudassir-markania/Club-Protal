@@ -59,9 +59,7 @@ The portal features a **1-Click Quick Demo Login** on the login page (`/login`) 
 | Role | Email | Password | Access / Capabilities |
 |------|-------|----------|-----------------------|
 | **Super Admin** | `admin@sportsportal.com` | `admin123` | Complete Tournament Oversight, Approvals, Leaderboards, Settings |
-| **Referee 1 (Marcus)** | `ref.marcus@sportsportal.com` | `referee123` | Code: `REF-001`, Match result submission, points calculation |
-| **Referee 2 (Sarah)** | `ref.sarah@sportsportal.com` | `referee123` | Code: `REF-002`, Match result submission, points calculation |
-| **Referee 3 (David)** | `ref.david@sportsportal.com` | `referee123` | Code: `REF-003`, Match result submission, points calculation |
+| **Official Referee (Marcus)** | `marcus@gmail.com` | `marcus123` | Code: `REF-001`, Match result submission & officiating across all sports |
 
 ---
 

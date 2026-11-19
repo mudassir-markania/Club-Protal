@@ -64,7 +64,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           setUser({
             id: 'ref-marcus-default',
             name: 'Marcus Sterling',
-            email: 'ref.marcus@sportsportal.com',
+            email: 'marcus@gmail.com',
             role: 'REFEREE',
             refereeId: 'ca701ecb-f512-45a3-b651-600b4d45f965',
             referee: { refereeCode: 'REF-001', name: 'Marcus Sterling' },
@@ -83,7 +83,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         setUser({
           id: 'ref-marcus-default',
           name: 'Marcus Sterling',
-          email: 'ref.marcus@sportsportal.com',
+          email: 'marcus@gmail.com',
           role: 'REFEREE',
           refereeId: 'ca701ecb-f512-45a3-b651-600b4d45f965',
           referee: { refereeCode: 'REF-001', name: 'Marcus Sterling' },
@@ -118,7 +118,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     try {
       await fetch('/api/notifications', { method: 'PUT' });
       setUnreadCount(0);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const switchRole = async (roleType: 'ADMIN' | 'REFEREE', customEmail?: string) => {
@@ -126,8 +126,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       const email =
         roleType === 'ADMIN'
           ? 'admin@sportsportal.com'
-          : customEmail || 'ref.marcus@sportsportal.com';
-      const password = roleType === 'ADMIN' ? 'admin123' : 'referee123';
+          : customEmail || 'marcus@gmail.com';
+      const password = roleType === 'ADMIN' ? 'admin123' : 'marcus123';
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -188,9 +188,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-navy-900 text-white flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-navy-900 text-white flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Brand Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-navy-800 bg-navy-950/60">
@@ -239,11 +238,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
                     ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30 font-semibold'
                     : 'text-navy-300 hover:text-white hover:bg-navy-800/80'
-                }`}
+                  }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-navy-400'}`} />
                 <span className="truncate">{item.name}</span>
@@ -261,21 +259,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => switchRole('ADMIN')}
-                className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border text-center transition-all ${
-                  isAdmin
+                className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border text-center transition-all ${isAdmin
                     ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
                     : 'bg-navy-900 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-800'
-                }`}
+                  }`}
               >
                 Admin Panel
               </button>
               <button
                 onClick={() => switchRole('REFEREE')}
-                className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border text-center transition-all ${
-                  isRefereeMode
+                className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border text-center transition-all ${isRefereeMode
                     ? 'bg-amber-600 text-white border-amber-500 shadow-xs'
                     : 'bg-navy-900 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-800'
-                }`}
+                  }`}
               >
                 Referee Panel
               </button>
@@ -283,42 +279,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {isRefereeMode && (
               <div className="mt-2 pt-2 border-t border-navy-800/80">
                 <span className="text-[9px] text-navy-400 uppercase tracking-wider block mb-1">
-                  Active Official Persona:
+                  Active Official:
                 </span>
-                <div className="grid grid-cols-3 gap-1 text-[10px]">
-                  <button
-                    onClick={() => switchRole('REFEREE', 'ref.marcus@sportsportal.com')}
-                    title="Football & Cricket (REF-001)"
-                    className={`py-1 px-1 rounded text-center truncate font-medium border ${
-                      user?.email === 'ref.marcus@sportsportal.com'
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
-                        : 'bg-navy-900/60 text-navy-400 border-navy-800 hover:text-navy-200'
-                    }`}
-                  >
-                    Marcus
-                  </button>
-                  <button
-                    onClick={() => switchRole('REFEREE', 'ref.sarah@sportsportal.com')}
-                    title="Badminton & TT (REF-002)"
-                    className={`py-1 px-1 rounded text-center truncate font-medium border ${
-                      user?.email === 'ref.sarah@sportsportal.com'
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
-                        : 'bg-navy-900/60 text-navy-400 border-navy-800 hover:text-navy-200'
-                    }`}
-                  >
-                    Sarah
-                  </button>
-                  <button
-                    onClick={() => switchRole('REFEREE', 'ref.david@sportsportal.com')}
-                    title="Basketball & Football (REF-003)"
-                    className={`py-1 px-1 rounded text-center truncate font-medium border ${
-                      user?.email === 'ref.david@sportsportal.com'
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
-                        : 'bg-navy-900/60 text-navy-400 border-navy-800 hover:text-navy-200'
-                    }`}
-                  >
-                    David
-                  </button>
+                <div className="py-1 px-2 rounded text-left truncate font-medium border bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold text-[10px] flex items-center gap-1.5">
+                  <UserCheck className="w-3 h-3 text-amber-400" />
+                  <span>Marcus (marcus@gmail.com)</span>
                 </div>
               </div>
             )}

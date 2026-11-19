@@ -66,7 +66,7 @@ export default function RefereeLoginPage() {
 
   const quickFillRef = (refEmail: string) => {
     setEmail(refEmail);
-    setPassword('referee123');
+    setPassword('marcus123');
     setError(null);
   };
 
@@ -175,7 +175,7 @@ export default function RefereeLoginPage() {
                     autoCorrect="off"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ref.marcus@sportsportal.com or marcus"
+                    placeholder="marcus@gmail.com or marcus"
                     className="w-full pl-11 pr-4 py-3.5 bg-[#F0F4F9]/75 border border-slate-200 rounded-2xl text-sm text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition"
                   />
                 </div>
@@ -225,29 +225,24 @@ export default function RefereeLoginPage() {
                 )}
               </button>
 
-              {/* Quick Fill Official Personas */}
+              {/* Quick Fill Official Persona */}
               <div className="pt-4 border-t border-slate-100">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2 text-center">
-                  Select Certified Official:
+                  Official Match Referee:
                 </span>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => quickFillRef('ref.marcus@sportsportal.com')}
-                    className="p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 text-left transition font-semibold text-slate-800 flex items-center justify-between"
-                  >
-                    <span className="truncate">Ref Marcus</span>
-                    <FootballIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => quickFillRef('ref.sarah@sportsportal.com')}
-                    className="p-2 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-left transition font-semibold text-slate-800 flex items-center justify-between"
-                  >
-                    <span className="truncate">Ref Sarah</span>
-                    <BadmintonIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => quickFillRef('marcus@gmail.com')}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 text-left transition font-semibold text-slate-800 flex items-center justify-between text-xs cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Marcus (marcus@gmail.com)</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+                    marcus123
+                  </span>
+                </button>
               </div>
             </form>
           </div>

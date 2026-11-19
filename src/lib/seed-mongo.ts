@@ -1,6 +1,6 @@
 import { db, connectToDatabase } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import { seedOfficialScoringRules } from './sports-rules';
+import { seedOfficialScoringRules } from './sports-rules-server';
 
 export async function seedMongoDatabase() {
   console.log('Connecting to MongoDB for seeding...');
@@ -187,9 +187,14 @@ export async function seedMongoDatabase() {
     venues.push(ven);
   }
 
-  console.log('6. Seeding Users & Referees...');
+  console.log('6. Seeding Users & Single Official Referee (Marcus)...');
   const adminPassword = await bcrypt.hash('admin123', 10);
-  const refereePassword = await bcrypt.hash('referee123', 10);
+  const marcusPassword = await bcrypt.hash('marcus123', 10);
+
+  // Remove any legacy referees or referee users to ensure only ONE referee exists
+  if (db.refereeSport) await db.refereeSport.deleteMany({});
+  if (db.referee) await db.referee.deleteMany({});
+  if (db.user) await db.user.deleteMany({ roleId: refereeRole.id });
 
   await db.user.upsert({
     where: { email: 'admin@sportsportal.com' },
@@ -203,69 +208,51 @@ export async function seedMongoDatabase() {
     },
   });
 
-  const refereesData = [
-    {
+  const marcusRef = await db.referee.upsert({
+    where: { email: 'marcus@gmail.com' },
+    update: {
+      name: 'Marcus Sterling',
+      refereeCode: 'REF-001',
+      phone: '+1 555-0192',
+      availability: 'AVAILABLE',
+      status: 'ACTIVE',
+    },
+    create: {
       refereeCode: 'REF-001',
       name: 'Marcus Sterling',
-      email: 'ref.marcus@sportsportal.com',
+      email: 'marcus@gmail.com',
       phone: '+1 555-0192',
-      sportNames: ['BGMI', 'Cricket', 'Football'],
+      availability: 'AVAILABLE',
+      status: 'ACTIVE',
     },
-    {
-      refereeCode: 'REF-002',
-      name: 'Sarah Jenkins',
-      email: 'ref.sarah@sportsportal.com',
-      phone: '+1 555-0193',
-      sportNames: ['Badminton', 'Carrom'],
-    },
-    {
-      refereeCode: 'REF-003',
-      name: 'David Okafor',
-      email: 'ref.david@sportsportal.com',
-      phone: '+1 555-0194',
-      sportNames: ['Chess', 'BGMI', 'Football'],
-    },
-  ];
+  });
 
-  const referees: any[] = [];
-  for (const r of refereesData) {
-    const ref = await db.referee.upsert({
-      where: { refereeCode: r.refereeCode },
-      update: { name: r.name, email: r.email },
-      create: {
-        refereeCode: r.refereeCode,
-        name: r.name,
-        email: r.email,
-        phone: r.phone,
-        availability: 'AVAILABLE',
-        status: 'ACTIVE',
-      },
+  await db.user.upsert({
+    where: { email: 'marcus@gmail.com' },
+    update: {
+      refereeId: marcusRef.id,
+      passwordHash: marcusPassword,
+      name: 'Marcus Sterling',
+      roleId: refereeRole.id,
+      status: 'ACTIVE',
+    },
+    create: {
+      email: 'marcus@gmail.com',
+      passwordHash: marcusPassword,
+      name: 'Marcus Sterling',
+      roleId: refereeRole.id,
+      refereeId: marcusRef.id,
+      status: 'ACTIVE',
+    },
+  });
+
+  // Assign Marcus as referee across all championship sports
+  for (const sp of sports) {
+    await db.refereeSport.upsert({
+      where: { refereeId_sportId: { refereeId: marcusRef.id, sportId: sp.id } },
+      update: {},
+      create: { refereeId: marcusRef.id, sportId: sp.id },
     });
-    referees.push(ref);
-
-    await db.user.upsert({
-      where: { email: r.email },
-      update: { refereeId: ref.id, passwordHash: refereePassword },
-      create: {
-        email: r.email,
-        passwordHash: refereePassword,
-        name: r.name,
-        roleId: refereeRole.id,
-        refereeId: ref.id,
-        status: 'ACTIVE',
-      },
-    });
-
-    for (const sName of r.sportNames) {
-      const sp = sports.find((s) => s.name === sName);
-      if (sp) {
-        await db.refereeSport.upsert({
-          where: { refereeId_sportId: { refereeId: ref.id, sportId: sp.id } },
-          update: {},
-          create: { refereeId: ref.id, sportId: sp.id },
-        });
-      }
-    }
   }
 
   console.log('7. Seeding 10 Official House Athletes (Captains & Vice Captains)...');

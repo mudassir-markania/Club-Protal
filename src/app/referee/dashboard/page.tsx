@@ -80,7 +80,7 @@ export default function RefereeDashboardPage() {
         const loginRes = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'ref.marcus@sportsportal.com', password: 'referee123' }),
+          body: JSON.stringify({ email: 'marcus@gmail.com', password: 'marcus123' }),
         });
         if (loginRes.ok) {
           const loginData = await loginRes.json();
@@ -110,7 +110,7 @@ export default function RefereeDashboardPage() {
       const loginRes = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: 'referee123' }),
+        body: JSON.stringify({ email, password: 'marcus123' }),
       });
       if (loginRes.ok) {
         const loginData = await loginRes.json();
@@ -130,7 +130,7 @@ export default function RefereeDashboardPage() {
   };
 
   const assignedSports = user?.referee?.sports || [];
-  
+
   // Categorize matches
   const awaitingSubmission = matches.filter((m) => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS');
   const upcomingMatches = matches.filter((m) => m.status === 'SCHEDULED');
@@ -208,45 +208,13 @@ export default function RefereeDashboardPage() {
                   Inter-club House Championship result recording portal. Enter final scores and positions for assigned competition fixtures. Points are automatically distributed equally among unique participating clubs.
                 </p>
 
-                {/* Persona Switcher Buttons for Seamless Testing */}
+                {/* Active Official Badge */}
                 <div className="mt-4 pt-3 border-t border-navy-800 flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] text-navy-400 font-semibold">Switch Official:</span>
-                  <button
-                    type="button"
-                    onClick={() => switchRefereePersona('ref.marcus@sportsportal.com')}
-                    disabled={refreshing}
-                    className={`text-xs px-3 py-1 rounded-lg font-medium transition border flex items-center gap-1.5 ${
-                      user?.email === 'ref.marcus@sportsportal.com'
-                        ? 'bg-amber-500 text-navy-950 border-amber-400 font-bold shadow-xs'
-                        : 'bg-navy-800/80 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-700'
-                    }`}
-                  >
-                    Marcus (BGMI / Cricket / Football)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => switchRefereePersona('ref.sarah@sportsportal.com')}
-                    disabled={refreshing}
-                    className={`text-xs px-3 py-1 rounded-lg font-medium transition border flex items-center gap-1.5 ${
-                      user?.email === 'ref.sarah@sportsportal.com'
-                        ? 'bg-amber-500 text-navy-950 border-amber-400 font-bold shadow-xs'
-                        : 'bg-navy-800/80 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-700'
-                    }`}
-                  >
-                    Sarah (Badminton / Carrom)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => switchRefereePersona('ref.david@sportsportal.com')}
-                    disabled={refreshing}
-                    className={`text-xs px-3 py-1 rounded-lg font-medium transition border flex items-center gap-1.5 ${
-                      user?.email === 'ref.david@sportsportal.com'
-                        ? 'bg-amber-500 text-navy-950 border-amber-400 font-bold shadow-xs'
-                        : 'bg-navy-800/80 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-700'
-                    }`}
-                  >
-                    David (Chess / BGMI / Football)
-                  </button>
+                  <span className="text-[11px] text-navy-400 font-semibold">Active Official:</span>
+                  <div className="text-xs px-3 py-1 rounded-lg font-bold border border-amber-400 bg-amber-500 text-navy-950 flex items-center gap-1.5 shadow-xs">
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>Marcus (marcus@gmail.com • All Sports)</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -333,11 +301,10 @@ export default function RefereeDashboardPage() {
               <button
                 type="button"
                 onClick={() => setFilterOnlyMine(!filterOnlyMine)}
-                className={`text-xs px-3 py-2 rounded-lg font-bold border transition flex items-center gap-1.5 shrink-0 ${
-                  filterOnlyMine
-                    ? 'bg-navy-950 text-white border-navy-950 shadow-2xs'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                }`}
+                className={`text-xs px-3 py-2 rounded-lg font-bold border transition flex items-center gap-1.5 shrink-0 ${filterOnlyMine
+                  ? 'bg-navy-950 text-white border-navy-950 shadow-2xs'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
                 title={filterOnlyMine ? 'Showing only matches assigned to you' : 'Showing all championship events'}
               >
                 <UserCheck className="w-3.5 h-3.5" />
@@ -350,44 +317,40 @@ export default function RefereeDashboardPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('ALL')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${
-                  activeTab === 'ALL'
-                    ? 'bg-navy-900 text-white shadow-2xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'ALL'
+                  ? 'bg-navy-900 text-white shadow-2xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
               >
                 All ({matches.length})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('AWAITING')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${
-                  activeTab === 'AWAITING'
-                    ? 'bg-amber-600 text-white shadow-2xs'
-                    : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                }`}
+                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'AWAITING'
+                  ? 'bg-amber-600 text-white shadow-2xs'
+                  : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                  }`}
               >
                 Awaiting Submission ({awaitingSubmission.length})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('SUBMITTED')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${
-                  activeTab === 'SUBMITTED'
-                    ? 'bg-purple-600 text-white shadow-2xs'
-                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                }`}
+                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'SUBMITTED'
+                  ? 'bg-purple-600 text-white shadow-2xs'
+                  : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  }`}
               >
                 Under Review ({pendingApproval.length})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('COMPLETED')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${
-                  activeTab === 'COMPLETED'
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                }`}
+                className={`px-3 py-1.5 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'COMPLETED'
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  }`}
               >
                 Approved ({completedMatches.length})
               </button>
@@ -403,11 +366,10 @@ export default function RefereeDashboardPage() {
               <button
                 key={s.value}
                 onClick={() => setSportFilter(s.value)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
-                  sportFilter === s.value
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 hover:border-slate-300'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${sportFilter === s.value
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 hover:border-slate-300'
+                  }`}
               >
                 {s.value && <SportIcon name={s.value} className="w-3.5 h-3.5" />}
                 <span>{s.label}</span>
@@ -469,19 +431,18 @@ export default function RefereeDashboardPage() {
                         </div>
 
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            isCompleted
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : isSubmitted
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isCompleted
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : isSubmitted
                               ? 'bg-purple-50 text-purple-700 border border-purple-200'
                               : 'bg-amber-50 text-amber-700 border border-amber-200'
-                          }`}
+                            }`}
                         >
                           {isCompleted
                             ? 'Approved & Completed'
                             : isSubmitted
-                            ? 'Submitted (Under Review)'
-                            : 'Awaiting Result Entry'}
+                              ? 'Submitted (Under Review)'
+                              : 'Awaiting Result Entry'}
                         </span>
                       </div>
 
@@ -590,13 +551,12 @@ export default function RefereeDashboardPage() {
 
                       <Link
                         href={`/referee/matches/${match.matchCode}`}
-                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-lg shadow-xs transition ${
-                          isCompleted
-                            ? 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                            : isSubmitted
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-lg shadow-xs transition ${isCompleted
+                          ? 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                          : isSubmitted
                             ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
                             : 'bg-amber-500 hover:bg-amber-400 text-navy-950 font-extrabold shadow-sm'
-                        }`}
+                          }`}
                       >
                         {isCompleted ? (
                           <>

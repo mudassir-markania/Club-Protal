@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
-import { DEFAULT_OFFICIAL_RULES, OFFICIAL_CATEGORY_LABELS, seedOfficialScoringRules } from '@/lib/sports-rules';
+import { DEFAULT_OFFICIAL_RULES, OFFICIAL_CATEGORY_LABELS } from '@/lib/sports-rules';
+import { seedOfficialScoringRules } from '@/lib/sports-rules-server';
 
 export async function GET(req: Request) {
   try {
