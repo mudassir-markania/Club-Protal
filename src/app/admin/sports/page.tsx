@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
 import {
   Medal,
@@ -35,6 +36,7 @@ import {
 } from '@/lib/sports-rules-definitions';
 
 export default function SportsPage() {
+  const [mounted, setMounted] = useState(false);
   const [sports, setSports] = useState<any[]>([]);
   const [referees, setReferees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,7 @@ export default function SportsPage() {
   });
 
   useEffect(() => {
+    setMounted(true);
     fetchData();
   }, []);
 
@@ -683,9 +686,9 @@ export default function SportsPage() {
         </div>
 
         {/* Modal: Add / Configure Sport Scoring */}
-        {isModalOpen && (
+        {mounted && isModalOpen && createPortal(
           <div
-            className="fixed inset-0 z-[100] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
             onClick={(e) => {
               if (e.target === e.currentTarget) setIsModalOpen(false);
             }}
@@ -1635,7 +1638,8 @@ export default function SportsPage() {
                 </div>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </AdminLayout>

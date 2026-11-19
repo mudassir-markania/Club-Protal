@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
 import {
   Calendar,
@@ -37,6 +38,7 @@ interface BgmiSquadInput {
 }
 
 export default function MatchesPage() {
+  const [mounted, setMounted] = useState(false);
   const [matches, setMatches] = useState<any[]>([]);
   const [sports, setSports] = useState<any[]>([]);
   const [clubs, setClubs] = useState<any[]>([]);
@@ -105,6 +107,7 @@ export default function MatchesPage() {
   const [sideBPlayer2Id, setSideBPlayer2Id] = useState('');
 
   useEffect(() => {
+    setMounted(true);
     fetchData();
   }, [selectedSport]);
 
@@ -934,8 +937,8 @@ export default function MatchesPage() {
       </div>
 
       {/* Modal: Schedule New Match (Sport-Specific Participant Configuration) */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      {mounted && isCreateModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in duration-200">
             {/* Modal Header */}
             <div className="p-5 bg-navy-950 text-white flex items-center justify-between shrink-0 border-b border-navy-800">
@@ -1961,12 +1964,13 @@ export default function MatchesPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal: Result Review & Approval Workflow (Section 6 Compliant) */}
-      {isReviewModalOpen && selectedMatch && (
-        <div className="fixed inset-0 z-[100] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      {mounted && isReviewModalOpen && selectedMatch && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
             <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
               <div>
@@ -2219,7 +2223,8 @@ export default function MatchesPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </AdminLayout>
   );
