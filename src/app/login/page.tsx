@@ -12,7 +12,6 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  Trophy,
   ArrowRight,
   Crown,
   Sparkles,
@@ -144,29 +143,10 @@ export default function UnifiedOfficialLoginPage() {
           </span>
         </div>
 
-        {/* Center: Prestigious Emblem & Typography */}
+        {/* Center: Prestigious Typography */}
         <div className="relative z-10 my-auto py-8 lg:py-0 flex flex-col items-center text-center">
-          {/* Golden Trophy Emblem Box */}
-          <div className="relative mb-5 flex flex-col items-center">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-b from-amber-400/25 via-amber-500/10 to-transparent p-[1.5px] border border-amber-400/30 flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.18)] backdrop-blur-sm">
-              <div className="w-full h-full rounded-[22px] bg-[#070e1e]/90 flex items-center justify-center">
-                <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400 drop-shadow-[0_4px_14px_rgba(245,158,11,0.6)]" />
-              </div>
-            </div>
-
-            {/* APL Season 9 Mark */}
-            <div className="mt-3 flex flex-col items-center">
-              <span className="text-xl sm:text-2xl font-black tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 uppercase font-heading">
-                A P L
-              </span>
-              <span className="text-[10px] font-black tracking-[0.3em] text-amber-300/80 uppercase">
-                SEASON 9
-              </span>
-            </div>
-          </div>
-
           {/* Heading Block */}
-          <div className="space-y-2 max-w-md">
+          <div className="space-y-3 max-w-md">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.35em] text-slate-400 block font-heading">
               CHAMPIONSHIP ACCESS GATEWAY
             </span>
