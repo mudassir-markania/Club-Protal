@@ -68,6 +68,25 @@ export default function SportsPage() {
     fetchData();
   }, []);
 
+  // Lock background scrolling and allow Escape key to close modal
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isModalOpen]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -665,22 +684,37 @@ export default function SportsPage() {
 
         {/* Modal: Add / Configure Sport Scoring */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 z-[100] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsModalOpen(false);
+            }}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150">
               {/* Modal Header */}
-              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-navy-900 text-white">
-                <div>
-                  <h3 className="font-bold text-sm flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-amber-400" />
-                    {selectedSport ? `Configure Sport Scoring: ${selectedSport.name}` : 'Register New Sport Discipline'}
-                  </h3>
-                  <p className="text-[11px] text-slate-300">
-                    Source of truth: sports_points_distribution.pdf • Post-match calculation & house distribution
-                  </p>
+              <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between bg-navy-900 text-white shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-400 shrink-0">
+                    <Sliders className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                      {selectedSport ? `Configure Sport: ${selectedSport.name}` : 'Register New Sport Discipline'}
+                      {selectedSportKey && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                          PDF Rules
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-slate-300">
+                      APL Season 9 • House Championship Scoring Configuration
+                    </p>
+                  </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="p-1 text-slate-300 hover:text-white rounded"
+                  className="p-1.5 text-slate-400 hover:text-white hover:bg-navy-800 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -720,14 +754,15 @@ export default function SportsPage() {
               </div>
 
               {error && (
-                <div className="m-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
+                <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium shrink-0">
                   {error}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 text-xs flex-1">
-                {/* TAB 1: SPORT DETAILS & OFFICIALS */}
-                {modalTab === 'general' && (
+              <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="p-6 overflow-y-auto space-y-4 text-xs flex-1">
+                  {/* TAB 1: SPORT DETAILS & OFFICIALS */}
+                  {modalTab === 'general' && (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -1567,23 +1602,25 @@ export default function SportsPage() {
                   </div>
                 )}
 
-                {/* Modal Footer */}
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div className="text-[11px] text-slate-400">
-                    {modalTab === 'general' ? 'Step 1 of 2' : 'Step 2 of 2'}
+                </div>
+
+                {/* Modal Footer (Pinned at bottom) */}
+                <div className="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    {modalTab === 'general' ? 'Tab: Sport Details' : `Official Scoring Rules: ${selectedSportKey || 'Custom'}`}
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition"
+                      className="px-4 py-2 border border-slate-200 text-slate-600 font-semibold rounded-lg hover:bg-slate-100 transition"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={savingRules}
-                      className="px-5 py-2 bg-navy-900 text-white font-bold rounded-lg hover:bg-navy-800 shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
+                      className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
                     >
                       {savingRules ? (
                         <span>Saving Rules...</span>

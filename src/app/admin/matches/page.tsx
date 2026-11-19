@@ -935,7 +935,7 @@ export default function MatchesPage() {
 
       {/* Modal: Schedule New Match (Sport-Specific Participant Configuration) */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+        <div className="fixed inset-0 z-[100] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in duration-200">
             {/* Modal Header */}
             <div className="p-5 bg-navy-950 text-white flex items-center justify-between shrink-0 border-b border-navy-800">
@@ -1966,7 +1966,7 @@ export default function MatchesPage() {
 
       {/* Modal: Result Review & Approval Workflow (Section 6 Compliant) */}
       {isReviewModalOpen && selectedMatch && (
-        <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
             <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
               <div>
