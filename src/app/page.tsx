@@ -226,7 +226,7 @@ const HERO_SPORTS = [
     shortName: 'Badminton',
     icon: 'sports_tennis',
     tagline: '21-POINT RALLY SCORING • SINGLES & DOUBLES',
-    headline: 'BLISTERING SMASHES.',
+    headline: 'LIGHTNING SMASH.',
     headlineAccent: 'SURGICAL TOUCH.',
     description:
       'Rapid 300+ km/h shuttlecock action on synthetic championship courts. Best of 3 sets with sudden death deuces up to 30 points.',
@@ -242,8 +242,8 @@ const HERO_SPORTS = [
     shortName: 'Carrom',
     icon: 'carrom',
     tagline: 'QUEEN COVER • ACCURACY • PURE FINESSE',
-    headline: 'PINPOINT STRIKES.',
-    headlineAccent: 'MASTER POCKETING.',
+    headline: 'PINPOINT STRIKE.',
+    headlineAccent: 'MASTER POCKET.',
     description:
       'Classic tournament board warfare with precision rebounds, white & black piece accumulation, and high-tension queen confirmation pocketing.',
     image: '/carrom.jpg',
@@ -259,7 +259,7 @@ const HERO_SPORTS = [
     icon: 'chess',
     tagline: '5 MINS + 3 SECS INCREMENT • DGT SENSORY BOARDS',
     headline: 'STRATEGIC MIND.',
-    headlineAccent: 'UNYIELDING FOCUS.',
+    headlineAccent: 'TACTICAL FOCUS.',
     description:
       'Grandmaster-level tactical confrontations with digital clock timers and FIDE Swiss pairing in an acoustic, sound-dampened auditorium.',
     image: '/chess.jpg',
@@ -274,7 +274,7 @@ const HERO_SPORTS = [
     shortName: 'BGMI',
     icon: 'sports_esports',
     tagline: 'BATTLE ROYALE • ERANGEL & MIRAMAR • 4-MAN SQUADS',
-    headline: 'TACTICAL ROTATION.',
+    headline: 'BATTLE ROYALE.',
     headlineAccent: 'CHICKEN DINNER.',
     description:
       'High-adrenaline mobile esports battle royale on campus dedicated LAN servers with live casting, zone shifts, and squad clutch plays.',
@@ -328,7 +328,7 @@ export default function HomePage() {
           {/* 2. HERO SECTION (MULTI-SPORT STADIUM SHOWCASE - H-SCREEN) */}
           {/* ======================================================== */}
           <section
-            className="relative w-full h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
+            className="relative w-full h-[calc(100dvh-4rem)] sm:h-[calc(100vh-5rem)] min-h-[580px] max-h-[760px] sm:max-h-none flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
           >
             {/* Multi-Sport Stadium Backgrounds with Fast Snappy 500ms Cross-Fade */}
             <div className="absolute inset-0 z-0 overflow-hidden">
@@ -348,26 +348,25 @@ export default function HomePage() {
             </div>
 
             {/* Live Telemetry Watermark & Centered Content */}
-            <div className="relative z-10 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 flex-1 flex flex-col justify-center py-3 sm:py-5">
+            <div className="relative z-10 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 flex-1 flex flex-col justify-center py-3 sm:py-5 min-h-0">
               {/* Monumental Typography Stack */}
-              <div className="max-w-4xl flex flex-col gap-1 sm:gap-1.5 mb-3 sm:mb-4">
-                <span className="text-[11px] sm:text-xs uppercase tracking-widest text-[#dbe1ff] font-bold font-manrope">
+              <div className="max-w-4xl flex flex-col gap-1 sm:gap-1.5 mb-3 sm:mb-4 min-h-[140px] sm:min-h-[190px] justify-end">
+                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[#dbe1ff] font-bold font-manrope line-clamp-1 h-4 sm:h-5">
                   {activeHero.tagline}
                 </span>
-                <h1 className="font-manrope text-4xl sm:text-6xl lg:text-[68px] xl:text-[72px] font-extrabold uppercase tracking-tight text-white leading-[0.98]">
-                  {activeHero.headline}
-                  <br />
+                <h1 className="font-manrope text-[32px] xs:text-4xl sm:text-6xl lg:text-[68px] xl:text-[72px] font-extrabold uppercase tracking-tight text-white leading-[1.02] min-h-[66px] sm:min-h-[120px] lg:min-h-[145px] flex flex-col justify-end">
+                  <span>{activeHero.headline}</span>
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#dae2fd] to-[#dbe1ff]">
                     {activeHero.headlineAccent}
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-[#b7c4fd] max-w-2xl mt-1 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm lg:text-base text-[#b7c4fd] max-w-2xl mt-1 leading-relaxed font-normal line-clamp-2 sm:line-clamp-none min-h-[36px] sm:min-h-[48px]">
                   {activeHero.description}
                 </p>
               </div>
 
               {/* Discipline Switcher Pill Dock with Chevron Arrows */}
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4 min-h-[114px] sm:min-h-0">
                 <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#808dc2] font-manrope mr-1 hidden md:inline">
                   Select Discipline:
                 </span>
