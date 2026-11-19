@@ -330,17 +330,6 @@ export default function HomePage() {
           <section
             className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
           >
-            {/* Live Fast Progress Bar Indicator */}
-            <div className="absolute top-0 left-0 right-0 z-30 h-1 bg-white/10 overflow-hidden">
-              <div
-                key={heroIndex}
-                className="h-full bg-gradient-to-r from-[#eb6905] via-[#0051d5] to-[#eb6905]"
-                style={{
-                  animation: 'heroProgress 2.5s linear forwards',
-                }}
-              />
-            </div>
-
             {/* Multi-Sport Stadium Backgrounds with Fast Snappy 500ms Cross-Fade */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               {HERO_SPORTS.map((sport, idx) => (
