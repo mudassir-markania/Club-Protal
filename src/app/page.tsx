@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import {
@@ -204,7 +204,103 @@ const DISCIPLINES_DATA = [
   },
 ];
 
+// Featured Multi-Sport Showcase for Hero (Dynamic Carousel & Discipline Switcher)
+const HERO_SPORTS = [
+  {
+    id: 'multi',
+    badge: 'MULTI-SPORT INTER-HOUSE MEET',
+    name: 'All 8 Disciplines',
+    shortName: 'All 8 Sports',
+    icon: 'emoji_events',
+    tagline: '8 OLYMPIC & COLLEGIATE DISCIPLINES • 5 HOUSES • 42 FIXTURES',
+    headline: 'FIVE HOUSES.',
+    headlineAccent: 'ONE ARENA.',
+    description:
+      'Where institutional pride meets multi-sport athletic glory. Track live sets, finish line laser times, and certified referee decisions across Football, Track & Field, Basketball, Cricket, Badminton, Esports, Table Tennis, and Blitz Chess.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAYgHttvkcX2GSBqMH7qDXIXjYFRis-CkG6x5RDFd3GFuBWpIzt_EKbjvSMgvjlxLuYpWP2mSRvnL08kYqR6kU8563xCiTz3R8QdH8MoO-MlJM7u6XxejdweTTxlkylbYLP0rfpNp1d3yumZaMwyDRMT6DJuKhBKlVZaAsSdSzQemlyuo8Ew9PQI6c1Wkg2b80TF0Kk1mW_AaDX4jhNRcXwnX3uE1CZ93xu9wPUZ04S',
+    clashTitle: 'Multi-Sport Fixtures Live',
+    clashMatch: '42 MATCHES ACROSS 8 SPORTS',
+    clashSub: 'Central Sports Complex • Live Decision Feeds',
+  },
+  {
+    id: 'football',
+    badge: 'COLLEGIATE FOOTBALL 11v11',
+    name: 'Football',
+    shortName: 'Football',
+    icon: 'sports_soccer',
+    tagline: 'FULL-PITCH 11v11 KNOCKOUT • 45-MIN HALVES',
+    headline: 'EVERY GOAL.',
+    headlineAccent: 'EVERY TACKLE.',
+    description:
+      'High-stakes 11v11 collegiate football under 1,000-watt international floodlights. Golden goal extra time rules and direct penalty shootouts in knockout draws.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAYgHttvkcX2GSBqMH7qDXIXjYFRis-CkG6x5RDFd3GFuBWpIzt_EKbjvSMgvjlxLuYpWP2mSRvnL08kYqR6kU8563xCiTz3R8QdH8MoO-MlJM7u6XxejdweTTxlkylbYLP0rfpNp1d3yumZaMwyDRMT6DJuKhBKlVZaAsSdSzQemlyuo8Ew9PQI6c1Wkg2b80TF0Kk1mW_AaDX4jhNRcXwnX3uE1CZ93xu9wPUZ04S',
+    clashTitle: 'Upcoming Football Marquee',
+    clashMatch: 'ALPHAS v PHOENIX • SEMI-FINAL',
+    clashSub: 'Main Turf Stadium • Today 15:30',
+  },
+  {
+    id: 'athletics',
+    badge: 'IAAF TRACK & FIELD SPRINT',
+    name: 'Track & Field',
+    shortName: 'Athletics',
+    icon: 'sprint',
+    tagline: '100M • 400M • 4x100M RELAYS • LONG JUMP',
+    description:
+      'IAAF electronic laser finish timing, wind assistance monitoring, and house lane draw seeding across 8 varsity track & field medal disciplines.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuATP42Sfu3lffWOxOPFEGm1S_9k8tfnGu_z0HEjaERDGY0NtQRoPDozZja1mdCqEyYdVf2F849G2NiXvKDCw9K7KEExLkxN982wUQ0vf_GIBO9qrW2AWrXknjlfq9EmVWOoOUws587WQ_ufk9PIrK1vI4CcCw6UR4E5P-72SgfZpBxGFZOcdh3VqhXLV4WCqMbX0JabrfgxJcP_PjqWfp8Aok2Fq1bxVV7hPSx3GO6L',
+    clashTitle: 'Laser Finish Sprint Final',
+    clashMatch: '100M SPRINT • ALL 5 HOUSES',
+    clashSub: 'Olympic Synthetic Track • 18:00',
+  },
+  {
+    id: 'badminton',
+    badge: 'BWF REGULATION BADMINTON',
+    name: 'Badminton',
+    shortName: 'Badminton',
+    icon: 'sports_tennis',
+    tagline: '21-POINT RALLY SCORING • SINGLES & DOUBLES',
+    description:
+      'Rapid 300 km/h shuttlecock action on synthetic championship courts. Best of 3 sets with sudden death deuces up to 30 points.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCZbzJg5oKtlxpOehYLTEvAp0HiHFCemm7g-x2tD8jxZkXAp8IJri9Ntm8oY1APVlhbLIo3D2M_lubOE5MNbyssJN481nHgQXeMBodJp9TJe4FNGyznhvDp81WPXvuZbDHWDJ3mUUdB5M_7XzTnJ9QKAISW-7CW7Sli3kwkwMvBmoVQ5pjgnDBvCGFLIRbjApNbtaJen8Z2edWq1vBXXae91XTNcsnPjV2vAo_vt_8d',
+    clashTitle: 'Badminton Trophy Match',
+    clashMatch: 'SPARTANS v MAV • MIXED DOUBLES',
+    clashSub: 'Indoor Sports Arena • Tomorrow',
+  },
+  {
+    id: 'cricket',
+    badge: 'FLOODLIT CRICKET T10',
+    name: 'Cricket T10',
+    shortName: 'Cricket',
+    icon: 'sports_cricket',
+    tagline: '10 OVERS • 60 BALLS PER SIDE • UNDER LIGHTS',
+    description:
+      'High-octane power hitting under international stadium floodlights with live commentary, over ball tracker, and referee decisions.',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBET2OC-cxivK7TuB_cYyVjBbonubElBM-vuAQK2wGviPSsXm2tYeGhZ_OVaRe8YJN0HMh7ke6LSyWwHHbG-Ik8Xv7fpT_ejUbTw1ds9uCDLY5I3Nh0BUqJpQX0roLWFPQXCEfZg_Z9SyULT64KwYvvxV2Z9kWAxajFVcgYrEOZ9YHDh8vF3BxAfJQldHVhz9IZv2MkUYjANPW_xTuRtXMooiNkGHHmHobIF6YUMjuz',
+    clashTitle: 'Cricket Marquee Opener',
+    clashMatch: 'MAV v DOM • T10 CRICKET',
+    clashSub: 'Main Oval Stadium • Nov 26',
+  },
+];
+
 export default function HomePage() {
+  // Multi-Sport Hero Carousel State
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [isHeroPaused, setIsHeroPaused] = useState(false);
+  const activeHero = HERO_SPORTS[heroIndex];
+
+  useEffect(() => {
+    if (isHeroPaused) return;
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % HERO_SPORTS.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [isHeroPaused]);
+
   // UI interactive state
   const [selectedHouse, setSelectedHouse] = useState<(typeof HOUSES_DATA)[0] | null>(null);
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
@@ -233,80 +329,126 @@ export default function HomePage() {
       <main className="w-full pt-20 bg-[#faf8ff] min-h-[calc(100vh-80px)]">
         <div className="flex flex-col w-full">
           {/* ======================================================== */}
-          {/* 2. HERO SECTION (STADIUM FLOODLIT ATMOSPHERE - H-SCREEN)  */}
+          {/* 2. HERO SECTION (MULTI-SPORT STADIUM SHOWCASE - H-SCREEN) */}
           {/* ======================================================== */}
-          <section className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#000f3f] text-white">
-            {/* Stadium Floodlit Atmosphere Background */}
-            <div className="absolute inset-0 z-0">
-              <img
-                className="w-full h-full object-cover object-center opacity-45 mix-blend-luminosity scale-105 transform hover:scale-100 transition-transform duration-1000 ease-out"
-                alt="High action shot of professional cricket batsman playing an explosive lofted pull shot at night under blinding bright international stadium floodlights with packed crowds in blue jerseys"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBET2OC-cxivK7TuB_cYyVjBbonubElBM-vuAQK2wGviPSsXm2tYeGhZ_OVaRe8YJN0HMh7ke6LSyWwHHbG-Ik8Xv7fpT_ejUbTw1ds9uCDLY5I3Nh0BUqJpQX0roLWFPQXCEfZg_Z9SyULT64KwYvvxV2Z9kWAxajFVcgYrEOZ9YHDh8vF3BxAfJQldHVhz9IZv2MkUYjANPW_xTuRtXMooiNkGHHmHobIF6YUMjuz"
-              />
+          <section
+            onMouseEnter={() => setIsHeroPaused(true)}
+            onMouseLeave={() => setIsHeroPaused(false)}
+            className="relative w-full h-[calc(100vh-5rem)] min-h-[580px] flex flex-col justify-between overflow-hidden bg-[#000f3f] text-white select-none"
+          >
+            {/* Multi-Sport Stadium Backgrounds with Smooth Cross-Fade */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+              {HERO_SPORTS.map((sport, idx) => (
+                <img
+                  key={sport.id}
+                  className={`absolute inset-0 w-full h-full object-cover object-center mix-blend-luminosity scale-105 transition-all duration-1000 ease-in-out ${
+                    idx === heroIndex ? 'opacity-45 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+                  }`}
+                  alt={sport.name}
+                  src={sport.image}
+                />
+              ))}
               <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f] via-[#000f3f]/75 to-[#000f3f]/30" />
               <div className="absolute inset-0 bg-gradient-to-r from-[#000f3f] via-[#000f3f]/60 to-transparent" />
             </div>
 
             {/* Live Telemetry Watermark & Centered Content */}
-            <div className="relative z-10 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 flex-1 flex flex-col justify-center py-4 sm:py-6">
-              {/* Live Pill Chip */}
-              <div className="inline-flex items-center gap-2.5 w-fit px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md mb-4 sm:mb-5 border border-white/15 shadow-sm">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#eb6905] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#eb6905]" />
-                </span>
-                <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#eb6905] font-extrabold font-manrope">
-                  LIVE CHAMPIONSHIP • DAY 4 OF 12
-                </span>
-                <span className="text-[#808dc2] text-xs">|</span>
-                <span className="text-[10px] sm:text-[11px] text-[#dce1ff] uppercase tracking-wider hidden sm:inline font-manrope font-semibold">
-                  CENTRAL ARENA COMPLEX
-                </span>
+            <div className="relative z-10 max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-12 flex-1 flex flex-col justify-center py-3 sm:py-5">
+              {/* Live Multi-Sport Pill Chip */}
+              <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 shadow-sm">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#eb6905] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#eb6905]" />
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#eb6905] font-extrabold font-manrope">
+                    {activeHero.badge} • DAY 4 OF 12
+                  </span>
+                  <span className="text-[#808dc2] text-xs">|</span>
+                  <span className="text-[10px] sm:text-[11px] text-[#dce1ff] uppercase tracking-wider hidden sm:inline font-manrope font-semibold">
+                    CENTRAL ARENA COMPLEX
+                  </span>
+                </div>
+
+                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0051d5]/30 border border-[#0051d5]/40 text-[#dbe1ff] text-[10px] uppercase font-extrabold tracking-wider font-manrope">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
+                  <span>8 Olympic Disciplines</span>
+                </div>
               </div>
 
               {/* Monumental Typography Stack */}
-              <div className="max-w-4xl flex flex-col gap-1.5 sm:gap-2 mb-5 sm:mb-6">
+              <div className="max-w-4xl flex flex-col gap-1 sm:gap-1.5 mb-3 sm:mb-4">
                 <span className="text-[11px] sm:text-xs uppercase tracking-widest text-[#dbe1ff] font-bold font-manrope">
-                  ONE CHAMPIONSHIP. FIVE HOUSES. ENDLESS GLORY.
+                  {activeHero.tagline}
                 </span>
                 <h1 className="font-manrope text-4xl sm:text-6xl lg:text-[68px] xl:text-[72px] font-extrabold uppercase tracking-tight text-white leading-[0.98]">
-                  THE ARENA
+                  {activeHero.headline}
                   <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#dae2fd] to-[#dbe1ff]">
-                    IS YOURS.
+                    {activeHero.headlineAccent}
                   </span>
                 </h1>
-                <p className="text-sm sm:text-base text-[#b7c4fd] max-w-2xl mt-1.5 leading-relaxed font-normal">
-                  Where passion meets performance. Experience the sheer adrenaline and institutional spirit of collegiate competition at NexCore Institute of Technology’s APL Season 9.
+                <p className="text-xs sm:text-sm lg:text-base text-[#b7c4fd] max-w-2xl mt-1 leading-relaxed font-normal">
+                  {activeHero.description}
                 </p>
               </div>
 
-              {/* Action Tiers */}
+              {/* Discipline Switcher Pill Dock */}
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
+                <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#808dc2] font-manrope mr-1 hidden md:inline">
+                  Select Discipline:
+                </span>
+                {HERO_SPORTS.map((s, idx) => {
+                  const active = idx === heroIndex;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        setHeroIndex(idx);
+                        setIsHeroPaused(true);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-manrope font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                        active
+                          ? 'bg-white text-[#000f3f] shadow-lg scale-105 ring-2 ring-white/50'
+                          : 'bg-white/10 hover:bg-white/20 text-[#dce1ff] border border-white/10'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[15px]">{s.icon}</span>
+                      <span>{s.shortName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Action Tiers & Dynamic Clashing Card */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
                 <a
                   href="#championship-overview"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg bg-[#eb6905] hover:bg-[#783200] text-white text-xs sm:text-sm uppercase tracking-wider font-bold transition-all duration-200 shadow-xl shadow-[#eb6905]/25 font-manrope cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-lg bg-[#eb6905] hover:bg-[#783200] text-white text-xs sm:text-sm uppercase tracking-wider font-bold transition-all duration-200 shadow-xl shadow-[#eb6905]/25 font-manrope cursor-pointer"
                 >
-                  <span>EXPLORE THE CHAMPIONSHIP</span>
+                  <span>EXPLORE 8 DISCIPLINES</span>
                   <span className="material-symbols-outlined text-[20px]">north_east</span>
                 </a>
 
-                <a
-                  href="#fixtures"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm uppercase tracking-wider backdrop-blur-md transition-all duration-200 font-manrope border border-white/20 cursor-pointer"
+                <Link
+                  href="/schedule"
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm uppercase tracking-wider backdrop-blur-md transition-all duration-200 font-manrope border border-white/20 cursor-pointer"
                 >
-                  <span>VIEW FIXTURES</span>
+                  <span>VIEW SCHEDULE</span>
                   <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-                </a>
+                </Link>
 
-                {/* Next Marquee Clashing Badge */}
-                <div className="hidden lg:flex items-center gap-4 ml-auto bg-[#172554]/80 backdrop-blur-md px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg border border-white/10 shadow-lg">
+                {/* Next Multi-Sport Marquee Clashing Badge */}
+                <div className="hidden lg:flex items-center gap-4 ml-auto bg-[#172554]/85 backdrop-blur-md px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg border border-white/10 shadow-lg">
                   <div className="flex flex-col text-right">
                     <span className="text-[10px] uppercase text-[#808dc2] font-semibold font-manrope">
-                      Next Marquee Clashing
+                      {activeHero.clashTitle}
                     </span>
                     <span className="text-xs sm:text-sm font-bold uppercase text-white tracking-tight font-manrope">
-                      MAV v DOM • T10 CRICKET
+                      {activeHero.clashMatch}
+                    </span>
+                    <span className="text-[10px] text-[#b7c4fd] font-medium font-manrope">
+                      {activeHero.clashSub}
                     </span>
                   </div>
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ba1a1a] animate-ping" />
@@ -315,8 +457,8 @@ export default function HomePage() {
             </div>
 
             {/* Stadium Telemetry Stats Ribbon Pinned to Bottom */}
-            <div className="w-full bg-[#172554] text-[#808dc2] py-3.5 sm:py-4 relative z-10 border-t border-white/10 shrink-0">
-              <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-wrap items-center justify-between gap-y-3 gap-x-6 text-center lg:text-left">
+            <div className="w-full bg-[#172554] text-[#808dc2] py-3 sm:py-3.5 relative z-10 border-t border-white/10 shrink-0">
+              <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-wrap items-center justify-between gap-y-2 gap-x-6 text-center lg:text-left">
                 <div className="flex items-center gap-3">
                   <span className="text-xs uppercase text-white font-extrabold tracking-widest font-manrope">
                     APL S9 RECORD
