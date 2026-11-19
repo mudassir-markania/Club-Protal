@@ -6,7 +6,7 @@ import { calculateMatchPoints } from '@club-portal/shared';
 import { getSportRules } from '@/lib/sports-rules-server';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
 import { canRefereeActOnMatch } from '@/lib/referee-access';
-import { EVENT_SCORED_SPORTS } from '@/lib/event-standings';
+import { EVENT_SCORED_SPORTS, isRankedSport } from '@/lib/event-standings';
 import { assertPlayersEligible } from '@/lib/player-eligibility';
 
 const matchInclude = {
@@ -161,6 +161,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     // Badminton / Carrom: matches only record the winner; points come from the event standings
     const eventScored = EVENT_SCORED_SPORTS.includes(calculation.sportKey);
+    const rankedSport = isRankedSport(match.sport?.name || '');
 
     const winnerEntry = calculation.teamPoints.find((t: any) => t.participantId === winnerParticipantId);
     if (!eventScored && (!winnerEntry || winnerEntry.points <= 0)) {
@@ -174,7 +175,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     if (preview) {
-      return NextResponse.json({ success: true, preview: true, eventScored, calculation });
+      return NextResponse.json({ success: true, preview: true, eventScored, rankedSport, calculation });
     }
 
     // Admin: result is approved immediately. Referee: result is submitted and waits for admin approval.

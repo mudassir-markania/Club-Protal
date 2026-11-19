@@ -31,5 +31,5 @@ export function awardFieldsFor(sportName?: string): AwardField[] {
   }
 }
 
-/** BGMI can also record the overall tournament placements (1st / 2nd / 3rd team). */
-export const hasTournamentPlacements = (sportName?: string) => normalizeSportKey(sportName) === 'BGMI';
+/** Tournament placements are paid by the overall team ranking (Event Standings), no longer chosen per match. */
+export const hasTournamentPlacements = (_sportName?: string) => false;

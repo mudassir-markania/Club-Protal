@@ -1,8 +1,7 @@
 import { NextResponse } from '@/http/next-server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
-import { EVENT_SCORED_SPORTS, isValidEventCategory, buildAwards, computeStandings, eventKeyOf } from '@/lib/event-standings';
-import { normalizeSportKey } from '@club-portal/shared';
+import { isEventSport, isRankedSport, isValidEventCategory, buildAwards, computeStandings, eventKeyOf } from '@/lib/event-standings';
 
 /**
  * GET ?sportId=&category=
@@ -18,7 +17,7 @@ export async function GET(req: Request) {
 
     const sport = sportId ? await db.sport.findUnique({ where: { id: sportId } }) : null;
     if (!sport) return NextResponse.json({ error: 'Sport not found' }, { status: 404 });
-    if (!EVENT_SCORED_SPORTS.includes(normalizeSportKey(sport.name) || '')) {
+    if (!isEventSport(sport.name)) {
       return NextResponse.json({ error: `${sport.name} is scored per match, not by event standings` }, { status: 400 });
     }
     if (!isValidEventCategory(sport.name, category)) return NextResponse.json({ error: 'Invalid event category' }, { status: 400 });
@@ -27,10 +26,12 @@ export async function GET(req: Request) {
     const awards = await buildAwards(sport, category, standings);
     const finalized = await db.eventResult.findUnique({ where: { eventKey: eventKeyOf(sportId, category) } });
 
-    const matches = await db.match.findMany({ where: { sportId, matchCategory: category } });
+    const ranked = isRankedSport(sport.name);
+    const matches = await db.match.findMany({ where: ranked ? { sportId } : { sportId, matchCategory: category } });
     return NextResponse.json({
       sport: { id: sport.id, name: sport.name },
       category,
+      rankedByPoints: ranked,
       standings: standings.map(({ contributions, ...row }) => row),
       matchCount: matches.length,
       completedCount: matches.filter((m: any) => m.status === 'COMPLETED').length,

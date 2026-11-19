@@ -35,19 +35,20 @@ import * as route32 from './routes/players/leaderboard/route';
 import * as route33 from './routes/players/[id]/route';
 import * as route34 from './routes/points-history/route';
 import * as route35 from './routes/public/overview/route';
-import * as route36 from './routes/referees/route';
-import * as route37 from './routes/referees/[id]/route';
-import * as route38 from './routes/registrations/route';
-import * as route39 from './routes/registrations/import-csv/route';
-import * as route40 from './routes/registrations/sync-sheets/route';
-import * as route41 from './routes/registrations/[id]/approve/route';
-import * as route42 from './routes/registrations/[id]/reject/route';
-import * as route43 from './routes/reports/export/route';
-import * as route44 from './routes/sports/route';
-import * as route45 from './routes/sports/[id]/route';
-import * as route46 from './routes/sports/[id]/rules/route';
-import * as route47 from './routes/tournament-settings/route';
-import * as route48 from './routes/venues/route';
+import * as route36 from './routes/public/schedule/route';
+import * as route37 from './routes/referees/route';
+import * as route38 from './routes/referees/[id]/route';
+import * as route39 from './routes/registrations/route';
+import * as route40 from './routes/registrations/import-csv/route';
+import * as route41 from './routes/registrations/sync-sheets/route';
+import * as route42 from './routes/registrations/[id]/approve/route';
+import * as route43 from './routes/registrations/[id]/reject/route';
+import * as route44 from './routes/reports/export/route';
+import * as route45 from './routes/sports/route';
+import * as route46 from './routes/sports/[id]/route';
+import * as route47 from './routes/sports/[id]/rules/route';
+import * as route48 from './routes/tournament-settings/route';
+import * as route49 from './routes/venues/route';
 
 export const routes = [
   { path: '/api/admin/scoring-rules', module: route0 as Record<string, unknown> },
@@ -86,17 +87,18 @@ export const routes = [
   { path: '/api/players/:id', module: route33 as Record<string, unknown> },
   { path: '/api/points-history', module: route34 as Record<string, unknown> },
   { path: '/api/public/overview', module: route35 as Record<string, unknown> },
-  { path: '/api/referees', module: route36 as Record<string, unknown> },
-  { path: '/api/referees/:id', module: route37 as Record<string, unknown> },
-  { path: '/api/registrations', module: route38 as Record<string, unknown> },
-  { path: '/api/registrations/import-csv', module: route39 as Record<string, unknown> },
-  { path: '/api/registrations/sync-sheets', module: route40 as Record<string, unknown> },
-  { path: '/api/registrations/:id/approve', module: route41 as Record<string, unknown> },
-  { path: '/api/registrations/:id/reject', module: route42 as Record<string, unknown> },
-  { path: '/api/reports/export', module: route43 as Record<string, unknown> },
-  { path: '/api/sports', module: route44 as Record<string, unknown> },
-  { path: '/api/sports/:id', module: route45 as Record<string, unknown> },
-  { path: '/api/sports/:id/rules', module: route46 as Record<string, unknown> },
-  { path: '/api/tournament-settings', module: route47 as Record<string, unknown> },
-  { path: '/api/venues', module: route48 as Record<string, unknown> },
+  { path: '/api/public/schedule', module: route36 as Record<string, unknown> },
+  { path: '/api/referees', module: route37 as Record<string, unknown> },
+  { path: '/api/referees/:id', module: route38 as Record<string, unknown> },
+  { path: '/api/registrations', module: route39 as Record<string, unknown> },
+  { path: '/api/registrations/import-csv', module: route40 as Record<string, unknown> },
+  { path: '/api/registrations/sync-sheets', module: route41 as Record<string, unknown> },
+  { path: '/api/registrations/:id/approve', module: route42 as Record<string, unknown> },
+  { path: '/api/registrations/:id/reject', module: route43 as Record<string, unknown> },
+  { path: '/api/reports/export', module: route44 as Record<string, unknown> },
+  { path: '/api/sports', module: route45 as Record<string, unknown> },
+  { path: '/api/sports/:id', module: route46 as Record<string, unknown> },
+  { path: '/api/sports/:id/rules', module: route47 as Record<string, unknown> },
+  { path: '/api/tournament-settings', module: route48 as Record<string, unknown> },
+  { path: '/api/venues', module: route49 as Record<string, unknown> },
 ];

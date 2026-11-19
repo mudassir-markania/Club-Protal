@@ -246,23 +246,13 @@ export async function calculateMatchPoints(
       teamPoints.push({ participantId: loserId, teamName: getParticipantName(loserId), points: 0, reason: `${input.sportName} match loss: 0 pts`, isWinner: false, rank: 2 });
     }
   } else if (sportKey === 'BGMI') {
-    // Every match: the winning team earns the match-win rule
+    // BGMI: every match pays the winning team the match-win rule. Overall winner / runner-up / third place are paid
+    // when the overall team ranking is finalized (see event-standings.ts), not by a single match.
     awardTeam(winnerId, 'MATCH_WIN', true, 1);
-    // Tournament placements (only when this result is a tournament placement)
-    if (input.isTournamentPlacement) {
-      awardTeam(input.firstPlaceParticipantId, 'TOURNAMENT_WINNER', true, 1, { skipIfNoRule: true });
-      awardTeam(input.secondPlaceParticipantId, 'TOURNAMENT_RUNNER_UP', false, 2, { skipIfNoRule: true });
-      awardTeam(input.thirdPlaceParticipantId, 'TOURNAMENT_THIRD', false, 3, { skipIfNoRule: true }); // honours "min teams" condition
-    }
   } else {
-    // Head-to-head sports (Football, Cricket): by stage
-    if (stage === 'FINAL') {
-      awardTeam(winnerId, 'FINAL_WINNER', true, 1);
-      awardTeam(loserId, 'FINAL_LOSER', false, 2);
-    } else if (stage === 'THIRD_PLACE') {
-      awardTeam(winnerId, 'THIRD_PLACE_WINNER', true, 3, { fallback: 'MATCH_WIN' });
-      awardTeam(loserId, 'THIRD_PLACE_LOSER', false, 4, { fallback: 'MATCH_LOSS' });
-    } else if (stage === 'QUARTER_FINAL' || stage === 'SEMI_FINAL') {
+    // Football and Cricket: each match pays its winner the match-win rule. Final winner / loser and cricket third place
+    // are paid by the overall team ranking when it is finalized, so a final or 3rd-place match is paid like any other.
+    if (stage === 'QUARTER_FINAL' || stage === 'SEMI_FINAL') {
       const q = stage === 'QUARTER_FINAL';
       awardTeam(winnerId, q ? 'QUARTER_FINAL_WIN' : 'SEMI_FINAL_WIN', true, 1, { fallback: 'MATCH_WIN' });
       awardTeam(loserId, q ? 'QUARTER_FINAL_LOSS' : 'SEMI_FINAL_LOSS', false, 2, { fallback: 'MATCH_LOSS' });

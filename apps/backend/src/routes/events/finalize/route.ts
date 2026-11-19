@@ -3,13 +3,12 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
-import { EVENT_SCORED_SPORTS, isValidEventCategory, buildAwards, computeStandings, eventKeyOf, eventLabel } from '@/lib/event-standings';
-import { normalizeSportKey } from '@club-portal/shared';
+import { isEventSport, isValidEventCategory, buildAwards, computeStandings, eventKeyOf, eventLabel } from '@/lib/event-standings';
 
 async function loadEvent(sportId: string, category: string) {
   const sport = sportId ? await db.sport.findUnique({ where: { id: sportId } }) : null;
   if (!sport) return { error: NextResponse.json({ error: 'Sport not found' }, { status: 404 }) };
-  if (!EVENT_SCORED_SPORTS.includes(normalizeSportKey(sport.name) || '')) {
+  if (!isEventSport(sport.name)) {
     return { error: NextResponse.json({ error: `${sport.name} is scored per match, not by event standings` }, { status: 400 }) };
   }
   if (!isValidEventCategory(sport.name, category)) return { error: NextResponse.json({ error: 'Invalid event category' }, { status: 400 }) };

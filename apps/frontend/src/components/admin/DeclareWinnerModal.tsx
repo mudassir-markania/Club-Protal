@@ -26,6 +26,7 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
   const [error, setError] = useState<string | null>(null);
   const [calc, setCalc] = useState<any | null>(null);
   const [eventScored, setEventScored] = useState(false);
+  const [rankedSport, setRankedSport] = useState(false);
   // optional extras: individual award winners and BGMI tournament placements
   const [awards, setAwards] = useState<Record<string, string>>({});
   const [tournament, setTournament] = useState(false);
@@ -89,6 +90,7 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
     setError(null);
     setCalc(null);
     setEventScored(false);
+    setRankedSport(false);
     fetch(`/api/matches/${match.id}/declare-winner`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -103,6 +105,7 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
         if (cancelled) return;
         setCalc(d.calculation);
         setEventScored(Boolean(d.eventScored));
+        setRankedSport(Boolean(d.rankedSport));
       })
       .catch((e) => !cancelled && setError(e.message))
       .finally(() => !cancelled && setLoading(false));
@@ -175,6 +178,13 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
               ? 'Points are calculated automatically from the Scoring Rules and sent to the admin for approval. Clubs are credited once it is approved.'
               : 'Points are awarded automatically from the Scoring Rules and credited to the clubs.'}
           </p>
+
+          {rankedSport && !eventScored && (
+            <p className="p-2.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-900">
+              This match pays its win points now. The overall winner, runner-up and third place points are paid later from the team ranking, on the
+              <strong> Event Standings</strong> page.
+            </p>
+          )}
 
           {error && (
             <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-start gap-2">

@@ -700,26 +700,13 @@ export default function RefereeMatchSheetPage() {
           {/* 2. BGMI FORM */}
           {sportKey === 'BGMI' && (
             <div className="space-y-5">
-              {/* Placement Toggle */}
-              <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/80 flex items-center justify-between flex-wrap gap-3">
-                <div>
-                  <span className="text-xs font-extrabold text-blue-950 uppercase block">
-                    Tournament Placement Mode
-                  </span>
-                  <span className="text-[11px] text-blue-800/80">
-                    Toggle ON if this match decides the overall championship podium (1st 20 pts, 2nd 12 pts, 3rd 8 pts if 7 teams).
-                  </span>
-                </div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    disabled={isReadOnly}
-                    checked={isBgmiTournamentPlacement}
-                    onChange={(e) => setIsBgmiTournamentPlacement(e.target.checked)}
-                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-xs font-bold text-blue-900">Award Overall Placements</span>
-                </label>
+              {/* Overall placements are paid by the team ranking */}
+              <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/80">
+                <span className="text-xs font-extrabold text-blue-950 uppercase block">Overall placements</span>
+                <span className="text-[11px] text-blue-800/80">
+                  Each match pays its winner 8 points. The overall winner (20), runner-up (12) and third place (8 with 7 teams) are paid by the
+                  admin from the team ranking, so there is nothing to toggle here.
+                </span>
               </div>
 
               {/* Normal match winner */}

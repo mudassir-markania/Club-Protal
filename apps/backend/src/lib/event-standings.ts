@@ -2,14 +2,29 @@ import { db } from '@/lib/db';
 import { calculateClubPointsDistribution, PlayerContribution } from '@club-portal/shared';
 import { getSportRules } from '@/lib/sports-rules-server';
 import { toEffectiveRule, findRuleForTrigger, RuleTrigger } from '@club-portal/shared';
-import { categoryDisplayName, categoryRules, getScheduleConfig } from '@club-portal/shared';
+import { categoryDisplayName, categoryRules, getScheduleConfig, normalizeSportKey } from '@club-portal/shared';
+
+/** Sports whose points come ONLY from event standings (1st / 2nd / 3rd): their matches award nothing. */
+export const EVENT_SCORED_SPORTS = ['BADMINTON', 'CARROM', 'CHESS'];
+
+/**
+ * Team sports that play many matches: each match still pays its own win points, and an overall team ranking
+ * (total match points) pays the placement points when it is finalized.
+ */
+export const RANKED_SPORTS = ['BGMI', 'FOOTBALL', 'CRICKET'];
+
+/** The single event of a ranked sport covers all of its matches. */
+export const OVERALL = 'OVERALL';
+
+export const sportKeyOf = (sportName: string) => normalizeSportKey(sportName) || '';
+export const isRankedSport = (sportName: string) => RANKED_SPORTS.includes(sportKeyOf(sportName));
+export const isEventSport = (sportName: string) => EVENT_SCORED_SPORTS.includes(sportKeyOf(sportName)) || isRankedSport(sportName);
 
 /** An event category is valid when it is one of the sport's categories (Badminton formats, Chess Classical, ...). */
 export const isValidEventCategory = (sportName: string, category: string) =>
-  !!categoryRules(category) || getScheduleConfig(sportName).categories.some((c) => c.code === category);
-
-/** Sports whose points come from event standings (1st / 2nd / 3rd), not from individual matches. */
-export const EVENT_SCORED_SPORTS = ['BADMINTON', 'CARROM', 'CHESS'];
+  isRankedSport(sportName)
+    ? category === OVERALL
+    : !!categoryRules(category) || getScheduleConfig(sportName).categories.some((c) => c.code === category);
 
 export const eventKeyOf = (sportId: string, category: string) => `${sportId}|${category}`;
 
@@ -20,18 +35,29 @@ export interface StandingRow {
   played: number;
   wins: number;
   losses: number;
+  points: number; // total match points (the ranking basis for BGMI, Football and Cricket)
   rank: number;
-  tied: boolean; // shares wins and losses with a neighbour
+  tied: boolean; // shares its ranking numbers with a neighbour
   contributions: PlayerContribution[]; // players and their clubs (used for the equal split)
 }
 
 const PLACE_TRIGGERS: RuleTrigger[] = ['PLACE_1', 'PLACE_2', 'PLACE_3'];
+
+// Which scoring rule pays which finishing position of the overall ranking
+const RANK_TRIGGERS: Record<string, RuleTrigger[]> = {
+  BGMI: ['TOURNAMENT_WINNER', 'TOURNAMENT_RUNNER_UP', 'TOURNAMENT_THIRD'],
+  FOOTBALL: ['FINAL_WINNER', 'FINAL_LOSER'],
+  CRICKET: ['FINAL_WINNER', 'FINAL_LOSER', 'THIRD_PLACE_WINNER'],
+};
 
 /**
  * Standings for one event (sport + category), built from the winners recorded on completed matches.
  * Sorted by wins (most first), then losses (fewest first), then name.
  */
 export async function computeStandings(sportId: string, category: string): Promise<StandingRow[]> {
+  const sport = await db.sport.findUnique({ where: { id: sportId } });
+  if (sport && isRankedSport(sport.name)) return computeTeamRanking(sportId);
+
   const matches = await db.match.findMany({
     where: { sportId, matchCategory: category },
     include: {
@@ -67,6 +93,7 @@ export async function computeStandings(sportId: string, category: string): Promi
           played: 0,
           wins: 0,
           losses: 0,
+          points: 0,
           rank: 0,
           tied: false,
           contributions,
@@ -94,10 +121,86 @@ export async function computeStandings(sportId: string, category: string): Promi
   return list;
 }
 
+/**
+ * Overall team ranking of a ranked sport (BGMI, Football, Cricket): total points the team earned from its completed
+ * matches, then wins, then fewest losses, then name. One ranking per sport, across all of its matches.
+ */
+async function computeTeamRanking(sportId: string): Promise<StandingRow[]> {
+  const matches = await db.match.findMany({
+    where: { sportId },
+    include: {
+      participants: {
+        include: { club: true, cricketTeam: true, player: true, players: { include: { player: true, club: true } } },
+      },
+    },
+  });
+
+  const identity = (p: any) =>
+    p.bgmiTeamId ? `B:${p.bgmiTeamId}` : p.cricketTeamId ? `C:${p.cricketTeamId}` : p.clubId ? `K:${p.clubId}` : `E:${p.id}`;
+
+  const rows = new Map<string, StandingRow>();
+  for (const m of matches) {
+    const completed = m.status === 'COMPLETED';
+    for (const p of m.participants || []) {
+      const key = identity(p);
+      let row = rows.get(key);
+      if (!row) {
+        // BGMI squads share points between their players; Football clubs and Cricket house teams are one entry for their club
+        const contributions: PlayerContribution[] =
+          p.players && p.players.length > 0
+            ? p.players.map((mpp: any) => ({
+                playerId: mpp.playerId,
+                playerName: mpp.player?.name,
+                clubId: mpp.clubId,
+                clubName: mpp.club?.name || 'Club',
+                clubCode: mpp.club?.code,
+              }))
+            : p.clubId && p.club
+            ? [{ playerId: 'team', playerName: p.teamName || p.club.name, clubId: p.clubId, clubName: p.club.name, clubCode: p.club.code }]
+            : [];
+        const clubMap = new Map<string, { id: string; name: string; code?: string }>();
+        contributions.forEach((c) => clubMap.set(c.clubId, { id: c.clubId, name: c.clubName, code: c.clubCode }));
+        row = {
+          key,
+          name: p.teamName || p.cricketTeam?.name || p.club?.name || 'Entry',
+          clubs: Array.from(clubMap.values()),
+          played: 0,
+          wins: 0,
+          losses: 0,
+          points: 0,
+          rank: 0,
+          tied: false,
+          contributions,
+        };
+        rows.set(key, row);
+      }
+      if (completed) {
+        row.played += 1;
+        row.points = Number((row.points + Number(p.score || 0)).toFixed(2));
+        if (p.isWinner) row.wins += 1;
+        else row.losses += 1;
+      }
+    }
+  }
+
+  const list = Array.from(rows.values()).sort(
+    (a, b) => b.points - a.points || b.wins - a.wins || a.losses - b.losses || a.name.localeCompare(b.name)
+  );
+  const same = (a: StandingRow, b?: StandingRow) => !!b && a.points === b.points && a.wins === b.wins && a.losses === b.losses;
+  list.forEach((r, i) => {
+    r.rank = i + 1;
+    r.tied = same(r, list[i - 1]) || same(r, list[i + 1]);
+  });
+  return list;
+}
+
 /** Points the rules award for a finishing position in this event (0 when no rule exists). */
 export async function placePoints(sportName: string, category: string, position: 1 | 2 | 3, teamCount: number) {
+  const triggers = RANK_TRIGGERS[sportKeyOf(sportName)] || PLACE_TRIGGERS;
+  const trigger = triggers[position - 1];
+  if (!trigger) return 0; // this sport pays fewer places (e.g. Football: 1st and 2nd)
   const rules = (await getSportRules(sportName)).map(toEffectiveRule);
-  return findRuleForTrigger(rules, PLACE_TRIGGERS[position - 1], category, teamCount)?.points ?? 0;
+  return findRuleForTrigger(rules, trigger, category, teamCount)?.points ?? 0;
 }
 
 /** Points each of the top 3 placements would earn, with the equal split across their unique clubs. */
@@ -112,4 +215,5 @@ export async function buildAwards(sport: any, category: string, ordered: Standin
   return awards;
 }
 
-export const eventLabel = (sportName: string, category: string) => `${sportName} ${categoryDisplayName(category)}`;
+export const eventLabel = (sportName: string, category: string) =>
+  category === OVERALL ? `${sportName} overall ranking` : `${sportName} ${categoryDisplayName(category)}`;

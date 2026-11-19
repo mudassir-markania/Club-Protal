@@ -7,7 +7,9 @@ import { ClubBadge, SportIcon } from '@/components/ui/icons';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { categoryDisplayName, getScheduleConfig } from '@club-portal/shared';
 
-const EVENT_SPORTS = ['Badminton', 'Carrom', 'Chess'];
+const EVENT_SPORTS = ['BGMI', 'Football', 'Cricket', 'Badminton', 'Carrom', 'Chess'];
+// Team sports ranked overall by total match points (their matches still pay win points)
+const RANKED_SPORTS = ['BGMI', 'Football', 'Cricket'];
 const ORDINAL = ['1st', '2nd', '3rd'];
 
 export default function EventStandingsPage() {
@@ -33,7 +35,9 @@ export default function EventStandingsPage() {
   }, []);
 
   const sport = sports.find((s) => s.id === sportId);
+  const isRanked = !!sport && RANKED_SPORTS.includes(sport.name);
   const categories = useMemo(() => {
+    if (sport && RANKED_SPORTS.includes(sport.name)) return [{ code: 'OVERALL', label: 'Overall ranking', format: 'Overall' }];
     const cfg = getScheduleConfig(sport?.name, sport?.sportType);
     return cfg.formats.length
       ? cfg.formats.flatMap((f) => f.options.map((o) => ({ code: o.code, label: o.label, format: f.label })))
@@ -70,7 +74,7 @@ export default function EventStandingsPage() {
 
   const finalize = async () => {
     if (!data) return;
-    const label = `${data.sport.name} ${categoryDisplayName(category)}`;
+    const label = `${data.sport.name} ${category === 'OVERALL' ? 'overall ranking' : categoryDisplayName(category)}`;
     if (
       !confirm(
         `${data.finalized ? 'Re-finalize' : 'Finalize'} ${label}?\n\nThe 1st, 2nd and 3rd place points are credited to the clubs and the leaderboard is updated.` +
@@ -123,10 +127,11 @@ export default function EventStandingsPage() {
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold tracking-tight text-navy-950">Event Standings</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">Badminton, Carrom & Chess</span>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">All sports</span>
           </div>
           <p className="text-xs text-slate-500">
-            Badminton, Carrom and Chess matches award no points. Each event is ranked by match wins, and finalizing it credits the 1st, 2nd and 3rd place points to the
+            <strong>BGMI, Football and Cricket</strong> pay their match-win points per match, and the overall team ranking (total match points) pays the
+            winner, runner-up and third place points when finalized. <strong>Badminton, Carrom and Chess</strong> matches award no points. Each event is ranked, and finalizing it credits the 1st, 2nd and 3rd place points to the
             leaderboard.
           </p>
         </div>
@@ -185,7 +190,7 @@ export default function EventStandingsPage() {
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-extrabold text-xs uppercase tracking-wider text-navy-950 flex items-center gap-2">
                 <Medal className="w-4 h-4 text-blue-600" />
-                {sport?.name} {categoryDisplayName(category)} standings
+                {sport?.name} {category === 'OVERALL' ? 'overall ranking' : categoryDisplayName(category)} {category === 'OVERALL' ? '(by total match points)' : 'standings'}
               </h3>
               {data && (
                 <span className="text-[11px] text-slate-500">
@@ -206,6 +211,7 @@ export default function EventStandingsPage() {
                       <th className="py-2 px-4">Player / Team</th>
                       <th className="py-2 px-4">Clubs</th>
                       <th className="py-2 px-4 text-center">Played</th>
+                      {isRanked && <th className="py-2 px-4 text-center">Points</th>}
                       <th className="py-2 px-4 text-center">Won</th>
                       <th className="py-2 px-4 text-center">Lost</th>
                     </tr>
@@ -229,6 +235,7 @@ export default function EventStandingsPage() {
                           </span>
                         </td>
                         <td className="py-2.5 px-4 text-center font-mono">{s.played}</td>
+                        {isRanked && <td className="py-2.5 px-4 text-center font-mono font-black text-navy-950">{s.points}</td>}
                         <td className="py-2.5 px-4 text-center font-mono font-bold text-emerald-700">{s.wins}</td>
                         <td className="py-2.5 px-4 text-center font-mono text-slate-500">{s.losses}</td>
                       </tr>
@@ -265,7 +272,7 @@ export default function EventStandingsPage() {
 
             {hasTie && (
               <p className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
-                Some of the top 3 are tied on wins and losses. Check the placements below and adjust them before finalizing.
+                Some of the top 3 are tied. Check the placements below and adjust them before finalizing.
               </p>
             )}
 
