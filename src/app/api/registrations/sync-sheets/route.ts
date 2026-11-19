@@ -100,7 +100,7 @@ export async function POST(req: Request) {
           Gender: 'FEMALE',
           Age: '22',
           'Club Preference': 'Titan Warriors',
-          'Sport(s) Selected': 'Table Tennis Singles, Badminton Doubles',
+          'Sport(s) Selected': 'Carrom Singles, Badminton Doubles',
         },
         {
           Timestamp: timestamp,

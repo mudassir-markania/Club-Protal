@@ -51,7 +51,7 @@ export default function RefereeLeaderboardPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Read-only official rankings of the 5 houses across all 8 sports, calculated via automatic unique-club points distribution.
+              Read-only official rankings of the 5 houses across all 6 sports, calculated via automatic unique-club points distribution.
             </p>
           </div>
 

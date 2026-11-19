@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Official cumulative rankings of the 5 houses across all 8 sports derived from approved unique-club points distributions.
+                Official cumulative rankings of the 5 houses across all 6 sports derived from approved unique-club points distributions.
               </p>
             </div>
           </div>
@@ -189,7 +189,7 @@ export default function LeaderboardPage() {
                     House {championClub.name} Wins the Championship!
                   </h2>
                   <p className="text-xs font-semibold text-navy-900/80 mt-1">
-                    With an unbeatable total of {Number(championClub.totalPoints || 0).toFixed(2)} points across the 8 sports.
+                    With an unbeatable total of {Number(championClub.totalPoints || 0).toFixed(2)} points across the 6 sports.
                   </p>
                 </div>
               </div>

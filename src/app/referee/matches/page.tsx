@@ -61,10 +61,8 @@ export default function RefereeMatchesPage() {
     { label: 'Carrom', value: 'Carrom' },
     { label: 'Badminton', value: 'Badminton' },
     { label: 'Chess', value: 'Chess' },
-    { label: 'Table Tennis', value: 'Table Tennis' },
     { label: 'Cricket', value: 'Cricket' },
     { label: 'Football', value: 'Football' },
-    { label: 'Treasure Hunt', value: 'Treasure Hunt' },
   ];
 
   const filteredMatches = matches.filter((m) => {

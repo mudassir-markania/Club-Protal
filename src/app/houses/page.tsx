@@ -141,7 +141,7 @@ const HOUSES_FULL_DATA: HouseDetail[] = [
     athletes: [
       { name: 'Vikramaditya Singh', sport: 'Badminton', role: 'Singles Seed #1', status: 'Captain' },
       { name: 'Riddhi Sen', sport: 'Badminton', role: 'Women’s Singles', status: 'Vice Captain' },
-      { name: 'Pranav Jha', sport: 'Table Tennis', role: 'Singles Champ', status: 'Active' },
+      { name: 'Pranav Jha', sport: 'Carrom', role: 'Singles Champ', status: 'Active' },
       { name: 'Aditi Rao', sport: 'Blitz Chess', role: 'Board 1 Master', status: 'Active' },
       { name: 'Farhan Ali', sport: 'Football', role: 'Midfield Playmaker', status: 'Active' },
       { name: 'Sanya Mirza', sport: 'Athletics', role: 'Relay Anchor', status: 'Active' },
@@ -168,12 +168,12 @@ const HOUSES_FULL_DATA: HouseDetail[] = [
       year: 'Third Year Civil',
     },
     narrative:
-      'The stamina engine of the university. Built on iron discipline and high aerobic endurance, Spartans dominate long-distance heats, shot-put, and fiercely contest table tennis doubles.',
+      'The stamina engine of the university. Built on iron discipline and high aerobic endurance, Spartans dominate long-distance heats, shot-put, and fiercely contest carrom doubles.',
     heroImage:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuATP42Sfu3lffWOxOPFEGm1S_9k8tfnGu_z0HEjaERDGY0NtQRoPDozZja1mdCqEyYdVf2F849G2NiXvKDCw9K7KEExLkxN982wUQ0vf_GIBO9qrW2AWrXknjlfq9EmVWOoOUws587WQ_ufk9PIrK1vI4CcCw6UR4E5P-72SgfZpBxGFZOcdh3VqhXLV4WCqMbX0JabrfgxJcP_PjqWfp8Aok2Fq1bxVV7hPSx3GO6L',
     athletes: [
       { name: 'Devendra Nair', sport: 'Athletics', role: 'Decathlon / Relays', status: 'Captain' },
-      { name: 'Tanmay Joshi', sport: 'Table Tennis', role: 'Doubles Ace', status: 'Vice Captain' },
+      { name: 'Tanmay Joshi', sport: 'Carrom', role: 'Doubles Ace', status: 'Vice Captain' },
       { name: 'Gaurav Gill', sport: 'Cricket T10', role: 'Middle Order', status: 'Active' },
       { name: 'Megha Nair', sport: 'Basketball', role: 'Power Forward', status: 'Active' },
       { name: 'Arvind Swamy', sport: 'Football', role: 'Sweeper Keeper', status: 'Active' },
@@ -210,7 +210,7 @@ const HOUSES_FULL_DATA: HouseDetail[] = [
       { name: 'Priya Sharma', sport: 'Badminton', role: 'Mixed Doubles', status: 'Active' },
       { name: 'Naveen Raj', sport: 'Football', role: 'Fullback', status: 'Active' },
       { name: 'Kiran Deep', sport: 'Blitz Chess', role: 'Board 2 Master', status: 'Active' },
-      { name: 'Shreya Roy', sport: 'Table Tennis', role: 'Singles', status: 'Active' },
+      { name: 'Shreya Roy', sport: 'Carrom', role: 'Singles', status: 'Active' },
     ],
   },
 ];

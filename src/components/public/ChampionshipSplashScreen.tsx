@@ -77,7 +77,7 @@ export default function ChampionshipSplashScreen({
             HOUSE CHAMPIONSHIP
           </h1>
           <p className="text-[11px] font-mono tracking-widest text-[#C6A04A] font-semibold uppercase">
-            5 Houses • 8 Sports • One Champion
+            5 Houses • 6 Sports • One Champion
           </p>
         </div>
 

@@ -94,7 +94,7 @@ export default function PointsHistoryPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Complete verifiable ledger of all approved points distributed across the 5 houses and 7 championship sports.
+              Complete verifiable ledger of all approved points distributed across the 5 houses and 6 championship sports.
             </p>
           </div>
 

@@ -360,7 +360,7 @@ export default function MatchesPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Schedule competitions, assign certified referees, and verify incoming points distributions across the 8 sports.
+              Schedule competitions, assign certified referees, and verify incoming points distributions across the 6 sports.
             </p>
           </div>
 
@@ -453,7 +453,7 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          {/* 8 Sports Pills */}
+          {/* 6 Sports Pills */}
           <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100 text-xs">
             <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mr-1 shrink-0">Sport:</span>
             <button

@@ -363,7 +363,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* 2-Column Core Layout: 5 Houses Standings & 7 Championship Sports */}
+        {/* 2-Column Core Layout: 5 Houses Standings & 6 Championship Sports */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Column 1: 5 Houses Current Standings (2 cols) */}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
@@ -373,7 +373,7 @@ export default function AdminDashboardPage() {
                   <Trophy className="w-4 h-4 text-amber-500" />
                   <span>The 5 Houses — Current Standings</span>
                 </h3>
-                <p className="text-xs text-slate-500">Total verified points across all 8 sports</p>
+                <p className="text-xs text-slate-500">Total verified points across all 6 sports</p>
               </div>
               <Link
                 href="/admin/leaderboard"
@@ -425,14 +425,14 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Column 2: 7 Championship Sports Quick Glance */}
+          {/* Column 2: 6 Championship Sports Quick Glance */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between">
             <div>
               <div className="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-extrabold text-navy-950 uppercase tracking-wider flex items-center gap-2">
                     <Medal className="w-4 h-4 text-blue-600" />
-                    <span>7 Championship Sports</span>
+                    <span>6 Championship Sports</span>
                   </h3>
                   <p className="text-xs text-slate-500">Disciplines and competition formats</p>
                 </div>

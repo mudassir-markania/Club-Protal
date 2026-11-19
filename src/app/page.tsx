@@ -153,14 +153,14 @@ const DISCIPLINES_DATA = [
     rules: 'BWF standard rules, 21-point rally scoring system, sudden death deuce up to 30 points.',
   },
   {
-    id: 'table-tennis',
-    name: 'Table Tennis',
+    id: 'carrom',
+    name: 'Carrom',
     category: 'Indoor',
     icon: 'sports_kabaddi',
-    pointsMax: '50 PTS MAX',
-    fixturesCount: '14 Fixtures',
-    description: 'Rapid rally tournament on ITTF standard boards with spin tracking.',
-    rules: 'Best of 5 games to 11 points, alternate service every 2 points, ITTF regulation balls.',
+    pointsMax: '40 PTS MAX',
+    fixturesCount: '12 Fixtures',
+    description: 'Classic precision board championship featuring singles, doubles, and queen cover point systems.',
+    rules: 'Points limit 25 or 8 boards. White 1 pt, Black 2 pts, Queen 3 pts. Immediate confirmation cover required on queen pocketing.',
   },
   {
     id: 'chess',
@@ -862,11 +862,11 @@ export default function HomePage() {
                   </h2>
                 </div>
                 <p className="text-sm text-[#45464f] max-w-md">
-                  Across physical grounds and virtual arenas, points are calculated meticulously across 8 sanctioned championship disciplines.
+                  Across physical grounds and virtual arenas, points are calculated meticulously across 6 sanctioned championship disciplines.
                 </p>
               </div>
 
-              {/* 8 Sports Grid */}
+              {/* 6 Sports Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {DISCIPLINES_DATA.map((sport) => (
                   <div

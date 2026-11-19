@@ -68,7 +68,7 @@ export async function seedMongoDatabase() {
     cricketTeams.push(teamA, teamB);
   }
 
-  console.log('4. Seeding 7 Championship Sports...');
+  console.log('4. Seeding 6 Championship Sports...');
   const sportsData = [
     {
       name: 'BGMI',
@@ -121,18 +121,6 @@ export async function seedMongoDatabase() {
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
     },
     {
-      name: 'Table Tennis',
-      category: 'Racquet',
-      icon: 'Activity',
-      sportType: 'INDIVIDUAL',
-      maxParticipants: 2,
-      allowsMixedClubs: false,
-      pointsEntryMethod: 'BOTH',
-      positionPoints: JSON.stringify({ '1': 50, '2': 30, '3': 20 }),
-      scoringConfig: JSON.stringify({ type: 'sets', setsToWin: 3, pointsPerSet: 11 }),
-      pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
-    },
-    {
       name: 'Cricket',
       category: 'Outdoor',
       icon: 'Flame',
@@ -154,18 +142,6 @@ export async function seedMongoDatabase() {
       pointsEntryMethod: 'MANUAL',
       positionPoints: JSON.stringify({ '1': 100, '2': 60, '3': 40 }),
       scoringConfig: JSON.stringify({ halves: 2, minutesPerHalf: 20 }),
-      pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
-    },
-    {
-      name: 'Treasure Hunt',
-      category: 'Adventure Quest',
-      icon: 'Compass',
-      sportType: 'SQUAD',
-      maxParticipants: 5,
-      allowsMixedClubs: true,
-      pointsEntryMethod: 'POSITION',
-      positionPoints: JSON.stringify({ '1': 75, '2': 50, '3': 35, '4': 20, '5': 10 }),
-      scoringConfig: JSON.stringify({ type: 'clues_found', timeBased: true }),
       pointsDistribution: JSON.stringify({ uniqueClubSplit: true }),
     },
   ];
@@ -227,14 +203,14 @@ export async function seedMongoDatabase() {
       name: 'Sarah Jenkins',
       email: 'ref.sarah@sportsportal.com',
       phone: '+1 555-0193',
-      sportNames: ['Badminton', 'Table Tennis', 'Carrom'],
+      sportNames: ['Badminton', 'Carrom'],
     },
     {
       refereeCode: 'REF-003',
       name: 'David Okafor',
       email: 'ref.david@sportsportal.com',
       phone: '+1 555-0194',
-      sportNames: ['Chess', 'BGMI', 'Football', 'Treasure Hunt'],
+      sportNames: ['Chess', 'BGMI', 'Football'],
     },
   ];
 

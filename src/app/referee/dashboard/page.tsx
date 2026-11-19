@@ -143,10 +143,8 @@ export default function RefereeDashboardPage() {
     { label: 'Carrom', value: 'Carrom' },
     { label: 'Badminton', value: 'Badminton' },
     { label: 'Chess', value: 'Chess' },
-    { label: 'Table Tennis', value: 'Table Tennis' },
     { label: 'Cricket', value: 'Cricket' },
     { label: 'Football', value: 'Football' },
-    { label: 'Treasure Hunt', value: 'Treasure Hunt' },
   ];
 
   const filteredMatches = matches.filter((m) => {
@@ -235,7 +233,7 @@ export default function RefereeDashboardPage() {
                         : 'bg-navy-800/80 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-700'
                     }`}
                   >
-                    Sarah (Badminton / TT / Carrom)
+                    Sarah (Badminton / Carrom)
                   </button>
                   <button
                     type="button"
@@ -247,7 +245,7 @@ export default function RefereeDashboardPage() {
                         : 'bg-navy-800/80 text-navy-300 border-navy-700 hover:text-white hover:bg-navy-700'
                     }`}
                   >
-                    David (Chess / BGMI / Treasure Hunt)
+                    David (Chess / BGMI / Football)
                   </button>
                 </div>
               </div>
@@ -280,7 +278,7 @@ export default function RefereeDashboardPage() {
             </span>
             <p className="text-2xl font-extrabold text-navy-950">{matches.length}</p>
             <div className="flex items-center gap-1 mt-1 text-[11px] text-slate-500 truncate font-medium">
-              Across 8 Championship Sports
+              Across 6 Championship Sports
             </div>
           </div>
 
@@ -440,7 +438,7 @@ export default function RefereeDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredMatches.map((match) => {
                 const participants = match.participants || [];
-                const isBgmiOrSquad = match.sport?.category === 'SQUAD' || match.sport?.category === 'Adventure Quest' || match.sport?.sportType === 'SQUAD' || match.sport?.name === 'BGMI' || match.sport?.name === 'Treasure Hunt';
+                const isBgmiOrSquad = match.sport?.category === 'SQUAD' || match.sport?.category === 'Adventure Quest' || match.sport?.sportType === 'SQUAD' || match.sport?.name === 'BGMI';
                 const isSubmitted = match.status === 'SUBMITTED';
                 const isCompleted = match.status === 'COMPLETED';
 

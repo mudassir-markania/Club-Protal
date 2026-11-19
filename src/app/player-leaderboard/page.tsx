@@ -140,7 +140,7 @@ export default function PlayerLeaderboardPage() {
           </span>
         </div>
 
-        {/* 8 Sports Category Filter Pills */}
+        {/* 6 Sports Category Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             onClick={() => setSelectedSport('')}

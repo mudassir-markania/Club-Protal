@@ -151,7 +151,7 @@ const SPORT_POINTS_MATRIX = [
   { sport: 'Football', DOM: 90, MAV: 50, ALP: 60, SPA: 45, PHX: 30 },
   { sport: 'Badminton', DOM: 45, MAV: 40, ALP: 60, SPA: 35, PHX: 30 },
   { sport: 'Basketball', DOM: 60, MAV: 75, ALP: 45, SPA: 40, PHX: 55 },
-  { sport: 'Table Tennis', DOM: 40, MAV: 35, ALP: 50, SPA: 50, PHX: 25 },
+  { sport: 'Carrom', DOM: 40, MAV: 35, ALP: 50, SPA: 50, PHX: 25 },
   { sport: 'Blitz Chess', DOM: 45, MAV: 30, ALP: 50, SPA: 35, PHX: 40 },
   { sport: 'Track & Field', DOM: 80, MAV: 60, ALP: 45, SPA: 70, PHX: 45 },
   { sport: 'BGMI Esports', DOM: 20, MAV: 40, ALP: 30, SPA: 15, PHX: 40 },

@@ -39,16 +39,6 @@ const INITIAL_SPORTS = [
     description: 'Intense 21-point rally format on Olympic sprung wooden courts across Men’s Singles, Women’s Singles, and Mixed Doubles categories.',
   },
   {
-    id: 'sport-tt',
-    name: 'Table Tennis',
-    category: 'Racquet',
-    tournamentFormat: '11-Point Fast Table',
-    venue: 'Table Tennis Hall',
-    timing: 'Nov 25th - 27th',
-    rulesSummary: 'ITTF service rotation every 2 points. Best of 5 sets to 11 points. 2-point clear lead required upon reaching 10-all.',
-    description: 'Lightning reflex table tennis on international standard tables with professional referees and sudden death deuce rules.',
-  },
-  {
     id: 'sport-chess',
     name: 'Chess',
     category: 'Mind Sport',
@@ -77,16 +67,6 @@ const INITIAL_SPORTS = [
     timing: 'Nov 27th - 28th',
     rulesSummary: 'Official esports scoring matrix: 15 pts for Winner Winner Chicken Dinner, 1 pt per verified kill. 4 maps played.',
     description: 'High-intensity mobile esports battle royale across custom low-latency campus LAN servers with live casting and spectator feeds.',
-  },
-  {
-    id: 'sport-mystery',
-    name: 'Mystery Game',
-    category: 'Special Quest',
-    tournamentFormat: 'Revealed on Nov 27th',
-    venue: 'Central Arena Plaza',
-    timing: 'Nov 27th, 04:00 PM',
-    rulesSummary: 'House captains submit 4 athletes. Rules and format unveiled live by the Tournament Director 10 minutes prior to kickoff.',
-    description: 'Surprise team challenge unlocked on tournament Day 3 with massive bonus championship points awarded to the podium finishers.',
   },
 ];
 
