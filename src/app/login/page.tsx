@@ -7,15 +7,18 @@ import {
   ArrowLeft,
   Lock,
   Mail,
+  User,
   AlertCircle,
-  ArrowRight,
   Eye,
   EyeOff,
   ShieldCheck,
   CheckCircle2,
-  KeyRound,
   Crown,
-  Sparkles,
+  Trophy,
+  ArrowRight,
+  LogIn,
+  HelpCircle,
+  X,
 } from 'lucide-react';
 
 interface QuickAccount {
@@ -24,39 +27,74 @@ interface QuickAccount {
   role: 'SUPER_ADMIN' | 'REFEREE';
   roleLabel: string;
   email: string;
+  sports: string;
   icon: string;
+  username: string;
 }
 
-const QUICK_ACCOUNTS: QuickAccount[] = [
-  { id: 'admin', name: 'Admin', role: 'SUPER_ADMIN', roleLabel: 'Super Admin', email: 'admin', icon: '👑' },
-  { id: 'marcus', name: 'Marcus', role: 'REFEREE', roleLabel: 'Referee (BGMI/Cricket/Football)', email: 'ref.marcus@sportsportal.com', icon: '⚽' },
-  { id: 'sarah', name: 'Sarah', role: 'REFEREE', roleLabel: 'Referee (Badminton/Carrom)', email: 'ref.sarah@sportsportal.com', icon: '🏸' },
-  { id: 'david', name: 'David', role: 'REFEREE', roleLabel: 'Referee (Chess/BGMI/Football)', email: 'ref.david@sportsportal.com', icon: '♟️' },
+const PRESET_ACCOUNTS: QuickAccount[] = [
+  {
+    id: 'admin',
+    name: 'Championship Director',
+    role: 'SUPER_ADMIN',
+    roleLabel: 'League Admin',
+    email: 'admin@sportsportal.com',
+    username: 'admin',
+    sports: 'Official Adjudication',
+    icon: '👑',
+  },
+  {
+    id: 'marcus',
+    name: 'Marcus Sterling',
+    role: 'REFEREE',
+    roleLabel: 'Field Referee',
+    email: 'ref.marcus@sportsportal.com',
+    username: 'marcus',
+    sports: 'BGMI • Cricket • Football',
+    icon: '⚽',
+  },
+  {
+    id: 'sarah',
+    name: 'Sarah Jenkins',
+    role: 'REFEREE',
+    roleLabel: 'Court Referee',
+    email: 'ref.sarah@sportsportal.com',
+    username: 'sarah',
+    sports: 'Badminton • Carrom',
+    icon: '🏸',
+  },
+  {
+    id: 'david',
+    name: 'David Okafor',
+    role: 'REFEREE',
+    roleLabel: 'Match Referee',
+    email: 'ref.david@sportsportal.com',
+    username: 'david',
+    sports: 'Chess • BGMI • Football',
+    icon: '♟️',
+  },
 ];
 
-export default function UnifiedLoginPage() {
+export default function ProfessionalLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin');
+  const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [activeTab, setActiveTab] = useState<'signin' | 'presets'>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [forgotNotice, setForgotNotice] = useState<string | null>(null);
-  const [selectedQuickId, setSelectedQuickId] = useState<string | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
-  const handleSelectQuickAccount = (account: QuickAccount) => {
-    setSelectedQuickId(account.id);
-    setEmail(account.email);
+  const handleSelectPreset = (account: QuickAccount) => {
+    setEmail(account.username);
     setPassword(account.role === 'SUPER_ADMIN' ? 'admin123' : 'referee123');
+    setActiveTab('signin');
     setError(null);
-    setForgotNotice(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setForgotNotice(null);
     setLoading(true);
 
     try {
@@ -88,128 +126,186 @@ export default function UnifiedLoginPage() {
   };
 
   return (
-    <div
-      className="h-screen max-h-screen w-full overflow-hidden bg-[#faf8ff] text-[#000f3f] flex flex-col justify-between relative select-none font-manrope antialiased"
-      style={{
-        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 81, 213, 0.08) 1px, transparent 0)',
-        backgroundSize: '24px 24px',
-      }}
-    >
-      {/* Ambient decorative lighting */}
-      <div className="absolute top-0 right-0 w-[500px] h-[450px] bg-gradient-to-bl from-[#dae2fd]/50 via-[#dae2fd]/15 to-transparent rounded-full blur-3xl pointer-events-none -mr-28 -mt-28" />
-      <div className="absolute bottom-0 left-0 w-[450px] h-[400px] bg-gradient-to-tr from-[#ffdbcb]/35 via-[#dae2fd]/15 to-transparent rounded-full blur-3xl pointer-events-none -ml-28 -mb-28" />
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#080d19] font-sans antialiased text-slate-100 selection:bg-amber-500 selection:text-black overflow-x-hidden">
+      {/* ================= LEFT BRANDED SHOWCASE PANEL (44% desktop) ================= */}
+      <section className="relative w-full lg:w-[44%] min-h-[460px] lg:min-h-screen bg-gradient-to-br from-[#060b17] via-[#091124] to-[#040813] flex flex-col justify-between p-6 sm:p-10 lg:p-14 border-b lg:border-b-0 lg:border-r border-rose-950/40 overflow-hidden">
+        {/* Subtle Diagonal Red Accent Strip along the dividing edge */}
+        <div className="hidden lg:block absolute top-0 bottom-0 right-0 w-[3px] bg-gradient-to-b from-rose-600 via-amber-500/80 to-blue-600 shadow-[0_0_15px_rgba(225,29,72,0.4)]" />
 
-      {/* Top Header Navigation */}
-      <header className="h-14 sm:h-16 shrink-0 z-20 bg-[#faf8ff]/85 backdrop-blur-xl border-b border-[#e2e7ff]/70 px-4 sm:px-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <img
-            alt="Apex Arena Crest Logo"
-            className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsYOXH0JYiyX1rmUrq9scGTZImP9xqWivkekIWmx1Ruo3otUd9tF9VRe8WIEtDDPKFqcNYPrtpXTIXrhPILhl9C2Uw5zIvtHrgYGOblFU_y9Yhx0x9Afb48VKHwvWODlmjYpYUyz_3yPcHKJKV9F_uUUhRi2EmHmOnbK1FUcl9_CtwK5i8ia2Y4vQEOzSc86Qw-nN0mJFIxB1L5GZVK5OaxLk0RGsSzIYuMPIrLWbc"
-          />
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-manrope text-base sm:text-lg font-bold uppercase tracking-tight text-[#000f3f] leading-none">
-                Apex Arena
+        {/* Ambient Glows */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+        {/* Top Left: Navigation link */}
+        <div className="relative z-10 flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all backdrop-blur-md group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1 text-amber-400" />
+            <span>Tournament Home</span>
+          </Link>
+
+          <span className="text-[11px] font-bold text-amber-400/90 tracking-widest uppercase px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+            Official Portal
+          </span>
+        </div>
+
+        {/* Center: Prestigious Emblem & Typography */}
+        <div className="relative z-10 my-auto py-8 lg:py-0 flex flex-col items-center text-center">
+          {/* Golden Trophy Emblem */}
+          <div className="relative mb-5 flex flex-col items-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-b from-amber-400/20 via-amber-500/10 to-transparent p-0.5 border border-amber-400/30 flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.15)] backdrop-blur-sm">
+              <div className="w-full h-full rounded-[22px] bg-[#070e1e]/90 flex items-center justify-center">
+                <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400 drop-shadow-[0_4px_12px_rgba(245,158,11,0.5)] animate-pulse" />
+              </div>
+            </div>
+
+            {/* APL Season 9 Mark */}
+            <div className="mt-3 flex flex-col items-center">
+              <span className="text-xl sm:text-2xl font-black tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 uppercase font-heading">
+                A P L
               </span>
-              <span className="px-1.5 py-0.5 rounded-md bg-[#dae2fd] text-[#000f3f] text-[9px] font-extrabold uppercase tracking-wider font-manrope">
-                APL S9
+              <span className="text-[10px] font-black tracking-[0.3em] text-amber-300/80 uppercase">
+                SEASON 9
               </span>
             </div>
-            <span className="text-[9px] sm:text-[10px] font-bold text-[#45464f] tracking-wider uppercase font-manrope mt-0.5">
-              NexCore Institute of Technology
-            </span>
           </div>
-        </Link>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-[#000f3f] hover:text-[#0051d5] font-extrabold px-3 py-1.5 rounded-lg border border-[#c6c5d0]/50 hover:border-[#000f3f] bg-white/80 transition-all font-manrope shadow-2xs group"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-          <span>Back to Arena</span>
-        </Link>
-      </header>
-
-      {/* Main Form Center (Zero Scroll, Perfectly Centered) */}
-      <main className="flex-1 min-h-0 z-10 flex items-center justify-center p-4">
-        <div className="w-full max-w-[430px] bg-white/95 backdrop-blur-2xl rounded-2xl border border-[#c6c5d0]/40 shadow-[0_16px_50px_-10px_rgba(0,15,63,0.12)] p-6 sm:p-7 flex flex-col gap-3.5">
-          {/* Card Header & Icon */}
-          <div className="text-center space-y-1">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#000f3f] to-[#0051d5] flex items-center justify-center text-white shadow-md mx-auto mb-1.5">
-              <KeyRound className="w-5 h-5 text-amber-300" />
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-[#000f3f] tracking-tight uppercase leading-none font-manrope">
-              Sign In
+          {/* Heading Block */}
+          <div className="space-y-2 max-w-md">
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.35em] text-slate-400 block font-heading">
+              WELCOME TO
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white capitalize font-serif leading-tight">
+              Account Portal
             </h1>
-            <p className="text-xs text-[#45464f] max-w-xs mx-auto leading-relaxed">
-              Sign in with your Referee or Admin account. Roles are authenticated and routed automatically.
+            <h2 className="text-base sm:text-lg font-bold text-amber-400 tracking-wide">
+              Apex Arena Championship
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed pt-2 max-w-sm mx-auto font-normal">
+              One portal for Referees and Championship Admins — manage match results, official PDF points distribution, and approved house standings.
             </p>
           </div>
 
-          {/* Quick Account Selector Chips (Inspired by reference for fast 1-click test) */}
-          <div className="p-2.5 rounded-xl bg-[#faf8ff] border border-[#e2e7ff] space-y-1.5">
-            <div className="flex items-center justify-between text-[10px] font-bold text-[#45464f] uppercase tracking-wider">
-              <span className="flex items-center gap-1 text-[#0051d5]">
-                <Crown className="w-3 h-3 text-amber-500" />
-                <span>Quick Fill</span>
+          {/* 5 Houses Badge Strip */}
+          <div className="mt-8 pt-6 border-t border-white/10 w-full max-w-xs flex items-center justify-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_#3b82f6]" /> Blue</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_#f43f5e]" /> Red</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" /> Green</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_#a855f7]" /> Purple</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]" /> Yellow</span>
+          </div>
+        </div>
+
+        {/* Bottom Left: Trust & Accreditation */}
+        <div className="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+          <span className="flex items-center gap-1.5 text-slate-400">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>NexCore Institute of Technology</span>
+          </span>
+          <span className="text-slate-400 font-semibold">256-Bit SSL Encrypted</span>
+        </div>
+      </section>
+
+      {/* ================= RIGHT AUTHENTICATION PANEL (56% desktop) ================= */}
+      <main className="w-full lg:w-[56%] min-h-[540px] lg:min-h-screen bg-[#e8ecf4] text-slate-900 flex flex-col items-center justify-center p-4 sm:p-8 lg:p-12 relative">
+        {/* Floating Card */}
+        <div className="w-full max-w-[460px] bg-white/95 backdrop-blur-2xl rounded-3xl border border-slate-300/80 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.18)] p-7 sm:p-9 md:p-10 flex flex-col gap-6">
+          {/* Card Header */}
+          <div className="space-y-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
+              Sign In
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Sign in with your Referee or Admin account
+            </p>
+          </div>
+
+          {/* Segmented Pill Switcher */}
+          <div className="p-1 rounded-2xl bg-slate-100 border border-slate-200 grid grid-cols-2 gap-1 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setActiveTab('signin')}
+              className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                activeTab === 'signin'
+                  ? 'bg-[#6b1124] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('presets')}
+              className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                activeTab === 'presets'
+                  ? 'bg-[#6b1124] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+              }`}
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-300" />
+              <span>Role Presets</span>
+            </button>
+          </div>
+
+          {/* Presets Tray (when tab is presets) */}
+          {activeTab === 'presets' && (
+            <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 animate-in fade-in slide-in-from-top-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+                Select a test account to auto-fill:
               </span>
-              <span className="text-[9px] text-[#808dc2] font-semibold">1-Click Test Credentials</span>
-            </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              {QUICK_ACCOUNTS.map((acc) => {
-                const isSelected = selectedQuickId === acc.id;
-                return (
+              <div className="grid grid-cols-1 gap-1.5">
+                {PRESET_ACCOUNTS.map((acc) => (
                   <button
                     key={acc.id}
                     type="button"
-                    onClick={() => handleSelectQuickAccount(acc)}
-                    className={`py-1 px-1.5 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center ${
-                      isSelected
-                        ? 'bg-[#000f3f] border-[#000f3f] text-white shadow-2xs'
-                        : 'bg-white border-[#c6c5d0]/60 text-[#000f3f] hover:border-[#0051d5] hover:bg-blue-50/50'
-                    }`}
+                    onClick={() => handleSelectPreset(acc)}
+                    className="w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-rose-700/60 hover:bg-rose-50/40 transition-all flex items-center justify-between group cursor-pointer"
                   >
-                    <span className="text-xs leading-none mb-0.5">{acc.icon}</span>
-                    <span className="text-[10px] font-extrabold truncate w-full">{acc.name}</span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-lg">{acc.icon}</span>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span>{acc.name}</span>
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700">
+                            {acc.roleLabel}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-500">{acc.sports}</div>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-[#6b1124] opacity-0 group-hover:opacity-100 transition-opacity">
+                      Load &rarr;
+                    </span>
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Error Banner */}
           {error && (
             <div
               role="alert"
               aria-live="polite"
-              className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+              className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in"
             >
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
-              <span className="leading-tight">{error}</span>
-            </div>
-          )}
-
-          {/* Forgot Password Notice */}
-          {forgotNotice && (
-            <div
-              role="status"
-              aria-live="polite"
-              className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium flex items-center gap-2 animate-in fade-in"
-            >
-              <Sparkles className="w-4 h-4 shrink-0 text-amber-600" />
-              <span className="leading-tight">{forgotNotice}</span>
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+              <span className="leading-snug">{error}</span>
             </div>
           )}
 
           {/* Form */}
-          <form method="POST" onSubmit={handleSubmit} noValidate className="space-y-3">
+          <form method="POST" onSubmit={handleSubmit} noValidate className="space-y-4">
+            {/* Username/Email Input */}
             <div>
               <label
                 htmlFor="username"
-                className="block text-[11px] font-extrabold text-[#000f3f] uppercase tracking-wider mb-1 font-manrope"
+                className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
               >
-                Email / Username
+                Email, Mobile, or Admin Username
               </label>
               <div className="relative">
                 <input
@@ -224,21 +320,19 @@ export default function UnifiedLoginPage() {
                   required
                   aria-invalid={!!error}
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setSelectedQuickId(null);
-                  }}
-                  placeholder="e.g. admin or ref.marcus@sportsportal.com"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#faf8ff] border border-[#c6c5d0]/70 text-[#000f3f] text-xs placeholder:text-[#808dc2] outline-none focus:bg-white focus:border-[#0051d5] focus:ring-2 focus:ring-[#0051d5]/15 transition-all font-medium font-manrope"
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin or ref.marcus@sportsportal.com"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-100/80 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#6b1124] focus:ring-4 focus:ring-rose-900/10 transition-all font-medium"
                 />
-                <Mail className="w-4 h-4 text-[#808dc2] absolute left-3 top-2.5 pointer-events-none" />
+                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
               </div>
             </div>
 
+            {/* Password Input */}
             <div>
               <label
                 htmlFor="password"
-                className="block text-[11px] font-extrabold text-[#000f3f] uppercase tracking-wider mb-1 font-manrope"
+                className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
               >
                 Password
               </label>
@@ -254,99 +348,133 @@ export default function UnifiedLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-[#faf8ff] border border-[#c6c5d0]/70 text-[#000f3f] text-xs placeholder:text-[#808dc2] outline-none focus:bg-white focus:border-[#0051d5] focus:ring-2 focus:ring-[#0051d5]/15 transition-all font-medium font-manrope"
+                  className="w-full pl-11 pr-11 py-3 rounded-xl bg-slate-100/80 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#6b1124] focus:ring-4 focus:ring-rose-900/10 transition-all font-medium"
                 />
-                <Lock className="w-4 h-4 text-[#808dc2] absolute left-3 top-2.5 pointer-events-none" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-[#808dc2] hover:text-[#000f3f] transition-colors cursor-pointer"
-                  tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#6b1124] rounded-md"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Helper row: Referees: email • Admins: username + Forgot password? */}
-            <div className="flex items-center justify-between text-[11px] text-[#45464f] pt-0.5">
-              <span className="text-[10px] text-[#808dc2]">
+            {/* Sub-label helper & Forgot password */}
+            <div className="flex items-center justify-between text-xs pt-0.5">
+              <span className="text-[11px] text-slate-500 font-medium">
                 Referees: email • Admins: username
               </span>
               <button
                 type="button"
-                onClick={() =>
-                  setForgotNotice(
-                    'Default passwords are admin123 and referee123. To reset, contact the Championship Director.'
-                  )
-                }
-                className="text-[10px] font-bold text-[#0051d5] hover:underline cursor-pointer"
+                onClick={() => setShowHelpModal(true)}
+                className="text-[11px] font-bold text-[#6b1124] hover:text-rose-900 hover:underline cursor-pointer"
               >
                 Forgot password?
               </button>
             </div>
 
-            {/* Remember Me & Accreditation badge */}
-            <div className="flex items-center justify-between text-xs pt-0.5">
-              <label className="flex items-center gap-2 cursor-pointer text-[#45464f] hover:text-[#000f3f] transition-colors">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-[#c6c5d0] text-[#0051d5] focus:ring-[#0051d5] accent-[#0051d5] cursor-pointer"
-                />
-                <span className="text-[11px] font-semibold">Remember me</span>
-              </label>
-
-              <div className="flex items-center gap-1 text-[11px] font-bold text-[#0051d5]">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Portal</span>
-              </div>
-            </div>
-
-            {/* Primary Submit Button */}
+            {/* Primary Action Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 sm:py-3 rounded-xl bg-[#000f3f] hover:bg-[#0051d5] active:bg-[#000a28] text-white font-extrabold text-xs uppercase tracking-wider transition-all duration-150 shadow-md shadow-[#000f3f]/15 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer font-manrope mt-2 group"
+              className="w-full py-3.5 rounded-xl bg-[#6b1124] hover:bg-[#83182d] active:bg-[#500c1a] text-white font-extrabold text-sm tracking-wide transition-all duration-150 shadow-md shadow-rose-950/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-3 group"
             >
               {loading ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Verifying Credentials...</span>
+                  <span>Verifying...</span>
                 </>
               ) : (
                 <>
+                  <LogIn className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   <span>Sign In</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Under Card Quick Links */}
-          <div className="pt-2 border-t border-[#e2e7ff]/70 flex items-center justify-between text-[11px] font-bold text-[#45464f]">
-            <Link href="/" className="hover:text-[#0051d5] transition-colors flex items-center gap-1 group">
-              <span>Championship Arena</span>
-              <span className="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+          {/* Quick Footer Links matching reference */}
+          <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-600">
+            <Link
+              href="/points-rules"
+              className="hover:text-[#6b1124] transition-colors inline-flex items-center gap-1 group"
+            >
+              <span>Scoring Rules (PDF)</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <Link href="/leaderboard" className="hover:text-[#0051d5] transition-colors flex items-center gap-1 group">
+
+            <Link
+              href="/leaderboard"
+              className="hover:text-[#6b1124] transition-colors inline-flex items-center gap-1 group"
+            >
               <span>Leaderboards</span>
-              <span className="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
         </div>
+
+        {/* Mobile-only accreditation text */}
+        <div className="lg:hidden text-center mt-6 text-xs text-slate-500">
+          © 2026 NexCore Institute of Technology • APL Season 9
+        </div>
       </main>
 
-      {/* Bottom Footer (Compact 40px, Non-scrollable) */}
-      <footer className="h-10 shrink-0 z-20 border-t border-[#e2e7ff]/70 bg-[#faf8ff]/85 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between text-[10px] text-[#45464f] font-medium font-manrope">
-        <span>© 2026 NexCore Institute of Technology • APL Season 9</span>
-        <div className="flex items-center gap-1.5 text-[#000f3f] font-bold">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Role-Based Authentication</span>
+      {/* Forgot Password / Help Dialog */}
+      {showHelpModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 text-slate-900 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <HelpCircle className="w-5 h-5 text-[#6b1124]" />
+                <span>Default Access Credentials</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowHelpModal(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              For security, credential resets must be requested through the Tournament Director. You can use the baseline tournament accounts:
+            </p>
+            <div className="space-y-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div className="flex justify-between">
+                <strong>Super Admin:</strong>
+                <code className="text-blue-700">admin / admin123</code>
+              </div>
+              <div className="flex justify-between">
+                <strong>Referee Marcus:</strong>
+                <code className="text-blue-700">marcus / referee123</code>
+              </div>
+              <div className="flex justify-between">
+                <strong>Referee Sarah:</strong>
+                <code className="text-blue-700">sarah / referee123</code>
+              </div>
+              <div className="flex justify-between">
+                <strong>Referee David:</strong>
+                <code className="text-blue-700">david / referee123</code>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(false)}
+              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer"
+            >
+              Got it
+            </button>
+          </div>
         </div>
-      </footer>
+      )}
     </div>
   );
 }
