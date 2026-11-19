@@ -3,6 +3,24 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 
+// Helper to look up a field from a CSV row case-insensitively and ignoring non-alphanumeric chars
+function getField(row: any, aliases: string[]): string {
+  if (!row || typeof row !== 'object') return '';
+  const entries = Object.entries(row);
+  for (const [key, val] of entries) {
+    if (val === undefined || val === null) continue;
+    const cleanKey = key.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    for (const alias of aliases) {
+      const cleanAlias = alias.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanKey === cleanAlias || cleanKey.includes(cleanAlias)) {
+        const strVal = String(val).trim();
+        if (strVal.length > 0) return strVal;
+      }
+    }
+  }
+  return '';
+}
+
 export async function POST(req: Request) {
   try {
     const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
@@ -21,25 +39,41 @@ export async function POST(req: Request) {
     ]);
 
     const normalizeClub = (raw: string): any => {
-      if (!raw) return null;
+      if (!raw || typeof raw !== 'string') return null;
       const s = raw.toLowerCase().trim();
-      return (
-        clubs.find((c: any) => c.id.toLowerCase() === s) ||
-        clubs.find((c: any) => c.name.toLowerCase() === s) ||
-        clubs.find((c: any) => c.code.toLowerCase() === s) ||
-        (s.includes('mav') ? clubs.find((c: any) => c.code === 'MAV' || c.name === 'Blue') : null) ||
-        (s.includes('dom') ? clubs.find((c: any) => c.code === 'DOM' || c.name === 'Red') : null) ||
-        (s.includes('crw') || s.includes('crew') || s.includes('crown')
-          ? clubs.find((c: any) => c.code === 'CRW' || c.name === 'Yellow')
-          : null) ||
-        (s.includes('alp') || s.includes('alpha')
-          ? clubs.find((c: any) => c.code === 'ALP' || c.name === 'Green')
-          : null) ||
-        (s.includes('ryl') || s.includes('royal')
-          ? clubs.find((c: any) => c.code === 'RYL' || c.name === 'Purple')
-          : null) ||
-        clubs[0]
+
+      // 1. Direct ID, code, or exact name match
+      const direct = clubs.find(
+        (c: any) =>
+          (c.id && c.id.toLowerCase() === s) ||
+          (c.code && c.code.toLowerCase() === s) ||
+          (c.name && c.name.toLowerCase() === s)
       );
+      if (direct) return direct;
+
+      // 2. House Names / Codes / Color Aliases
+      // Blue -> Mavericks (MAV)
+      if (s.includes('blue') || s.includes('mav') || s === 'mav') {
+        return clubs.find((c: any) => c.code?.toUpperCase() === 'MAV' || c.name?.toLowerCase().includes('mav')) || clubs[0];
+      }
+      // Red -> Dominator (DOM)
+      if (s.includes('red') || s.includes('dom') || s === 'dom') {
+        return clubs.find((c: any) => c.code?.toUpperCase() === 'DOM' || c.name?.toLowerCase().includes('dom')) || clubs[1];
+      }
+      // Yellow -> Crown Crushers (CRW)
+      if (s.includes('yellow') || s.includes('crw') || s.includes('crown') || s.includes('crush') || s === 'crw') {
+        return clubs.find((c: any) => c.code?.toUpperCase() === 'CRW' || c.name?.toLowerCase().includes('crown')) || clubs[4];
+      }
+      // Green -> Alpha (ALP)
+      if (s.includes('green') || s.includes('alp') || s.includes('alpha') || s === 'alp') {
+        return clubs.find((c: any) => c.code?.toUpperCase() === 'ALP' || c.name?.toLowerCase().includes('alpha')) || clubs[2];
+      }
+      // Purple -> Royal Force (RYL)
+      if (s.includes('purple') || s.includes('ryl') || s.includes('royal') || s === 'ryl') {
+        return clubs.find((c: any) => c.code?.toUpperCase() === 'RYL' || c.name?.toLowerCase().includes('royal')) || clubs[3];
+      }
+
+      return null;
     };
 
     let importedCount = 0;
@@ -49,30 +83,31 @@ export async function POST(req: Request) {
     for (const row of records) {
       try {
         // Extract Name from common header variations
-        const name =
-          row['Participant Name'] ||
-          row['Player Name'] ||
-          row['Full Name'] ||
-          row['Name'] ||
-          row['name'] ||
-          '';
+        const cleanName = getField(row, [
+          'participantname',
+          'playername',
+          'fullname',
+          'athlete',
+          'name',
+        ]);
 
-        const cleanName = typeof name === 'string' ? name.trim() : '';
         if (!cleanName) {
           failedCount++;
           continue;
         }
 
         // Extract House/Club
-        const houseInput =
-          row['Assigned Club'] ||
-          row['Club'] ||
-          row['House'] ||
-          row['House Name'] ||
-          row['Club Preference'] ||
-          row['house'] ||
-          row['club'] ||
-          '';
+        const houseInput = getField(row, [
+          'assignedhouse',
+          'assignedclub',
+          'house',
+          'club',
+          'housename',
+          'clubpreference',
+          'team',
+          'color',
+          'housecolor',
+        ]);
 
         const club = normalizeClub(houseInput) || clubs[0];
         if (!club) {
@@ -94,12 +129,13 @@ export async function POST(req: Request) {
         }
 
         // Extract Gender
-        const rawGender = (row['Gender'] || row['gender'] || 'MALE').toUpperCase().trim();
+        const rawGender = getField(row, ['gender', 'sex']).toUpperCase();
         const gender = rawGender.startsWith('F') ? 'FEMALE' : rawGender.startsWith('O') ? 'OTHER' : 'MALE';
 
         // Extract Age
-        const rawAge = row['Age'] || row['age'] || null;
-        const age = rawAge ? parseInt(rawAge) : 22;
+        const rawAge = getField(row, ['age', 'years']);
+        const parsedAge = rawAge ? parseInt(rawAge) : 22;
+        const age = isNaN(parsedAge) ? 22 : parsedAge;
 
         // Auto-generate unique registration ID and internal identifier email
         const nameSlug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'athlete';
@@ -113,7 +149,7 @@ export async function POST(req: Request) {
             registrationId: regId,
             email,
             gender,
-            age: isNaN(age) ? 22 : age,
+            age,
             clubId: club.id,
             status: 'APPROVED',
             paymentStatus: 'PAID',
@@ -121,22 +157,24 @@ export async function POST(req: Request) {
         });
 
         // Extract and assign participating sports if provided
-        const rawSports =
-          row['Participating Sports'] ||
-          row['Sports'] ||
-          row['Sport'] ||
-          row['Sport(s) Selected'] ||
-          '';
+        const rawSports = getField(row, [
+          'participatingsports',
+          'participatingsport',
+          'sportsselected',
+          'sports',
+          'sport',
+        ]);
 
         if (rawSports && typeof rawSports === 'string') {
           const sportTokens = rawSports.split(/[,;/]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);
           for (const token of sportTokens) {
-            const matchedSport = sports.find(
-              (s: any) =>
-                s.name.toLowerCase() === token ||
-                s.name.toLowerCase().includes(token) ||
-                token.includes(s.name.toLowerCase())
-            );
+            const matchedSport = sports.find((s: any) => {
+              const sName = (s.name || '').toLowerCase();
+              if (sName === token) return true;
+              if (token === 'tt' && sName.includes('table tennis')) return true;
+              if (sName.includes(token) || token.includes(sName)) return true;
+              return false;
+            });
             if (matchedSport) {
               await db.playerSport.create({
                 data: {

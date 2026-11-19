@@ -43,6 +43,8 @@ export default function PlayersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
+  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+  const [clearingRoster, setClearingRoster] = useState(false);
 
   // Selected Player
   const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
@@ -72,7 +74,7 @@ export default function PlayersPage() {
 
   // Lock background scrolling and handle Escape key
   useEffect(() => {
-    if (isModalOpen || isViewModalOpen || isCsvModalOpen) {
+    if (isModalOpen || isViewModalOpen || isCsvModalOpen || isDeleteAllModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -82,6 +84,7 @@ export default function PlayersPage() {
         setIsModalOpen(false);
         setIsViewModalOpen(false);
         setIsCsvModalOpen(false);
+        setIsDeleteAllModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -89,7 +92,7 @@ export default function PlayersPage() {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isModalOpen, isViewModalOpen, isCsvModalOpen]);
+  }, [isModalOpen, isViewModalOpen, isCsvModalOpen, isDeleteAllModalOpen]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -227,16 +230,18 @@ export default function PlayersPage() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const text = event.target?.result as string;
-        if (!text) return;
+        const rawText = event.target?.result as string;
+        if (!rawText) return;
 
+        // Strip UTF-8 BOM if present from Excel exports
+        const text = rawText.replace(/^\uFEFF/, '');
         const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
         if (lines.length <= 1) {
           setCsvError('CSV file has no data rows.');
           return;
         }
 
-        const headers = lines[0].split(',').map((h) => h.replace(/^["'\s]+|["'\s]+$/g, '').trim());
+        const headers = lines[0].split(',').map((h) => h.replace(/^["'\s\uFEFF]+|["'\s\uFEFF]+$/g, '').trim());
         const rows: any[] = [];
 
         for (let i = 1; i < lines.length; i++) {
@@ -306,6 +311,24 @@ export default function PlayersPage() {
     }
   };
 
+  const handleClearAllRoster = async () => {
+    setClearingRoster(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/players', { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to clear athlete roster');
+
+      setSuccess(data.message || 'All athletes have been removed from roster.');
+      setIsDeleteAllModalOpen(false);
+      fetchData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setClearingRoster(false);
+    }
+  };
+
   const downloadSampleCsv = () => {
     const csvContent =
       'Participant Name,Assigned House,Gender,Participating Sports\n' +
@@ -372,6 +395,16 @@ export default function PlayersPage() {
               <Download className="w-4 h-4 text-slate-400" />
               Export Roster (CSV)
             </button>
+            {players.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsDeleteAllModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-lg border border-rose-200 shadow-2xs transition"
+              >
+                <Trash2 className="w-4 h-4 text-rose-600" />
+                Clear All Roster
+              </button>
+            )}
             <button
               onClick={handleOpenCreate}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold rounded-lg shadow-sm transition"
@@ -473,8 +506,8 @@ export default function PlayersPage() {
                     <tr key={player.id} className="hover:bg-slate-50/80 transition">
                       <td className="py-3.5 px-5">
                         <span className="font-bold text-slate-900 block text-xs">{player.name}</span>
-                        <span className="text-[11px] text-slate-400">
-                          {player.gender || 'MALE'} {player.age ? `• Age ${player.age}` : ''}
+                        <span className="text-[11px] text-slate-400 font-medium">
+                          {player.gender || 'MALE'}
                         </span>
                       </td>
                       <td className="py-3.5 px-5">
@@ -621,35 +654,19 @@ export default function PlayersPage() {
                       </select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                          Gender
-                        </label>
-                        <select
-                          value={formData.gender}
-                          onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                          className="w-full px-2.5 py-2 border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-600 outline-none text-xs"
-                        >
-                          <option value="MALE">Male</option>
-                          <option value="FEMALE">Female</option>
-                          <option value="OTHER">Other</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                          Age
-                        </label>
-                        <input
-                          type="number"
-                          min={10}
-                          max={70}
-                          value={formData.age}
-                          onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 20 })}
-                          className="w-full px-2.5 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none text-xs"
-                        />
-                      </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        Gender
+                      </label>
+                      <select
+                        value={formData.gender}
+                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-600 outline-none text-xs"
+                      >
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                      </select>
                     </div>
                   </div>
 
@@ -724,8 +741,8 @@ export default function PlayersPage() {
               <div className="px-6 py-4 bg-navy-900 text-white flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm text-white">{selectedPlayer.name}</h3>
-                  <span className="text-xs text-blue-300">
-                    {selectedPlayer.gender || 'MALE'} {selectedPlayer.age ? `• Age ${selectedPlayer.age}` : ''}
+                  <span className="text-xs text-blue-300 font-medium">
+                    {selectedPlayer.gender || 'MALE'}
                   </span>
                 </div>
                 <button
@@ -947,6 +964,59 @@ export default function PlayersPage() {
                     )}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* Modal: Confirm Clear All Roster */}
+        {mounted && isDeleteAllModalOpen && createPortal(
+          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
+              <div className="p-5 bg-rose-600 text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-rose-100" />
+                  <h3 className="font-bold text-sm">Clear All Athletes from Roster?</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteAllModalOpen(false)}
+                  className="p-1 text-rose-100 hover:text-white rounded"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-3 text-xs">
+                <p className="text-slate-700 font-semibold">
+                  Are you sure you want to remove all <strong>{players.length} registered athletes</strong> from the championship roster?
+                </p>
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-[11px] space-y-1">
+                  <p className="font-bold">⚠️ Warning: Irreversible Action</p>
+                  <p>
+                    This will permanently delete all athlete records and their sport assignments from the database.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteAllModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-100 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearAllRoster}
+                  disabled={clearingRoster}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>{clearingRoster ? 'Clearing Roster...' : `Yes, Delete All ${players.length} Athletes`}</span>
+                </button>
               </div>
             </div>
           </div>,

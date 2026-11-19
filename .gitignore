@@ -41,6 +41,8 @@ lerna-debug.log*
 *.sqlite-journal
 *.db
 *.db-journal
+backup-*.json
+*.backup.json
 
 # Testing & Coverage
 /coverage/

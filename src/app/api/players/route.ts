@@ -152,3 +152,29 @@ export async function POST(req: Request) {
   }
 }
 
+export async function DELETE(req: Request) {
+  try {
+    const user = await requireAuth(['SUPER_ADMIN', 'ADMIN']);
+
+    const { count } = await db.player.deleteMany({});
+    if (db.playerSport) {
+      await db.playerSport.deleteMany({});
+    }
+
+    await createAuditLog({
+      user,
+      action: 'DELETE_ALL_PLAYERS',
+      entity: 'Player',
+      recordId: 'ALL',
+      previousValue: { deletedCount: count },
+    });
+
+    return NextResponse.json({ success: true, message: `Successfully deleted ${count} players`, count });
+  } catch (error: any) {
+    if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+

@@ -1,3 +1,10 @@
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // Ignore fallback
+}
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
@@ -75,8 +82,16 @@ async function seed() {
 
   console.log('Seeding 10 Cricket Teams (2 per House)...');
   for (const c of clubs) {
-    await CricketTeam.findOneAndUpdate({ name: `${c.name} A` }, { _id: `crick-${c.code.toLowerCase()}-a`, name: `${c.name} A`, clubId: c._id, captainName: `${c.captainName} (A)`, status: 'ACTIVE' }, { upsert: true });
-    await CricketTeam.findOneAndUpdate({ name: `${c.name} B` }, { _id: `crick-${c.code.toLowerCase()}-b`, name: `${c.name} B`, clubId: c._id, captainName: `${c.name} Vice Captain (B)`, status: 'ACTIVE' }, { upsert: true });
+    await CricketTeam.findOneAndUpdate(
+      { _id: `crick-${c.code.toLowerCase()}-a` },
+      { $set: { name: `${c.name} A`, clubId: c._id, captainName: `${c.captainName} (A)`, status: 'ACTIVE' } },
+      { upsert: true }
+    );
+    await CricketTeam.findOneAndUpdate(
+      { _id: `crick-${c.code.toLowerCase()}-b` },
+      { $set: { name: `${c.name} B`, clubId: c._id, captainName: `${c.name} Vice Captain (B)`, status: 'ACTIVE' } },
+      { upsert: true }
+    );
   }
 
   console.log('Seeding 7 Sports...');
@@ -138,45 +153,113 @@ async function seed() {
   }
 
   // Athletes
-  const p1 = await Player.findOneAndUpdate({ registrationId: 'REG-MAV-101' }, { _id: 'ply-1', registrationId: 'REG-MAV-101', name: 'Alex Rivera', email: 'alex.rivera@housechampionship.com', clubId: 'club-mav', status: 'APPROVED' }, { upsert: true, new: true });
-  const p2 = await Player.findOneAndUpdate({ registrationId: 'REG-MAV-102' }, { _id: 'ply-2', registrationId: 'REG-MAV-102', name: 'David Miller', email: 'david.miller@housechampionship.com', clubId: 'club-mav', status: 'APPROVED' }, { upsert: true, new: true });
-  const p3 = await Player.findOneAndUpdate({ registrationId: 'REG-DOM-103' }, { _id: 'ply-3', registrationId: 'REG-DOM-103', name: 'Leo Vance', email: 'leo.vance@housechampionship.com', clubId: 'club-dom', status: 'APPROVED' }, { upsert: true, new: true });
-  const p4 = await Player.findOneAndUpdate({ registrationId: 'REG-ALP-104' }, { _id: 'ply-4', registrationId: 'REG-ALP-104', name: 'Ethan Hunt', email: 'ethan.hunt@housechampionship.com', clubId: 'club-alp', status: 'APPROVED' }, { upsert: true, new: true });
+  const p1 = await Player.findOneAndUpdate(
+    { registrationId: 'REG-MAV-101' },
+    {
+      $setOnInsert: { _id: 'ply-1' },
+      $set: { name: 'Alex Rivera', email: 'alex.rivera@housechampionship.com', clubId: 'club-mav', status: 'APPROVED' },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
+  const p2 = await Player.findOneAndUpdate(
+    { registrationId: 'REG-MAV-102' },
+    {
+      $setOnInsert: { _id: 'ply-2' },
+      $set: { name: 'David Miller', email: 'david.miller@housechampionship.com', clubId: 'club-mav', status: 'APPROVED' },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
+  const p3 = await Player.findOneAndUpdate(
+    { registrationId: 'REG-DOM-103' },
+    {
+      $setOnInsert: { _id: 'ply-3' },
+      $set: { name: 'Leo Vance', email: 'leo.vance@housechampionship.com', clubId: 'club-dom', status: 'APPROVED' },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
+  const p4 = await Player.findOneAndUpdate(
+    { registrationId: 'REG-ALP-104' },
+    {
+      $setOnInsert: { _id: 'ply-4' },
+      $set: { name: 'Ethan Hunt', email: 'ethan.hunt@housechampionship.com', clubId: 'club-alp', status: 'APPROVED' },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
 
   // Fixture: M-BGMI-01 with 3 unique clubs represented!
   const bgmi = sports.find((s) => s.name === 'BGMI');
-  const match = await Match.findOneAndUpdate({ matchCode: 'M-BGMI-01' }, {
-    _id: 'match-bgmi-01',
-    matchCode: 'M-BGMI-01',
-    sportId: bgmi._id,
-    round: 'Grand Finals - Erangel',
-    stageName: 'Championship Finals',
-    matchDate: '2026-11-26',
-    matchTime: '15:00',
-    venueId: venues[1]._id,
-    status: 'SCHEDULED',
-    notes: 'Squad 1 features 4 players from 3 unique clubs: 2 Mavericks, 1 Dominator, 1 Alpha.',
-  }, { upsert: true, new: true });
+  const match = await Match.findOneAndUpdate(
+    { matchCode: 'M-BGMI-01' },
+    {
+      $setOnInsert: { _id: 'match-bgmi-01' },
+      $set: {
+        matchCode: 'M-BGMI-01',
+        sportId: bgmi._id,
+        round: 'Grand Finals - Erangel',
+        stageName: 'Championship Finals',
+        matchDate: '2026-11-26',
+        matchTime: '15:00',
+        venueId: venues[1]._id,
+        status: 'SCHEDULED',
+        notes: 'Squad 1 features 4 players from 3 unique clubs: 2 Mavericks, 1 Dominator, 1 Alpha.',
+      },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
 
-  await MatchReferee.findOneAndUpdate({ matchId: match._id, refereeId: ref1._id }, { _id: 'mr-1', matchId: match._id, refereeId: ref1._id }, { upsert: true });
+  await MatchReferee.findOneAndUpdate(
+    { matchId: match._id, refereeId: ref1._id },
+    { $setOnInsert: { _id: 'mr-1' }, $set: { matchId: match._id, refereeId: ref1._id } },
+    { upsert: true }
+  );
 
-  const part1 = await MatchParticipant.findOneAndUpdate({ _id: 'part-bgmi-sq1' }, {
-    _id: 'part-bgmi-sq1',
-    matchId: match._id,
-    teamName: 'Squad Titans',
-    score: 100,
-    rank: 1,
-    isWinner: true,
-  }, { upsert: true, new: true });
+  const part1 = await MatchParticipant.findOneAndUpdate(
+    { _id: 'part-bgmi-sq1' },
+    {
+      $setOnInsert: { _id: 'part-bgmi-sq1' },
+      $set: {
+        matchId: match._id,
+        teamName: 'Squad Titans',
+        score: 100,
+        rank: 1,
+        isWinner: true,
+      },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
 
-  await MatchParticipantPlayer.findOneAndUpdate({ participantId: part1._id, playerId: p1._id }, { _id: 'mpp-1', participantId: part1._id, playerId: p1._id, clubId: 'club-mav' }, { upsert: true });
-  await MatchParticipantPlayer.findOneAndUpdate({ participantId: part1._id, playerId: p2._id }, { _id: 'mpp-2', participantId: part1._id, playerId: p2._id, clubId: 'club-mav' }, { upsert: true });
-  await MatchParticipantPlayer.findOneAndUpdate({ participantId: part1._id, playerId: p3._id }, { _id: 'mpp-3', participantId: part1._id, playerId: p3._id, clubId: 'club-dom' }, { upsert: true });
-  await MatchParticipantPlayer.findOneAndUpdate({ participantId: part1._id, playerId: p4._id }, { _id: 'mpp-4', participantId: part1._id, playerId: p4._id, clubId: 'club-alp' }, { upsert: true });
+  await MatchParticipantPlayer.findOneAndUpdate(
+    { participantId: part1._id, playerId: p1._id },
+    { $setOnInsert: { _id: 'mpp-1' }, $set: { participantId: part1._id, playerId: p1._id, clubId: 'club-mav' } },
+    { upsert: true }
+  );
+  await MatchParticipantPlayer.findOneAndUpdate(
+    { participantId: part1._id, playerId: p2._id },
+    { $setOnInsert: { _id: 'mpp-2' }, $set: { participantId: part1._id, playerId: p2._id, clubId: 'club-mav' } },
+    { upsert: true }
+  );
+  await MatchParticipantPlayer.findOneAndUpdate(
+    { participantId: part1._id, playerId: p3._id },
+    { $setOnInsert: { _id: 'mpp-3' }, $set: { participantId: part1._id, playerId: p3._id, clubId: 'club-dom' } },
+    { upsert: true }
+  );
+  await MatchParticipantPlayer.findOneAndUpdate(
+    { participantId: part1._id, playerId: p4._id },
+    { $setOnInsert: { _id: 'mpp-4' }, $set: { participantId: part1._id, playerId: p4._id, clubId: 'club-alp' } },
+    { upsert: true }
+  );
 
   // Settings
-  await TournamentSetting.findOneAndUpdate({ key: 'CHAMPIONSHIP_STATUS' }, { _id: 'set-1', key: 'CHAMPIONSHIP_STATUS', value: 'ACTIVE', description: 'Championship status' }, { upsert: true });
-  await TournamentSetting.findOneAndUpdate({ key: 'CURRENT_ROTATION_INDEX' }, { _id: 'set-2', key: 'CURRENT_ROTATION_INDEX', value: '0', description: 'Rotation index' }, { upsert: true });
+  await TournamentSetting.findOneAndUpdate(
+    { key: 'CHAMPIONSHIP_STATUS' },
+    { $setOnInsert: { _id: 'set-1' }, $set: { key: 'CHAMPIONSHIP_STATUS', value: 'ACTIVE', description: 'Championship status' } },
+    { upsert: true }
+  );
+  await TournamentSetting.findOneAndUpdate(
+    { key: 'CURRENT_ROTATION_INDEX' },
+    { $setOnInsert: { _id: 'set-2' }, $set: { key: 'CURRENT_ROTATION_INDEX', value: '0', description: 'Rotation index' } },
+    { upsert: true }
+  );
 
   console.log('✅ MongoDB Seeding finished successfully!');
   await mongoose.disconnect();

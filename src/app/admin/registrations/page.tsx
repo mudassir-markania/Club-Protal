@@ -443,7 +443,7 @@ export default function RegistrationsPage() {
                         <span className="font-bold text-slate-900 block text-xs">{reg.fullName}</span>
                         <span className="text-[11px] text-slate-500 block truncate max-w-xs">{reg.email}</span>
                         <span className="text-[10px] text-slate-400">
-                          {reg.gender || 'N/A'} • Age {reg.age || 'N/A'} • {reg.phone || 'No phone'}
+                          {reg.gender || 'N/A'}{reg.phone ? ` • ${reg.phone}` : ''}
                         </span>
                       </td>
                       <td className="py-3 px-4 font-bold text-slate-800">
