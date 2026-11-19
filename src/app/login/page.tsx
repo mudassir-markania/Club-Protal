@@ -4,72 +4,87 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Shield,
-  ShieldCheck,
+  ArrowLeft,
   Lock,
   Mail,
   User,
+  AlertCircle,
   Eye,
   EyeOff,
-  ArrowRight,
-  ArrowLeft,
-  AlertCircle,
-  Crown,
+  ShieldCheck,
   Trophy,
+  ArrowRight,
+  Crown,
   Sparkles,
-  CheckCircle2,
-  ChevronRight,
-  Flame,
-  Zap,
 } from 'lucide-react';
 
-interface RefereePreset {
+interface QuickOfficial {
   id: string;
+  label: string;
   name: string;
+  role: 'SUPER_ADMIN' | 'REFEREE';
+  roleBadge: string;
   username: string;
-  sports: string;
-  avatar: string;
+  email: string;
+  icon: string;
 }
 
-const REFEREE_PRESETS: RefereePreset[] = [
-  { id: 'marcus', name: 'Marcus Sterling', username: 'marcus', sports: 'BGMI • Cricket • Football', avatar: '⚽' },
-  { id: 'sarah', name: 'Sarah Jenkins', username: 'sarah', sports: 'Badminton • Carrom', avatar: '🏸' },
-  { id: 'david', name: 'David Okafor', username: 'david', sports: 'Chess • BGMI • Football', avatar: '♟️' },
+const OFFICIAL_ACCOUNTS: QuickOfficial[] = [
+  {
+    id: 'admin',
+    label: 'Admin Director',
+    name: 'Championship Director',
+    role: 'SUPER_ADMIN',
+    roleBadge: 'Admin',
+    username: 'admin',
+    email: 'admin@sportsportal.com',
+    icon: '👑',
+  },
+  {
+    id: 'marcus',
+    label: 'Ref Marcus',
+    name: 'Marcus Sterling',
+    role: 'REFEREE',
+    roleBadge: 'BGMI • Crick • Foot',
+    username: 'marcus',
+    email: 'ref.marcus@sportsportal.com',
+    icon: '⚽',
+  },
+  {
+    id: 'sarah',
+    label: 'Ref Sarah',
+    name: 'Sarah Jenkins',
+    role: 'REFEREE',
+    roleBadge: 'Badminton • Carrom',
+    username: 'sarah',
+    email: 'ref.sarah@sportsportal.com',
+    icon: '🏸',
+  },
+  {
+    id: 'david',
+    label: 'Ref David',
+    name: 'David Okafor',
+    role: 'REFEREE',
+    roleBadge: 'Chess • BGMI • Foot',
+    username: 'david',
+    email: 'ref.david@sportsportal.com',
+    icon: '♟️',
+  },
 ];
 
-const HOUSES_TICKER = [
-  { name: 'Blue', code: 'MAV', color: 'from-blue-500 to-indigo-600', dot: 'bg-blue-400' },
-  { name: 'Red', code: 'DOM', color: 'from-rose-500 to-red-600', dot: 'bg-rose-400' },
-  { name: 'Green', code: 'ALP', color: 'from-emerald-500 to-teal-600', dot: 'bg-emerald-400' },
-  { name: 'Purple', code: 'RYL', color: 'from-purple-500 to-indigo-600', dot: 'bg-purple-400' },
-  { name: 'Yellow', code: 'CRW', color: 'from-amber-400 to-yellow-600', dot: 'bg-amber-400' },
-];
-
-export default function ProfessionalChampionshipLoginPage() {
+export default function UnifiedOfficialLoginPage() {
   const router = useRouter();
-  const [roleMode, setRoleMode] = useState<'admin' | 'referee'>('admin');
   const [identifier, setIdentifier] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [selectedOfficialId, setSelectedOfficialId] = useState<string>('admin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const switchRole = (mode: 'admin' | 'referee') => {
-    setRoleMode(mode);
-    setError(null);
-    if (mode === 'admin') {
-      setIdentifier('admin');
-      setPassword('admin123');
-    } else {
-      setIdentifier('marcus');
-      setPassword('referee123');
-    }
-  };
-
-  const handleSelectReferee = (ref: RefereePreset) => {
-    setIdentifier(ref.username);
-    setPassword('referee123');
+  const handleSelectOfficial = (official: QuickOfficial) => {
+    setSelectedOfficialId(official.id);
+    setIdentifier(official.username);
+    setPassword(official.role === 'SUPER_ADMIN' ? 'admin123' : 'referee123');
     setError(null);
   };
 
@@ -87,10 +102,10 @@ export default function ProfessionalChampionshipLoginPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed. Please verify credentials.');
+        throw new Error(data.error || 'Authentication failed. Please check credentials.');
       }
 
-      // Role-based routing
+      // Automatic role-based routing from database
       const userRole = data.user?.role;
       if (userRole === 'SUPER_ADMIN' || userRole === 'ADMIN') {
         router.push('/admin/dashboard');
@@ -107,313 +122,228 @@ export default function ProfessionalChampionshipLoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#030712] text-slate-100 flex flex-col justify-between font-sans antialiased selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
-      {/* Stadium Floodlight & Atmospheric Mesh Gradients */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Top Centered Golden Floodlight */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-blue-600/18 via-indigo-600/8 to-transparent rounded-full blur-[140px]" />
-        {/* Secondary Warm Stadium Halos */}
-        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px]" />
-        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px]" />
-        {/* Subtle Athletic Grid Lines */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
-      </div>
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#050a14] font-sans antialiased text-slate-100 selection:bg-amber-500 selection:text-black">
+      {/* ================= LEFT BRANDED SHOWCASE PANEL (44% desktop) ================= */}
+      <section className="relative w-full lg:w-[44%] min-h-[460px] lg:min-h-screen bg-gradient-to-br from-[#040812] via-[#060e20] to-[#02050e] flex flex-col justify-between p-6 sm:p-10 lg:p-14 border-b lg:border-b-0 lg:border-r border-slate-800/80 overflow-hidden">
+        {/* Subtle Ambient Golden Glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* ================= TOP NAVIGATION BAR ================= */}
-      <header className="relative z-20 h-20 w-full max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3.5 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-amber-400 p-[1px] shadow-lg shadow-blue-900/30">
-            <div className="w-full h-full rounded-[11px] bg-[#070e20] flex items-center justify-center">
-              <Trophy className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-black tracking-tight text-white uppercase font-heading">
-                APEX ARENA
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-300 text-[10px] font-black uppercase tracking-wider">
-                APL S9
-              </span>
-            </div>
-            <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
-              NexCore Institute of Technology
-            </span>
-          </div>
-        </Link>
-
-        {/* Quick Nav Action Pills */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/leaderboard"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all backdrop-blur-md"
-          >
-            <span>Standings</span>
-          </Link>
-          <Link
-            href="/points-rules"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all backdrop-blur-md"
-          >
-            <span>PDF Rules</span>
-          </Link>
+        {/* Top Left Nav & Top Right Badge */}
+        <div className="relative z-10 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-bold text-white px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-900/20 transition-all group"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all backdrop-blur-md group"
           >
-            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-            <span>Public Arena</span>
+            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1 text-amber-400" />
+            <span>Public Championship Portal</span>
           </Link>
+
+          <span className="text-[11px] font-bold text-amber-400/90 tracking-wider uppercase px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            <span>Authorized Officials</span>
+          </span>
         </div>
-      </header>
 
-      {/* ================= MAIN CENTRAL CONSOLE ================= */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-12">
-        <div className="w-full max-w-[480px]">
-          {/* Main Card with Premium Frosted Glassmorphism */}
-          <div className="rounded-3xl bg-slate-900/65 backdrop-blur-2xl border border-slate-700/60 shadow-[0_30px_90px_rgba(0,0,0,0.65)] p-7 sm:p-10 relative overflow-hidden">
-            {/* Top Glowing Trim */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
-
-            {/* Header Badge & Title */}
-            <div className="text-center space-y-2 mb-7">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/25 text-blue-300 text-[11px] font-extrabold uppercase tracking-widest">
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                <span>Official Access Gateway</span>
+        {/* Center: Prestigious Emblem & Typography */}
+        <div className="relative z-10 my-auto py-8 lg:py-0 flex flex-col items-center text-center">
+          {/* Golden Trophy Emblem Box */}
+          <div className="relative mb-5 flex flex-col items-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-b from-amber-400/25 via-amber-500/10 to-transparent p-[1.5px] border border-amber-400/30 flex items-center justify-center shadow-[0_10px_35px_rgba(245,158,11,0.18)] backdrop-blur-sm">
+              <div className="w-full h-full rounded-[22px] bg-[#070e1e]/90 flex items-center justify-center">
+                <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400 drop-shadow-[0_4px_14px_rgba(245,158,11,0.6)]" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase font-heading">
-                Sign In to Portal
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
-                Authorized tournament portal for Championship Directors and Match Referees.
-              </p>
             </div>
 
-            {/* Modern Segmented Role Selector */}
-            <div className="mb-6 p-1.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 grid grid-cols-2 gap-1.5">
-              <button
-                type="button"
-                onClick={() => switchRole('admin')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  roleMode === 'admin'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Crown className="w-3.5 h-3.5 text-amber-300" />
-                <span>Tournament Admin</span>
-              </button>
+            {/* APL Season 9 Mark */}
+            <div className="mt-3 flex flex-col items-center">
+              <span className="text-xl sm:text-2xl font-black tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 uppercase font-heading">
+                A P L
+              </span>
+              <span className="text-[10px] font-black tracking-[0.3em] text-amber-300/80 uppercase">
+                SEASON 9
+              </span>
+            </div>
+          </div>
 
-              <button
-                type="button"
-                onClick={() => switchRole('referee')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  roleMode === 'referee'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}
+          {/* Heading Block */}
+          <div className="space-y-2 max-w-md">
+            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.35em] text-slate-400 block font-heading">
+              CHAMPIONSHIP ACCESS GATEWAY
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white capitalize font-serif leading-tight">
+              Official Portal
+            </h1>
+            <h2 className="text-base sm:text-lg font-bold text-amber-400 tracking-wide">
+              Administration & Match Console
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed pt-2 max-w-sm mx-auto font-normal">
+              Dedicated portal for tournament administrators and certified field referees to access assigned competitions, record verified final scores, and submit points for official approval.
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom Left: Trust & Accreditation */}
+        <div className="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+          <span className="text-slate-400">APL Season 9 Field Officials</span>
+          <span className="text-slate-400 font-semibold">Certified Officials Only</span>
+        </div>
+      </section>
+
+      {/* ================= RIGHT AUTHENTICATION PANEL (56% desktop) ================= */}
+      <main className="w-full lg:w-[56%] min-h-[540px] lg:min-h-screen bg-[#dce1e9] text-slate-900 flex flex-col items-center justify-center p-4 sm:p-8 lg:p-12 relative">
+        {/* Floating Card exactly matching the reference */}
+        <div className="w-full max-w-[440px] bg-[#edf2f7] rounded-3xl border border-slate-300/90 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.16)] p-7 sm:p-9 flex flex-col gap-5">
+          {/* Top Badge */}
+          <div>
+            <span className="inline-block px-3 py-1 rounded-md bg-amber-100/90 border border-amber-300/80 text-[10px] font-black tracking-wider text-amber-900 uppercase">
+              CERTIFIED OFFICIAL LOGIN
+            </span>
+          </div>
+
+          {/* Card Title */}
+          <div className="space-y-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
+              Official Sign In
+            </h2>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Enter your official credentials or choose your assigned profile below:
+            </p>
+          </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+              <span className="leading-snug">{error}</span>
+            </div>
+          )}
+
+          {/* Semantic Form */}
+          <form method="POST" onSubmit={handleSubmit} noValidate className="space-y-4">
+            {/* Username/Email Input */}
+            <div>
+              <label
+                htmlFor="identifier"
+                className="block text-xs font-bold text-slate-700 tracking-wide mb-1.5"
               >
-                <Zap className="w-3.5 h-3.5 text-amber-300" />
-                <span>Match Referee</span>
-              </button>
+                Official Username or Email
+              </label>
+              <div className="relative">
+                <input
+                  id="identifier"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  spellCheck="false"
+                  autoCapitalize="none"
+                  inputMode="email"
+                  enterKeyHint="next"
+                  required
+                  aria-invalid={!!error}
+                  value={identifier}
+                  onChange={(e) => {
+                    setIdentifier(e.target.value);
+                    setSelectedOfficialId('');
+                  }}
+                  placeholder="admin or ref.marcus@sportsportal.com"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#cdd5e0]/70 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-500 outline-none focus:bg-white focus:border-amber-600 focus:ring-3 focus:ring-amber-500/20 transition-all font-medium"
+                />
+                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
+              </div>
             </div>
 
-            {/* Role Context Bar */}
-            {roleMode === 'admin' ? (
-              <div className="mb-6 p-3 rounded-2xl bg-blue-950/40 border border-blue-500/20 flex items-center justify-between text-xs text-blue-200">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  <span className="font-bold">Super Admin Account</span>
-                </div>
+            {/* Password Input */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-xs font-bold text-slate-700 tracking-wide mb-1.5"
+              >
+                Official Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  enterKeyHint="done"
+                  required
+                  aria-invalid={!!error}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-11 pr-11 py-3 rounded-xl bg-[#cdd5e0]/70 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-500 outline-none focus:bg-white focus:border-amber-600 focus:ring-3 focus:ring-amber-500/20 transition-all font-medium"
+                />
+                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
                 <button
                   type="button"
-                  onClick={() => switchRole('admin')}
-                  className="text-[11px] font-extrabold text-amber-300 hover:text-amber-200 underline cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3.5 top-3 text-slate-500 hover:text-slate-800 transition-colors p-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-600 rounded-md"
                 >
-                  admin / admin123
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            ) : (
-              <div className="mb-6 space-y-2">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  <span>Quick-select official referee:</span>
-                  <span className="text-amber-400 text-[10px]">Pass: referee123</span>
-                </div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {REFEREE_PRESETS.map((ref) => {
-                    const isSelected = identifier === ref.username;
-                    return (
-                      <button
-                        key={ref.id}
-                        type="button"
-                        onClick={() => handleSelectReferee(ref)}
-                        className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
-                          isSelected
-                            ? 'bg-blue-600/30 border-blue-500 text-white ring-1 ring-blue-400'
-                            : 'bg-slate-950/50 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-white/5'
-                        }`}
-                      >
-                        <span className="text-base mb-0.5">{ref.avatar}</span>
-                        <span className="text-[11px] font-black truncate w-full">{ref.name.split(' ')[0]}</span>
-                        <span className="text-[9px] text-slate-400 truncate w-full">{ref.username}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            </div>
 
-            {/* Error Notification */}
-            {error && (
-              <div
-                role="alert"
-                aria-live="polite"
-                className="mb-5 p-3.5 rounded-2xl bg-rose-950/50 border border-rose-500/40 text-rose-200 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in"
-              >
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                <span className="leading-snug">{error}</span>
-              </div>
-            )}
+            {/* Primary Action Button (Warm Golden Ochre matching reference) */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-[#b86e00] hover:bg-[#a05f00] active:bg-[#885100] text-white font-extrabold text-sm tracking-wide transition-all duration-150 shadow-md shadow-amber-950/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-2 group"
+            >
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Authenticating...</span>
+                </>
+              ) : (
+                <>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  <span>Enter Official Console</span>
+                </>
+              )}
+            </button>
+          </form>
 
-            {/* Form */}
-            <form method="POST" onSubmit={handleSubmit} noValidate className="space-y-4">
-              {/* Username Input */}
-              <div>
-                <label
-                  htmlFor="identifier"
-                  className="block text-[11px] font-black text-slate-300 uppercase tracking-wider mb-1.5"
-                >
-                  Username or Official Email <span className="text-rose-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    id="identifier"
-                    name="username"
-                    type="text"
-                    autoComplete="username"
-                    spellCheck="false"
-                    autoCapitalize="none"
-                    inputMode="email"
-                    enterKeyHint="next"
-                    required
-                    aria-invalid={!!error}
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder={roleMode === 'admin' ? 'admin or admin@sportsportal.com' : 'marcus / sarah / david'}
-                    className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-slate-950/80 border border-slate-700/80 text-white text-sm placeholder:text-slate-500 outline-none focus:bg-slate-950 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all font-medium"
-                  />
-                  <User className="w-4 h-4 text-slate-400 absolute left-4 top-4 pointer-events-none" />
-                </div>
-              </div>
+          {/* Quick Official Selection Grid */}
+          <div className="pt-2 border-t border-slate-300/80 space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block text-center">
+              SELECT CERTIFIED OFFICIAL:
+            </span>
 
-              {/* Password Input */}
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-[11px] font-black text-slate-300 uppercase tracking-wider mb-1.5"
-                >
-                  Password <span className="text-rose-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    enterKeyHint="done"
-                    required
-                    aria-invalid={!!error}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-11 pr-11 py-3.5 rounded-2xl bg-slate-950/80 border border-slate-700/80 text-white text-sm placeholder:text-slate-500 outline-none focus:bg-slate-950 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all font-medium"
-                  />
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-4 pointer-events-none" />
+            <div className="grid grid-cols-2 gap-2">
+              {OFFICIAL_ACCOUNTS.map((acc) => {
+                const isSelected = selectedOfficialId === acc.id;
+                return (
                   <button
+                    key={acc.id}
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-4 top-3.5 text-slate-400 hover:text-white transition-colors p-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+                    onClick={() => handleSelectOfficial(acc)}
+                    className={`py-2 px-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-100/80 border-amber-500 text-amber-950 ring-2 ring-amber-500/30 font-bold'
+                        : 'bg-[#dce3ec]/80 border-slate-300/90 text-slate-700 hover:bg-white hover:border-slate-400'
+                    }`}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <span className="text-xs truncate">{acc.label}</span>
+                    <span className="text-sm shrink-0">{acc.icon}</span>
                   </button>
-                </div>
-              </div>
-
-              {/* Session Security Options */}
-              <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-200 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer bg-slate-900"
-                  />
-                  <span className="font-semibold text-[11px]">Keep session active</span>
-                </label>
-
-                <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Encrypted 256-Bit</span>
-                </span>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 active:from-blue-700 active:to-indigo-700 text-white font-black text-sm uppercase tracking-wider transition-all duration-150 shadow-xl shadow-blue-900/30 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer mt-3 group"
-              >
-                {loading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Verifying Authority...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Enter {roleMode === 'admin' ? 'Championship Control' : 'Match Center'}</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Footer Footnote */}
-            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-              <span>Automatic Role-Based Adjudication</span>
-              <span className="text-amber-400 font-bold">APL Season 9</span>
+                );
+              })}
             </div>
           </div>
+        </div>
 
-          {/* 5 Houses Status Bar Beneath Card */}
-          <div className="mt-6 p-3 rounded-2xl bg-slate-900/40 border border-slate-800/60 backdrop-blur-md flex items-center justify-between text-[11px] text-slate-400">
-            <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">The 5 Houses:</span>
-            <div className="flex items-center gap-3">
-              {HOUSES_TICKER.map((h) => (
-                <span key={h.code} className="flex items-center gap-1.5 font-bold text-slate-300">
-                  <span className={`w-2 h-2 rounded-full ${h.dot} shadow-[0_0_6px_currentColor]`} />
-                  <span>{h.name}</span>
-                </span>
-              ))}
-            </div>
-          </div>
+        {/* Bottom Security / Copyright Note */}
+        <div className="text-center mt-5 text-[11px] text-slate-500 font-medium">
+          NexCore Institute of Technology • Encrypted Session
         </div>
       </main>
-
-      {/* ================= BOTTOM FOOTER ================= */}
-      <footer className="relative z-10 h-14 w-full max-w-7xl mx-auto px-4 sm:px-8 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-medium">
-        <span>© 2026 NexCore Institute of Technology • APL Season 9 House Championship</span>
-        <div className="flex items-center gap-2 text-slate-300">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Official Scoring Engine Active</span>
-        </div>
-      </footer>
     </div>
   );
 }
