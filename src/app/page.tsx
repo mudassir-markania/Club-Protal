@@ -415,9 +415,9 @@ export default function HomePage() {
                       }`}
                     >
                       {s.icon === 'carrom' ? (
-                        <CarromIcon className="w-3.5 h-3.5 shrink-0" />
+                        <CarromIcon className="w-[18px] h-[18px] shrink-0" />
                       ) : (
-                        <span className="material-symbols-outlined text-[15px]">{s.icon}</span>
+                        <span className="material-symbols-outlined text-[17px]">{s.icon}</span>
                       )}
                       <span>{s.shortName}</span>
                     </button>
@@ -1034,7 +1034,7 @@ export default function HomePage() {
                       <div className="flex items-center justify-between mb-4">
                         <span className="w-12 h-12 rounded-lg bg-[#e2e7ff] text-[#000f3f] flex items-center justify-center group-hover:bg-[#000f3f] group-hover:text-white transition-colors">
                           {sport.icon === 'carrom' ? (
-                            <CarromIcon className="w-6 h-6 shrink-0" />
+                            <CarromIcon className="w-7 h-7 shrink-0" />
                           ) : (
                             <span className="material-symbols-outlined text-2xl">{sport.icon}</span>
                           )}
@@ -1717,7 +1717,7 @@ export default function HomePage() {
             <div className="flex items-center gap-4 mb-4">
               <span className="w-14 h-14 rounded-xl bg-[#000f3f] text-white flex items-center justify-center shadow-sm">
                 {selectedSport.icon === 'carrom' ? (
-                  <CarromIcon className="w-8 h-8 shrink-0" />
+                  <CarromIcon className="w-9 h-9 shrink-0" />
                 ) : (
                   <span className="material-symbols-outlined text-3xl">{selectedSport.icon}</span>
                 )}

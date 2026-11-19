@@ -142,7 +142,7 @@ export function BasketballIcon({ className = 'w-4 h-4', size }: IconProps) {
 }
 
 // Crisp Vector SVG for Carrom Board
-export function CarromIcon({ className = 'w-4 h-4', size }: IconProps) {
+export function CarromIcon({ className = 'w-5 h-5', size }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -156,17 +156,21 @@ export function CarromIcon({ className = 'w-4 h-4', size }: IconProps) {
       width={size}
       height={size}
     >
-      <rect x="2.5" y="2.5" width="19" height="19" rx="2.5" />
-      <circle cx="5.5" cy="5.5" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="18.5" cy="5.5" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="5.5" cy="18.5" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="18.5" cy="18.5" r="1.4" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="12" r="3.2" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
-      <line x1="8.5" y1="8.5" x2="6.8" y2="6.8" strokeWidth="1.4" />
-      <line x1="15.5" y1="8.5" x2="17.2" y2="6.8" strokeWidth="1.4" />
-      <line x1="8.5" y1="15.5" x2="6.8" y2="17.2" strokeWidth="1.4" />
-      <line x1="15.5" y1="15.5" x2="17.2" y2="17.2" strokeWidth="1.4" />
+      {/* Outer Carrom Board Frame - Full 22x22 Bleed for optimal height */}
+      <rect x="1" y="1" width="22" height="22" rx="3" strokeWidth="2.2" />
+      {/* 4 Corner Pockets */}
+      <circle cx="4.8" cy="4.8" r="1.8" fill="currentColor" stroke="none" />
+      <circle cx="19.2" cy="4.8" r="1.8" fill="currentColor" stroke="none" />
+      <circle cx="4.8" cy="19.2" r="1.8" fill="currentColor" stroke="none" />
+      <circle cx="19.2" cy="19.2" r="1.8" fill="currentColor" stroke="none" />
+      {/* Center Circle & Red Queen */}
+      <circle cx="12" cy="12" r="4.2" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
+      {/* 4 Corner Baseline Pockets Lines */}
+      <line x1="8" y1="8" x2="6" y2="6" strokeWidth="1.6" />
+      <line x1="16" y1="8" x2="18" y2="6" strokeWidth="1.6" />
+      <line x1="8" y1="16" x2="6" y2="18" strokeWidth="1.6" />
+      <line x1="16" y1="16" x2="18" y2="18" strokeWidth="1.6" />
     </svg>
   );
 }
