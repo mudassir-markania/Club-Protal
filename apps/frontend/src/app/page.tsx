@@ -953,44 +953,85 @@ export default function HomePage() {
 
 
           {/* ======================================================== */}
-          {/* 8. FINAL CALL TO ACTION: CHAMPIONSHIP ANTHEM              */}
+          {/* 8. CHAMPIONSHIP FINALE CALLOUT BANNER                     */}
           {/* ======================================================== */}
-          <section className="w-full py-20 lg:py-28 bg-[#faf8ff] relative overflow-hidden border-t border-[#e2e7ff]">
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 text-center flex flex-col items-center">
-              <span className="w-12 h-1 bg-[#0051d5] rounded-full mb-4" />
-              <span className="text-xs text-[#0051d5] uppercase tracking-widest font-extrabold mb-2 font-manrope">
-                THE FINAL STAGES AWAIT
-              </span>
-              <h2 className="font-manrope text-4xl sm:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight text-[#000f3f] leading-none max-w-4xl">
-                YOUR HOUSE.
-                <br />
-                <span className="text-[#eb6905]">YOUR PRIDE.</span>
-                <br />
-                YOUR CHAMPIONSHIP.
-              </h2>
-              <p className="text-base sm:text-lg text-[#45464f] max-w-2xl mt-4 mb-10 leading-relaxed font-normal">
-                Every match writes a story. Every victory creates a collegiate legacy. Come witness history at the NexCore Sports Complex or stream live coverage on campus networks.
-              </p>
+          <section className="w-full py-16 sm:py-24 bg-[#faf8ff] relative">
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#000f3f] via-[#071952] to-[#010922] p-8 sm:p-14 lg:p-20 text-white shadow-2xl border border-[#3b82f6]/30 text-center flex flex-col items-center">
+                {/* Decorative Ambient Radial Glows */}
+                <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#eb6905]/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#0051d5]/30 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-5 pointer-events-none" />
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Link
-                  href="/schedule"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg bg-[#eb6905] hover:bg-[#783200] text-white text-xs sm:text-sm uppercase tracking-wider font-extrabold transition-all duration-200 shadow-xl shadow-[#eb6905]/20 font-manrope cursor-pointer"
-                >
-                  <span>Explore Match Schedule</span>
-                  <span className="material-symbols-outlined text-[20px]">calendar_month</span>
-                </Link>
-                <Link
-                  href="/leaderboard"
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg bg-[#000f3f] hover:bg-[#0051d5] text-white text-xs sm:text-sm uppercase tracking-wider font-extrabold transition-all duration-200 shadow-md font-manrope cursor-pointer"
-                >
-                  <span>Live Championship Leaderboard</span>
-                  <span className="material-symbols-outlined text-[20px]">leaderboard</span>
-                </Link>
+                {/* Top Championship Emblem */}
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-transparent border border-amber-400/40 p-2.5 shadow-xl shadow-amber-500/15 flex items-center justify-center mx-auto hover:scale-105 transition-transform duration-300">
+                    <img
+                      src="/logo.png"
+                      alt="APL Championship Trophy"
+                      className="w-full h-full object-contain filter drop-shadow"
+                    />
+                  </div>
+                </div>
+
+                {/* Subheading Pill Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-extrabold uppercase tracking-widest text-amber-300 font-manrope mb-5 shadow-inner">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>APL Season 9 • The Championship Race</span>
+                </div>
+
+                {/* Main Headline */}
+                <h2 className="font-manrope text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-none max-w-4xl relative">
+                  YOUR HOUSE.{' '}
+                  <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-300 bg-clip-text text-transparent">
+                    YOUR PRIDE.
+                  </span>
+                  <br />
+                  <span className="text-white drop-shadow-sm">YOUR CHAMPIONSHIP.</span>
+                </h2>
+
+                <p className="text-sm sm:text-base text-[#dce1ff] max-w-2xl mt-5 mb-8 leading-relaxed font-normal">
+                  Every point scored writes a chapter in your house’s history. Track live match results, follow real-time leaderboards, and support your varsity athletes at the NexCore Arena.
+                </p>
+
+                {/* Tournament Quick Stats Strip */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl w-full mb-10">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-xs">
+                    <span className="text-xl sm:text-2xl font-black font-manrope text-white block">5</span>
+                    <span className="text-[10px] sm:text-[11px] text-[#93c5fd] uppercase font-bold tracking-wider font-manrope">Contending Houses</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-xs">
+                    <span className="text-xl sm:text-2xl font-black font-manrope text-white block">6</span>
+                    <span className="text-[10px] sm:text-[11px] text-[#93c5fd] uppercase font-bold tracking-wider font-manrope">Sport Disciplines</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-xs">
+                    <span className="text-xl sm:text-2xl font-black font-manrope text-amber-400 block">100+</span>
+                    <span className="text-[10px] sm:text-[11px] text-amber-200/80 uppercase font-bold tracking-wider font-manrope">Varsity Athletes</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-xs">
+                    <span className="text-xl sm:text-2xl font-black font-manrope text-emerald-400 block">LIVE</span>
+                    <span className="text-[10px] sm:text-[11px] text-emerald-200/80 uppercase font-bold tracking-wider font-manrope">Points Engine</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-4 relative z-10">
+                  <Link
+                    href="/schedule"
+                    className="inline-flex items-center gap-2.5 px-7 py-3.5 sm:px-9 sm:py-4 rounded-xl bg-gradient-to-r from-[#eb6905] via-[#f97316] to-[#eb6905] hover:brightness-110 text-white text-xs sm:text-sm uppercase tracking-wider font-black transition-all duration-200 shadow-xl shadow-[#eb6905]/30 hover:shadow-[#eb6905]/50 hover:scale-[1.02] active:scale-[0.98] font-manrope cursor-pointer"
+                  >
+                    <span>Explore Match Schedule</span>
+                    <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                  </Link>
+                  <Link
+                    href="/leaderboard"
+                    className="inline-flex items-center gap-2.5 px-7 py-3.5 sm:px-9 sm:py-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 hover:border-white/35 text-white text-xs sm:text-sm uppercase tracking-wider font-black transition-all duration-200 backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] font-manrope cursor-pointer shadow-lg"
+                  >
+                    <span>Live Championship Standings</span>
+                    <span className="material-symbols-outlined text-[20px]">leaderboard</span>
+                  </Link>
+                </div>
               </div>
-
-
             </div>
           </section>
         </div>
