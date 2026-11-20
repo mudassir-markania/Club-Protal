@@ -86,6 +86,33 @@ export function toEffectiveRule(r: any): EffectiveRule {
   };
 }
 
+export function canonicalCategory(cat?: string | null): string {
+  if (!cat) return '';
+  const c = (cat || '').trim().toLowerCase();
+  if (c === 'md' || c === "men's doubles" || c === "mens doubles" || c === 'men doubles') return 'md';
+  if (c === 'wd' || c === "women's doubles" || c === "womens doubles" || c === 'women doubles') return 'wd';
+  if (c === 'mixed' || c === 'mixed doubles' || c === 'xd') return 'mixed';
+  if (
+    c === 'ms' ||
+    c === "men's singles" ||
+    c === "mens singles" ||
+    c === 'men singles' ||
+    c === "men's singles / doubles" ||
+    c === "men's singles & doubles bracket events"
+  )
+    return "men's singles / doubles";
+  if (
+    c === 'ws' ||
+    c === "women's singles" ||
+    c === "womens singles" ||
+    c === 'women singles' ||
+    c === "women's singles / doubles" ||
+    c === "women's singles & doubles bracket events"
+  )
+    return "women's singles / doubles";
+  return c;
+}
+
 const norm = (v?: string | null) => (v || '').trim().toLowerCase();
 
 /**
@@ -103,11 +130,16 @@ export function findRuleForTrigger(
   );
   if (candidates.length === 0) return null;
 
-  const cat = norm(eventCategory);
+  const cat = canonicalCategory(eventCategory);
+  if (cat) {
+    const matched = candidates.find((r) => r.category && canonicalCategory(r.category) === cat);
+    if (matched) return matched;
+  }
+
   return (
-    candidates.find((r) => r.category && cat && norm(r.category) === cat) ||
     candidates.find((r) => !r.category) ||
-    candidates.find((r) => norm(r.category) === norm("Men's singles / doubles")) ||
+    candidates.find((r) => canonicalCategory(r.category) === "men's singles / doubles") ||
+    candidates[0] ||
     null
   );
 }

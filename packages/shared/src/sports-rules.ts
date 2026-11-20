@@ -235,30 +235,46 @@ export async function calculateMatchPoints(
   const winnerId = input.winnerParticipantId;
   const loserId = input.loserParticipantId;
 
-  if (sportKey === 'BADMINTON' || sportKey === 'CARROM' || sportKey === 'CHESS') {
-    // Badminton / Carrom / Chess: NO points per match. Points come from the event standings: when an admin finalizes an
-    // event, the 1st / 2nd / 3rd place rules are paid to the top three (see event-standings.ts).
-    const note = 'no points per match - awarded when the event is finalized from the standings';
-    if (winnerId) {
-      teamPoints.push({ participantId: winnerId, teamName: getParticipantName(winnerId), points: 0, reason: `${input.sportName} match win: ${note}`, isWinner: true, rank: 1 });
-    }
-    if (loserId) {
-      teamPoints.push({ participantId: loserId, teamName: getParticipantName(loserId), points: 0, reason: `${input.sportName} match loss: 0 pts`, isWinner: false, rank: 2 });
-    }
-  } else if (sportKey === 'BGMI') {
-    // BGMI: every match pays the winning team the match-win rule. Overall winner / runner-up / third place are paid
-    // when the overall team ranking is finalized (see event-standings.ts), not by a single match.
-    awardTeam(winnerId, 'MATCH_WIN', true, 1);
-  } else {
-    // Football and Cricket: each match pays its winner the match-win rule. Final winner / loser and cricket third place
-    // are paid by the overall team ranking when it is finalized, so a final or 3rd-place match is paid like any other.
-    if (stage === 'QUARTER_FINAL' || stage === 'SEMI_FINAL') {
+  // Placements passed explicitly (e.g. from referee sheet or admin placement form)
+  if (input.firstPlaceParticipantId) {
+    awardTeam(input.firstPlaceParticipantId, 'PLACE_1', true, 1, { fallback: 'FINAL_WINNER' });
+  }
+  if (input.secondPlaceParticipantId) {
+    awardTeam(input.secondPlaceParticipantId, 'PLACE_2', false, 2, { fallback: 'FINAL_LOSER' });
+  }
+  if (input.thirdPlaceParticipantId) {
+    awardTeam(input.thirdPlaceParticipantId, 'PLACE_3', false, 3, { fallback: 'THIRD_PLACE_WINNER' });
+  }
+
+  // If team points were not already populated by explicit placements above:
+  if (teamPoints.length === 0) {
+    if (stage === 'FINAL') {
+      awardTeam(winnerId, 'FINAL_WINNER', true, 1, { fallback: 'PLACE_1' });
+      awardTeam(loserId, 'FINAL_LOSER', false, 2, { fallback: 'PLACE_2' });
+    } else if (stage === 'THIRD_PLACE') {
+      awardTeam(winnerId, 'THIRD_PLACE_WINNER', true, 3, { fallback: 'PLACE_3' });
+      awardTeam(loserId, 'THIRD_PLACE_LOSER', false, 4, { fallback: 'MATCH_LOSS' });
+    } else if (stage === 'QUARTER_FINAL' || stage === 'SEMI_FINAL') {
       const q = stage === 'QUARTER_FINAL';
       awardTeam(winnerId, q ? 'QUARTER_FINAL_WIN' : 'SEMI_FINAL_WIN', true, 1, { fallback: 'MATCH_WIN' });
       awardTeam(loserId, q ? 'QUARTER_FINAL_LOSS' : 'SEMI_FINAL_LOSS', false, 2, { fallback: 'MATCH_LOSS' });
     } else {
-      awardTeam(winnerId, 'MATCH_WIN', true, 1);
+      // NORMAL / Regular match
+      awardTeam(winnerId, 'MATCH_WIN', true, 1, { fallback: 'PLACE_1' });
       awardTeam(loserId, 'MATCH_LOSS', false, 2);
+    }
+  }
+
+  // BGMI tournament placement handling if requested
+  if (sportKey === 'BGMI' && input.isTournamentPlacement) {
+    if (input.firstPlaceParticipantId && !teamPoints.some((t) => t.participantId === input.firstPlaceParticipantId)) {
+      awardTeam(input.firstPlaceParticipantId, 'TOURNAMENT_WINNER', true, 1, { skipIfNoRule: true });
+    }
+    if (input.secondPlaceParticipantId && !teamPoints.some((t) => t.participantId === input.secondPlaceParticipantId)) {
+      awardTeam(input.secondPlaceParticipantId, 'TOURNAMENT_RUNNER_UP', false, 2, { skipIfNoRule: true });
+    }
+    if (input.thirdPlaceParticipantId && !teamPoints.some((t) => t.participantId === input.thirdPlaceParticipantId)) {
+      awardTeam(input.thirdPlaceParticipantId, 'TOURNAMENT_THIRD', false, 3, { skipIfNoRule: true });
     }
   }
 

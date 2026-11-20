@@ -4,8 +4,8 @@ import { getSportRules } from '@/lib/sports-rules-server';
 import { toEffectiveRule, findRuleForTrigger, RuleTrigger } from '@club-portal/shared';
 import { categoryDisplayName, categoryRules, getScheduleConfig, normalizeSportKey } from '@club-portal/shared';
 
-/** Sports whose points come ONLY from event standings (1st / 2nd / 3rd): their matches award nothing. */
-export const EVENT_SCORED_SPORTS = ['BADMINTON', 'CARROM', 'CHESS'];
+/** Sports whose points come ONLY from event standings (1st / 2nd / 3rd): matches now award points directly. */
+export const EVENT_SCORED_SPORTS: string[] = [];
 
 /**
  * Team sports that play many matches: each match still pays its own win points, and an overall team ranking

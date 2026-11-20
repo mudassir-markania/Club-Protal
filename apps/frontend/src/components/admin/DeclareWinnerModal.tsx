@@ -282,14 +282,14 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
                 </div>
               )}
 
-              {winnerDist && (
-                <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 space-y-2">
+              {calc.calculatedDistributions?.filter((d: any) => d.originalPoints > 0).map((dist: any) => (
+                <div key={dist.participantId} className="rounded-xl border border-blue-100 bg-blue-50/50 p-3 space-y-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-blue-800">
-                    Club credit for {winnerName}
-                    {winnerDist.allocations.reduce((n: number, a: any) => n + a.playersContributed, 0) > 1 ? ' (split equally between its players, credited to their clubs)' : ''}
+                    Club credit for {dist.teamName}
+                    {dist.allocations.reduce((n: number, a: any) => n + a.playersContributed, 0) > 1 ? ' (split equally between its players, credited to their clubs)' : ''}
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    {winnerDist.allocations.map((a: any) => (
+                    {dist.allocations.map((a: any) => (
                       <span key={a.clubId} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200 font-bold text-slate-800">
                         <ClubBadge code={a.clubCode} name={a.clubName} className="w-3.5 h-3.5" />
                         {a.clubName}
@@ -298,7 +298,7 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
                     ))}
                   </div>
                 </div>
-              )}
+              ))}
             </>
           ) : null}
         </div>

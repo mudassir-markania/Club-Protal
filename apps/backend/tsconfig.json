@@ -13,7 +13,8 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@club-portal/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src", "scripts/*.ts"]
