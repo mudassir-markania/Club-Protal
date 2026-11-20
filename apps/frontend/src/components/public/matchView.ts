@@ -35,16 +35,21 @@ export interface HouseStanding {
 }
 
 /** Start time of a match as a local Date. */
-export function startsAt(m: PublicMatch): Date {
-  const [y, mo, d] = m.date.split('-').map(Number);
-  const [h, mi] = (m.time || '00:00').split(':').map(Number);
-  return new Date(y, (mo || 1) - 1, d || 1, h || 0, mi || 0);
+export function startsAt(m?: PublicMatch | null): Date {
+  if (!m || !m.date) return new Date(0);
+  try {
+    const [y, mo, d] = (m.date || '').split('-').map(Number);
+    const [h, mi] = (m.time || '00:00').split(':').map(Number);
+    return new Date(y || 1970, (mo || 1) - 1, d || 1, h || 0, mi || 0);
+  } catch {
+    return new Date(0);
+  }
 }
 
-export const isLive = (m: PublicMatch) => m.status === 'IN_PROGRESS';
-export const isDone = (m: PublicMatch) => m.status === 'COMPLETED';
-export const isPending = (m: PublicMatch) => m.status === 'SUBMITTED'; // played, result waiting for approval
-export const isUpcoming = (m: PublicMatch) => m.status === 'SCHEDULED' || m.status === 'AWAITING_RESULT' || m.status === 'IN_PROGRESS';
+export const isLive = (m?: PublicMatch | null) => m?.status === 'IN_PROGRESS';
+export const isDone = (m?: PublicMatch | null) => m?.status === 'COMPLETED';
+export const isPending = (m?: PublicMatch | null) => m?.status === 'SUBMITTED'; // played, result waiting for approval
+export const isUpcoming = (m?: PublicMatch | null) => m?.status === 'SCHEDULED' || m?.status === 'AWAITING_RESULT' || m?.status === 'IN_PROGRESS';
 
 export function statusBadge(m: PublicMatch): { label: string; tone: 'live' | 'upcoming' | 'done' | 'pending' } {
   if (isLive(m)) return { label: 'LIVE NOW', tone: 'live' };
@@ -62,6 +67,7 @@ const STAGE_LABELS: Record<string, string> = {
 
 /** e.g. "Badminton • Men's Singles • Semi Final" */
 export function matchTitle(m: PublicMatch): string {
+  if (!m) return '';
   const parts = [m.sport?.name, m.categoryLabel && m.categoryLabel !== m.sport?.name ? m.categoryLabel : '', STAGE_LABELS[m.stageType] || ''].filter(Boolean);
   return parts.join(' • ');
 }
@@ -70,29 +76,43 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 /** "Today • 17:30", "Tomorrow • 09:00", "Fri 20 Nov • 15:00" */
 export function whenLabel(m: PublicMatch, now: Date = new Date()): string {
-  const start = startsAt(m);
-  const dayDiff = Math.round(
-    (new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000
-  );
-  const time = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
-  const day =
-    dayDiff === 0 ? 'Today' : dayDiff === 1 ? 'Tomorrow' : dayDiff === -1 ? 'Yesterday' : start.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
-  return `${day} • ${time}`;
+  if (!m || !m.date) return 'Time TBA';
+  try {
+    const start = startsAt(m);
+    if (isNaN(start.getTime()) || start.getTime() === 0) return 'Time TBA';
+    const dayDiff = Math.round(
+      (new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000
+    );
+    const time = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+    const day =
+      dayDiff === 0 ? 'Today' : dayDiff === 1 ? 'Tomorrow' : dayDiff === -1 ? 'Yesterday' : start.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+    return `${day} • ${time}`;
+  } catch {
+    return 'Time TBA';
+  }
 }
 
 /** "Starts in 2h 15m" / "Started 40m ago" */
 export function countdownLabel(m: PublicMatch, now: Date = new Date()): string {
-  const diffMin = Math.round((startsAt(m).getTime() - now.getTime()) / 60000);
-  const abs = Math.abs(diffMin);
-  const d = Math.floor(abs / 1440);
-  const h = Math.floor((abs % 1440) / 60);
-  const mi = abs % 60;
-  const span = d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${mi}m` : `${mi}m`;
-  return diffMin >= 0 ? `Starts in ${span}` : `Started ${span} ago`;
+  if (!m || !m.date) return '';
+  try {
+    const start = startsAt(m);
+    if (isNaN(start.getTime()) || start.getTime() === 0) return '';
+    const diffMin = Math.round((start.getTime() - now.getTime()) / 60000);
+    const abs = Math.abs(diffMin);
+    const d = Math.floor(abs / 1440);
+    const h = Math.floor((abs % 1440) / 60);
+    const mi = abs % 60;
+    const span = d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${mi}m` : `${mi}m`;
+    return diffMin >= 0 ? `Starts in ${span}` : `Started ${span} ago`;
+  } catch {
+    return '';
+  }
 }
 
 /** The match viewers should look at next: a live one, else the soonest one still to be played. */
 export function pickNext(matches: PublicMatch[], now: Date = new Date()): PublicMatch | null {
+  if (!Array.isArray(matches) || matches.length === 0) return null;
   const live = matches.find(isLive);
   if (live) return live;
   const open = matches.filter((m) => m.status === 'SCHEDULED' || m.status === 'AWAITING_RESULT').sort((a, b) => startsAt(a).getTime() - startsAt(b).getTime());
@@ -111,8 +131,8 @@ export const houseColor = (code?: string, name?: string): string => {
   return '#000f3f';
 };
 
-export const initials = (name: string) =>
-  name
+export const initials = (name?: string) =>
+  (name || '')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)

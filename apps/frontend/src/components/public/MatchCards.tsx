@@ -32,12 +32,13 @@ export function StatusPill({ match }: { match: PublicMatch }) {
 }
 
 function ClubChips({ side }: { side: PublicSide }) {
-  if (side.clubs.length === 0) return null;
+  const clubs = side?.clubs || [];
+  if (clubs.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center justify-center gap-1 mt-1.5">
-      {side.clubs.map((c) => (
+      {clubs.map((c) => (
         <span
-          key={c.id}
+          key={c.id || c.name}
           className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase text-white"
           style={{ backgroundColor: houseColor(c.code, c.name) }}
           title={c.name}
@@ -51,7 +52,9 @@ function ClubChips({ side }: { side: PublicSide }) {
 
 /** One side of a two-sided match, large (used in the featured card). */
 function DuelSide({ side, match, align }: { side: PublicSide; match: PublicMatch; align: 'left' | 'right' }) {
-  const color = houseColor(side.clubs[0]?.code, side.clubs[0]?.name);
+  const clubs = side?.clubs || [];
+  const players = side?.players || [];
+  const color = houseColor(clubs[0]?.code, clubs[0]?.name);
   const done = isDone(match);
   return (
     <div className="col-span-2 flex flex-col items-center text-center min-w-0">
@@ -59,17 +62,17 @@ function DuelSide({ side, match, align }: { side: PublicSide; match: PublicMatch
         className="w-16 h-16 rounded-full flex items-center justify-center font-manrope text-xl font-black mb-2 shadow-inner text-white shrink-0"
         style={{ backgroundColor: color }}
       >
-        {initials(side.name)}
+        {initials(side?.name)}
       </div>
-      <h4 className="text-sm sm:text-lg font-bold text-[#000f3f] uppercase font-manrope break-words max-w-full">{side.name}</h4>
-      {side.players.length > 0 && (
-        <span className="text-[11px] text-[#45464f] mt-0.5 max-w-full break-words">{side.players.join(' & ')}</span>
+      <h4 className="text-sm sm:text-lg font-bold text-[#000f3f] uppercase font-manrope break-words max-w-full">{side?.name || 'TBA'}</h4>
+      {players.length > 0 && (
+        <span className="text-[11px] text-[#45464f] mt-0.5 max-w-full break-words">{players.join(' & ')}</span>
       )}
       <ClubChips side={side} />
       {done && (
-        <span className={`font-manrope text-3xl sm:text-4xl font-black mt-2 ${side.isWinner ? 'text-emerald-700' : 'text-[#45464f]'}`} data-align={align}>
-          {side.score}
-          {side.isWinner && <span className="ml-1 text-sm align-middle">🏆</span>}
+        <span className={`font-manrope text-3xl sm:text-4xl font-black mt-2 ${side?.isWinner ? 'text-emerald-700' : 'text-[#45464f]'}`} data-align={align}>
+          {side?.score ?? 0}
+          {side?.isWinner && <span className="ml-1 text-sm align-middle">🏆</span>}
         </span>
       )}
     </div>
@@ -78,7 +81,8 @@ function DuelSide({ side, match, align }: { side: PublicSide; match: PublicMatch
 
 /** Featured "next match" card with full details. */
 export function FeaturedMatch({ match, now, onLiveStream }: { match: PublicMatch; now: Date; onLiveStream?: () => void }) {
-  const twoSided = match.sides.length === 2;
+  const sides = match?.sides || [];
+  const twoSided = sides.length === 2;
   const live = isLive(match);
   return (
     <div className="bg-white rounded-xl p-6 sm:p-8 shadow-md relative overflow-hidden flex flex-col justify-between border border-[#e2e7ff] h-full">
@@ -89,33 +93,33 @@ export function FeaturedMatch({ match, now, onLiveStream }: { match: PublicMatch
           <StatusPill match={match} />
           <span className="text-[11px] text-[#45464f] uppercase font-bold font-manrope">{matchTitle(match)}</span>
         </div>
-        <span className="text-xs text-[#45464f] font-medium font-manrope">{match.matchCode}</span>
+        <span className="text-xs text-[#45464f] font-medium font-manrope">{match?.matchCode || ''}</span>
       </div>
 
       {twoSided ? (
         <div className="py-8 grid grid-cols-5 items-start gap-1">
-          <DuelSide side={match.sides[0]} match={match} align="left" />
+          <DuelSide side={sides[0]} match={match} align="left" />
           <div className="col-span-1 flex flex-col items-center justify-center self-center">
             <span className="text-lg font-black text-[#45464f] font-manrope">VS</span>
           </div>
-          <DuelSide side={match.sides[1]} match={match} align="right" />
+          <DuelSide side={sides[1]} match={match} align="right" />
         </div>
       ) : (
         <div className="py-6">
-          <p className="text-[11px] text-[#45464f] uppercase tracking-wider font-bold font-manrope mb-3">{match.sides.length} teams in this match</p>
+          <p className="text-[11px] text-[#45464f] uppercase tracking-wider font-bold font-manrope mb-3">{sides.length} teams in this match</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {match.sides.map((s, i) => (
-              <div key={s.id} className={`p-3 rounded-lg border ${s.isWinner ? 'border-emerald-300 bg-emerald-50/60' : 'border-[#e2e7ff] bg-[#f2f3ff]'}`}>
+            {sides.map((s, i) => (
+              <div key={s.id || String(i)} className={`p-3 rounded-lg border ${s.isWinner ? 'border-emerald-300 bg-emerald-50/60' : 'border-[#e2e7ff] bg-[#f2f3ff]'}`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-manrope font-bold text-sm text-[#000f3f] uppercase break-words">
-                    {i + 1}. {s.name}
+                    {i + 1}. {s.name || 'TBA'}
                   </span>
-                  {isDone(match) && <span className="font-mono font-black text-sm text-[#000f3f]">{s.score}</span>}
+                  {isDone(match) && <span className="font-mono font-black text-sm text-[#000f3f]">{s.score ?? 0}</span>}
                 </div>
-                {s.players.length > 0 && <span className="text-[11px] text-[#45464f] block mt-0.5">{s.players.join(', ')}</span>}
+                {(s.players || []).length > 0 && <span className="text-[11px] text-[#45464f] block mt-0.5">{(s.players || []).join(', ')}</span>}
                 <div className="flex flex-wrap gap-1 mt-1.5">
-                  {s.clubs.map((c) => (
-                    <span key={c.id} className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase text-white" style={{ backgroundColor: houseColor(c.code, c.name) }}>
+                  {(s.clubs || []).map((c) => (
+                    <span key={c.id || c.name} className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase text-white" style={{ backgroundColor: houseColor(c.code, c.name) }}>
                       {c.code || c.name}
                     </span>
                   ))}
@@ -150,7 +154,8 @@ export function FeaturedMatch({ match, now, onLiveStream }: { match: PublicMatch
 /** Compact match card for lists. `expanded` shows every side with its players and clubs. */
 export function MatchCard({ match, now, expanded = false, onToggle }: { match: PublicMatch; now: Date; expanded?: boolean; onToggle?: () => void }) {
   const done = isDone(match);
-  const many = match.sides.length > 2;
+  const sides = match?.sides || [];
+  const many = sides.length > 2;
   return (
     <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-[#e2e7ff] overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3">
@@ -163,40 +168,44 @@ export function MatchCard({ match, now, expanded = false, onToggle }: { match: P
 
       {many && !expanded ? (
         <p className="text-sm font-bold text-[#000f3f] font-manrope uppercase py-1">
-          {match.sides.length} teams: <span className="font-semibold normal-case text-[#45464f]">{match.sides.map((s) => s.name).join(', ')}</span>
+          {sides.length} teams: <span className="font-semibold normal-case text-[#45464f]">{sides.map((s) => s.name || 'TBA').join(', ')}</span>
         </p>
       ) : (
         <div className={many ? 'space-y-1.5' : 'space-y-2'}>
-          {match.sides.map((s) => (
-            <div key={s.id} className="flex items-center justify-between gap-3">
-              <div className="min-w-0 flex items-center gap-2.5">
-                <span
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-black shrink-0 font-manrope"
-                  style={{ backgroundColor: houseColor(s.clubs[0]?.code, s.clubs[0]?.name) }}
-                >
-                  {initials(s.name)}
-                </span>
-                <div className="min-w-0">
-                  <span className={`block text-sm font-bold uppercase font-manrope truncate ${done && !s.isWinner ? 'text-[#45464f]' : 'text-[#000f3f]'}`}>{s.name}</span>
-                  <span className="block text-[11px] text-[#45464f] truncate">
-                    {s.players.length > 0 ? s.players.join(', ') : s.clubs.map((c) => c.name).join(', ')}
-                    {expanded && s.players.length > 0 && s.clubs.length > 0 && ` • ${s.clubs.map((c) => c.code || c.name).join(' / ')}`}
+          {sides.map((s, idx) => {
+            const clubs = s.clubs || [];
+            const players = s.players || [];
+            return (
+              <div key={s.id || String(idx)} className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex items-center gap-2.5">
+                  <span
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-black shrink-0 font-manrope"
+                    style={{ backgroundColor: houseColor(clubs[0]?.code, clubs[0]?.name) }}
+                  >
+                    {initials(s.name)}
                   </span>
+                  <div className="min-w-0">
+                    <span className={`block text-sm font-bold uppercase font-manrope truncate ${done && !s.isWinner ? 'text-[#45464f]' : 'text-[#000f3f]'}`}>{s.name || 'TBA'}</span>
+                    <span className="block text-[11px] text-[#45464f] truncate">
+                      {players.length > 0 ? players.join(', ') : clubs.map((c) => c.name).join(', ')}
+                      {expanded && players.length > 0 && clubs.length > 0 && ` • ${clubs.map((c) => c.code || c.name).join(' / ')}`}
+                    </span>
+                  </div>
                 </div>
+                {done && (
+                  <span className={`font-mono font-black text-sm shrink-0 ${s.isWinner ? 'text-emerald-700' : 'text-[#45464f]'}`}>
+                    {s.isWinner ? '🏆 ' : ''}
+                    {s.score ?? 0}
+                  </span>
+                )}
               </div>
-              {done && (
-                <span className={`font-mono font-black text-sm shrink-0 ${s.isWinner ? 'text-emerald-700' : 'text-[#45464f]'}`}>
-                  {s.isWinner ? '🏆 ' : ''}
-                  {s.score}
-                </span>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#e2e7ff] text-xs text-[#45464f]">
-        <span className="text-[11px] font-mono">{match.matchCode}</span>
+        <span className="text-[11px] font-mono">{match?.matchCode || ''}</span>
         {many && onToggle && (
           <button onClick={onToggle} className="text-[11px] text-[#0051d5] uppercase font-bold font-manrope hover:underline cursor-pointer">
             {expanded ? 'Hide teams' : 'Show teams'}

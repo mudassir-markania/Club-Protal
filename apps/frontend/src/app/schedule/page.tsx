@@ -34,12 +34,23 @@ const matchesTab = (m: PublicMatch, tab: StatusTab) => {
   return true;
 };
 
-const dayHeading = (date: string, now: Date) => {
-  const [y, mo, d] = date.split('-').map(Number);
-  const day = new Date(y, mo - 1, d);
-  const diff = Math.round((day.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000);
-  const label = day.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  return diff === 0 ? `Today • ${label}` : diff === 1 ? `Tomorrow • ${label}` : label;
+const dayHeading = (date?: string, now?: Date) => {
+  if (!date) return 'TBA';
+  try {
+    const parts = date.split('-').map(Number);
+    if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) {
+      return date;
+    }
+    const [y, mo, d] = parts;
+    const day = new Date(y, mo - 1, d);
+    if (isNaN(day.getTime())) return date;
+    const n = now || new Date();
+    const diff = Math.round((day.getTime() - new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime()) / 86400000);
+    const label = day.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return diff === 0 ? `Today • ${label}` : diff === 1 ? `Tomorrow • ${label}` : label;
+  } catch {
+    return date || 'TBA';
+  }
 };
 
 export default function SchedulePage() {
@@ -60,7 +71,14 @@ export default function SchedulePage() {
     .filter((m) => (sport === 'All' || m.sport?.name === sport) && matchesTab(m, tab))
     .filter((m) => {
       if (!q) return true;
-      const hay = [m.matchCode, m.sport?.name, m.categoryLabel, m.round, ...m.sides.flatMap((s) => [s.name, ...s.players, ...s.clubs.map((c) => c.name)])]
+      const hay = [
+        m.matchCode,
+        m.sport?.name,
+        m.categoryLabel,
+        m.round,
+        ...(m.sides || []).flatMap((s) => [s.name, ...(s.players || []), ...(s.clubs || []).map((c) => c.name)]),
+      ]
+        .filter(Boolean)
         .join(' ')
         .toLowerCase();
       return hay.includes(q);
@@ -73,7 +91,10 @@ export default function SchedulePage() {
 
   const byDay = useMemo(() => {
     const groups = new Map<string, PublicMatch[]>();
-    filtered.forEach((m) => groups.set(m.date, [...(groups.get(m.date) || []), m]));
+    filtered.forEach((m) => {
+      const d = m.date || 'TBA';
+      groups.set(d, [...(groups.get(d) || []), m]);
+    });
     return Array.from(groups.entries());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered.map((m) => m.id + m.status).join(',')]);
@@ -217,13 +238,15 @@ export default function SchedulePage() {
                   {top.map((h) => (
                     <li key={h.id} className="flex items-center justify-between gap-3 px-4 py-3 border-b last:border-0 border-[#e2e7ff]/70">
                       <span className="flex items-center gap-2.5 min-w-0">
-                        <span className="font-manrope font-extrabold text-sm w-6" style={{ color: houseColor(h.club.code, h.club.name) }}>
+                        <span className="font-manrope font-extrabold text-sm w-6" style={{ color: houseColor(h?.club?.code, h?.club?.name) }}>
                           {h.rank}
                         </span>
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: houseColor(h.club.code, h.club.name) }} />
-                        <span className="font-manrope text-sm font-bold uppercase text-[#000f3f] truncate">{h.club.name}</span>
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: houseColor(h?.club?.code, h?.club?.name) }} />
+                        <span className="font-manrope text-sm font-bold uppercase text-[#000f3f] truncate">{h?.club?.name || 'House'}</span>
                       </span>
-                      <span className="font-manrope text-base font-extrabold text-[#000f3f]">{Number.isInteger(h.points) ? h.points : h.points.toFixed(2)}</span>
+                      <span className="font-manrope text-base font-extrabold text-[#000f3f]">
+                        {typeof h?.points === 'number' ? (Number.isInteger(h.points) ? h.points : h.points.toFixed(2)) : 0}
+                      </span>
                     </li>
                   ))}
                 </ul>
