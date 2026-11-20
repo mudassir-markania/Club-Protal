@@ -129,55 +129,226 @@ export default function LeaderboardPage() {
     return true;
   });
 
+  const totalPointsCount = (standings || []).reduce(
+    (acc: number, s: any) => acc + (s.totalPoints || s.points || 0),
+    0
+  );
+
+  const trueHousesCount =
+    (standings || []).filter(
+      (s: any) => s.club?.code !== 'OT1' && s.club?.name?.toUpperCase() !== 'OTHER'
+    ).length || 5;
+
   return (
     <div className="bg-[#faf8ff] text-[#131b2e] font-inter text-[15px] antialiased selection:bg-[#0051d5] selection:text-white min-h-screen">
       <PublicNavbar activeOverride="leaderboard" />
 
-      <main className="w-full pt-20 pb-20">
-        {/* HERO HEADER */}
-        <section className="w-full bg-[#000f3f] text-white py-12 lg:py-16 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#000f3f] via-[#172554] to-[#000f3f] opacity-90" />
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2">
-              <span className="text-xs uppercase tracking-widest text-[#dbe1ff] font-extrabold font-manrope">
-                APL SEASON 9 • OFFICIAL CHAMPIONSHIP TELEMETRY
-              </span>
-              <h1 className="font-manrope text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
-                LEADERBOARD &amp; TOURNAMENT RESULTS
-              </h1>
-              <p className="text-sm text-[#b7c4fd] max-w-2xl leading-relaxed">
-                Official approved point tallies across all 6 championship sports calculated strictly via the official sports points distribution rules.
-              </p>
+      <main className="w-full pb-20">
+        {/* ======================================================== */}
+        {/* HERO HEADER: STADIUM LEADERBOARD & TELEMETRY            */}
+        {/* ======================================================== */}
+        <header className="relative w-full pt-24 sm:pt-28 lg:pt-32 pb-10 sm:pb-14 bg-gradient-to-br from-[#000f3f] via-[#071952] to-[#010922] text-white overflow-hidden border-b border-[#3b82f6]/20 shadow-xl">
+          {/* Decorative Ambient Radial Glows */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#eb6905]/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#0051d5]/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-5 pointer-events-none" />
+
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Left Column: Heading & Telemetry Metrics */}
+              <div className="lg:col-span-7 flex flex-col items-start">
+                {/* Season Pill Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-extrabold uppercase tracking-widest text-amber-300 font-manrope mb-4 shadow-inner">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>APL Season 9 • Official Championship Telemetry</span>
+                </div>
+
+                {/* Main Headline */}
+                <h1 className="font-manrope text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-none">
+                  LEADERBOARD &amp;{' '}
+                  <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-300 bg-clip-text text-transparent">
+                    RESULTS
+                  </span>
+                </h1>
+
+                <p className="text-sm sm:text-base text-[#dce1ff] max-w-2xl mt-4 leading-relaxed font-normal">
+                  Official certified point tallies across all 6 championship sports, verified awards, completed match results, and administrative points audit trail.
+                </p>
+
+                {/* Telemetry KPI Metric Chips */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 w-full max-w-2xl mt-7">
+                  <div className="p-3 sm:p-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-[#93c5fd] font-manrope block">
+                      Houses
+                    </span>
+                    <span className="block font-manrope text-2xl sm:text-3xl font-black text-white">
+                      {trueHousesCount}
+                    </span>
+                    <span className="text-[10px] text-white/60 font-medium">Contenders</span>
+                  </div>
+
+                  <div className="p-3 sm:p-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-amber-300 font-manrope block">
+                      Approved PTS
+                    </span>
+                    <span className="block font-manrope text-2xl sm:text-3xl font-black text-amber-400">
+                      {Number.isInteger(totalPointsCount) ? totalPointsCount : totalPointsCount.toFixed(1)}
+                    </span>
+                    <span className="text-[10px] text-amber-200/70 font-medium">Verified Engine</span>
+                  </div>
+
+                  <div className="p-3 sm:p-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-[#93c5fd] font-manrope block">
+                      Sports
+                    </span>
+                    <span className="block font-manrope text-2xl sm:text-3xl font-black text-white">
+                      {sports.length > 0 ? sports.length : 6}
+                    </span>
+                    <span className="text-[10px] text-white/60 font-medium">Disciplines</span>
+                  </div>
+
+                  <div className="p-3 sm:p-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-emerald-300 font-manrope block">
+                      Completed
+                    </span>
+                    <span className="block font-manrope text-2xl sm:text-3xl font-black text-emerald-400">
+                      {completedMatches.length}
+                    </span>
+                    <span className="text-[10px] text-emerald-200/70 font-medium">Official Results</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Crown Leader Spotlight Console */}
+              <div className="lg:col-span-5">
+                <div className="relative rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/15 p-5 sm:p-6 shadow-2xl overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+
+                  {/* Header */}
+                  <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-transparent border border-amber-400/30 p-1 flex items-center justify-center shrink-0"
+                        style={{ width: '40px', height: '40px' }}
+                      >
+                        <img
+                          src="/logo.png"
+                          alt="APL Trophy"
+                          className="w-full h-full object-contain"
+                          style={{ width: '100%', height: '100%', maxWidth: '32px', maxHeight: '32px', objectFit: 'contain' }}
+                        />
+                      </div>
+                      <div>
+                        <span className="block font-manrope text-xs font-black uppercase tracking-wider text-white">
+                          Championship Telemetry Desk
+                        </span>
+                        <span className="text-[10px] text-[#93c5fd] font-medium font-manrope">
+                          NexCore Directorate of Sports
+                        </span>
+                      </div>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-[10px] font-bold text-emerald-300 uppercase tracking-wider font-manrope">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live Verified
+                    </span>
+                  </div>
+
+                  {/* Leading House Highlight */}
+                  <div className="pt-4 space-y-3.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-300 font-manrope flex items-center gap-1.5">
+                        <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                        Championship Crown Leader
+                      </span>
+                      <span className="text-[10px] font-mono text-[#93c5fd] bg-white/10 px-2 py-0.5 rounded">
+                        Rank #1
+                      </span>
+                    </div>
+
+                    <div className="bg-black/25 rounded-xl p-3.5 border border-white/10 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#0051d5] flex items-center justify-center text-white font-manrope font-black text-base shadow-sm shrink-0">
+                          {leadingClub?.code?.charAt(0) || 'B'}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="block font-manrope text-sm font-black uppercase text-white truncate">
+                            {leadingClub?.name || 'Blue Club'}
+                          </span>
+                          <span className="text-[11px] text-[#93c5fd] truncate block">
+                            Captain: {leadingClub?.captainName || 'Roheen'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="block font-manrope text-xl font-black text-amber-400">
+                          {standings[0]?.totalPoints ? standings[0].totalPoints.toFixed(0) : 31} PTS
+                        </span>
+                        <span className="text-[9px] uppercase font-bold text-emerald-400">
+                          Leading Table
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 text-xs">
+                      <Link
+                        href="/houses"
+                        className="text-amber-300 hover:text-amber-200 font-extrabold uppercase tracking-wider font-manrope flex items-center gap-1 text-[11px]"
+                      >
+                        <span>Explore House Dynasties</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                      <Link
+                        href="/schedule"
+                        className="text-[#93c5fd] hover:text-white font-bold uppercase tracking-wider font-manrope text-[11px]"
+                      >
+                        Match Fixtures
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Public Tab Navigation */}
-            <div className="flex items-center gap-1.5 bg-white/10 p-1.5 rounded-xl border border-white/15 backdrop-blur-md self-start md:self-auto shrink-0 flex-wrap text-xs font-bold font-manrope">
+            {/* Public Tab Navigation Command Bar */}
+            <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
               {[
-                { id: 'OVERALL', label: 'Overall Standings', icon: Trophy },
-                { id: 'SPORTS', label: 'By Sport', icon: Medal },
-                { id: 'AWARDS', label: `Awards (${awards.length})`, icon: Award },
-                { id: 'RESULTS', label: `Match Results (${completedMatches.length})`, icon: Calendar },
-                { id: 'HISTORY', label: 'Points Audit', icon: History },
+                { id: 'OVERALL', label: 'Overall Standings', icon: Trophy, count: null },
+                { id: 'SPORTS', label: 'By Sport', icon: Medal, count: sports.length || 6 },
+                { id: 'AWARDS', label: 'Approved Awards', icon: Award, count: awards.length },
+                { id: 'RESULTS', label: 'Match Results', icon: Calendar, count: completedMatches.length },
+                { id: 'HISTORY', label: 'Points Audit Trail', icon: History, count: pointsHistory.length },
               ].map((tab) => {
                 const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 ${
-                      activeTab === tab.id
-                        ? 'bg-white text-[#000f3f] shadow-sm font-extrabold'
-                        : 'text-[#dbe1ff] hover:text-white'
+                    className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-xs font-extrabold font-manrope uppercase tracking-wider shrink-0 cursor-pointer ${
+                      isActive
+                        ? 'bg-white text-[#000f3f] shadow-lg shadow-black/20 scale-[1.02]'
+                        : 'bg-white/10 hover:bg-white/15 text-[#dbe1ff] hover:text-white border border-white/10'
                     }`}
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#0051d5]' : 'text-amber-300'}`} />
                     <span>{tab.label}</span>
+                    {typeof tab.count === 'number' && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold font-mono ${
+                          isActive ? 'bg-[#dae2fd] text-[#000f3f]' : 'bg-white/15 text-white'
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
-        </section>
+        </header>
 
         {/* CONTENT CONTAINER */}
         <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-10 space-y-10">
