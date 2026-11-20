@@ -370,6 +370,9 @@ const HERO_SPORTS = [
   },
 ];
 
+// Track full page load vs in-app client navigation
+let isInitialPageLoad = true;
+
 export default function HomePage() {
   // Multi-Sport Hero Carousel State (Automatic 3.5s cycle with pause-on-hover & interactive restart)
   const [heroIndex, setHeroIndex] = useState(0);
@@ -486,29 +489,16 @@ export default function HomePage() {
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
-  const [showSplash, setShowSplash] = useState(false);
+  // Splash screen: displays on page load/refresh, but NOT on in-app navbar clicks
+  const [showSplash, setShowSplash] = useState(isInitialPageLoad);
 
-  // Splash screen: only runs once on fresh session entry, NEVER on navbar "Home" clicks
   useEffect(() => {
-    try {
-      const alreadyShown = sessionStorage.getItem('apl_splash_shown');
-      const params = new URLSearchParams(window.location.search);
-      if (!alreadyShown || params.get('splash') === '1') {
-        setShowSplash(true);
-        sessionStorage.setItem('apl_splash_shown', 'true');
-      }
-    } catch {
-      // storage unavailable / SSR guard
-    }
+    // Mark that initial load has happened so in-app navbar "Home" clicks don't re-trigger splash
+    isInitialPageLoad = false;
   }, []);
 
   const handleSplashDismiss = () => {
     setShowSplash(false);
-    try {
-      sessionStorage.setItem('apl_splash_shown', 'true');
-    } catch {
-      // ignore
-    }
   };
 
   return (
