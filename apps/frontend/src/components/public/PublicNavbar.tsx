@@ -44,11 +44,14 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group">
             {/* Logo */}
-            <img
-              alt="APL Logo"
-              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
-              src="/logo.png"
-            />
+            <div className="h-8 w-8 sm:h-9 sm:w-9 relative shrink-0 flex items-center justify-center" style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px' }}>
+              <img
+                alt="APL Logo"
+                className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                src="/logo.png"
+              />
+            </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="font-manrope text-base sm:text-xl font-bold uppercase tracking-tight text-[#000f3f] leading-none whitespace-nowrap">
