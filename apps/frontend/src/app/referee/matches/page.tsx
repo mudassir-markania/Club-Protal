@@ -317,27 +317,27 @@ export default function RefereeMatchesPage() {
                               </div>
                             </div>
 
-                            <div className="text-right">
+                            <div className="text-right shrink-0">
                               {canDeclare ? (
                                 <button
                                   onClick={() => setWinTarget({ match: m, participant: p })}
                                   title="Declare this side the winner"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold transition"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold transition whitespace-nowrap"
                                 >
                                   <Trophy className="w-3.5 h-3.5" />
                                   Win
                                 </button>
                               ) : p.isWinner ? (
-                                <span className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                <span className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 whitespace-nowrap">
                                   <Trophy className="w-3 h-3" />
                                   {p.score} pts
                                 </span>
                               ) : p.score !== null && p.score !== undefined ? (
-                                <span className="font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                <span className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap">
                                   {p.score} pts
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-slate-400 font-medium">Pending</span>
+                                <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending</span>
                               )}
                             </div>
                           </div>

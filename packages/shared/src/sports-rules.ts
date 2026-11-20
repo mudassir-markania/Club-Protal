@@ -1,7 +1,7 @@
 import { calculateClubPointsDistribution, PlayerContribution } from './points-distribution';
 export * from './sports-rules-definitions';
 export * from './scoring-triggers';
-import { toEffectiveRule, findRuleForTrigger, triggerLabel, RuleTrigger } from './scoring-triggers';
+import { toEffectiveRule, findRuleForTrigger, triggerLabel, RuleTrigger, EffectiveRule } from './scoring-triggers';
 import {
   SportScoringRuleDef,
   DEFAULT_OFFICIAL_RULES,

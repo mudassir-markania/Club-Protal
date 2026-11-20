@@ -488,13 +488,13 @@ export default function RefereeDashboardPage() {
                                   </div>
                                 </div>
 
-                                <div className="text-right">
+                                <div className="text-right shrink-0">
                                   {p.score !== null && p.score !== undefined ? (
-                                    <span className="font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                    <span className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap">
                                       {p.score} pts
                                     </span>
                                   ) : (
-                                    <span className="text-[10px] text-slate-400 font-medium">Pending Entry</span>
+                                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending Entry</span>
                                   )}
                                 </div>
                               </div>

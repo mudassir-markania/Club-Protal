@@ -513,9 +513,9 @@ A referee result is awaiting approval and will be discarded.`
                         return (
                           <div
                             key={p.id || idx}
-                            className="bg-white p-2.5 rounded-lg border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs"
+                            className="bg-white p-2.5 rounded-lg border border-slate-200/80 flex items-center justify-between gap-3 shadow-2xs"
                           >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
                               {p.club ? (
                                 <div className="w-7 h-7 rounded bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
                                   <ClubBadge code={p.club.code} name={p.club.name} className="w-4 h-4" />
@@ -525,8 +525,8 @@ A referee result is awaiting approval and will be discarded.`
                                   #{idx + 1}
                                 </div>
                               )}
-                              <div>
-                                <span className="font-bold text-xs text-slate-900 block truncate max-w-[220px]">
+                              <div className="min-w-0 flex-1">
+                                <span className="font-bold text-xs text-slate-900 block truncate">
                                   {p.cricketTeam?.name || p.player?.name || p.teamName || p.club?.name || `Entry ${idx + 1}`}
                                 </span>
                                 {p.cricketTeam ? (
@@ -561,27 +561,27 @@ A referee result is awaiting approval and will be discarded.`
                               </div>
                             </div>
 
-                            <div className="text-right">
+                            <div className="text-right shrink-0">
                               {isScheduled ? (
                                 <button
                                   onClick={() => setWinTarget({ match, participant: p })}
                                   title={`Declare ${participantName(p, idx)} the winner`}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold transition"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold transition whitespace-nowrap"
                                 >
                                   <Trophy className="w-3.5 h-3.5" />
                                   Win
                                 </button>
                               ) : p.isWinner ? (
-                                <span className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                <span className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 whitespace-nowrap">
                                   <Trophy className="w-3 h-3" />
                                   {p.score} pts
                                 </span>
                               ) : p.score !== null && p.score !== undefined ? (
-                                <span className="font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                <span className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap">
                                   {p.score} pts
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-slate-400 font-medium">Pending Entry</span>
+                                <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending Entry</span>
                               )}
                             </div>
                           </div>
@@ -813,8 +813,8 @@ A referee result is awaiting approval and will be discarded.`
                             </span>
                           )}
                         </div>
-                        <div className="text-right">
-                          <span className="font-mono font-black text-blue-700 text-base">
+                        <div className="text-right shrink-0">
+                          <span className="font-mono font-black text-blue-700 text-base whitespace-nowrap">
                             {p.score ?? 0} pts
                           </span>
                           {p.rank && (
