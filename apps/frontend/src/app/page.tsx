@@ -484,17 +484,7 @@ export default function HomePage() {
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
 
-  // SMS / WhatsApp alert form
-  const [phoneOrEmail, setPhoneOrEmail] = useState('');
-  const [subscribedToast, setSubscribedToast] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phoneOrEmail.trim()) return;
-    setSubscribedToast(true);
-    setPhoneOrEmail('');
-    setTimeout(() => setSubscribedToast(false), 5000);
-  };
 
   return (
     <div className="bg-[#faf8ff] text-[#131b2e] font-inter text-[15px] antialiased selection:bg-[#0051d5] selection:text-white min-h-screen">
@@ -1000,42 +990,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Instant Alert Subscription Box */}
-              <form
-                onSubmit={handleSubscribe}
-                className="mt-12 max-w-md w-full bg-white p-4 rounded-xl shadow-md flex items-center justify-between gap-3 border border-[#e2e7ff]"
-              >
-                <div className="flex items-center gap-3 text-left">
-                  <span className="material-symbols-outlined text-[#0051d5] text-2xl shrink-0">
-                    notifications_active
-                  </span>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] text-[#000f3f] uppercase font-bold font-manrope">
-                      Instant SMS / WhatsApp Alerts
-                    </span>
-                    <input
-                      type="text"
-                      placeholder="Enter mobile or student email"
-                      value={phoneOrEmail}
-                      onChange={(e) => setPhoneOrEmail(e.target.value)}
-                      className="text-xs text-[#131b2e] bg-transparent outline-none border-b border-[#c6c5d0] focus:border-[#0051d5] py-0.5 placeholder:text-[#767680]"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded bg-[#e2e7ff] hover:bg-[#dae2fd] text-[#000f3f] text-xs font-bold uppercase tracking-wider shrink-0 transition-colors font-manrope cursor-pointer"
-                >
-                  Subscribe
-                </button>
-              </form>
 
-              {subscribedToast && (
-                <div className="mt-4 px-4 py-2 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold animate-in fade-in flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Subscribed successfully! You will receive live alerts for upcoming house matches.
-                </div>
-              )}
             </div>
           </section>
         </div>
