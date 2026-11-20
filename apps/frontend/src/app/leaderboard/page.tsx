@@ -582,7 +582,7 @@ export default function LeaderboardPage() {
                                 {p.isWinner && <Trophy className="w-3.5 h-3.5 text-amber-500" />}
                                 <span>{p.teamName || p.cricketTeam?.name || p.club?.name}</span>
                               </div>
-                              <span className="font-mono font-black text-navy-950">{p.score || 0} pts</span>
+                              <span className="inline-flex items-center font-mono font-black text-navy-950 whitespace-nowrap shrink-0">{p.score || 0} pts</span>
                             </div>
                           ))}
                         </div>

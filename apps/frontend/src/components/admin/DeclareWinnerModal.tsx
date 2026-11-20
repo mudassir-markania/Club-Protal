@@ -261,7 +261,7 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
                       <span className="font-bold text-slate-900 block truncate">{t.teamName}</span>
                       <span className="text-[11px] text-slate-500">{t.reason}</span>
                     </div>
-                    <span className={`font-mono font-extrabold px-2 py-0.5 rounded border shrink-0 ${t.isWinner ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                    <span className={`inline-flex items-center font-mono font-extrabold px-2 py-0.5 rounded border shrink-0 whitespace-nowrap ${t.isWinner ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                       {t.points} pts
                     </span>
                   </div>

@@ -1327,7 +1327,7 @@ export default function RefereeMatchSheetPage() {
                             className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs text-[11px] font-bold flex items-center gap-1.5"
                           >
                             <span className="text-slate-700">{alloc.clubName}:</span>
-                            <span className="font-mono text-navy-950 font-black">{alloc.pointsFormatted} pts</span>
+                            <span className="inline-flex items-center font-mono text-navy-950 font-black whitespace-nowrap shrink-0">{alloc.pointsFormatted} pts</span>
                             {alloc.isRemainderWinner && (
                               <span className="text-[9px] text-amber-600 font-extrabold" title="Fair Remainder Cent">
                                 (+0.01¢)
