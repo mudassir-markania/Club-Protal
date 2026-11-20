@@ -370,16 +370,18 @@ const HERO_SPORTS = [
 ];
 
 export default function HomePage() {
-  // Multi-Sport Hero Carousel State (Fast 2.5s cycle for snappy showcase)
+  // Multi-Sport Hero Carousel State (Automatic 3.5s cycle with pause-on-hover & interactive restart)
   const [heroIndex, setHeroIndex] = useState(0);
+  const [isHeroPaused, setIsHeroPaused] = useState(false);
   const activeHero = HERO_SPORTS[heroIndex];
 
   useEffect(() => {
+    if (isHeroPaused) return;
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % HERO_SPORTS.length);
-    }, 3000);
+    }, 3500);
     return () => clearInterval(interval);
-  }, []);
+  }, [isHeroPaused, heroIndex]);
 
   // Dynamic Houses from Admin Backend
   const [houses, setHouses] = useState<HouseItem[]>(INITIAL_HOUSES_DATA);
@@ -497,6 +499,8 @@ export default function HomePage() {
           {/* 2. HERO SECTION (MULTI-SPORT STADIUM SHOWCASE - H-SCREEN) */}
           {/* ======================================================== */}
           <section
+            onMouseEnter={() => setIsHeroPaused(true)}
+            onMouseLeave={() => setIsHeroPaused(false)}
             className="relative w-full h-[calc(100dvh-4rem)] sm:h-[calc(100vh-5rem)] min-h-[calc(100dvh-4rem)] sm:min-h-[calc(100vh-5rem)] flex flex-col justify-between overflow-hidden bg-[#0a0a0c] text-white select-none"
           >
             {/* Multi-Sport Stadium Backgrounds with Fast Snappy 500ms Cross-Fade */}
