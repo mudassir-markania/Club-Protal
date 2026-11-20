@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import HomeFixtures from '@/components/public/HomeFixtures';
 import HomePointsTable from '@/components/public/HomePointsTable';
+import ChampionshipSplashScreen from '@/components/public/ChampionshipSplashScreen';
 import { CarromIcon } from '@/components/ui/icons';
 import {
   Trophy,
@@ -485,11 +486,38 @@ export default function HomePage() {
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
 
+  useEffect(() => {
+    try {
+      const hasSeen = sessionStorage.getItem('apl_splash_shown');
+      const params = new URLSearchParams(window.location.search);
+      if (!hasSeen || params.get('splash') === '1') {
+        setShowSplash(true);
+      }
+    } catch {
+      // storage unavailable / SSR guard
+    }
+  }, []);
 
+  const handleSplashDismiss = () => {
+    setShowSplash(false);
+    try {
+      sessionStorage.setItem('apl_splash_shown', 'true');
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="bg-[#faf8ff] text-[#131b2e] font-inter text-[15px] antialiased selection:bg-[#0051d5] selection:text-white min-h-screen">
+      {/* 0. CINEMATIC CHAMPIONSHIP SPLASH SCREEN */}
+      {showSplash && (
+        <ChampionshipSplashScreen
+          onComplete={handleSplashDismiss}
+          autoDismissDelay={3200}
+        />
+      )}
       {/* 1. BRAND HEADER & NAVBAR */}
       <PublicNavbar activeOverride="home" />
 
