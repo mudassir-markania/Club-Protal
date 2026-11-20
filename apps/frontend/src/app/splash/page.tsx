@@ -12,10 +12,10 @@ export default function DedicatedSplashPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#000a20]">
+    <div className="relative min-h-screen bg-[#020713]">
       <ChampionshipSplashScreen
         onComplete={handleComplete}
-        autoDismissDelay={2100}
+        autoDismissDelay={2200}
       />
     </div>
   );

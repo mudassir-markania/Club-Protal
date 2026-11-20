@@ -498,7 +498,7 @@ export default function HomePage() {
       {showSplash && (
         <ChampionshipSplashScreen
           onComplete={handleSplashDismiss}
-          autoDismissDelay={2100}
+          autoDismissDelay={2200}
         />
       )}
       {/* 1. BRAND HEADER & NAVBAR */}
