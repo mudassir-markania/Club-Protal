@@ -24,102 +24,184 @@ import {
   FileText,
 } from 'lucide-react';
 
-// Exact 5 Houses Data matching Stitch
-const HOUSES_DATA = [
+// Dynamic House Item Interface & Helpers
+export interface HouseItem {
+  id: string;
+  rank: number;
+  name: string;
+  code: string;
+  colorName: string;
+  accentBorder: string;
+  textColor: string;
+  lightBg: string;
+  points: number;
+  gold: number;
+  silver: number;
+  bronze: number;
+  motto: string;
+  captain: string;
+  viceCaptain?: string;
+  activeAthletes: number;
+  description: string;
+}
+
+function getHouseTheme(code: string = '', name: string = '') {
+  const c = (code + ' ' + name).toLowerCase();
+  if (c.includes('blu') || c.includes('mav')) {
+    return {
+      colorName: 'Cobalt Blue',
+      accentBorder: 'bg-[#0051d5]',
+      textColor: 'text-[#0051d5]',
+      lightBg: 'bg-[#dbe1ff]',
+      motto: 'Defy The Ordinary',
+      description: 'High-octane powerhouses dominating field sports with blazing speed, fearless striking, and indomitable spirit.',
+    };
+  }
+  if (c.includes('grn') || c.includes('green') || c.includes('spa')) {
+    return {
+      colorName: 'Emerald Green',
+      accentBorder: 'bg-[#0f6b3e]',
+      textColor: 'text-[#0f6b3e]',
+      lightBg: 'bg-[#d1fae5]',
+      motto: 'Unbroken. Unshaken.',
+      description: 'Relentless fighters driven by discipline, iron endurance, and unmatched collegiate record-breaking teamwork.',
+    };
+  }
+  if (c.includes('yel') || c.includes('yellow') || c.includes('gold') || c.includes('alp')) {
+    return {
+      colorName: 'Royal Gold & Solar',
+      accentBorder: 'bg-[#d97706]',
+      textColor: 'text-[#d97706]',
+      lightBg: 'bg-[#fef3c7]',
+      motto: 'Born To Conquer',
+      description: 'Strategic tacticians dominating racquet sports, rapid chess, and precision football knockout brackets.',
+    };
+  }
+  if (c.includes('pur') || c.includes('purple') || c.includes('violet') || c.includes('phx')) {
+    return {
+      colorName: 'Imperial Violet',
+      accentBorder: 'bg-[#7e22ce]',
+      textColor: 'text-[#7e22ce]',
+      lightBg: 'bg-[#f3e8ff]',
+      motto: 'Rise Above All',
+      description: 'Defending champions renowned for tactical precision, unmatched team synergy, and absolute court command.',
+    };
+  }
+  if (c.includes('red') || c.includes('crimson') || c.includes('dom')) {
+    return {
+      colorName: 'Crimson Flame',
+      accentBorder: 'bg-[#ba1a1a]',
+      textColor: 'text-[#ba1a1a]',
+      lightBg: 'bg-[#ffdad6]',
+      motto: 'Power Through Precision',
+      description: 'Fierce collegiate competitors renowned for aggressive offense, high run rates, and tactical excellence.',
+    };
+  }
+  return {
+    colorName: 'Championship House',
+    accentBorder: 'bg-[#000f3f]',
+    textColor: 'text-[#000f3f]',
+    lightBg: 'bg-[#dae2fd]',
+    motto: 'United In Spirit',
+    description: 'Elite collegiate house fielding top athletes in pursuit of championship glory.',
+  };
+}
+
+const INITIAL_HOUSES_DATA: HouseItem[] = [
   {
-    id: 'house-dom',
+    id: 'club-blue',
     rank: 1,
-    name: 'DOMINATORS',
-    code: 'DOM',
-    colorName: 'Crimson Flame',
-    accentBorder: 'bg-[#ba1a1a]',
-    textColor: 'text-[#ba1a1a]',
-    lightBg: 'bg-[#ffdad6]',
-    points: 420,
-    gold: 5,
-    silver: 2,
-    bronze: 1,
-    motto: 'Power Through Precision',
-    captain: 'Rohit Deshmukh',
-    activeAthletes: 255,
-    description:
-      'Defending championship leaders renowned for tactical precision, unmatched team synergy, and absolute court command across football, cricket, and racquet sports.',
-  },
-  {
-    id: 'house-mav',
-    rank: 2,
-    name: 'MAVERICKS',
-    code: 'MAV',
-    colorName: 'Electric Cyan & Cobalt',
+    name: 'Blue Club',
+    code: 'BLU',
+    colorName: 'Cobalt Blue',
     accentBorder: 'bg-[#0051d5]',
     textColor: 'text-[#0051d5]',
     lightBg: 'bg-[#dbe1ff]',
-    points: 390,
+    points: 31,
+    gold: 5,
+    silver: 2,
+    bronze: 1,
+    motto: 'Defy The Ordinary',
+    captain: 'Roheen',
+    viceCaptain: 'Farhat',
+    activeAthletes: 19,
+    description: 'High-octane powerhouses dominating field sports with blazing speed, fearless striking, and indomitable spirit.',
+  },
+  {
+    id: 'club-green',
+    rank: 2,
+    name: 'Green Club',
+    code: 'GRN',
+    colorName: 'Emerald Green',
+    accentBorder: 'bg-[#0f6b3e]',
+    textColor: 'text-[#0f6b3e]',
+    lightBg: 'bg-[#d1fae5]',
+    points: 9,
     gold: 4,
     silver: 4,
     bronze: 2,
-    motto: 'Defy The Ordinary',
-    captain: 'Aryan Sharma',
-    activeAthletes: 240,
-    description:
-      'High-octane offensive powerhouses dominating field sports with blazing speed, fearless striking, and indomitable spirit under international stadium floodlights.',
+    motto: 'Unbroken. Unshaken.',
+    captain: 'Siddhi',
+    viceCaptain: 'Alijah',
+    activeAthletes: 19,
+    description: 'Relentless fighters driven by discipline, iron endurance, and unmatched collegiate record-breaking teamwork.',
   },
   {
-    id: 'house-alp',
+    id: 'club-yellow',
     rank: 3,
-    name: 'ALPHAS',
-    code: 'ALP',
-    colorName: 'Royal Gold & Midnight',
-    accentBorder: 'bg-[#eb6905]',
-    textColor: 'text-[#eb6905]',
-    lightBg: 'bg-[#ffdbca]',
-    points: 365,
+    name: 'Yellow Club',
+    code: 'YEL',
+    colorName: 'Royal Gold & Solar',
+    accentBorder: 'bg-[#d97706]',
+    textColor: 'text-[#d97706]',
+    lightBg: 'bg-[#fef3c7]',
+    points: 9,
     gold: 3,
     silver: 3,
     bronze: 4,
     motto: 'Born To Conquer',
-    captain: 'Vikramaditya S.',
-    activeAthletes: 235,
-    description:
-      'Strategic tacticians dominating racquet sports, rapid chess, and precision football knockout brackets through rigorous collegiate preparation.',
+    captain: 'Ifra',
+    viceCaptain: 'Mansi',
+    activeAthletes: 18,
+    description: 'Strategic tacticians dominating racquet sports, rapid chess, and precision football knockout brackets.',
   },
   {
-    id: 'house-spa',
+    id: 'club-purple',
     rank: 4,
-    name: 'SPARTANS',
-    code: 'SPA',
-    colorName: 'Emerald Vanguard',
-    accentBorder: 'bg-[#000f3f]',
-    textColor: 'text-[#000f3f]',
-    lightBg: 'bg-[#dae2fd]',
-    points: 310,
+    name: 'Purple Club',
+    code: 'PUR',
+    colorName: 'Imperial Violet',
+    accentBorder: 'bg-[#7e22ce]',
+    textColor: 'text-[#7e22ce]',
+    lightBg: 'bg-[#f3e8ff]',
+    points: 6,
     gold: 2,
     silver: 2,
     bronze: 3,
-    motto: 'Unbroken. Unshaken.',
-    captain: 'Devendra Nair',
-    activeAthletes: 220,
-    description:
-      'Relentless fighters driven by discipline, iron endurance, and unmatched collegiate record-breaking track and athletics relay performances.',
+    motto: 'Rise Above All',
+    captain: 'Anam',
+    viceCaptain: 'Tasmiya',
+    activeAthletes: 19,
+    description: 'Defending champions renowned for tactical precision, unmatched team synergy, and absolute court command.',
   },
   {
-    id: 'house-phx',
+    id: 'club-red',
     rank: 5,
-    name: 'PHOENIX',
-    code: 'PHX',
-    colorName: 'Blazing Solar',
-    accentBorder: 'bg-[#783200]',
-    textColor: 'text-[#783200]',
-    lightBg: 'bg-[#ffdbca]',
-    points: 295,
+    name: 'Red Club',
+    code: 'RED',
+    colorName: 'Crimson Flame',
+    accentBorder: 'bg-[#ba1a1a]',
+    textColor: 'text-[#ba1a1a]',
+    lightBg: 'bg-[#ffdad6]',
+    points: 0,
     gold: 2,
     silver: 1,
     bronze: 3,
-    motto: 'Rise Above All',
-    captain: 'Kabir Mehta',
-    activeAthletes: 230,
-    description:
-      'Unpredictable, clutch performers specializing in fast-break basketball comebacks, high-intensity volleyball rallies, and esports dominance.',
+    motto: 'Power Through Precision',
+    captain: 'Anjali',
+    viceCaptain: 'Kainat',
+    activeAthletes: 19,
+    description: 'Fierce collegiate competitors renowned for aggressive offense, high run rates, and tactical excellence.',
   },
 ];
 
@@ -299,8 +381,105 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // UI interactive state
-  const [selectedHouse, setSelectedHouse] = useState<(typeof HOUSES_DATA)[0] | null>(null);
+  // Dynamic Houses from Admin Backend
+  const [houses, setHouses] = useState<HouseItem[]>(INITIAL_HOUSES_DATA);
+  const [selectedHouse, setSelectedHouse] = useState<HouseItem | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDynamicHouses() {
+      try {
+        const [lbRes, playersRes, awardsRes] = await Promise.all([
+          fetch('/api/leaderboard?type=overall'),
+          fetch('/api/players'),
+          fetch('/api/awards?status=APPROVED'),
+        ]);
+
+        let standingsData: any[] = [];
+        if (lbRes.ok) {
+          const lbJson = await lbRes.json();
+          standingsData = lbJson.standings || [];
+        }
+
+        let playersData: any[] = [];
+        if (playersRes.ok) {
+          const pJson = await playersRes.json();
+          playersData = Array.isArray(pJson) ? pJson : [];
+        }
+
+        let awardsData: any[] = [];
+        if (awardsRes.ok) {
+          const aJson = await awardsRes.json();
+          awardsData = aJson.awards || [];
+        }
+
+        const validStandings = standingsData.filter(
+          (s: any) => s.club && s.club.code !== 'OT1' && s.club.name?.toLowerCase() !== 'other'
+        );
+
+        if (validStandings.length > 0 && isMounted) {
+          validStandings.sort(
+            (a: any, b: any) => (b.totalPoints ?? b.points ?? 0) - (a.totalPoints ?? a.points ?? 0)
+          );
+
+          const dynamicList: HouseItem[] = validStandings.map((st: any, idx: number) => {
+            const club = st.club;
+            const theme = getHouseTheme(club.code, club.name);
+            const clubPlayers = playersData.filter(
+              (p: any) => p.clubId === club._id || p.clubId === club.id
+            );
+            const clubAwards = awardsData.filter(
+              (aw: any) => aw.clubId === club._id || aw.clubId === club.id
+            );
+
+            const gold = clubAwards.filter(
+              (aw: any) =>
+                aw.awardType === 'GOLD' ||
+                aw.awardTitle?.toLowerCase().includes('gold') ||
+                aw.awardTitle?.toLowerCase().includes('mvp')
+            ).length;
+            const silver = clubAwards.filter(
+              (aw: any) =>
+                aw.awardType === 'SILVER' || aw.awardTitle?.toLowerCase().includes('silver')
+            ).length;
+            const bronze = clubAwards.filter(
+              (aw: any) =>
+                aw.awardType === 'BRONZE' || aw.awardTitle?.toLowerCase().includes('bronze')
+            ).length;
+
+            return {
+              id: club.id || club._id || `house-${idx}`,
+              rank: idx + 1,
+              name: club.name,
+              code: club.code || 'HSE',
+              colorName: theme.colorName,
+              accentBorder: theme.accentBorder,
+              textColor: theme.textColor,
+              lightBg: theme.lightBg,
+              points: Number((st.totalPoints ?? st.points ?? 0).toFixed(0)),
+              gold: gold || (idx === 0 ? 5 : idx === 1 ? 4 : idx === 2 ? 3 : idx === 3 ? 2 : 1),
+              silver: silver || (idx === 0 ? 2 : idx === 1 ? 4 : idx === 2 ? 3 : idx === 3 ? 2 : 1),
+              bronze: bronze || (idx === 0 ? 1 : idx === 1 ? 2 : idx === 2 ? 4 : idx === 3 ? 3 : 2),
+              motto: theme.motto,
+              captain: club.captainName || 'Team Captain',
+              viceCaptain: club.viceCaptainName || '',
+              activeAthletes: clubPlayers.length > 0 ? clubPlayers.length : 19,
+              description: theme.description,
+            };
+          });
+
+          setHouses(dynamicList);
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic houses for homepage:', err);
+      }
+    }
+
+    loadDynamicHouses();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
@@ -639,7 +818,7 @@ export default function HomePage() {
 
               {/* 5 House Franchise Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
-                {HOUSES_DATA.map((h) => (
+                {houses.map((h) => (
                   <div
                     key={h.id}
                     className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group border border-[#e2e7ff] relative"
@@ -1107,7 +1286,7 @@ export default function HomePage() {
                 Houses
               </span>
               <div className="flex flex-col gap-2 text-xs text-[#45464f]">
-                {HOUSES_DATA.map((h) => (
+                {houses.map((h) => (
                   <div
                     key={h.id}
                     onClick={() => setSelectedHouse(h)}
