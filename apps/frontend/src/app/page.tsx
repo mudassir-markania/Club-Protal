@@ -837,9 +837,6 @@ export default function HomePage() {
                       >
                         {h.name}
                       </h3>
-                      <span className="text-[11px] text-[#0051d5] uppercase font-semibold tracking-wider mt-0.5 font-manrope">
-                        {h.colorName}
-                      </span>
                       <p className="text-xs text-[#45464f] italic mt-2 mb-4">
                         &ldquo;{h.motto}&rdquo;
                       </p>
@@ -1138,9 +1135,6 @@ export default function HomePage() {
                     className="hover:text-[#000f3f] transition-colors flex items-center justify-between cursor-pointer"
                   >
                     <span>{h.name}</span>
-                    <span className="text-[10px] text-[#0051d5] uppercase font-bold">
-                      {h.colorName.split(' ')[0]}
-                    </span>
                   </div>
                 ))}
               </div>
@@ -1224,7 +1218,7 @@ export default function HomePage() {
                   </span>
                 </div>
                 <span className="text-xs text-[#0051d5] uppercase font-bold font-manrope">
-                  {selectedHouse.colorName} • &ldquo;{selectedHouse.motto}&rdquo;
+                  &ldquo;{selectedHouse.motto}&rdquo;
                 </span>
               </div>
             </div>
