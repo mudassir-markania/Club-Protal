@@ -101,7 +101,7 @@ const HOUSES_FULL_DATA: HouseDetail[] = [
       year: 'Third Year CSE',
     },
     narrative:
-      'The aerial tacticians of Apex Arena. The Mavericks lean heavily into tactical fast breaks and high run-rate aggression in Cricket T10. Aryan Sharma’s leadership has bridged junior prodigies with veteran collegiate seniors into a lethal unit.',
+      'The aerial tacticians of APL Season 9. The Mavericks lean heavily into tactical fast breaks and high run-rate aggression in Cricket T10. Aryan Sharma’s leadership has bridged junior prodigies with veteran collegiate seniors into a lethal unit.',
     heroImage: '/cricket.jpg',
     athletes: [
       { name: 'Aryan Sharma', sport: 'Cricket T10', role: 'All-Rounder', status: 'Captain' },

@@ -1030,7 +1030,7 @@ export default function HomePage() {
             <div className="lg:col-span-2 flex flex-col gap-4 pr-0 lg:pr-8">
               <div className="flex items-center gap-3">
                 <span className="font-manrope text-xl font-bold uppercase tracking-tight text-[#000f3f]">
-                  Apex Arena
+                  APL
                 </span>
                 <span className="px-2 py-0.5 rounded-lg bg-[#dae2fd] text-[#000f3f] text-[10px] font-bold uppercase font-manrope">
                   Season 9
@@ -1149,7 +1149,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-[10px] uppercase tracking-wider font-manrope font-semibold">
-                © 2026 APEX ARENA PREMIER LEAGUE. ALL RIGHTS RESERVED.
+                © 2026 APL SEASON 9. ALL RIGHTS RESERVED.
               </span>
               <div className="flex items-center gap-2">
                 <a className="hover:text-[#000f3f] transition-colors" href="#">

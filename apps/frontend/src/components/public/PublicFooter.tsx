@@ -26,10 +26,10 @@ export default function PublicFooter() {
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-black text-base tracking-tight text-white uppercase">
-                  APEX<span className="text-[#38BDF8]">ARENA</span>
+                  APL
                 </span>
                 <span className="text-[11px] font-black tracking-widest text-[#FB923C] uppercase">
-                  APL SEASON 9
+                  SEASON 9
                 </span>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function PublicFooter() {
 
         {/* Bottom Copyright Bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
-          <p>© 2026 ApexArena – APL Season 9. All Rights Reserved.</p>
+          <p>© 2026 APL Season 9. All Rights Reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/rules" className="hover:text-slate-400 transition">
               Tournament By-Laws

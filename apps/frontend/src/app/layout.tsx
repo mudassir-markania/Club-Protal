@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Apex Arena | APL Season 9 Inter-House Championship',
+  title: 'APL Season 9 | Inter-House Championship',
   description: 'Official tournament broadcast and management engine for NexCore Institute of Technology: clubs, sports, live telemetry, and overall leaderboards.',
   icons: {
     icon: '/logo.png',

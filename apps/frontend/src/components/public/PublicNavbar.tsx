@@ -43,19 +43,19 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
         {/* Brand Crest & Title */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group">
-            {/* Crest Logo */}
+            {/* Logo */}
             <img
-              alt="Apex Arena Crest Logo"
-              className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsYOXH0JYiyX1rmUrq9scGTZImP9xqWivkekIWmx1Ruo3otUd9tF9VRe8WIEtDDPKFqcNYPrtpXTIXrhPILhl9C2Uw5zIvtHrgYGOblFU_y9Yhx0x9Afb48VKHwvWODlmjYpYUyz_3yPcHKJKV9F_uUUhRi2EmHmOnbK1FUcl9_CtwK5i8ia2Y4vQEOzSc86Qw-nN0mJFIxB1L5GZVK5OaxLk0RGsSzIYuMPIrLWbc"
+              alt="APL Logo"
+              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
+              src="/logo.png"
             />
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="font-manrope text-base sm:text-xl font-bold uppercase tracking-tight text-[#000f3f] leading-none whitespace-nowrap">
-                  Apex Arena
+                  APL
                 </span>
                 <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[#dae2fd] text-[#000f3f] text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider font-manrope shrink-0">
-                  APL S9
+                  Season 9
                 </span>
               </div>
               <span className="text-[9px] sm:text-[10px] font-bold text-[#45464f] tracking-wider uppercase font-manrope mt-0.5 truncate hidden sm:block">
