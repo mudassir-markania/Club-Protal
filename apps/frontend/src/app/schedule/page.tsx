@@ -11,6 +11,9 @@ import {
   isDone,
   isLive,
   isPending,
+  matchTitle,
+  whenLabel,
+  countdownLabel,
   pickNext,
   startsAt,
   useHouseStandings,
@@ -111,24 +114,240 @@ export default function SchedulePage() {
     <div className="min-h-screen bg-[#faf8ff] text-[#131b2e]">
       <PublicNavbar activeOverride="schedule" />
 
-      <header className="bg-[#000f3f] text-white">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-12 lg:py-16">
-          <span className="text-xs text-[#ffdbca] uppercase tracking-widest font-extrabold font-manrope">Fixtures &amp; results</span>
-          <h1 className="font-manrope text-4xl sm:text-6xl font-extrabold uppercase tracking-tight mt-2">Match Schedule</h1>
-          <p className="text-sm sm:text-base text-[#dce1ff] max-w-2xl mt-3">
-            Every scheduled match across all sports, with the teams, players and houses taking part. Results and the points table update as matches are played.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-6">
-            {[
-              { label: 'Upcoming', value: counts.upcoming },
-              { label: 'Live now', value: counts.live },
-              { label: 'Completed', value: counts.results },
-            ].map((c) => (
-              <div key={c.label} className="px-4 py-2.5 rounded-lg bg-white/10 border border-white/15 text-center min-w-[96px]">
-                <span className="block font-manrope text-2xl font-black text-[#ffdbca]">{c.value}</span>
-                <span className="text-[10px] uppercase tracking-wider font-bold text-[#dce1ff]">{c.label}</span>
+      {/* ======================================================== */}
+      {/* 1. HERO HEADER: STADIUM MATCH CENTER                     */}
+      {/* ======================================================== */}
+      <header className="relative w-full pt-24 sm:pt-28 lg:pt-32 pb-12 sm:pb-16 bg-gradient-to-br from-[#000f3f] via-[#071952] to-[#010922] text-white overflow-hidden border-b border-[#3b82f6]/20 shadow-xl">
+        {/* Decorative Ambient Radial Glows */}
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#eb6905]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#0051d5]/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-5 pointer-events-none" />
+
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Column: Heading & Telemetry Metrics */}
+            <div className="lg:col-span-7 flex flex-col items-start">
+              {/* Season Pill Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-extrabold uppercase tracking-widest text-amber-300 font-manrope mb-4 shadow-inner">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>APL Season 9 • Tournament Match Center</span>
               </div>
-            ))}
+
+              {/* Main Headline */}
+              <h1 className="font-manrope text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-none">
+                MATCH{' '}
+                <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-300 bg-clip-text text-transparent">
+                  SCHEDULE
+                </span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-[#dce1ff] max-w-2xl mt-4 leading-relaxed font-normal">
+                Official collegiate fixtures, live courtside scores, and approved results across all sports. Follow your house athletes as they compete for collegiate supremacy.
+              </p>
+
+              {/* Interactive Telemetry Chips */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 w-full max-w-2xl mt-7">
+                <button
+                  type="button"
+                  onClick={() => setTab('ALL')}
+                  className={`text-left p-3 sm:p-3.5 rounded-xl border backdrop-blur-md transition-all cursor-pointer ${
+                    tab === 'ALL'
+                      ? 'bg-white/20 border-amber-400/80 shadow-lg shadow-amber-500/10 scale-[1.02]'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-[#93c5fd] font-manrope">
+                      All Matches
+                    </span>
+                    <span className="material-symbols-outlined text-[16px] text-[#93c5fd]">calendar_view_week</span>
+                  </div>
+                  <span className="block font-manrope text-2xl sm:text-3xl font-black text-white">{matches.length}</span>
+                  <span className="text-[10px] text-white/60 font-medium">Full Schedule</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTab('UPCOMING')}
+                  className={`text-left p-3 sm:p-3.5 rounded-xl border backdrop-blur-md transition-all cursor-pointer ${
+                    tab === 'UPCOMING'
+                      ? 'bg-white/20 border-amber-400/80 shadow-lg shadow-amber-500/10 scale-[1.02]'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-amber-300 font-manrope">
+                      Upcoming
+                    </span>
+                    <span className="material-symbols-outlined text-[16px] text-amber-300">event_upcoming</span>
+                  </div>
+                  <span className="block font-manrope text-2xl sm:text-3xl font-black text-amber-400">{counts.upcoming}</span>
+                  <span className="text-[10px] text-amber-200/70 font-medium">To Be Played</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTab('LIVE')}
+                  className={`text-left p-3 sm:p-3.5 rounded-xl border backdrop-blur-md transition-all cursor-pointer ${
+                    tab === 'LIVE'
+                      ? 'bg-rose-500/20 border-rose-400 shadow-lg shadow-rose-500/20 scale-[1.02]'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-rose-300 font-manrope flex items-center gap-1">
+                      {counts.live > 0 && <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />}
+                      Live Now
+                    </span>
+                    <span className="material-symbols-outlined text-[16px] text-rose-300">sensors</span>
+                  </div>
+                  <span className={`block font-manrope text-2xl sm:text-3xl font-black ${counts.live > 0 ? 'text-rose-400' : 'text-white/80'}`}>
+                    {counts.live}
+                  </span>
+                  <span className="text-[10px] text-rose-200/70 font-medium">In Progress</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTab('RESULTS')}
+                  className={`text-left p-3 sm:p-3.5 rounded-xl border backdrop-blur-md transition-all cursor-pointer ${
+                    tab === 'RESULTS'
+                      ? 'bg-white/20 border-emerald-400/80 shadow-lg shadow-emerald-500/10 scale-[1.02]'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-emerald-300 font-manrope">
+                      Completed
+                    </span>
+                    <span className="material-symbols-outlined text-[16px] text-emerald-300">verified</span>
+                  </div>
+                  <span className="block font-manrope text-2xl sm:text-3xl font-black text-emerald-400">{counts.results}</span>
+                  <span className="text-[10px] text-emerald-200/70 font-medium">Points Logged</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Broadcast Spotlight Console */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/15 p-5 sm:p-6 shadow-2xl overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+
+                {/* Console Top Header */}
+                <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-transparent border border-amber-400/30 p-1 flex items-center justify-center shrink-0"
+                      style={{ width: '40px', height: '40px' }}
+                    >
+                      <img
+                        src="/logo.png"
+                        alt="APL"
+                        className="w-full h-full object-contain"
+                        style={{ width: '100%', height: '100%', maxWidth: '32px', maxHeight: '32px', objectFit: 'contain' }}
+                      />
+                    </div>
+                    <div>
+                      <span className="block font-manrope text-xs font-black uppercase tracking-wider text-white">
+                        APL Broadcast Hub
+                      </span>
+                      <span className="text-[10px] text-[#93c5fd] font-medium font-manrope">NexCore Sports Complex</span>
+                    </div>
+                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-[10px] font-bold text-emerald-300 uppercase tracking-wider font-manrope">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Telemetry
+                  </span>
+                </div>
+
+                {/* Spotlight Match Preview or Standings Overview */}
+                {next ? (
+                  <div className="pt-4 space-y-3.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-300 font-manrope">
+                        Next Up on Court
+                      </span>
+                      <span className="text-[11px] font-mono text-[#93c5fd] bg-white/10 px-2 py-0.5 rounded">
+                        {next.matchCode}
+                      </span>
+                    </div>
+
+                    <div className="bg-black/25 rounded-xl p-3 border border-white/10">
+                      <div className="text-xs font-black uppercase text-white font-manrope truncate mb-2">
+                        {matchTitle(next)}
+                      </div>
+
+                      {next.sides.length === 2 ? (
+                        <div className="grid grid-cols-5 items-center gap-2 py-1 text-center">
+                          <div className="col-span-2 min-w-0">
+                            <span className="block text-xs sm:text-sm font-bold text-white uppercase font-manrope truncate">
+                              {next.sides[0]?.name || 'Side 1'}
+                            </span>
+                            <span className="block text-[10px] text-[#93c5fd] uppercase font-semibold truncate">
+                              {next.sides[0]?.clubs?.[0]?.name || 'House'}
+                            </span>
+                          </div>
+                          <span className="col-span-1 font-manrope text-xs font-black text-amber-400">VS</span>
+                          <div className="col-span-2 min-w-0">
+                            <span className="block text-xs sm:text-sm font-bold text-white uppercase font-manrope truncate">
+                              {next.sides[1]?.name || 'Side 2'}
+                            </span>
+                            <span className="block text-[10px] text-[#93c5fd] uppercase font-semibold truncate">
+                              {next.sides[1]?.clubs?.[0]?.name || 'House'}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-[#dce1ff] font-medium">
+                          {next.sides.length} teams competing: {next.sides.map((s) => s.name).join(', ')}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-1">
+                      <div className="flex items-center gap-1.5 text-[#dce1ff]">
+                        <span className="material-symbols-outlined text-[16px] text-amber-400">schedule</span>
+                        <span className="font-bold">{whenLabel(next, now)}</span>
+                      </div>
+                      <span className="text-[11px] text-amber-300 font-semibold">{countdownLabel(next, now)}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-4 space-y-3">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-300 font-manrope">
+                      Championship Leaderboard
+                    </span>
+                    <div className="bg-black/25 rounded-xl p-3 border border-white/10 flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] text-[#93c5fd] uppercase font-bold block">Current Leader</span>
+                        <span className="text-sm font-black uppercase text-white font-manrope">
+                          {top[0]?.club?.name || 'Blue Club'}
+                        </span>
+                      </div>
+                      <span className="text-lg font-black font-manrope text-amber-400">
+                        {top[0]?.points ?? 31} PTS
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <Link
+                        href="/leaderboard"
+                        className="text-xs font-extrabold text-amber-300 hover:text-amber-200 uppercase tracking-wider font-manrope flex items-center gap-1"
+                      >
+                        <span>View Overall Leaderboard</span>
+                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      </Link>
+                      <Link
+                        href="/houses"
+                        className="text-xs font-bold text-[#93c5fd] hover:text-white uppercase tracking-wider font-manrope"
+                      >
+                        5 Houses
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </header>
