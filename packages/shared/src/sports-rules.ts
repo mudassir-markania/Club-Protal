@@ -202,21 +202,40 @@ export async function calculateMatchPoints(
 
   const awardTeam = (
     participantId: string | undefined,
-    trigger: RuleTrigger,
+    triggerOrTriggers: RuleTrigger | RuleTrigger[],
     isWinner: boolean,
     rank: number,
-    opts: { fallback?: RuleTrigger; skipIfNoRule?: boolean } = {}
+    opts: { skipIfNoRule?: boolean } = {}
   ) => {
     if (!participantId) return;
-    let rule = findRuleForTrigger(effectiveRules, trigger, input.eventCategory, teamCount);
-    if (!rule && opts.fallback) rule = findRuleForTrigger(effectiveRules, opts.fallback, input.eventCategory, teamCount);
+    const triggers: RuleTrigger[] = Array.isArray(triggerOrTriggers) ? triggerOrTriggers : [triggerOrTriggers];
+    let rule: EffectiveRule | null = null;
+    let matchedTrigger: RuleTrigger | null = null;
+
+    for (const t of triggers) {
+      const candidate = findRuleForTrigger(effectiveRules, t, input.eventCategory, teamCount);
+      if (candidate && candidate.points > 0) {
+        rule = candidate;
+        matchedTrigger = t;
+        break;
+      }
+      if (!rule && candidate) {
+        rule = candidate;
+        matchedTrigger = t;
+      }
+    }
+
     if (!rule && opts.skipIfNoRule) return;
 
-    const label = triggerLabel(trigger);
+    const label = triggerLabel(matchedTrigger || triggers[0]);
     const points = rule?.points ?? 0;
     const catSuffix = rule?.category ? ` (${rule.category})` : '';
     const zeroByDesign =
-      trigger === 'MATCH_LOSS' || trigger === 'THIRD_PLACE_LOSER' || trigger === 'QUARTER_FINAL_LOSS' || trigger === 'SEMI_FINAL_LOSS';
+      triggers.includes('MATCH_LOSS') ||
+      triggers.includes('THIRD_PLACE_LOSER') ||
+      triggers.includes('QUARTER_FINAL_LOSS') ||
+      triggers.includes('SEMI_FINAL_LOSS');
+
     teamPoints.push({
       participantId,
       teamName: getParticipantName(participantId),
@@ -237,31 +256,31 @@ export async function calculateMatchPoints(
 
   // Placements passed explicitly (e.g. from referee sheet or admin placement form)
   if (input.firstPlaceParticipantId) {
-    awardTeam(input.firstPlaceParticipantId, 'PLACE_1', true, 1, { fallback: 'FINAL_WINNER' });
+    awardTeam(input.firstPlaceParticipantId, ['PLACE_1', 'FINAL_WINNER', 'TOURNAMENT_WINNER', 'MATCH_WIN'], true, 1);
   }
   if (input.secondPlaceParticipantId) {
-    awardTeam(input.secondPlaceParticipantId, 'PLACE_2', false, 2, { fallback: 'FINAL_LOSER' });
+    awardTeam(input.secondPlaceParticipantId, ['PLACE_2', 'FINAL_LOSER', 'TOURNAMENT_RUNNER_UP'], false, 2);
   }
   if (input.thirdPlaceParticipantId) {
-    awardTeam(input.thirdPlaceParticipantId, 'PLACE_3', false, 3, { fallback: 'THIRD_PLACE_WINNER' });
+    awardTeam(input.thirdPlaceParticipantId, ['PLACE_3', 'THIRD_PLACE_WINNER', 'TOURNAMENT_THIRD'], false, 3);
   }
 
   // If team points were not already populated by explicit placements above:
   if (teamPoints.length === 0) {
     if (stage === 'FINAL') {
-      awardTeam(winnerId, 'FINAL_WINNER', true, 1, { fallback: 'PLACE_1' });
-      awardTeam(loserId, 'FINAL_LOSER', false, 2, { fallback: 'PLACE_2' });
+      awardTeam(winnerId, ['FINAL_WINNER', 'PLACE_1', 'TOURNAMENT_WINNER', 'MATCH_WIN'], true, 1);
+      awardTeam(loserId, ['FINAL_LOSER', 'PLACE_2', 'TOURNAMENT_RUNNER_UP', 'MATCH_LOSS'], false, 2);
     } else if (stage === 'THIRD_PLACE') {
-      awardTeam(winnerId, 'THIRD_PLACE_WINNER', true, 3, { fallback: 'PLACE_3' });
-      awardTeam(loserId, 'THIRD_PLACE_LOSER', false, 4, { fallback: 'MATCH_LOSS' });
+      awardTeam(winnerId, ['THIRD_PLACE_WINNER', 'PLACE_3', 'TOURNAMENT_THIRD', 'MATCH_WIN'], true, 3);
+      awardTeam(loserId, ['THIRD_PLACE_LOSER', 'MATCH_LOSS'], false, 4);
     } else if (stage === 'QUARTER_FINAL' || stage === 'SEMI_FINAL') {
       const q = stage === 'QUARTER_FINAL';
-      awardTeam(winnerId, q ? 'QUARTER_FINAL_WIN' : 'SEMI_FINAL_WIN', true, 1, { fallback: 'MATCH_WIN' });
-      awardTeam(loserId, q ? 'QUARTER_FINAL_LOSS' : 'SEMI_FINAL_LOSS', false, 2, { fallback: 'MATCH_LOSS' });
+      awardTeam(winnerId, q ? ['QUARTER_FINAL_WIN', 'MATCH_WIN'] : ['SEMI_FINAL_WIN', 'MATCH_WIN'], true, 1);
+      awardTeam(loserId, q ? ['QUARTER_FINAL_LOSS', 'MATCH_LOSS'] : ['SEMI_FINAL_LOSS', 'MATCH_LOSS'], false, 2);
     } else {
       // NORMAL / Regular match
-      awardTeam(winnerId, 'MATCH_WIN', true, 1, { fallback: 'PLACE_1' });
-      awardTeam(loserId, 'MATCH_LOSS', false, 2);
+      awardTeam(winnerId, ['MATCH_WIN', 'PLACE_1', 'TOURNAMENT_WINNER'], true, 1);
+      awardTeam(loserId, ['MATCH_LOSS'], false, 2);
     }
   }
 
