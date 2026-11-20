@@ -605,21 +605,7 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-[20px]">calendar_month</span>
                 </Link>
 
-                {/* Next Multi-Sport Marquee Clashing Badge */}
-                <div className="hidden lg:flex items-center gap-4 ml-auto bg-[#172554]/85 backdrop-blur-md px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg border border-white/10 shadow-lg">
-                  <div className="flex flex-col text-right">
-                    <span className="text-[10px] uppercase text-[#808dc2] font-semibold font-manrope">
-                      {activeHero.clashTitle}
-                    </span>
-                    <span className="text-xs sm:text-sm font-bold uppercase text-white tracking-tight font-manrope">
-                      {activeHero.clashMatch}
-                    </span>
-                    <span className="text-[10px] text-[#b7c4fd] font-medium font-manrope">
-                      {activeHero.clashSub}
-                    </span>
-                  </div>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#ba1a1a] animate-ping" />
-                </div>
+
               </div>
             </div>
           </section>
