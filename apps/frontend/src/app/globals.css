@@ -136,4 +136,11 @@ body {
   border: 1px solid rgba(203, 213, 225, 0.6);
 }
 
+/* Force non-wrapping utility guaranteed in production CSS */
+.whitespace-nowrap,
+.no-wrap {
+  white-space: nowrap !important;
+}
+
+
 

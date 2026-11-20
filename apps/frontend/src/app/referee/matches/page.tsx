@@ -317,27 +317,34 @@ export default function RefereeMatchesPage() {
                               </div>
                             </div>
 
-                            <div className="text-right shrink-0">
+                            <div className="text-right shrink-0" style={{ flexShrink: 0, minWidth: 'max-content' }}>
                               {canDeclare ? (
                                 <button
                                   onClick={() => setWinTarget({ match: m, participant: p })}
                                   title="Declare this side the winner"
+                                  style={{ whiteSpace: 'nowrap', display: 'inline-flex', flexShrink: 0 }}
                                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-extrabold transition whitespace-nowrap"
                                 >
-                                  <Trophy className="w-3.5 h-3.5" />
+                                  <Trophy className="w-3.5 h-3.5 shrink-0" />
                                   Win
                                 </button>
                               ) : p.isWinner ? (
-                                <span className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 whitespace-nowrap">
-                                  <Trophy className="w-3 h-3" />
-                                  {p.score} pts
+                                <span
+                                  style={{ whiteSpace: 'nowrap', display: 'inline-flex', flexShrink: 0 }}
+                                  className="inline-flex items-center gap-1 font-mono font-extrabold text-xs text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 whitespace-nowrap shrink-0"
+                                >
+                                  <Trophy className="w-3 h-3 shrink-0" />
+                                  {p.score}&nbsp;pts
                                 </span>
                               ) : p.score !== null && p.score !== undefined ? (
-                                <span className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap">
-                                  {p.score} pts
+                                <span
+                                  style={{ whiteSpace: 'nowrap', display: 'inline-flex', flexShrink: 0 }}
+                                  className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap shrink-0"
+                                >
+                                  {p.score}&nbsp;pts
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending</span>
+                                <span style={{ whiteSpace: 'nowrap' }} className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending</span>
                               )}
                             </div>
                           </div>

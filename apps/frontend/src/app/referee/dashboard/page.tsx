@@ -488,13 +488,16 @@ export default function RefereeDashboardPage() {
                                   </div>
                                 </div>
 
-                                <div className="text-right shrink-0">
+                                <div className="text-right shrink-0" style={{ flexShrink: 0, minWidth: 'max-content' }}>
                                   {p.score !== null && p.score !== undefined ? (
-                                    <span className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap">
-                                      {p.score} pts
+                                    <span
+                                      style={{ whiteSpace: 'nowrap', display: 'inline-flex', flexShrink: 0 }}
+                                      className="inline-flex items-center font-mono font-extrabold text-xs text-navy-950 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 whitespace-nowrap shrink-0"
+                                    >
+                                      {p.score}&nbsp;pts
                                     </span>
                                   ) : (
-                                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending Entry</span>
+                                    <span style={{ whiteSpace: 'nowrap' }} className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Pending Entry</span>
                                   )}
                                 </div>
                               </div>
