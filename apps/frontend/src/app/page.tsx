@@ -486,10 +486,29 @@ export default function HomePage() {
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
+
+  // Splash screen: only runs once on fresh session entry, NEVER on navbar "Home" clicks
+  useEffect(() => {
+    try {
+      const alreadyShown = sessionStorage.getItem('apl_splash_shown');
+      const params = new URLSearchParams(window.location.search);
+      if (!alreadyShown || params.get('splash') === '1') {
+        setShowSplash(true);
+        sessionStorage.setItem('apl_splash_shown', 'true');
+      }
+    } catch {
+      // storage unavailable / SSR guard
+    }
+  }, []);
 
   const handleSplashDismiss = () => {
     setShowSplash(false);
+    try {
+      sessionStorage.setItem('apl_splash_shown', 'true');
+    } catch {
+      // ignore
+    }
   };
 
   return (
