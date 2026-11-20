@@ -964,12 +964,19 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-5 pointer-events-none" />
 
                 {/* Top Championship Emblem */}
-                <div className="relative mb-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-transparent border border-amber-400/40 p-2.5 shadow-xl shadow-amber-500/15 flex items-center justify-center mx-auto hover:scale-105 transition-transform duration-300">
+                <div
+                  className="relative mb-6 flex items-center justify-center mx-auto"
+                  style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px' }}
+                >
+                  <div
+                    className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400/20 via-amber-500/10 to-transparent border border-amber-400/40 p-2.5 shadow-xl shadow-amber-500/15 flex items-center justify-center hover:scale-105 transition-transform duration-300"
+                    style={{ width: '80px', height: '80px' }}
+                  >
                     <img
                       src="/logo.png"
                       alt="APL Championship Trophy"
                       className="w-full h-full object-contain filter drop-shadow"
+                      style={{ width: '100%', height: '100%', maxWidth: '64px', maxHeight: '64px', objectFit: 'contain' }}
                     />
                   </div>
                 </div>
