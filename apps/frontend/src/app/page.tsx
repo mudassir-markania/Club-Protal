@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
+import PublicFooter from '@/components/public/PublicFooter';
 import HomeFixtures from '@/components/public/HomeFixtures';
 import HomePointsTable from '@/components/public/HomePointsTable';
 import ChampionshipSplashScreen from '@/components/public/ChampionshipSplashScreen';
@@ -1057,144 +1058,7 @@ export default function HomePage() {
       {/* ======================================================== */}
       {/* 10. FOOTER                                               */}
       {/* ======================================================== */}
-      <footer className="w-full bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-t border-[#e2e7ff]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 pt-12 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10">
-            {/* Col 1-2: Brand Information */}
-            <div className="lg:col-span-2 flex flex-col gap-4 pr-0 lg:pr-8">
-              <div className="flex items-center gap-3">
-                <span className="font-manrope text-xl font-bold uppercase tracking-tight text-[#000f3f]">
-                  APL
-                </span>
-                <span className="px-2 py-0.5 rounded-lg bg-[#dae2fd] text-[#000f3f] text-[10px] font-bold uppercase font-manrope">
-                  Season 9
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-[#45464f] max-w-md leading-relaxed">
-                Official Collegiate Inter-House Athletic &amp; Esports Championship. Hosted annually under the regulatory authority of the Directorate of Physical Education and Sports, NexCore Institute of Technology.
-              </p>
-              <div className="flex items-center gap-3 text-[#45464f]">
-                <a
-                  className="p-2 rounded-lg bg-[#f2f3ff] hover:bg-[#e2e7ff] hover:text-[#000f3f] transition-colors"
-                  href="#fixtures"
-                  title="Broadcast Hub"
-                >
-                  <span className="material-symbols-outlined text-[20px]">live_tv</span>
-                </a>
-                <Link
-                  className="p-2 rounded-lg bg-[#f2f3ff] hover:bg-[#e2e7ff] hover:text-[#000f3f] transition-colors"
-                  href="/schedule"
-                  title="Tournament Desk"
-                >
-                  <span className="material-symbols-outlined text-[20px]">sports_score</span>
-                </Link>
-                <a
-                  className="p-2 rounded-lg bg-[#f2f3ff] hover:bg-[#e2e7ff] hover:text-[#000f3f] transition-colors"
-                  href="#championship-overview"
-                  title="Press & Media"
-                >
-                  <span className="material-symbols-outlined text-[20px]">campaign</span>
-                </a>
-                <a
-                  className="p-2 rounded-lg bg-[#f2f3ff] hover:bg-[#e2e7ff] hover:text-[#000f3f] transition-colors"
-                  href="mailto:sports@nexcore.edu"
-                  title="Official Mail"
-                >
-                  <span className="material-symbols-outlined text-[20px]">mail</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Col 3: Tournament Links */}
-            <div className="flex flex-col gap-3">
-              <span className="text-xs uppercase tracking-wider text-[#000f3f] font-bold font-manrope">
-                Tournament Links
-              </span>
-              <div className="flex flex-col gap-2 text-xs text-[#45464f]">
-                <a className="hover:text-[#000f3f] transition-colors" href="#">
-                  Tournament Central
-                </a>
-                <Link className="hover:text-[#000f3f] transition-colors" href="/schedule">
-                  Fixtures &amp; Timings
-                </Link>
-                <Link className="hover:text-[#000f3f] transition-colors" href="/leaderboard">
-                  Championship Points Table
-                </Link>
-                <Link className="hover:text-[#000f3f] transition-colors" href="/sports">
-                  Medal Tally &amp; Records
-                </Link>
-                <Link className="hover:text-[#000f3f] transition-colors" href="/schedule">
-                  Knockout Brackets
-                </Link>
-                <button
-                  onClick={() => setShowRulebookModal(true)}
-                  className="text-left hover:text-[#000f3f] transition-colors cursor-pointer"
-                >
-                  Code of Conduct &amp; Rules
-                </button>
-              </div>
-            </div>
-
-            {/* Col 4: Houses */}
-            <div className="flex flex-col gap-3">
-              <span className="text-xs uppercase tracking-wider text-[#000f3f] font-bold font-manrope">
-                Houses
-              </span>
-              <div className="flex flex-col gap-2 text-xs text-[#45464f]">
-                {houses.map((h) => (
-                  <div
-                    key={h.id}
-                    onClick={() => setSelectedHouse(h)}
-                    className="hover:text-[#000f3f] transition-colors flex items-center justify-between cursor-pointer"
-                  >
-                    <span>{h.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Col 5: Sports Discipline */}
-            <div className="flex flex-col gap-3">
-              <span className="text-xs uppercase tracking-wider text-[#000f3f] font-bold font-manrope">
-                Sports Discipline
-              </span>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-xs text-[#45464f]">
-                {DISCIPLINES_DATA.map((s) => (
-                  <div
-                    key={s.id}
-                    onClick={() => setSelectedSport(s)}
-                    className="hover:text-[#000f3f] transition-colors cursor-pointer truncate"
-                  >
-                    {s.name}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Accreditation */}
-          <div className="pt-6 border-t border-[#e2e7ff] flex flex-col md:flex-row items-center justify-between gap-4 text-[#45464f] text-xs">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#0051d5]" />
-              <span>Accredited by Council of Collegiate Athletics &amp; NexCore Institute of Technology.</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] uppercase tracking-wider font-manrope font-semibold">
-                © 2026 APL SEASON 9. ALL RIGHTS RESERVED.
-              </span>
-              <div className="flex items-center gap-2">
-                <a className="hover:text-[#000f3f] transition-colors" href="#">
-                  Privacy Policy
-                </a>
-                <span className="text-[#c6c5d0]">•</span>
-                <a className="hover:text-[#000f3f] transition-colors" href="#">
-                  Official Regulations
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
       {/* ======================================================== */}
       {/* MODAL 1: HOUSE ROSTER & OVERVIEW                         */}
