@@ -122,7 +122,7 @@ export default function ChampionshipSplashScreen({
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white font-manrope">
-            Athletic Premier League
+            Alliance Premier League
           </h1>
 
           <p className="text-xs sm:text-sm text-[#b7c4fd] font-sans tracking-wide max-w-sm mx-auto">
