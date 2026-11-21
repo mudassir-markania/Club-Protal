@@ -218,55 +218,102 @@ function transformOrderBy(orderBy: any): any {
   return sort;
 }
 
-// Populate nested includes for a list of documents
+// Populate nested includes for a list of documents using batch loading
 async function populateIncludes(modelName: string, docs: any[], include: any): Promise<any[]> {
   if (!include || docs.length === 0) return docs;
   const rels = RELATIONS[modelName] || {};
 
-  for (const [relKey, includeVal] of Object.entries(include)) {
-    if (!includeVal) continue;
-    const relDef = rels[relKey];
-    if (!relDef) continue;
+  await Promise.all(
+    Object.entries(include).map(async ([relKey, includeVal]) => {
+      if (!includeVal) return;
+      const relDef = rels[relKey];
+      if (!relDef) return;
 
-    const TargetModel = models[relDef.model];
-    if (!TargetModel) continue;
+      const TargetModel = models[relDef.model];
+      if (!TargetModel) return;
 
-    const subInclude = typeof includeVal === 'object' && 'include' in includeVal ? (includeVal as any).include : null;
-    const subOrderBy = typeof includeVal === 'object' && 'orderBy' in includeVal ? (includeVal as any).orderBy : null;
+      const subInclude = typeof includeVal === 'object' && 'include' in includeVal ? (includeVal as any).include : null;
+      const subOrderBy = typeof includeVal === 'object' && 'orderBy' in includeVal ? (includeVal as any).orderBy : null;
 
-    for (const doc of docs) {
       if (relDef.isArray) {
-        const query: any = { [relDef.foreignKey]: doc.id || doc._id };
+        // Collect parent IDs
+        const parentIds = Array.from(new Set(docs.map((d) => String(d.id || d._id)).filter(Boolean)));
+        if (parentIds.length === 0) {
+          for (const doc of docs) {
+            doc[relKey] = [];
+          }
+          return;
+        }
+
+        const query: any = { [relDef.foreignKey]: { $in: parentIds } };
         let q = TargetModel.find(query);
         if (subOrderBy) q = q.sort(transformOrderBy(subOrderBy));
         let results = (await q.lean({ virtuals: true })) as any[];
         results = results.map((r) => ({ ...r, id: r._id }));
 
-        if (subInclude) {
+        if (subInclude && results.length > 0) {
           results = await populateIncludes(relDef.model, results, subInclude);
         }
-        doc[relKey] = results;
-      } else {
-        const lookupVal = relDef.localKey ? doc[relDef.localKey] : doc.id || doc._id;
-        if (!lookupVal) {
-          doc[relKey] = null;
-          continue;
-        }
-        const query: any = { [relDef.foreignKey]: lookupVal };
-        const found = await TargetModel.findOne(query).lean({ virtuals: true });
-        if (found) {
-          let item = { ...found, id: (found as any)._id };
-          if (subInclude) {
-            const populated = await populateIncludes(relDef.model, [item], subInclude);
-            item = populated[0];
+
+        // Group by foreignKey
+        const grouped = new Map<string, any[]>();
+        for (const item of results) {
+          const fk = String(item[relDef.foreignKey]);
+          const arr = grouped.get(fk);
+          if (arr) {
+            arr.push(item);
+          } else {
+            grouped.set(fk, [item]);
           }
-          doc[relKey] = item;
-        } else {
-          doc[relKey] = null;
         }
+
+        for (const doc of docs) {
+          const docId = String(doc.id || doc._id);
+          doc[relKey] = grouped.get(docId) || [];
+        }
+      } else {
+        // Single document relation
+        const lookupMap = new Map<number, string>();
+        const uniqueLookupVals = new Set<string>();
+
+        docs.forEach((doc, idx) => {
+          const val = relDef.localKey ? doc[relDef.localKey] : doc.id || doc._id;
+          if (val) {
+            const strVal = String(val);
+            lookupMap.set(idx, strVal);
+            uniqueLookupVals.add(strVal);
+          }
+        });
+
+        if (uniqueLookupVals.size === 0) {
+          for (const doc of docs) {
+            doc[relKey] = null;
+          }
+          return;
+        }
+
+        const lookupArr = Array.from(uniqueLookupVals);
+        const query: any = { [relDef.foreignKey]: { $in: lookupArr } };
+        let results = (await TargetModel.find(query).lean({ virtuals: true })) as any[];
+        results = results.map((r) => ({ ...r, id: r._id }));
+
+        if (subInclude && results.length > 0) {
+          results = await populateIncludes(relDef.model, results, subInclude);
+        }
+
+        const map = new Map<string, any>();
+        for (const item of results) {
+          const key = String(item[relDef.foreignKey] || item._id || item.id);
+          map.set(key, item);
+        }
+
+        docs.forEach((doc, idx) => {
+          const lookupVal = lookupMap.get(idx);
+          doc[relKey] = lookupVal ? map.get(lookupVal) || null : null;
+        });
       }
-    }
-  }
+    })
+  );
 
   return docs;
 }

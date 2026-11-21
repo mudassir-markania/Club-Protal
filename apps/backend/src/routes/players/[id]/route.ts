@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { validateSportIds, findSportByName } from '@/lib/player-eligibility';
+import { clearCache } from '@/lib/cache';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -145,6 +146,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       updatedValue: result,
     });
 
+    clearCache('players');
     return NextResponse.json(result);
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
@@ -178,6 +180,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       previousValue: player,
     });
 
+    clearCache('players');
     return NextResponse.json({ success: true, message: 'Player deleted successfully' });
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {

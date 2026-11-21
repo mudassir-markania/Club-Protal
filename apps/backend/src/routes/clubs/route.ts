@@ -2,9 +2,13 @@ import { NextResponse } from '@/http/next-server';
 import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { getCached, setCached, clearCache } from '@/lib/cache';
 
 export async function GET() {
   try {
+    const cached = getCached('clubs:all');
+    if (cached) return NextResponse.json(cached);
+
     const clubs = await db.club.findMany({
       orderBy: { currentRank: 'asc' },
       include: {
@@ -17,6 +21,7 @@ export async function GET() {
       },
     });
 
+    setCached('clubs:all', clubs, 60);
     return NextResponse.json(clubs);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -96,6 +101,8 @@ export async function POST(req: Request) {
       updatedValue: club,
     });
 
+    clearCache('clubs');
+    clearCache('leaderboard');
     return NextResponse.json(club, { status: 201 });
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {

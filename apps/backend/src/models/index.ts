@@ -131,6 +131,7 @@ const PlayerSchema = createSchema({
   totalPerformancePoints: { type: Number, default: 0 },
   starPlayerCount: { type: Number, default: 0 },
 });
+PlayerSchema.index({ clubId: 1, status: 1 });
 
 // 7. PlayerSport
 const PlayerSportSchema = createSchema({
@@ -138,6 +139,7 @@ const PlayerSportSchema = createSchema({
   sportId: { type: String, required: true },
 });
 PlayerSportSchema.index({ playerId: 1, sportId: 1 }, { unique: true });
+PlayerSportSchema.index({ sportId: 1 });
 
 // 8. Referee
 const RefereeSchema = createSchema({
@@ -181,6 +183,8 @@ const MatchSchema = createSchema({
   starPlayerPoints: { type: Number, default: 0 },
   totalTeamsParticipating: { type: Number },
 });
+MatchSchema.index({ status: 1, matchDate: 1 });
+MatchSchema.index({ sportId: 1 });
 
 // 12. MatchParticipant
 const MatchParticipantSchema = createSchema({
@@ -196,6 +200,9 @@ const MatchParticipantSchema = createSchema({
   isWinner: { type: Boolean, default: false },
   rank: { type: Number },
 });
+MatchParticipantSchema.index({ matchId: 1 });
+MatchParticipantSchema.index({ clubId: 1 });
+MatchParticipantSchema.index({ playerId: 1 });
 
 // 13. MatchParticipantPlayer
 const MatchParticipantPlayerSchema = createSchema({
@@ -204,6 +211,8 @@ const MatchParticipantPlayerSchema = createSchema({
   clubId: { type: String, required: true },
 });
 MatchParticipantPlayerSchema.index({ participantId: 1, playerId: 1 }, { unique: true });
+MatchParticipantPlayerSchema.index({ playerId: 1 });
+MatchParticipantPlayerSchema.index({ clubId: 1 });
 
 // 14. MatchReferee
 const MatchRefereeSchema = createSchema({
@@ -211,6 +220,7 @@ const MatchRefereeSchema = createSchema({
   refereeId: { type: String, required: true },
 });
 MatchRefereeSchema.index({ matchId: 1, refereeId: 1 }, { unique: true });
+MatchRefereeSchema.index({ refereeId: 1 });
 
 // 15. MatchResult
 const MatchResultSchema = createSchema({
@@ -232,6 +242,7 @@ const MatchResultSchema = createSchema({
   disputeReason: { type: String },
   rejectionReason: { type: String },
 });
+MatchResultSchema.index({ matchId: 1 });
 
 // 15B. PlayerPerformance (Individual Star Player & Performance Tracking)
 const PlayerPerformanceSchema = createSchema({
@@ -263,6 +274,8 @@ const PointsDistributionSchema = createSchema({
   rejectionReason: { type: String },
   approvedAt: { type: Date },
 });
+PointsDistributionSchema.index({ matchId: 1 });
+PointsDistributionSchema.index({ participantId: 1 });
 
 // 17. ClubPointAllocation
 const ClubPointAllocationSchema = createSchema({
@@ -272,6 +285,8 @@ const ClubPointAllocationSchema = createSchema({
   playersContributed: { type: Number, default: 1 },
   isRemainderWinner: { type: Boolean, default: false },
 });
+ClubPointAllocationSchema.index({ distributionId: 1 });
+ClubPointAllocationSchema.index({ clubId: 1 });
 
 // 18. ScoreEntry
 const ScoreEntrySchema = createSchema({
@@ -294,6 +309,8 @@ const PointsHistorySchema = createSchema({
   recordedAt: { type: Date, default: Date.now },
   recordedByUserId: { type: String },
 });
+PointsHistorySchema.index({ clubId: 1, sportId: 1 });
+PointsHistorySchema.index({ matchId: 1 });
 
 // 19B. EventResult (a finalized Badminton / Carrom event: placements and the points awarded)
 const EventResultSchema = createSchema({

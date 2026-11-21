@@ -4,9 +4,13 @@ import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { normalizeSportKey, DEFAULT_OFFICIAL_RULES } from '@club-portal/shared';
 import { getPurgedSports } from '@/lib/sports-rules-server';
+import { getCached, setCached, clearCache } from '@/lib/cache';
 
 export async function GET() {
   try {
+    const cached = getCached('sports:all');
+    if (cached) return NextResponse.json(cached);
+
     const sports = await db.sport.findMany({
       orderBy: { name: 'asc' },
       include: {
@@ -48,6 +52,7 @@ export async function GET() {
       };
     });
 
+    setCached('sports:all', enrichedSports, 60);
     return NextResponse.json(enrichedSports);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -121,6 +126,7 @@ export async function POST(req: Request) {
       updatedValue: sport,
     });
 
+    clearCache('sports');
     return NextResponse.json(sport, { status: 201 });
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {

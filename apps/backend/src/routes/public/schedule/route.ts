@@ -1,6 +1,7 @@
 import { NextResponse } from '@/http/next-server';
 import { db } from '@/lib/db';
 import { categoryDisplayName } from '@club-portal/shared';
+import { getCached, setCached } from '@/lib/cache';
 
 /**
  * Public schedule for viewers: every match with its sides, but only fields that are safe to show publicly
@@ -9,6 +10,10 @@ import { categoryDisplayName } from '@club-portal/shared';
  */
 export async function GET() {
   try {
+    const cacheKey = 'public:schedule';
+    const cached = getCached(cacheKey);
+    if (cached) return NextResponse.json(cached);
+
     const matches = await db.match.findMany({
       orderBy: [{ matchDate: 'asc' }, { matchTime: 'asc' }],
       include: {
@@ -51,7 +56,9 @@ export async function GET() {
       }),
     }));
 
-    return NextResponse.json({ generatedAt: new Date().toISOString(), matches: data });
+    const responseData = { generatedAt: new Date().toISOString(), matches: data };
+    setCached(cacheKey, responseData, 30);
+    return NextResponse.json(responseData);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

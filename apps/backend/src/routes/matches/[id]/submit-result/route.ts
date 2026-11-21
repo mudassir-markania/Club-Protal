@@ -5,6 +5,7 @@ import { createAuditLog } from '@/lib/audit';
 import { calculateMatchPoints } from '@club-portal/shared';
 import { getSportRules } from '@/lib/sports-rules-server';
 import { calculateClubPointsDistribution } from '@club-portal/shared';
+import { clearCache } from '@/lib/cache';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -34,7 +35,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
 
     if (!match) {
-      return NextResponse.json({ error: 'Match not found' }, { status: 404 });
+      clearCache();
+    return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
     // Role and referee assignment check
@@ -359,6 +361,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       },
     });
 
+    clearCache();
     return NextResponse.json({
       success: true,
       message: `Match result submitted successfully! Points automatically calculated and distributed across unique clubs. Awaiting Admin verification and approval.`,
@@ -369,6 +372,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
   } catch (error: any) {
     console.error('Submit result error:', error);
+    clearCache();
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

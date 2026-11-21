@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
 import { calculateClubPointsDistribution } from '@club-portal/shared';
+import { clearCache } from '@/lib/cache';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -231,6 +232,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         updatedValue: { matchCode: match.matchCode, status: 'APPROVED' },
       });
 
+      clearCache();
       return NextResponse.json({
         success: true,
         message: 'Result approved. Club points credited and leaderboard updated.',
@@ -312,6 +314,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         updatedValue: { rejectionReason, status: 'REJECTED' },
       });
 
+      clearCache();
       return NextResponse.json({
         success: true,
         message: 'Result rejected. Referee notified for correction.',
@@ -475,6 +478,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         updatedValue: corrections,
       });
 
+      clearCache();
       return NextResponse.json({
         success: true,
         message: 'Match results successfully corrected and re-distributed with full audit trail.',

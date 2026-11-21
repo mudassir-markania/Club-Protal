@@ -1,12 +1,17 @@
 import { NextResponse } from '@/http/next-server';
 import { db } from '@/lib/db';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
+import { getCached, setCached, clearCache } from '@/lib/cache';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type') || 'overall';
     const sportId = searchParams.get('sportId');
+
+    const cacheKey = `leaderboard:${req.url}`;
+    const cached = getCached(cacheKey);
+    if (cached) return NextResponse.json(cached);
 
     const sports = await db.sport.findMany({
       where: { status: 'ACTIVE' },
@@ -70,7 +75,7 @@ export async function GET(req: Request) {
         include: { club: true, sport: true, match: true },
       });
 
-      return NextResponse.json({
+      const responseData = {
         type: 'overall',
         championshipStatus,
         championClub,
@@ -78,7 +83,9 @@ export async function GET(req: Request) {
         standings,
         sports,
         recentPoints,
-      });
+      };
+      setCached(cacheKey, responseData, 30);
+      return NextResponse.json(responseData);
     }
 
     if (type === 'sport' && sportId) {
@@ -89,11 +96,13 @@ export async function GET(req: Request) {
         include: { club: true },
       });
 
-      return NextResponse.json({
+      const responseData = {
         type: 'sport',
         sport,
         standings: entries,
-      });
+      };
+      setCached(cacheKey, responseData, 30);
+      return NextResponse.json(responseData);
     }
 
     // Default fallback
@@ -103,11 +112,13 @@ export async function GET(req: Request) {
       include: { club: true },
     });
 
-    return NextResponse.json({
+    const fallbackData = {
       type: 'overall',
       standings: allEntries,
       sports,
-    });
+    };
+    setCached(cacheKey, fallbackData, 30);
+    return NextResponse.json(fallbackData);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -115,6 +126,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    clearCache('leaderboard');
     await recalculateAllLeaderboards();
     return NextResponse.json({ success: true, message: 'All leaderboards recalculated' });
   } catch (error: any) {

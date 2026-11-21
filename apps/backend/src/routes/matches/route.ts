@@ -6,6 +6,7 @@ import { createAuditLog } from '@/lib/audit';
 import { assertPlayersEligible } from '@/lib/player-eligibility';
 import { categoryRules, categoryDisplayName } from '@club-portal/shared';
 import { normalizeSportKey } from '@club-portal/shared';
+import { getCached, setCached, clearCache } from '@/lib/cache';
 
 export async function GET(req: Request) {
   try {
@@ -15,6 +16,14 @@ export async function GET(req: Request) {
     const date = searchParams.get('date');
     const refereeId = searchParams.get('refereeId');
     const clubId = searchParams.get('clubId');
+
+    const session = await getSessionUser();
+    const isPublicUser = !session || session.role !== 'REFEREE';
+    const cacheKey = `matches:${req.url}`;
+    if (isPublicUser) {
+      const cached = getCached(cacheKey);
+      if (cached) return NextResponse.json(cached);
+    }
 
     const where: any = {};
 
@@ -29,7 +38,6 @@ export async function GET(req: Request) {
     }
 
     // A signed-in referee only ever sees matches of their assigned sports (plus matches assigned to them directly)
-    const session = await getSessionUser();
     if (session?.role === 'REFEREE') {
       if (!session.refereeId) return NextResponse.json([]);
       const scope = await getRefereeScope(session.refereeId);
@@ -93,6 +101,10 @@ export async function GET(req: Request) {
         },
       },
     });
+
+    if (isPublicUser) {
+      setCached(cacheKey, matches, 30);
+    }
 
     return NextResponse.json(matches);
   } catch (error: any) {
@@ -436,6 +448,10 @@ export async function POST(req: Request) {
         referees: { include: { referee: true } },
       },
     });
+
+    clearCache('matches');
+    clearCache('public:schedule');
+    clearCache('leaderboard');
 
     return NextResponse.json(fullMatch, { status: 201 });
   } catch (error: any) {

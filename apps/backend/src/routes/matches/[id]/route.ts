@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { recalculateAllLeaderboards } from '@/lib/scoring';
+import { clearCache } from '@/lib/cache';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -260,6 +261,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       updatedValue: { ...updated, refereeIds },
     });
 
+    clearCache('matches');
+    clearCache('public:schedule');
+    clearCache('leaderboard');
+
     return NextResponse.json(updated);
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
@@ -317,6 +322,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       recordId: match.id,
       previousValue: match,
     });
+
+    clearCache('matches');
+    clearCache('public:schedule');
+    clearCache('leaderboard');
 
     return NextResponse.json({
       success: true,

@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { validateSportIds, eligiblePlayerIds } from '@/lib/player-eligibility';
+import { getCached, setCached, clearCache } from '@/lib/cache';
 
 export async function GET(req: Request) {
   try {
@@ -11,6 +12,10 @@ export async function GET(req: Request) {
     const clubId = searchParams.get('clubId');
     const sportId = searchParams.get('sportId');
     const status = searchParams.get('status');
+
+    const cacheKey = `players:${req.url}`;
+    const cached = getCached(cacheKey);
+    if (cached) return NextResponse.json(cached);
 
     const where: any = {};
 
@@ -50,6 +55,7 @@ export async function GET(req: Request) {
       },
     });
 
+    setCached(cacheKey, players, 30);
     return NextResponse.json(players);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -153,6 +159,7 @@ export async function POST(req: Request) {
       updatedValue: created,
     });
 
+    clearCache('players');
     return NextResponse.json(created, { status: 201 });
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {
@@ -179,6 +186,7 @@ export async function DELETE(req: Request) {
       previousValue: { deletedCount: count },
     });
 
+    clearCache('players');
     return NextResponse.json({ success: true, message: `Successfully deleted ${count} players`, count });
   } catch (error: any) {
     if (error.message === 'UNAUTHORIZED' || error.message === 'FORBIDDEN') {

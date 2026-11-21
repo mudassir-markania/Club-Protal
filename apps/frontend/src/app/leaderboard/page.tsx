@@ -44,8 +44,13 @@ export default function LeaderboardPage() {
   const fetchAllPublicData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Leaderboard
-      const lbRes = await fetch('/api/leaderboard?type=overall');
+      const [lbRes, awRes, mRes, hRes] = await Promise.all([
+        fetch('/api/leaderboard?type=overall'),
+        fetch('/api/awards?status=APPROVED'),
+        fetch('/api/matches?status=COMPLETED'),
+        fetch('/api/points-history'),
+      ]);
+
       if (lbRes.ok) {
         const lbData = await lbRes.json();
         setStandings(lbData.standings || []);
@@ -53,22 +58,16 @@ export default function LeaderboardPage() {
         setChampionClub(lbData.championClub || null);
       }
 
-      // 2. Fetch Approved Awards
-      const awRes = await fetch('/api/awards?status=APPROVED');
       if (awRes.ok) {
         const awData = await awRes.json();
         setAwards(awData.awards || []);
       }
 
-      // 3. Fetch Completed & Approved Matches
-      const mRes = await fetch('/api/matches?status=COMPLETED');
       if (mRes.ok) {
         const mData = await mRes.json();
         setCompletedMatches(Array.isArray(mData) ? mData : []);
       }
 
-      // 4. Fetch Points History
-      const hRes = await fetch('/api/points-history');
       if (hRes.ok) {
         const hData = await hRes.json();
         setPointsHistory(Array.isArray(hData) ? hData : []);
