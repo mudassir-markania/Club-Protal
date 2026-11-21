@@ -618,127 +618,190 @@ export default function HomePage() {
           <section className="w-full py-16 lg:py-20 bg-[#faf8ff]" id="championship-overview">
             <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
               {/* Section Marker */}
-              <div className="flex flex-col gap-2 mb-12">
+              <div className="flex flex-col gap-2 mb-10 sm:mb-12">
                 <div className="flex items-center gap-2">
                   <span className="w-8 h-1 bg-[#0051d5] rounded-full" />
                   <span className="text-xs text-[#0051d5] uppercase tracking-widest font-extrabold font-manrope">
-                    THE SPIRIT OF COMPETITION
+                    CHAMPIONSHIP SPECIFICATION • SEASON 9
                   </span>
                 </div>
-                <h2 className="font-manrope text-3xl sm:text-5xl font-extrabold text-[#000f3f] uppercase tracking-tight leading-none">
-                  MORE THAN A GAME.
-                  <br />
-                  <span className="text-[#45464f] text-2xl sm:text-4xl font-bold">
-                    IT&apos;S A DECADE OF LEGACY.
-                  </span>
-                </h2>
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                  <h2 className="font-manrope text-3xl sm:text-5xl font-extrabold text-[#000f3f] uppercase tracking-tight leading-none">
+                    5 HOUSES. 6 DISCIPLINES.
+                    <br />
+                    <span className="text-[#0051d5]">1 UNIFIED LEADERBOARD.</span>
+                  </h2>
+                  <p className="text-sm text-[#45464f] max-w-lg leading-relaxed">
+                    Alliance Premier League unites 96+ registered collegiate athletes across 5 houses in 6 sanctioned sports. All match results, final podium positions, and individual accolades feed directly into our audited scoring engine.
+                  </p>
+                </div>
               </div>
 
               {/* Asymmetrical Editorial Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                {/* Left Rich Media Card */}
+                {/* Left Rich Media & Tournament Engine Card */}
                 <div className="lg:col-span-7 bg-white rounded-xl overflow-hidden shadow-md flex flex-col justify-between border border-[#e2e7ff]">
-                  <div className="relative h-[320px] sm:h-[360px] w-full overflow-hidden">
+                  <div className="relative h-[280px] sm:h-[340px] w-full overflow-hidden">
                     <img
                       className="w-full h-full object-cover"
-                      alt="Collegiate cricket batsman playing shot under stadium floodlights"
+                      alt="Collegiate athletes in action under stadium floodlights"
                       src="/cricket.jpg"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f] via-[#000f3f]/50 to-transparent" />
+                    
+                    {/* Badge top-left */}
+                    <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[11px] uppercase tracking-wider font-extrabold font-manrope">
+                        APL S9 TOURNAMENT ENGINE
+                      </span>
+                    </div>
+
+                    {/* Bottom overlay info */}
                     <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
                       <div>
-                        <span className="px-2.5 py-1 rounded bg-[#0051d5] text-white text-[11px] uppercase tracking-wider font-extrabold font-manrope">
-                          CRICKET T10 POWERPLAY
+                        <span className="px-2.5 py-1 rounded bg-[#eb6905] text-white text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold font-manrope">
+                          ALLIANCE PREMIER LEAGUE
                         </span>
                         <p className="text-xl sm:text-2xl font-bold text-white mt-2 uppercase font-manrope">
-                          Record Partnership: 142 Runs
+                          Inter-House Championship 2026
                         </p>
                       </div>
-                      <span className="text-5xl font-black text-white/20 font-manrope">
-                        09
+                      <span className="text-4xl sm:text-5xl font-black text-white/25 font-manrope shrink-0">
+                        S9
                       </span>
                     </div>
                   </div>
 
                   <div className="p-6 flex flex-col justify-between flex-grow">
-                    <p className="text-[#45464f] text-base leading-relaxed mb-6 font-normal">
-                      APL brings together the finest athletes, passionate supporters, and five competing houses in one unforgettable celebration of athletic prestige, relentless drive, and raw sportsmanship. Every run counts, every goal shifts the institutional balance of power.
+                    <p className="text-[#45464f] text-sm sm:text-base leading-relaxed mb-6 font-normal">
+                      Every run, goal, match point, and checkmate shifts the championship standings. Points are calculated in strict alignment with <span className="font-semibold text-[#000f3f]">sports_points_distribution.pdf</span>, with verified scorecards, automated team point distribution, and immutable audit logs.
                     </p>
-                    <div className="grid grid-cols-3 gap-4 pt-4 bg-[#f2f3ff] p-4 rounded-lg border border-[#e2e7ff]/70">
+                    
+                    {/* 3 Metrics Bar */}
+                    <div className="grid grid-cols-3 gap-3 sm:gap-4 bg-[#f2f3ff] p-4 rounded-lg border border-[#e2e7ff]/70">
                       <div>
-                        <span className="text-[11px] text-[#45464f] uppercase font-bold font-manrope">
-                          All-Time Titles
+                        <span className="text-[10px] sm:text-[11px] text-[#45464f] uppercase font-bold font-manrope block">
+                          Houses &amp; Teams
                         </span>
-                        <p className="text-lg sm:text-xl text-[#000f3f] font-extrabold font-manrope">
-                          DOM • 3
+                        <p className="text-base sm:text-xl text-[#000f3f] font-extrabold font-manrope mt-0.5">
+                          5 Houses • 10 Teams
                         </p>
+                        <span className="text-[10px] text-[#0051d5] font-semibold">BLU • YEL • PUR • GRN • RED</span>
                       </div>
                       <div>
-                        <span className="text-[11px] text-[#45464f] uppercase font-bold font-manrope">
-                          Current Holder
+                        <span className="text-[10px] sm:text-[11px] text-[#45464f] uppercase font-bold font-manrope block">
+                          Sports Disciplines
                         </span>
-                        <p className="text-lg sm:text-xl text-[#0051d5] font-extrabold font-manrope">
-                          MAVERICKS
+                        <p className="text-base sm:text-xl text-[#0051d5] font-extrabold font-manrope mt-0.5">
+                          6 Official Sports
                         </p>
+                        <span className="text-[10px] text-[#45464f]">Field, Court, Board &amp; Esports</span>
                       </div>
                       <div>
-                        <span className="text-[11px] text-[#45464f] uppercase font-bold font-manrope">
-                          Attendance
+                        <span className="text-[10px] sm:text-[11px] text-[#45464f] uppercase font-bold font-manrope block">
+                          Scoring Engine
                         </span>
-                        <p className="text-lg sm:text-xl text-[#000f3f] font-extrabold font-manrope">
-                          8,500+
+                        <p className="text-base sm:text-xl text-[#000f3f] font-extrabold font-manrope mt-0.5">
+                          100% Automated
                         </p>
+                        <span className="text-[10px] text-[#0f6b3e] font-semibold">PDF Source of Truth</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Stack: Quote & Sports Breakdown */}
-                <div className="lg:col-span-5 flex flex-col gap-6">
-                  {/* Institutional Quote Bento */}
-                  <div className="bg-[#000f3f] text-white p-6 sm:p-8 rounded-xl shadow-md relative overflow-hidden flex flex-col justify-between border border-white/10">
+                {/* Right Stack: Live Standings Bento, Rulebook & Fixtures */}
+                <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5 justify-between">
+                  {/* Live House Standings Bento */}
+                  <div className="bg-[#000f3f] text-white p-5 sm:p-6 rounded-xl shadow-md relative overflow-hidden flex flex-col justify-between border border-white/10">
                     <div className="relative z-10">
-                      <span className="material-symbols-outlined text-[#dbe1ff] text-4xl mb-4 block">
-                        format_quote
-                      </span>
-                      <p className="text-base sm:text-lg leading-snug uppercase tracking-wide text-[#dce1ff] font-manrope font-bold">
-                        &ldquo;On these pitches and courts, students forge friendships that outlast semesters, and rivalries that define generations.&rdquo;
-                      </p>
-                    </div>
-                    <div className="pt-6 mt-4 flex items-center gap-4 relative z-10 border-t border-white/15">
-                      <div className="w-12 h-12 rounded-full bg-[#0051d5] flex items-center justify-center font-bold text-white font-manrope text-base shadow-sm">
-                        DR
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                          </span>
+                          <span className="text-xs uppercase font-extrabold font-manrope text-white tracking-wider">
+                            Live Standings Top 3
+                          </span>
+                        </div>
+                        <Link
+                          href="/leaderboard"
+                          className="text-[11px] font-bold text-[#eb6905] hover:text-[#ff9245] uppercase tracking-wider flex items-center gap-1 transition-colors"
+                        >
+                          Full Table
+                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                        </Link>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs uppercase text-white font-bold font-manrope">
-                          Dr. Rajeshwar Rao
-                        </span>
-                        <span className="text-[11px] text-[#808dc2]">
-                          Dean of Physical Education &amp; Sports
-                        </span>
+
+                      {/* Top 3 Houses rows */}
+                      <div className="space-y-2.5">
+                        {houses.slice(0, 3).map((h, idx) => (
+                          <div
+                            key={h.id}
+                            className="flex items-center justify-between p-2.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={`w-6 h-6 rounded flex items-center justify-center text-xs font-black font-manrope ${
+                                  idx === 0
+                                    ? 'bg-[#eb6905] text-white'
+                                    : idx === 1
+                                    ? 'bg-slate-300 text-slate-900'
+                                    : 'bg-amber-700/80 text-white'
+                                }`}
+                              >
+                                #{h.rank || idx + 1}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2.5 h-2.5 rounded-full ${h.accentBorder}`} />
+                                <span className="text-sm font-bold font-manrope text-white">
+                                  {h.name}
+                                </span>
+                                <span className="text-[10px] text-white/50 uppercase font-bold">
+                                  ({h.code})
+                                </span>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-0.5 rounded bg-white/10 text-white font-extrabold text-xs font-manrope whitespace-nowrap">
+                              {h.points} PTS
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
+
+                    <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-[#808dc2] relative z-10">
+                      <span>Referees submit • System verifies</span>
+                      <span className="text-emerald-400 font-semibold">Live Real-Time Sync</span>
+                    </div>
+
                     <div className="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-[#316bf3]/20 blur-2xl pointer-events-none" />
                   </div>
 
-                  {/* Quick Sports Schedule Feature Tile */}
+                  {/* Official Rulebook & Scoring Matrix Bento */}
                   <div
                     onClick={() => setShowRulebookModal(true)}
-                    className="bg-white p-5 rounded-xl shadow-sm border border-[#e2e7ff] flex items-center justify-between gap-4 hover:bg-[#e2e7ff]/40 transition-colors cursor-pointer group"
+                    className="bg-white p-5 rounded-xl shadow-sm border border-[#e2e7ff] flex items-center justify-between gap-4 hover:bg-[#e2e7ff]/30 hover:border-[#0051d5]/40 transition-all cursor-pointer group"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-lg bg-[#dae2fd] text-[#000f3f] flex items-center justify-center group-hover:bg-[#000f3f] group-hover:text-white transition-colors shrink-0">
-                        <span className="material-symbols-outlined text-2xl">emoji_events</span>
+                        <span className="material-symbols-outlined text-2xl">menu_book</span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[10px] text-[#0051d5] uppercase font-extrabold tracking-wider font-manrope">
-                          Tournament Handbook
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-[#0051d5] uppercase font-extrabold tracking-wider font-manrope">
+                            Scoring Specification
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-bold">
+                            PDF Source
+                          </span>
+                        </div>
+                        <span className="text-sm sm:text-base font-bold text-[#000f3f] uppercase font-manrope mt-0.5">
+                          Official Rules &amp; Points Matrix
                         </span>
-                        <span className="text-sm sm:text-base font-bold text-[#000f3f] uppercase font-manrope">
-                          APL S9 Official Rulebook &amp; Bye-Laws
-                        </span>
-                        <span className="text-xs text-[#45464f]">
-                          Includes points distribution matrix and foul conduct guidelines
+                        <span className="text-xs text-[#45464f] line-clamp-1">
+                          sports_points_distribution.pdf • 35+ verified scoring rules
                         </span>
                       </div>
                     </div>
@@ -747,27 +810,31 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  {/* Secondary Image Tile */}
-                  <div className="relative h-44 rounded-xl overflow-hidden shadow-sm border border-[#e2e7ff]">
-                    <img
-                      className="w-full h-full object-cover"
-                      alt="Collegiate football match under bright evening lights, player shooting the ball into the top corner"
-                      src="/football.jpg"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#000f3f]/90 via-[#000f3f]/30 to-transparent flex items-end p-4">
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-xs font-bold text-white uppercase tracking-wider font-manrope">
-                          FOOTBALL QUARTER-FINALS COMPLETED
+                  {/* Schedule & Arena Fixtures Card */}
+                  <Link
+                    href="/schedule"
+                    className="bg-white p-5 rounded-xl shadow-sm border border-[#e2e7ff] flex items-center justify-between gap-4 hover:bg-[#e2e7ff]/30 hover:border-[#0051d5]/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center group-hover:bg-[#ba1a1a] group-hover:text-white transition-colors shrink-0">
+                        <span className="material-symbols-outlined text-2xl">calendar_month</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-[#ba1a1a] uppercase font-extrabold tracking-wider font-manrope">
+                          Fixtures &amp; Timings
                         </span>
-                        <Link
-                          href="/schedule"
-                          className="text-[11px] text-[#ffdbca] font-extrabold uppercase hover:underline cursor-pointer"
-                        >
-                          VIEW RECAP
-                        </Link>
+                        <span className="text-sm sm:text-base font-bold text-[#000f3f] uppercase font-manrope mt-0.5">
+                          Live Matches &amp; Brackets
+                        </span>
+                        <span className="text-xs text-[#45464f] line-clamp-1">
+                          Track ongoing and upcoming clashes across all 6 disciplines
+                        </span>
                       </div>
                     </div>
-                  </div>
+                    <span className="material-symbols-outlined text-[#000f3f] text-2xl group-hover:translate-x-1 transition-transform shrink-0">
+                      arrow_forward
+                    </span>
+                  </Link>
                 </div>
               </div>
             </div>
