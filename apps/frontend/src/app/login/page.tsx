@@ -14,59 +14,16 @@ import {
   ShieldCheck,
   Trophy,
   ArrowRight,
-  Crown,
   Sparkles,
 } from 'lucide-react';
 
-interface QuickOfficial {
-  id: string;
-  label: string;
-  name: string;
-  role: 'SUPER_ADMIN' | 'REFEREE';
-  roleBadge: string;
-  username: string;
-  email: string;
-  icon: string;
-}
-
-const OFFICIAL_ACCOUNTS: QuickOfficial[] = [
-  {
-    id: 'admin',
-    label: 'Admin Director',
-    name: 'Championship Director',
-    role: 'SUPER_ADMIN',
-    roleBadge: 'Admin',
-    username: 'admin@sportsportal.com',
-    email: 'admin@sportsportal.com',
-    icon: '👑',
-  },
-  {
-    id: 'marcus',
-    label: 'Referee Marcus',
-    name: 'Marcus Sterling',
-    role: 'REFEREE',
-    roleBadge: 'Official Referee',
-    username: 'marcus@gmail.com',
-    email: 'marcus@gmail.com',
-    icon: '⚽',
-  },
-];
-
 export default function UnifiedOfficialLoginPage() {
   const router = useRouter();
-  const [identifier, setIdentifier] = useState('admin@sportsportal.com');
-  const [password, setPassword] = useState('admin123');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedOfficialId, setSelectedOfficialId] = useState<string>('admin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleSelectOfficial = (official: QuickOfficial) => {
-    setSelectedOfficialId(official.id);
-    setIdentifier(official.email);
-    setPassword(official.id === 'admin' ? 'admin123' : 'marcus123');
-    setError(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,11 +174,8 @@ export default function UnifiedOfficialLoginPage() {
                   required
                   aria-invalid={!!error}
                   value={identifier}
-                  onChange={(e) => {
-                    setIdentifier(e.target.value);
-                    setSelectedOfficialId('');
-                  }}
-                  placeholder="admin@sportsportal.com or marcus@gmail.com"
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="admin@sportsportal.com or official username"
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#cdd5e0]/70 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-500 outline-none focus:bg-white focus:border-[#0051d5] focus:ring-3 focus:ring-[#0051d5]/20 transition-all font-medium"
                 />
                 <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
@@ -281,34 +235,6 @@ export default function UnifiedOfficialLoginPage() {
               )}
             </button>
           </form>
-
-          {/* Quick Official Selection Grid in Portal Blue */}
-          <div className="pt-2 border-t border-slate-300/80 space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block text-center">
-              SELECT CERTIFIED OFFICIAL:
-            </span>
-
-            <div className="grid grid-cols-2 gap-2">
-              {OFFICIAL_ACCOUNTS.map((acc) => {
-                const isSelected = selectedOfficialId === acc.id;
-                return (
-                  <button
-                    key={acc.id}
-                    type="button"
-                    onClick={() => handleSelectOfficial(acc)}
-                    className={`py-2 px-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#dae2fd] border-[#0051d5] text-[#000f3f] ring-2 ring-[#0051d5]/30 font-bold shadow-xs'
-                        : 'bg-[#dce3ec]/80 border-slate-300/90 text-slate-700 hover:bg-white hover:border-[#0051d5]/50'
-                    }`}
-                  >
-                    <span className="text-xs truncate">{acc.label}</span>
-                    <span className="text-sm shrink-0">{acc.icon}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
 
         {/* Bottom Security / Copyright Note */}
