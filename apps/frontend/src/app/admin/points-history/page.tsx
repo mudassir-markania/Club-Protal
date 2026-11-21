@@ -19,6 +19,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
+import Pagination from '@/components/common/Pagination';
 
 export default function PointsHistoryPage() {
   const [history, setHistory] = useState<any[]>([]);
@@ -29,6 +30,8 @@ export default function PointsHistoryPage() {
   const [clubFilter, setClubFilter] = useState('');
   const [sportFilter, setSportFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -101,6 +104,10 @@ export default function PointsHistoryPage() {
     return clubName.includes(q) || sportName.includes(q) || round.includes(q) || reason.includes(q);
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredHistory.length / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedHistory = filteredHistory.slice((safePage - 1) * pageSize, safePage * pageSize);
+
   const totalPointsAwarded = filteredHistory.reduce((acc, h) => acc + (h.points || 0), 0);
 
   return (
@@ -168,7 +175,10 @@ export default function PointsHistoryPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search by house, sport, stage, or description..."
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-xs"
               />
@@ -178,7 +188,10 @@ export default function PointsHistoryPage() {
               {/* Club Filter */}
               <select
                 value={clubFilter}
-                onChange={(e) => setClubFilter(e.target.value)}
+                onChange={(e) => {
+                  setClubFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-600"
               >
                 <option value="">All 5 Houses</option>
@@ -192,7 +205,10 @@ export default function PointsHistoryPage() {
               {/* Sport Filter */}
               <select
                 value={sportFilter}
-                onChange={(e) => setSportFilter(e.target.value)}
+                onChange={(e) => {
+                  setSportFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-600"
               >
                 <option value="">All Sports</option>
@@ -209,6 +225,7 @@ export default function PointsHistoryPage() {
                     setClubFilter('');
                     setSportFilter('');
                     setSearch('');
+                    setCurrentPage(1);
                   }}
                   className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-lg transition"
                 >
@@ -228,7 +245,7 @@ export default function PointsHistoryPage() {
                 No points transactions found matching your criteria.
               </div>
             ) : (
-              filteredHistory.map((item) => (
+              paginatedHistory.map((item) => (
                 <div key={item.id} className="p-4 space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
@@ -295,7 +312,7 @@ export default function PointsHistoryPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredHistory.map((item) => (
+                  paginatedHistory.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/60 transition">
                       <td className="py-3 px-4 text-slate-500 font-mono text-[11px] whitespace-nowrap">
                         {new Date(item.recordedAt).toLocaleDateString()} {new Date(item.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -340,6 +357,17 @@ export default function PointsHistoryPage() {
             </table>
           </div>
         </div>
+
+        {/* Pagination Bar */}
+        <Pagination
+          currentPage={safePage}
+          totalItems={filteredHistory.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[10, 20, 50]}
+          itemName="transactions"
+        />
       </div>
 
       {/* Transaction Inspection Modal (Portalled to document.body) */}

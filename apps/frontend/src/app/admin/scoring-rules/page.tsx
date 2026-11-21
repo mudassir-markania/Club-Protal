@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { SportIcon } from '@/components/ui/icons';
 import ScoringRuleFormModal from '@/components/admin/ScoringRuleFormModal';
+import Pagination from '@/components/common/Pagination';
 import { toEffectiveRule, triggerLabel } from '@club-portal/shared';
 import { categoryDisplayName } from '@club-portal/shared';
 
@@ -32,8 +33,10 @@ export default function AdminScoringRulesPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Filter sport tab
+  // Filter sport tab & pagination
   const [selectedSport, setSelectedSport] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Create / edit rule modal
   const [formOpen, setFormOpen] = useState(false);
@@ -184,6 +187,13 @@ Matches calculated after this will no longer award these points. Past results ar
     return r.sport === selectedSport;
   });
 
+  const totalRules = filteredRules.length;
+  const totalPages = Math.max(1, Math.ceil(totalRules / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalRules);
+  const paginatedRules = filteredRules.slice(startIndex, endIndex);
+
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-6xl mx-auto">
@@ -291,7 +301,10 @@ Matches calculated after this will no longer award these points. Past results ar
           {sportsList.map((sp) => (
             <button
               key={sp}
-              onClick={() => setSelectedSport(sp)}
+              onClick={() => {
+                setSelectedSport(sp);
+                setCurrentPage(1);
+              }}
               className={`px-3.5 py-1.5 rounded-xl font-bold transition whitespace-nowrap ${
                 selectedSport === sp
                   ? 'bg-navy-950 text-white shadow-2xs'
@@ -319,7 +332,7 @@ Matches calculated after this will no longer award these points. Past results ar
                 No rules for this sport yet. Use <strong>Add Rule</strong> to create one.
               </p>
             )}
-            {filteredRules.map((rule) => (
+            {paginatedRules.map((rule) => (
               <div
                 key={rule.ruleCode}
                 className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 transition"
@@ -404,6 +417,17 @@ Matches calculated after this will no longer award these points. Past results ar
             ))}
           </div>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={safePage}
+          totalItems={totalRules}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[10, 20, 50]}
+          itemName="rules"
+        />
 
         <ScoringRuleFormModal
           open={formOpen}

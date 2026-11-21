@@ -4,11 +4,14 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { History, Search, Shield, Eye, Clock, UserCheck, RefreshCw, X } from 'lucide-react';
 import { usePreventScroll } from '@/hooks/usePreventScroll';
+import Pagination from '@/components/common/Pagination';
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
   usePreventScroll(!!selectedLog);
@@ -36,6 +39,10 @@ export default function AuditLogsPage() {
       l.entity.toLowerCase().includes(search.toLowerCase()) ||
       (l.userName && l.userName.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedLogs = filteredLogs.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   return (
     <AdminLayout>
@@ -70,7 +77,10 @@ export default function AuditLogsPage() {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Filter by action, entity (Match, Result, Club), or user..."
               className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white"
             />
@@ -89,7 +99,7 @@ export default function AuditLogsPage() {
                 No audit entries found.
               </div>
             ) : (
-              filteredLogs.map((log) => (
+              paginatedLogs.map((log) => (
                 <div key={log.id} className="p-4 space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
                     <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800">
@@ -147,7 +157,7 @@ export default function AuditLogsPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log) => (
+                  paginatedLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50 transition">
                       <td className="py-3 px-4 text-slate-500 font-sans">
                         {new Date(log.timestamp).toLocaleString()}
@@ -182,6 +192,17 @@ export default function AuditLogsPage() {
             </table>
           </div>
         </div>
+
+        {/* Pagination Bar */}
+        <Pagination
+          currentPage={safePage}
+          totalItems={filteredLogs.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[10, 15, 30, 50]}
+          itemName="log entries"
+        />
       </div>
 
       {/* Modal: View Diff */}

@@ -25,6 +25,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
+import Pagination from '@/components/common/Pagination';
 
 export default function PlayersPage() {
   const [mounted, setMounted] = useState(false);
@@ -38,6 +39,8 @@ export default function PlayersPage() {
   const [selectedClubFilter, setSelectedClubFilter] = useState('');
   const [selectedSportFilter, setSelectedSportFilter] = useState('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -367,6 +370,10 @@ export default function PlayersPage() {
     return matchSearch;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredPlayers.length / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedPlayers = filteredPlayers.slice((safePage - 1) * pageSize, safePage * pageSize);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -444,7 +451,10 @@ export default function PlayersPage() {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Search athletes by name, house, or sport..."
               className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white"
             />
@@ -453,7 +463,10 @@ export default function PlayersPage() {
           <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
             <select
               value={selectedClubFilter}
-              onChange={(e) => setSelectedClubFilter(e.target.value)}
+              onChange={(e) => {
+                setSelectedClubFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-1.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none"
             >
               <option value="">All Houses</option>
@@ -466,7 +479,10 @@ export default function PlayersPage() {
 
             <select
               value={selectedSportFilter}
-              onChange={(e) => setSelectedSportFilter(e.target.value)}
+              onChange={(e) => {
+                setSelectedSportFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-1.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none"
             >
               <option value="">All Sports</option>
@@ -479,7 +495,10 @@ export default function PlayersPage() {
 
             <select
               value={selectedStatusFilter}
-              onChange={(e) => setSelectedStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setSelectedStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-1.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none"
             >
               <option value="">All Statuses</option>
@@ -499,7 +518,7 @@ export default function PlayersPage() {
                 No participants match the selected filters.
               </div>
             ) : (
-              filteredPlayers.map((player) => (
+              paginatedPlayers.map((player) => (
                 <div key={player.id} className="p-4 space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
@@ -589,7 +608,7 @@ export default function PlayersPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredPlayers.map((player) => (
+                  paginatedPlayers.map((player) => (
                     <tr key={player.id} className="hover:bg-slate-50/80 transition">
                       <td className="py-3.5 px-5">
                         <span className="font-bold text-slate-900 block text-xs">{player.name}</span>
@@ -667,7 +686,16 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Modal: Add / Edit Athlete (Portalled to document.body) */}
+        {/* Pagination Bar */}
+        <Pagination
+          currentPage={safePage}
+          totalItems={filteredPlayers.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[10, 25, 50]}
+          itemName="athletes"
+        />
         {mounted && isModalOpen && createPortal(
           <div
             className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto overscroll-none touch-none"
