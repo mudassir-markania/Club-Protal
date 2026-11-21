@@ -38,7 +38,23 @@ export default function RefereeLayout({ children }: { children: React.ReactNode 
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Prevent background scrolling when mobile sidebar is open
   useEffect(() => {
+    if (sidebarOpen) {
+      const prevBodyOverflow = document.body.style.overflow;
+      const prevHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+
+      return () => {
+        document.body.style.overflow = prevBodyOverflow;
+        document.documentElement.style.overflow = prevHtmlOverflow;
+      };
+    }
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
     verifyRefereeAuth();
   }, [pathname]);
 
@@ -85,14 +101,16 @@ export default function RefereeLayout({ children }: { children: React.ReactNode 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-navy-950/70 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-navy-950/70 backdrop-blur-sm lg:hidden touch-none overscroll-none"
           onClick={() => setSidebarOpen(false)}
+          onTouchMove={(e) => e.preventDefault()}
+          onWheel={(e) => e.preventDefault()}
         />
       )}
 
       {/* Referee Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-navy-900 text-white flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-navy-900 text-white flex flex-col transition-transform duration-300 ease-in-out overscroll-contain lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -141,6 +159,7 @@ export default function RefereeLayout({ children }: { children: React.ReactNode 
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
                     ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30 font-bold'
