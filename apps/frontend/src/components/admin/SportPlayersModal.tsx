@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, Users, X } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 interface Props {
   sport: any | null;
@@ -13,6 +14,7 @@ interface Props {
 
 /** Players registered for one sport. The list comes from /api/players?sportId=… (database-side filter). */
 export default function SportPlayersModal({ sport, clubs, onClose }: Props) {
+  usePreventScroll(!!sport);
   const [mounted, setMounted] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,13 +66,19 @@ export default function SportPlayersModal({ sport, clubs, onClose }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className="bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden"
+        className="bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden touch-auto"
       >
         <div className="p-4 bg-navy-950 text-white flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3 min-w-0">

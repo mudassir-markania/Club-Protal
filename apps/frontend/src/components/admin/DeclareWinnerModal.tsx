@@ -6,6 +6,7 @@ import { AlertTriangle, Check, Trophy, X } from 'lucide-react';
 import { ClubBadge } from '@/components/ui/icons';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { awardFieldsFor, hasTournamentPlacements } from '@club-portal/shared';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 interface Props {
   match: any | null;
@@ -20,6 +21,7 @@ export const participantName = (p: any, idx = 0) =>
 
 /** Confirm a win. Shows the points the scoring rules will award, and how they are split across clubs. */
 export default function DeclareWinnerModal({ match, participant, onClose, onDone, forReferee = false }: Props) {
+  usePreventScroll(!!match);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -148,10 +150,16 @@ export default function DeclareWinnerModal({ match, participant, onClose, onDone
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => e.target === e.currentTarget && !saving && onClose()}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
     >
-      <div className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+      <div className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl touch-auto">
         <div className="p-4 bg-navy-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300">

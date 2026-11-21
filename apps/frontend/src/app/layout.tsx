@@ -1,5 +1,11 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: 'APL Season 9 | Inter-House Championship',
@@ -29,7 +35,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body suppressHydrationWarning className="min-h-screen bg-[#f8f9ff] text-[#0b1c30] antialiased selection:bg-[#0051d5] selection:text-white font-sans">
+      <body suppressHydrationWarning className="min-h-screen m-0 p-0 bg-[#f8f9ff] text-[#0b1c30] antialiased selection:bg-[#0051d5] selection:text-white font-sans">
         {children}
       </body>
     </html>

@@ -3,6 +3,7 @@
 import ClubRoster from '@/components/admin/ClubRoster';
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Shield,
   Plus,
@@ -40,6 +41,8 @@ export default function ClubsPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  usePreventScroll(isModalOpen || isTeamModalOpen || isViewModalOpen);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -611,267 +614,309 @@ Delete the club and its players?`
             </div>
           </div>
         )}
+      </div>
 
-        {/* House Creation / Edit Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in">
-              <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
-                <h3 className="font-bold text-sm">
-                  {selectedClub ? `Edit House: ${selectedClub.name}` : 'Create New House'}
-                </h3>
-                <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-white rounded">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="col-span-2">
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Blue"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 bg-white"
-                    >
-                      <option value="ACTIVE">Active</option>
-                      <option value="INACTIVE">Inactive</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">1st Team Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.team1Name}
-                      onChange={(e) => setFormData({ ...formData, team1Name: e.target.value })}
-                      placeholder="e.g. Mavericks A"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">2nd Team Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.team2Name}
-                      onChange={(e) => setFormData({ ...formData, team2Name: e.target.value })}
-                      placeholder="e.g. Mavericks B"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Captain</label>
-                    <input
-                      type="text"
-                      value={formData.captainName}
-                      onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
-                      placeholder="e.g. Alex Rivera"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Vice Captain</label>
-                    <input
-                      type="text"
-                      value={formData.viceCaptainName}
-                      onChange={(e) => setFormData({ ...formData, viceCaptainName: e.target.value })}
-                      placeholder="e.g. Jordan Smith"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
-                  >
-                    {selectedClub ? 'Save Changes' : 'Create House'}
-                  </button>
-                </div>
-              </form>
+      {/* House Creation / Edit Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 !m-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 bg-navy-900 text-white flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-sm">
+                {selectedClub ? `Edit House: ${selectedClub.name}` : 'Create New House'}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-white rounded">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-          </div>
-        )}
 
-        {/* House Team Edit Modal */}
-        {isTeamModalOpen && selectedTeam && (
-          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in">
-              <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm">
-                    Edit House Team: {selectedTeam.name}
-                  </h3>
-                  <span className="text-[11px] text-slate-300">
-                    Parent House: {selectedTeam.club?.name || 'House'}
-                  </span>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs overflow-y-auto overscroll-contain">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
                 </div>
-                <button onClick={() => setIsTeamModalOpen(false)} className="p-1 text-slate-400 hover:text-white rounded">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+              )}
 
-              <form onSubmit={handleTeamSubmit} className="p-6 space-y-4 text-xs">
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Team Name *</label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Name *</label>
                   <input
                     type="text"
                     required
-                    value={teamFormData.name}
-                    onChange={(e) => setTeamFormData({ ...teamFormData, name: e.target.value })}
-                    placeholder="e.g. Mavericks B"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-semibold text-slate-900"
-                  />
-                  <span className="text-[10px] text-slate-400 mt-1 block">
-                    Points earned by this team roll up to the parent house leaderboard.
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Team Captain</label>
-                  <input
-                    type="text"
-                    value={teamFormData.captainName}
-                    onChange={(e) => setTeamFormData({ ...teamFormData, captainName: e.target.value })}
-                    placeholder="e.g. Vice Captain"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Blue"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
                   />
                 </div>
-
                 <div>
                   <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
                   <select
-                    value={teamFormData.status}
-                    onChange={(e) => setTeamFormData({ ...teamFormData, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 bg-white"
                   >
                     <option value="ACTIVE">Active</option>
                     <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
+              </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsTeamModalOpen(false)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
-                  >
-                    Save Team Changes
-                  </button>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">1st Team Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.team1Name}
+                    onChange={(e) => setFormData({ ...formData, team1Name: e.target.value })}
+                    placeholder="e.g. Mavericks A"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                  />
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">2nd Team Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.team2Name}
+                    onChange={(e) => setFormData({ ...formData, team2Name: e.target.value })}
+                    placeholder="e.g. Mavericks B"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-medium"
+                  />
+                </div>
+              </div>
 
-        {/* House View Modal */}
-        {isViewModalOpen && clubDetails && (
-          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in">
-              <div className="p-6 bg-navy-950 text-white flex items-center justify-between border-b border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                    <ClubBadge code={clubDetails.code} name={clubDetails.name} className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-base">{clubDetails.name} House</h3>
-                    <span className="text-xs text-slate-300">
-                      Captain: {clubDetails.captainName || 'Not assigned'}
-                    </span>
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Captain</label>
+                  <input
+                    type="text"
+                    value={formData.captainName}
+                    onChange={(e) => setFormData({ ...formData, captainName: e.target.value })}
+                    placeholder="e.g. Alex Rivera"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                  />
                 </div>
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Vice Captain</label>
+                  <input
+                    type="text"
+                    value={formData.viceCaptainName}
+                    onChange={(e) => setFormData({ ...formData, viceCaptainName: e.target.value })}
+                    placeholder="e.g. Jordan Smith"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg transition"
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-bold"
                 >
-                  <X className="w-5 h-5" />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
+                >
+                  {selectedClub ? 'Save Changes' : 'Create House'}
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-              <div className="p-6 space-y-6">
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Current Rank</span>
-                    <span className="text-2xl font-extrabold text-navy-900">#{clubDetails.currentRank || '-'}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Total Points</span>
-                    <span className="text-2xl font-extrabold text-blue-600">
-                      {Number(clubDetails.totalPoints || 0).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">House Teams</span>
-                    <span className="text-2xl font-extrabold text-emerald-600">
-                      {cricketTeams.filter((ct: any) => ct.clubId === clubDetails.id).length || 2}
-                    </span>
-                  </div>
+      {/* House Team Edit Modal */}
+      {isTeamModalOpen && selectedTeam && (
+        <div
+          className="fixed inset-0 !m-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsTeamModalOpen(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 bg-navy-900 text-white flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="font-bold text-sm">
+                  Edit House Team: {selectedTeam.name}
+                </h3>
+                <span className="text-[11px] text-slate-300">
+                  Parent House: {selectedTeam.club?.name || 'House'}
+                </span>
+              </div>
+              <button onClick={() => setIsTeamModalOpen(false)} className="p-1 text-slate-400 hover:text-white rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleTeamSubmit} className="p-6 space-y-4 text-xs overflow-y-auto overscroll-contain">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg font-semibold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
                 </div>
+              )}
 
-                {/* Registered Player Roster (API-filtered by club and sport) */}
-                <ClubRoster clubId={clubDetails.id} />
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">House Team Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={teamFormData.name}
+                  onChange={(e) => setTeamFormData({ ...teamFormData, name: e.target.value })}
+                  placeholder="e.g. Mavericks B"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 font-semibold text-slate-900"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  Points earned by this team roll up to the parent house leaderboard.
+                </span>
               </div>
 
-              {/* Footer */}
-              <div className="p-4 bg-slate-50 border-t border-slate-200 text-right">
-                <button
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="px-4 py-2 bg-navy-950 text-white font-bold rounded-lg hover:bg-navy-900 text-xs"
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Team Captain</label>
+                <input
+                  type="text"
+                  value={teamFormData.captainName}
+                  onChange={(e) => setTeamFormData({ ...teamFormData, captainName: e.target.value })}
+                  placeholder="e.g. Vice Captain"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Status</label>
+                <select
+                  value={teamFormData.status}
+                  onChange={(e) => setTeamFormData({ ...teamFormData, status: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-600"
                 >
-                  Close Profile
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsTeamModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-navy-950 hover:bg-navy-900 text-white font-bold rounded-lg shadow-sm"
+                >
+                  Save Team Changes
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* House View Modal */}
+      {isViewModalOpen && clubDetails && (
+        <div
+          className="fixed inset-0 !m-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsViewModalOpen(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 bg-navy-950 text-white flex items-center justify-between border-b border-white/10 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <ClubBadge code={clubDetails.code} name={clubDetails.name} className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">{clubDetails.name} House</h3>
+                  <span className="text-xs text-slate-300">
+                    Captain: {clubDetails.captainName || 'Not assigned'}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6 overflow-y-auto overscroll-contain">
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Current Rank</span>
+                  <span className="text-2xl font-extrabold text-navy-900">#{clubDetails.currentRank || '-'}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Total Points</span>
+                  <span className="text-2xl font-extrabold text-blue-600">
+                    {Number(clubDetails.totalPoints || 0).toFixed(2)}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">House Teams</span>
+                  <span className="text-2xl font-extrabold text-emerald-600">
+                    {cricketTeams.filter((ct: any) => ct.clubId === clubDetails.id).length || 2}
+                  </span>
+                </div>
+              </div>
+
+              {/* Registered Player Roster (API-filtered by club and sport) */}
+              <ClubRoster clubId={clubDetails.id} />
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 text-right shrink-0">
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="px-4 py-2 bg-navy-950 text-white font-bold rounded-lg hover:bg-navy-900 text-xs"
+              >
+                Close Profile
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

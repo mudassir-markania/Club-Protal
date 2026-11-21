@@ -592,12 +592,21 @@ export default function PlayersPage() {
         {/* Modal: Add / Edit Athlete (Portalled to document.body) */}
         {mounted && isModalOpen && createPortal(
           <div
-            className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto overscroll-none touch-none"
             onClick={(e) => {
               if (e.target === e.currentTarget) setIsModalOpen(false);
             }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
           >
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150">
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between bg-navy-900 text-white shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-400 shrink-0">
@@ -741,12 +750,21 @@ export default function PlayersPage() {
         {/* View Modal (Portalled to document.body) */}
         {mounted && isViewModalOpen && selectedPlayer && createPortal(
           <div
-            className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto overscroll-none touch-none"
             onClick={(e) => {
               if (e.target === e.currentTarget) setIsViewModalOpen(false);
             }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
           >
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden my-auto animate-in fade-in duration-150">
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden my-auto animate-in fade-in duration-150 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="px-6 py-4 bg-navy-900 text-white flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm text-white">{selectedPlayer.name}</h3>
@@ -819,12 +837,21 @@ export default function PlayersPage() {
         {/* Modal: CSV Import (Portalled to document.body) */}
         {mounted && isCsvModalOpen && createPortal(
           <div
-            className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto overscroll-none touch-none"
             onClick={(e) => {
               if (e.target === e.currentTarget) setIsCsvModalOpen(false);
             }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
           >
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150">
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between bg-navy-900 text-white shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-blue-600/30 border border-blue-400/40 flex items-center justify-center text-blue-400 shrink-0">
@@ -981,8 +1008,22 @@ export default function PlayersPage() {
 
         {/* Modal: Confirm Clear All Roster */}
         {mounted && isDeleteAllModalOpen && createPortal(
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 !m-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsDeleteAllModalOpen(false);
+            }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-5 bg-rose-600 text-white flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-rose-100" />

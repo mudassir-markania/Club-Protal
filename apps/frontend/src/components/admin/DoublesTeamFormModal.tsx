@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, Check, X } from 'lucide-react';
 import TeamPlayerPicker from '@/components/admin/TeamPlayerPicker';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 interface Props {
   open: boolean;
@@ -22,6 +23,7 @@ const inputCls =
 
 /** Create / edit a doubles or mixed-doubles team. Shared by the Teams page and the Schedule Match modal. */
 export default function DoublesTeamFormModal({ open, onClose, onSaved, clubs, sports, category, fixedSportId, fixedGender, editing = null }: Props) {
+  usePreventScroll(open);
   const isMixed = category === 'MIXED_DOUBLES';
   const [gender, setGender] = useState<'MALE' | 'FEMALE'>('MALE');
   const label = isMixed ? 'Mixed Doubles Team' : gender === 'FEMALE' ? "Women's Doubles Team" : "Men's Doubles Team";
@@ -95,16 +97,22 @@ export default function DoublesTeamFormModal({ open, onClose, onSaved, clubs, sp
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[10000] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => {
         e.stopPropagation();
         if (e.target === e.currentTarget && !saving) onClose();
+      }}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
       }}
     >
       <form
         onSubmit={save}
         noValidate
-        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl touch-auto"
       >
         <div className="p-4 bg-navy-950 text-white flex items-center justify-between">
           <h3 className="font-extrabold text-sm">{editing ? `Edit ${label}` : `New ${label}`}</h3>

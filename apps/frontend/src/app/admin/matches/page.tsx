@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Calendar,
   Plus,
@@ -76,6 +77,8 @@ export default function MatchesPage() {
   const [editMatch, setEditMatch] = useState<any | null>(null);
   const [winTarget, setWinTarget] = useState<{ match: any; participant: any } | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  usePreventScroll(isCreateModalOpen || isReviewModalOpen || !!editMatch || !!winTarget);
 
   useEffect(() => {
     setMounted(true);
@@ -826,8 +829,22 @@ A referee result is awaiting approval and will be discarded.`
 
       {/* Modal: Result Review & Approval Workflow (Section 6 Compliant) */}
       {mounted && isReviewModalOpen && selectedMatch && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
+        <div
+          className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsReviewModalOpen(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200 touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
               <div>
                 <h3 className="font-extrabold text-sm">Verify Result: {selectedMatch.matchCode}</h3>

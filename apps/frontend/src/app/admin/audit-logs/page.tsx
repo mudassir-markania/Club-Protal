@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { History, Search, Shield, Eye, Clock, UserCheck, RefreshCw, X } from 'lucide-react';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
+
+  usePreventScroll(!!selectedLog);
 
   useEffect(() => {
     fetchLogs();
@@ -134,62 +137,76 @@ export default function AuditLogsPage() {
             </table>
           </div>
         </div>
+      </div>
 
-        {/* Modal: View Diff */}
-        {selectedLog && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
-              <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm">Audit Diff: {selectedLog.action}</h3>
-                  <span className="text-xs text-blue-300">
-                    {selectedLog.userName} ({selectedLog.role}) • {new Date(selectedLog.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setSelectedLog(null)}
-                  className="p-1 text-slate-300 hover:text-white rounded"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+      {/* Modal: View Diff */}
+      {selectedLog && (
+        <div
+          className="fixed inset-0 !m-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedLog(null);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in duration-200 touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 bg-navy-900 text-white flex items-center justify-between shrink-0">
+              <div>
+                <h3 className="font-bold text-sm">Audit Diff: {selectedLog.action}</h3>
+                <span className="text-xs text-blue-300">
+                  {selectedLog.userName} ({selectedLog.role}) • {new Date(selectedLog.timestamp).toLocaleString()}
+                </span>
               </div>
+              <button
+                onClick={() => setSelectedLog(null)}
+                className="p-1 text-slate-300 hover:text-white rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              <div className="p-6 overflow-y-auto space-y-4 text-xs font-mono flex-1">
-                {selectedLog.previousValue && (
-                  <div>
-                    <span className="font-bold font-sans text-slate-500 uppercase block mb-1">
-                      Previous State (Before Mutation):
-                    </span>
-                    <pre className="p-3 bg-red-50/50 border border-red-200 text-red-900 rounded-lg overflow-x-auto text-[11px]">
-                      {JSON.stringify(JSON.parse(selectedLog.previousValue), null, 2)}
-                    </pre>
-                  </div>
-                )}
-
+            <div className="p-6 overflow-y-auto space-y-4 text-xs font-mono flex-1 overscroll-contain">
+              {selectedLog.previousValue && (
                 <div>
                   <span className="font-bold font-sans text-slate-500 uppercase block mb-1">
-                    Updated State (After Mutation):
+                    Previous State (Before Mutation):
                   </span>
-                  <pre className="p-3 bg-emerald-50/50 border border-emerald-200 text-emerald-900 rounded-lg overflow-x-auto text-[11px]">
-                    {selectedLog.updatedValue
-                      ? JSON.stringify(JSON.parse(selectedLog.updatedValue), null, 2)
-                      : 'No updated snapshot recorded.'}
+                  <pre className="p-3 bg-red-50/50 border border-red-200 text-red-900 rounded-lg overflow-x-auto text-[11px]">
+                    {JSON.stringify(JSON.parse(selectedLog.previousValue), null, 2)}
                   </pre>
                 </div>
-              </div>
+              )}
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 text-right font-sans">
-                <button
-                  onClick={() => setSelectedLog(null)}
-                  className="px-4 py-2 bg-navy-900 text-white font-bold rounded-lg text-xs"
-                >
-                  Close
-                </button>
+              <div>
+                <span className="font-bold font-sans text-slate-500 uppercase block mb-1">
+                  Updated State (After Mutation):
+                </span>
+                <pre className="p-3 bg-emerald-50/50 border border-emerald-200 text-emerald-900 rounded-lg overflow-x-auto text-[11px]">
+                  {selectedLog.updatedValue
+                    ? JSON.stringify(JSON.parse(selectedLog.updatedValue), null, 2)
+                    : 'No updated snapshot recorded.'}
+                </pre>
               </div>
             </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 text-right font-sans shrink-0">
+              <button
+                onClick={() => setSelectedLog(null)}
+                className="px-4 py-2 bg-navy-900 text-white font-bold rounded-lg text-xs"
+              >
+                Close
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

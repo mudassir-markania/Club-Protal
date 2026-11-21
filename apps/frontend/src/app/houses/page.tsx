@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Shield,
   Users,
@@ -324,6 +325,7 @@ export default function HousesPage() {
   const [houses, setHouses] = useState<DynamicHouse[]>(INITIAL_FALLBACK_HOUSES);
   const [loading, setLoading] = useState(true);
   const [selectedHouse, setSelectedHouse] = useState<DynamicHouse | null>(null);
+  usePreventScroll(!!selectedHouse);
   const [rosterSearch, setRosterSearch] = useState('');
   const [pageSearch, setPageSearch] = useState('');
 
@@ -1048,8 +1050,22 @@ export default function HousesPage() {
       {/* 5. INTERACTIVE ATHLETE ROSTER MODAL                      */}
       {/* ======================================================== */}
       {selectedHouse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff] max-h-[90vh] flex flex-col">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedHouse(null);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff] max-h-[90vh] flex flex-col touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setSelectedHouse(null)}
               className="absolute top-4 right-4 p-2 rounded-full bg-[#f2f3ff] hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors cursor-pointer"

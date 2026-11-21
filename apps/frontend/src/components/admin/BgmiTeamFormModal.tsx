@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, Check, X } from 'lucide-react';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import { BGMI_TEAM_SIZE } from '@club-portal/shared';
 import TeamPlayerPicker from '@/components/admin/TeamPlayerPicker';
 
@@ -20,6 +21,7 @@ const inputCls =
 
 /** Create / edit a BGMI team. Shared by the Teams page and the Schedule Match modal. */
 export default function BgmiTeamFormModal({ open, onClose, onSaved, clubs, bgmiSportId, editing = null }: Props) {
+  usePreventScroll(open);
   const [mounted, setMounted] = useState(false);
   const [name, setName] = useState('');
   const [clubIds, setClubIds] = useState<string[]>([]);
@@ -84,16 +86,22 @@ export default function BgmiTeamFormModal({ open, onClose, onSaved, clubs, bgmiS
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[10000] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[10000] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => {
         e.stopPropagation();
         if (e.target === e.currentTarget && !saving) onClose();
+      }}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
       }}
     >
       <form
         onSubmit={save}
         noValidate
-        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden shadow-2xl touch-auto"
       >
         <div className="p-4 bg-navy-950 text-white flex items-center justify-between">
           <h3 className="font-extrabold text-sm">{editing ? 'Edit BGMI Team' : 'New BGMI Team'}</h3>

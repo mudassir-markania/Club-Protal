@@ -7,6 +7,7 @@ import HomeFixtures from '@/components/public/HomeFixtures';
 import HomePointsTable from '@/components/public/HomePointsTable';
 import ChampionshipSplashScreen from '@/components/public/ChampionshipSplashScreen';
 import { CarromIcon } from '@/components/ui/icons';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Trophy,
   X,
@@ -489,6 +490,8 @@ export default function HomePage() {
   const [selectedSport, setSelectedSport] = useState<(typeof DISCIPLINES_DATA)[0] | null>(null);
   const [showLiveStreamModal, setShowLiveStreamModal] = useState(false);
   const [showRulebookModal, setShowRulebookModal] = useState(false);
+
+  usePreventScroll(!!selectedHouse || !!selectedSport || showLiveStreamModal || showRulebookModal);
   // Splash screen: displays on page load/refresh, but NOT on in-app navbar clicks
   const [showSplash, setShowSplash] = useState(isInitialPageLoad);
 
@@ -1197,8 +1200,22 @@ export default function HomePage() {
       {/* MODAL 1: HOUSE ROSTER & OVERVIEW                         */}
       {/* ======================================================== */}
       {selectedHouse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff]">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedHouse(null);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff] max-h-[90vh] overflow-y-auto overscroll-contain touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setSelectedHouse(null)}
               className="absolute top-4 right-4 p-2 rounded-full bg-[#f2f3ff] hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors cursor-pointer"
@@ -1297,8 +1314,22 @@ export default function HomePage() {
       {/* MODAL 2: SPORT DISCIPLINE DETAILS                        */}
       {/* ======================================================== */}
       {selectedSport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff]">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedSport(null);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff] max-h-[90vh] overflow-y-auto overscroll-contain touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setSelectedSport(null)}
               className="absolute top-4 right-4 p-2 rounded-full bg-[#f2f3ff] hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors cursor-pointer"
@@ -1356,8 +1387,22 @@ export default function HomePage() {
       {/* MODAL 3: LIVE STREAM PLAYER                              */}
       {/* ======================================================== */}
       {showLiveStreamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="bg-[#000f3f] text-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-white/20">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowLiveStreamModal(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-[#000f3f] text-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-white/20 max-h-[90vh] overflow-y-auto overscroll-contain touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowLiveStreamModal(false)}
               className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
@@ -1417,8 +1462,22 @@ export default function HomePage() {
       {/* MODAL 4: TOURNAMENT RULEBOOK & BYE-LAWS                   */}
       {/* ======================================================== */}
       {showRulebookModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff] max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowRulebookModal(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative border border-[#e2e7ff] max-h-[90vh] overflow-y-auto overscroll-contain touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowRulebookModal(false)}
               className="absolute top-4 right-4 p-2 rounded-full bg-[#f2f3ff] hover:bg-[#e2e7ff] text-[#45464f] hover:text-[#000f3f] transition-colors cursor-pointer"

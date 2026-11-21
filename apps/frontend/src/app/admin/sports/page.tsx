@@ -708,12 +708,21 @@ export default function SportsPage() {
         {/* Modal: Add / Configure Sport Scoring */}
         {mounted && isModalOpen && createPortal(
           <div
-            className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto overscroll-none touch-none"
             onClick={(e) => {
               if (e.target === e.currentTarget) setIsModalOpen(false);
             }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
           >
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150">
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden my-auto animate-in fade-in duration-150 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* Modal Header */}
               <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between bg-navy-900 text-white shrink-0">
                 <div className="flex items-center gap-2.5">

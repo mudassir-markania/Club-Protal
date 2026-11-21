@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Shield,
   Medal,
@@ -43,6 +44,8 @@ export default function AdminDashboardPage() {
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [reviewResult, setReviewResult] = useState<any | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
+  usePreventScroll(isReviewModalOpen);
   const [approving, setApproving] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectBox, setShowRejectBox] = useState(false);
@@ -475,8 +478,22 @@ export default function AdminDashboardPage() {
 
       {/* Quick Result Approval Modal */}
       {isReviewModalOpen && selectedMatch && (
-        <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in duration-200">
+        <div
+          className="fixed inset-0 !m-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsReviewModalOpen(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200 touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
               <div>
                 <h3 className="font-extrabold text-sm">Verify Result: {selectedMatch.matchCode}</h3>

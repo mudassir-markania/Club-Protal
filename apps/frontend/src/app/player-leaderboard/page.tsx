@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Trophy,
   Star,
@@ -32,6 +33,8 @@ export default function PlayerLeaderboardPage() {
   // Selected player for history modal
   const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  usePreventScroll(isModalOpen);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -405,8 +408,22 @@ export default function PlayerLeaderboardPage() {
 
       {/* Athlete Performance History Modal (Section 7 Compliant) */}
       {isModalOpen && selectedPlayer && (
-        <div className="fixed inset-0 z-50 bg-[#080A0E]/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#141822] text-white rounded-2xl shadow-2xl border border-[#C6A04A]/40 w-full max-w-2xl overflow-hidden animate-in fade-in duration-200">
+        <div
+          className="fixed inset-0 !m-0 z-50 bg-[#080A0E]/80 backdrop-blur-sm flex items-center justify-center p-4 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-[#141822] text-white rounded-2xl shadow-2xl border border-[#C6A04A]/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain animate-in fade-in duration-200 touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
             <div className="p-6 bg-gradient-to-r from-[#1C2331] to-[#141822] border-b border-white/[0.08] flex items-center justify-between">
               <div className="flex items-center gap-3">

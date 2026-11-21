@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, Check, Pencil, X } from 'lucide-react';
 import { STAGE_OPTIONS } from '@club-portal/shared';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 interface Props {
   match: any | null;
@@ -23,6 +24,7 @@ const Label = ({ children, required }: { children: React.ReactNode; required?: b
 
 /** Edit the schedule details of a match that has no result yet. Participants are fixed once scheduled. */
 export default function EditMatchModal({ match, referees, onClose, onSaved }: Props) {
+  usePreventScroll(!!match);
   const [mounted, setMounted] = useState(false);
   const [stageType, setStageType] = useState('NORMAL');
   const [round, setRound] = useState('');
@@ -95,13 +97,19 @@ export default function EditMatchModal({ match, referees, onClose, onSaved }: Pr
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => e.target === e.currentTarget && !saving && onClose()}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
     >
       <form
         onSubmit={save}
         noValidate
-        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl touch-auto"
       >
         <div className="p-4 bg-navy-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">

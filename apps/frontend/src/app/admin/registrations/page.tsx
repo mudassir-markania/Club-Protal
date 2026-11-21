@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   FileSpreadsheet,
   RefreshCw,
@@ -65,6 +66,8 @@ export default function RegistrationsPage() {
   const [selectedClubId, setSelectedClubId] = useState('');
 
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  usePreventScroll(isApproveModalOpen || isCsvModalOpen);
 
   useEffect(() => {
     fetchData();
@@ -511,8 +514,22 @@ export default function RegistrationsPage() {
 
         {/* Modal: Approve Registration -> Player Account Creation */}
         {isApproveModalOpen && selectedReg && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 !m-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsApproveModalOpen(false);
+            }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm">Approve Participant Registration</h3>
@@ -582,8 +599,22 @@ export default function RegistrationsPage() {
 
         {/* Modal: CSV / Excel Import & Field Mapping (Method 2) */}
         {isCsvModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 !m-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsCsvModalOpen(false);
+            }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-5 bg-navy-900 text-white flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm">Upload Google Forms CSV / Excel Export</h3>

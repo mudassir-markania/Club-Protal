@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import RefereeLayout from '@/components/layout/RefereeLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   Swords,
   Calendar,
@@ -62,6 +63,7 @@ export default function RefereeDashboardPage() {
   const [search, setSearch] = useState('');
   const [filterOnlyMine, setFilterOnlyMine] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
+  usePreventScroll(showRulesModal);
 
   useEffect(() => {
     fetchRefereeData();
@@ -584,8 +586,22 @@ export default function RefereeDashboardPage() {
 
       {/* Rules & Points Distribution Explainer Modal */}
       {showRulesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-xs animate-in fade-in overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowRulesModal(false);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overscroll-contain touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-amber-500" />

@@ -292,12 +292,21 @@ export default function PointsHistoryPage() {
       {/* Transaction Inspection Modal (Portalled to document.body) */}
       {mounted && selectedTx && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-navy-950/80 backdrop-blur-sm overflow-y-auto"
+          className="fixed inset-0 !m-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-navy-950/80 backdrop-blur-sm overflow-y-auto overscroll-none touch-none"
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedTx(null);
           }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
         >
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-auto animate-in fade-in duration-150">
+          <div
+            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-auto animate-in fade-in duration-150 touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-500" />

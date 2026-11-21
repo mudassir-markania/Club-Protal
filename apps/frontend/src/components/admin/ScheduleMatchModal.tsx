@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, Calendar, Check, Plus, Trash2, Users, X } from 'lucide-react';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
 import { STAGE_OPTIONS, defaultRoundFor, getScheduleConfig, PlayFormat } from '@club-portal/shared';
 import BgmiTeamFormModal from '@/components/admin/BgmiTeamFormModal';
@@ -79,6 +80,7 @@ export default function ScheduleMatchModal({
   referees,
   players,
 }: ScheduleMatchModalProps) {
+  usePreventScroll(open);
   const [mounted, setMounted] = useState(false);
   const [sportId, setSportId] = useState('');
   const [category, setCategory] = useState('');
@@ -631,14 +633,20 @@ export default function ScheduleMatchModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => e.target === e.currentTarget && !submitting && onClose()}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="schedule-match-title"
-        className="bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 w-full max-w-3xl flex flex-col max-h-[95vh] sm:max-h-[92vh] overflow-hidden"
+        className="bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 w-full max-w-3xl flex flex-col max-h-[95vh] sm:max-h-[92vh] overflow-hidden touch-auto"
       >
         {/* Header */}
         <div className="p-4 sm:p-5 bg-navy-950 text-white flex items-start justify-between gap-3 shrink-0">

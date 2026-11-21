@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import { SportIcon } from '@/components/ui/icons';
 import {
   Trophy,
@@ -183,6 +184,7 @@ export default function SportsPage() {
   const [sports, setSports] = useState<SportDetail[]>(CANONICAL_SPORTS);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedSport, setSelectedSport] = useState<SportDetail | null>(null);
+  usePreventScroll(!!selectedSport);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -508,8 +510,22 @@ export default function SportsPage() {
       {/* 3. SPORT DETAILS & SCORING MODAL                         */}
       {/* ======================================================== */}
       {selectedSport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-[#e2e7ff] relative overflow-hidden flex flex-col max-h-[90vh]">
+        <div
+          className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 overscroll-none touch-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedSport(null);
+          }}
+          onTouchMove={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) e.preventDefault();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-[#e2e7ff] relative overflow-hidden flex flex-col max-h-[90vh] touch-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Hero Banner */}
             <div className="relative h-44 w-full bg-[#000f3f] overflow-hidden shrink-0">
               <img

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import RefereeLayout from '@/components/layout/RefereeLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -88,6 +89,8 @@ export default function RefereeMatchSheetPage() {
   const [disputeReason, setDisputeReason] = useState('');
   const [disputeCategory, setDisputeCategory] = useState('RULES_DISAGREEMENT');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  usePreventScroll(isConfirmModalOpen || isDisputeModalOpen);
 
   // Live calculation preview state
   const [previewCalculation, setPreviewCalculation] = useState<any | null>(null);
@@ -1422,8 +1425,22 @@ export default function RefereeMatchSheetPage() {
 
         {/* Confirmation Modal */}
         {isConfirmModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+          <div
+            className="fixed inset-0 !m-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !submitting) setIsConfirmModalOpen(false);
+            }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+          >
+            <div
+              className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center gap-2 text-navy-950 font-extrabold text-sm border-b border-slate-100 pb-3">
                 <Shield className="w-4 h-4 text-blue-600" />
                 <span>Confirm Official Match Result Submission</span>
@@ -1475,8 +1492,22 @@ export default function RefereeMatchSheetPage() {
 
         {/* Dispute Modal */}
         {isDisputeModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+          <div
+            className="fixed inset-0 !m-0 z-50 bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !submitting) setIsDisputeModalOpen(false);
+            }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+          >
+            <div
+              className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm border-b border-slate-100 pb-3">
                 <Flag className="w-4 h-4 text-red-600" />
                 <span>Report Match Issue or Technical Dispute</span>

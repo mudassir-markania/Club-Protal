@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, Check, X } from 'lucide-react';
 import { RULE_TRIGGERS, toEffectiveRule } from '@club-portal/shared';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 const SPORTS = ['FOOTBALL', 'BGMI', 'CRICKET', 'BADMINTON', 'CARROM', 'CHESS'];
 const PREFIX: Record<string, string> = { FOOTBALL: 'FT', BGMI: 'BG', CRICKET: 'CR', BADMINTON: 'BD', CARROM: 'CM', CHESS: 'CH' };
@@ -23,6 +24,7 @@ const slug = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(
 
 /** Create or edit a scoring rule. */
 export default function ScoringRuleFormModal({ open, onClose, onSaved, editing = null, defaultSport }: Props) {
+  usePreventScroll(open);
   const [mounted, setMounted] = useState(false);
   const [sport, setSport] = useState('FOOTBALL');
   const [ruleCode, setRuleCode] = useState('');
@@ -110,13 +112,19 @@ export default function ScoringRuleFormModal({ open, onClose, onSaved, editing =
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+      className="fixed inset-0 !m-0 z-[9999] bg-navy-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 overscroll-none touch-none"
       onMouseDown={(e) => e.target === e.currentTarget && !saving && onClose()}
+      onTouchMove={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
+      onWheel={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault();
+      }}
     >
       <form
         onSubmit={save}
         noValidate
-        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl"
+        className="bg-white sm:rounded-2xl rounded-t-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl touch-auto"
       >
         <div className="p-4 bg-navy-950 text-white flex items-center justify-between">
           <h3 className="font-extrabold text-sm">{editing ? `Edit Rule ${editing.ruleCode}` : 'Add Scoring Rule'}</h3>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
   UserCheck,
   Plus,
@@ -28,6 +29,8 @@ export default function RefereesPage() {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReferee, setSelectedReferee] = useState<any | null>(null);
+
+  usePreventScroll(isModalOpen);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -315,8 +318,22 @@ export default function RefereesPage() {
 
         {/* Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 !m-0 z-50 bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4 overscroll-none touch-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsModalOpen(false);
+            }}
+            onTouchMove={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+            onWheel={(e) => {
+              if (e.target === e.currentTarget) e.preventDefault();
+            }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200 touch-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-navy-900 text-white">
                 <h3 className="font-bold text-sm">
                   {selectedReferee ? `Edit Official: ${selectedReferee.name}` : 'Register Referee & Login Account'}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePreventScroll } from '@/hooks/usePreventScroll';
 
 interface ChampionshipSplashScreenProps {
   onComplete?: () => void;
@@ -13,6 +14,8 @@ export default function ChampionshipSplashScreen({
 }: ChampionshipSplashScreenProps) {
   const [closing, setClosing] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  usePreventScroll(!closing);
 
   // 1. Smooth Linear Progress Bar
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function ChampionshipSplashScreen({
   return (
     <div
       onClick={handleDismiss}
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-between bg-[#000a20] text-white select-none cursor-pointer transition-opacity duration-400 ease-out ${
+      className={`fixed inset-0 !m-0 z-[99999] flex flex-col items-center justify-between bg-[#000a20] text-white select-none cursor-pointer overscroll-none touch-none transition-opacity duration-400 ease-out ${
         closing ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
