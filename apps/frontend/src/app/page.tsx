@@ -677,34 +677,93 @@ export default function HomePage() {
                       Every run, goal, match point, and checkmate shifts the championship standings. Points are calculated in strict alignment with <span className="font-semibold text-[#000f3f]">sports_points_distribution.pdf</span>, with verified scorecards, automated team point distribution, and immutable audit logs.
                     </p>
                     
-                    {/* 3 Metrics Bar */}
-                    <div className="grid grid-cols-3 gap-3 sm:gap-4 bg-[#f2f3ff] p-4 rounded-lg border border-[#e2e7ff]/70">
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] text-[#45464f] uppercase font-bold font-manrope block">
-                          Houses &amp; Teams
-                        </span>
-                        <p className="text-base sm:text-xl text-[#000f3f] font-extrabold font-manrope mt-0.5">
-                          5 Houses • 10 Teams
-                        </p>
-                        <span className="text-[10px] text-[#0051d5] font-semibold">BLU • YEL • PUR • GRN • RED</span>
+                    {/* 3 Metrics Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3.5">
+                      {/* 1. Houses */}
+                      <div className="bg-[#f2f3ff] rounded-xl p-4 border border-[#e2e7ff] flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-2.5">
+                            <span className="text-[11px] uppercase tracking-wider font-extrabold text-[#45464f] font-manrope">
+                              Houses
+                            </span>
+                            <span className="w-6 h-6 rounded-md bg-[#dae2fd] text-[#0051d5] flex items-center justify-center shrink-0">
+                              <Shield className="w-3.5 h-3.5" />
+                            </span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-[#000f3f] font-manrope leading-none">
+                            5
+                            <span className="text-xs font-bold text-[#45464f] uppercase tracking-wider ml-1.5 font-sans">
+                              Houses
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#45464f] font-medium mt-1.5">
+                            10 Teams • 5 Clubs
+                          </p>
+                        </div>
+                        <div className="mt-3 pt-2.5 border-t border-[#e2e7ff] flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#0051d5]" title="Blue Club" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#d97706]" title="Yellow Club" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#7e22ce]" title="Purple Club" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#0f6b3e]" title="Green Club" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ba1a1a]" title="Red Club" />
+                          <span className="text-[10px] font-bold text-[#000f3f] ml-1">5 CLUBS</span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] text-[#45464f] uppercase font-bold font-manrope block">
-                          Sports Disciplines
-                        </span>
-                        <p className="text-base sm:text-xl text-[#0051d5] font-extrabold font-manrope mt-0.5">
-                          6 Official Sports
-                        </p>
-                        <span className="text-[10px] text-[#45464f]">Field, Court, Board &amp; Esports</span>
+
+                      {/* 2. Disciplines */}
+                      <div className="bg-[#f2f3ff] rounded-xl p-4 border border-[#e2e7ff] flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-2.5">
+                            <span className="text-[11px] uppercase tracking-wider font-extrabold text-[#45464f] font-manrope">
+                              Sports
+                            </span>
+                            <span className="w-6 h-6 rounded-md bg-[#dae2fd] text-[#0051d5] flex items-center justify-center shrink-0">
+                              <Trophy className="w-3.5 h-3.5" />
+                            </span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-[#0051d5] font-manrope leading-none">
+                            6
+                            <span className="text-xs font-bold text-[#0051d5] uppercase tracking-wider ml-1.5 font-sans">
+                              Sports
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#45464f] font-medium mt-1.5">
+                            Field, Court &amp; Esports
+                          </p>
+                        </div>
+                        <div className="mt-3 pt-2.5 border-t border-[#e2e7ff] flex items-center">
+                          <span className="text-[10px] font-bold text-[#0051d5] uppercase tracking-wide">
+                            T10 • Football • BGMI +3
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] sm:text-[11px] text-[#45464f] uppercase font-bold font-manrope block">
-                          Scoring Engine
-                        </span>
-                        <p className="text-base sm:text-xl text-[#000f3f] font-extrabold font-manrope mt-0.5">
-                          100% Automated
-                        </p>
-                        <span className="text-[10px] text-[#0f6b3e] font-semibold">PDF Source of Truth</span>
+
+                      {/* 3. Scoring Engine */}
+                      <div className="bg-[#f2f3ff] rounded-xl p-4 border border-[#e2e7ff] flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-2.5">
+                            <span className="text-[11px] uppercase tracking-wider font-extrabold text-[#45464f] font-manrope">
+                              Scoring
+                            </span>
+                            <span className="w-6 h-6 rounded-md bg-[#d1fae5] text-[#0f6b3e] flex items-center justify-center shrink-0">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </span>
+                          </div>
+                          <div className="text-2xl sm:text-3xl font-black text-[#0f6b3e] font-manrope leading-none">
+                            100%
+                            <span className="text-xs font-bold text-[#0f6b3e] uppercase tracking-wider ml-1.5 font-sans">
+                              Auto
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#45464f] font-medium mt-1.5">
+                            Audited Point Ledger
+                          </p>
+                        </div>
+                        <div className="mt-3 pt-2.5 border-t border-[#e2e7ff] flex items-center">
+                          <span className="text-[10px] font-bold text-[#0f6b3e] uppercase tracking-wide">
+                            PDF Source of Truth
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
