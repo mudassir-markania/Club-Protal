@@ -6,7 +6,6 @@ import PublicNavbar from '@/components/public/PublicNavbar';
 import PublicFooter from '@/components/public/PublicFooter';
 import HomeFixtures from '@/components/public/HomeFixtures';
 import HomePointsTable from '@/components/public/HomePointsTable';
-import ChampionshipSplashScreen from '@/components/public/ChampionshipSplashScreen';
 import { CarromIcon } from '@/components/ui/icons';
 import { usePreventScroll } from '@/hooks/usePreventScroll';
 import {
@@ -372,9 +371,6 @@ const HERO_SPORTS = [
   },
 ];
 
-// Track full page load vs in-app client navigation
-let isInitialPageLoad = true;
-
 export default function HomePage() {
   // Multi-Sport Hero Carousel State (Automatic 3.5s cycle with pause-on-hover & interactive restart)
   const [heroIndex, setHeroIndex] = useState(0);
@@ -493,27 +489,9 @@ export default function HomePage() {
   const [showRulebookModal, setShowRulebookModal] = useState(false);
 
   usePreventScroll(!!selectedHouse || !!selectedSport || showLiveStreamModal || showRulebookModal);
-  // Splash screen: displays on page load/refresh, but NOT on in-app navbar clicks
-  const [showSplash, setShowSplash] = useState(isInitialPageLoad);
-
-  useEffect(() => {
-    // Mark that initial load has happened so in-app navbar "Home" clicks don't re-trigger splash
-    isInitialPageLoad = false;
-  }, []);
-
-  const handleSplashDismiss = () => {
-    setShowSplash(false);
-  };
 
   return (
     <div className="bg-[#faf8ff] text-[#131b2e] font-inter text-[15px] antialiased selection:bg-[#0051d5] selection:text-white min-h-screen">
-      {/* 0. CINEMATIC CHAMPIONSHIP SPLASH SCREEN */}
-      {showSplash && (
-        <ChampionshipSplashScreen
-          onComplete={handleSplashDismiss}
-          autoDismissDelay={2100}
-        />
-      )}
       {/* 1. BRAND HEADER & NAVBAR */}
       <PublicNavbar activeOverride="home" />
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import PortalSplashScreen from '@/components/public/PortalSplashScreen';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -36,6 +37,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning className="min-h-screen m-0 p-0 bg-[#f8f9ff] text-[#0b1c30] antialiased selection:bg-[#0051d5] selection:text-white font-sans">
+        <PortalSplashScreen />
         {children}
       </body>
     </html>
