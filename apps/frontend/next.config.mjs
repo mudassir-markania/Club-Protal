@@ -5,6 +5,7 @@
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5022';
 
 const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   reactStrictMode: false,
   // @club-portal/shared ships TypeScript source
   transpilePackages: ['@club-portal/shared'],

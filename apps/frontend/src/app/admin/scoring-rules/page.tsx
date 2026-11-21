@@ -200,11 +200,11 @@ Matches calculated after this will no longer award these points. Past results ar
         {/* Header & Source of Truth Banner */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold tracking-tight text-navy-950">
+            <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy-950">
                 Official Sports Scoring Configuration
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap shrink-0">
                 PDF Source of Truth
               </span>
             </div>

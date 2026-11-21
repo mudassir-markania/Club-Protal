@@ -255,10 +255,10 @@ export default function RegistrationsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold tracking-tight text-navy-950">Registration Management</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
-                <LinkIcon className="w-3 h-3" />
+            <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy-950">Registration Management</h1>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                <LinkIcon className="w-3.5 h-3.5" />
                 Google Forms Automated Sync
               </span>
             </div>
