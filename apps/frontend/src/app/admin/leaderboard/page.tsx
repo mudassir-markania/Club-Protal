@@ -272,7 +272,68 @@ export default function LeaderboardPage() {
             </Link>
           </div>
 
-          <div className="overflow-x-auto no-scrollbar">
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {standings.map((entry) => (
+              <div key={entry.id} className="p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs shrink-0 ${
+                        entry.rank === 1
+                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-300 font-bold'
+                          : entry.rank === 2
+                          ? 'bg-slate-200 text-slate-800'
+                          : entry.rank === 3
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      #{entry.rank}
+                    </span>
+                    <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                      <ClubBadge code={entry.club.code} name={entry.club.name} className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-bold text-slate-900 text-sm block truncate">{entry.club.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{entry.club.code}</span>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-navy-950 font-mono bg-slate-100 px-2.5 py-1 rounded-md shrink-0">
+                    {entry.totalPoints.toFixed(2)} pts
+                  </span>
+                </div>
+
+                {/* Sports Micro-Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                  {sports.map((sp) => {
+                    const spPoints = entry.sportBreakdown?.[sp.name] || entry.sportBreakdown?.[sp.id] || 0;
+                    return (
+                      <div
+                        key={sp.id}
+                        className={`p-2 rounded-xl border flex items-center justify-between text-xs ${
+                          spPoints > 0
+                            ? 'bg-blue-50/50 border-blue-200/80 text-blue-900'
+                            : 'bg-slate-50/60 border-slate-100 text-slate-400'
+                        }`}
+                      >
+                        <span className="flex items-center gap-1 text-[11px] font-semibold truncate mr-1">
+                          <SportIcon name={sp.name} className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{sp.name}</span>
+                        </span>
+                        <span className="font-mono font-bold text-xs shrink-0">
+                          {spPoints > 0 ? Number(spPoints).toFixed(1) : '—'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                 <tr>

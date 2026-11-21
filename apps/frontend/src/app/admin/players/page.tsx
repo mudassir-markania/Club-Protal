@@ -490,9 +490,87 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Players Table (Reg ID and Contact Columns Removed) */}
+        {/* Players Table / Mobile Cards */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="overflow-x-auto no-scrollbar">
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {filteredPlayers.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 text-xs">
+                No participants match the selected filters.
+              </div>
+            ) : (
+              filteredPlayers.map((player) => (
+                <div key={player.id} className="p-4 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="font-bold text-slate-900 block text-sm truncate">{player.name}</span>
+                      <span className="text-[11px] text-slate-400 font-medium">{player.gender || 'MALE'}</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                        player.status === 'APPROVED'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}
+                    >
+                      {player.status || 'APPROVED'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs">
+                    <ClubBadge code={player.club?.code} name={player.club?.name} className="w-4 h-4 shrink-0" />
+                    <span className="font-bold text-slate-800">{player.club?.name}</span>
+                    {player.club?.code && (
+                      <span className="text-[10px] text-slate-400 font-mono">({player.club.code})</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {player.sports && player.sports.length > 0 ? (
+                      player.sports.map((s: any) => (
+                        <span
+                          key={s.id}
+                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 flex items-center gap-1 border border-slate-200"
+                        >
+                          <SportIcon name={s.sport?.name} className="w-3 h-3 text-slate-500" />
+                          <span>{s.sport?.name}</span>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic text-[11px]">All Sports Eligible</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100/60">
+                    <button
+                      onClick={() => handleOpenView(player)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-blue-600" />
+                      <span>View</span>
+                    </button>
+                    <button
+                      onClick={() => handleOpenEdit(player)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDelete(player.id, player.name)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                 <tr>

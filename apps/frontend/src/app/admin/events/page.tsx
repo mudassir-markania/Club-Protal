@@ -203,46 +203,106 @@ export default function EventStandingsPage() {
             ) : standings.length === 0 ? (
               <p className="p-8 text-center text-xs text-slate-400">No matches scheduled for this event yet.</p>
             ) : (
-              <div className="overflow-x-auto no-scrollbar">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
-                    <tr>
-                      <th className="py-2 px-4">#</th>
-                      <th className="py-2 px-4">Player / Team</th>
-                      <th className="py-2 px-4">Clubs</th>
-                      <th className="py-2 px-4 text-center">Played</th>
-                      {isRanked && <th className="py-2 px-4 text-center">Points</th>}
-                      <th className="py-2 px-4 text-center">Won</th>
-                      <th className="py-2 px-4 text-center">Lost</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {standings.map((s) => (
-                      <tr key={s.key} className={s.rank <= 3 ? 'bg-amber-50/30' : ''}>
-                        <td className="py-2.5 px-4 font-black text-slate-700">{s.rank}</td>
-                        <td className="py-2.5 px-4 font-bold text-slate-900">
-                          {s.name}
-                          {s.tied && s.rank <= 3 && <span className="ml-2 text-[10px] font-bold text-amber-700">tied</span>}
-                        </td>
-                        <td className="py-2.5 px-4">
-                          <span className="inline-flex flex-wrap gap-x-2">
-                            {s.clubs.map((c: any) => (
-                              <span key={c.id} className="inline-flex items-center gap-1 text-slate-600">
-                                <ClubBadge code={c.code} name={c.name} className="w-3 h-3" />
-                                {c.code || c.name}
-                              </span>
-                            ))}
+              <>
+                {/* Mobile Card List View (md:hidden) */}
+                <div className="md:hidden divide-y divide-slate-100">
+                  {standings.map((s) => (
+                    <div key={s.key} className={`p-4 space-y-2.5 ${s.rank <= 3 ? 'bg-amber-50/20' : ''}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                              s.rank === 1
+                                ? 'bg-amber-400 text-navy-950'
+                                : s.rank === 2
+                                ? 'bg-slate-200 text-slate-800'
+                                : s.rank === 3
+                                ? 'bg-amber-100 text-amber-900'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            #{s.rank}
                           </span>
-                        </td>
-                        <td className="py-2.5 px-4 text-center font-mono">{s.played}</td>
-                        {isRanked && <td className="py-2.5 px-4 text-center font-mono font-black text-navy-950">{s.points}</td>}
-                        <td className="py-2.5 px-4 text-center font-mono font-bold text-emerald-700">{s.wins}</td>
-                        <td className="py-2.5 px-4 text-center font-mono text-slate-500">{s.losses}</td>
+                          <span className="font-bold text-slate-900 text-sm truncate">{s.name}</span>
+                          {s.tied && s.rank <= 3 && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">
+                              tied
+                            </span>
+                          )}
+                        </div>
+                        {isRanked && (
+                          <div className="shrink-0 text-right">
+                            <span className="text-xs font-black text-navy-950 font-mono bg-slate-100 px-2 py-0.5 rounded">
+                              {s.points} pts
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                          {s.clubs.map((c: any) => (
+                            <span
+                              key={c.id}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold"
+                            >
+                              <ClubBadge code={c.code} name={c.name} className="w-3.5 h-3.5" />
+                              {c.code || c.name}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs font-mono shrink-0">
+                          <span className="text-slate-500">P:{s.played}</span>
+                          <span className="font-bold text-emerald-700">W:{s.wins}</span>
+                          <span className="text-slate-400">L:{s.losses}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table View (hidden md:block) */}
+                <div className="hidden md:block overflow-x-auto no-scrollbar">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
+                      <tr>
+                        <th className="py-2 px-4">#</th>
+                        <th className="py-2 px-4">Player / Team</th>
+                        <th className="py-2 px-4">Clubs</th>
+                        <th className="py-2 px-4 text-center">Played</th>
+                        {isRanked && <th className="py-2 px-4 text-center">Points</th>}
+                        <th className="py-2 px-4 text-center">Won</th>
+                        <th className="py-2 px-4 text-center">Lost</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {standings.map((s) => (
+                        <tr key={s.key} className={s.rank <= 3 ? 'bg-amber-50/30' : ''}>
+                          <td className="py-2.5 px-4 font-black text-slate-700">{s.rank}</td>
+                          <td className="py-2.5 px-4 font-bold text-slate-900">
+                            {s.name}
+                            {s.tied && s.rank <= 3 && <span className="ml-2 text-[10px] font-bold text-amber-700">tied</span>}
+                          </td>
+                          <td className="py-2.5 px-4">
+                            <span className="inline-flex flex-wrap gap-x-2">
+                              {s.clubs.map((c: any) => (
+                                <span key={c.id} className="inline-flex items-center gap-1 text-slate-600">
+                                  <ClubBadge code={c.code} name={c.name} className="w-3 h-3" />
+                                  {c.code || c.name}
+                                </span>
+                              ))}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4 text-center font-mono">{s.played}</td>
+                          {isRanked && <td className="py-2.5 px-4 text-center font-mono font-black text-navy-950">{s.points}</td>}
+                          <td className="py-2.5 px-4 text-center font-mono font-bold text-emerald-700">{s.wins}</td>
+                          <td className="py-2.5 px-4 text-center font-mono text-slate-500">{s.losses}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
 

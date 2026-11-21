@@ -80,9 +80,54 @@ export default function AuditLogsPage() {
           </span>
         </div>
 
-        {/* Logs Table */}
+        {/* Logs Table / Mobile Cards */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="overflow-x-auto no-scrollbar">
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {filteredLogs.length === 0 ? (
+              <div className="py-8 text-center text-slate-400 text-xs">
+                No audit entries found.
+              </div>
+            ) : (
+              filteredLogs.map((log) => (
+                <div key={log.id} className="p-4 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-800">
+                      {log.action}
+                    </span>
+                    <span className="text-slate-400 text-[11px]">
+                      {new Date(log.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div>
+                      <span className="font-bold text-slate-900 block">{log.userName}</span>
+                      <span className="text-[10px] text-blue-600 font-semibold">{log.role}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-semibold text-slate-700 block">{log.entity}</span>
+                      <span className="text-[10px] text-slate-400 font-mono truncate max-w-[140px] block">
+                        {log.recordId || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1 border-t border-slate-100/60">
+                    <button
+                      onClick={() => setSelectedLog(log)}
+                      className="px-2.5 py-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg font-semibold text-xs border border-blue-200 transition"
+                    >
+                      View Diff
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                 <tr>

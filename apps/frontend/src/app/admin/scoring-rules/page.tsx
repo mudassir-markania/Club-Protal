@@ -287,7 +287,7 @@ Matches calculated after this will no longer award these points. Past results ar
         </div>
 
         {/* Sport Filter Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
           {sportsList.map((sp) => (
             <button
               key={sp}

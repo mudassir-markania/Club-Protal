@@ -219,9 +219,62 @@ export default function PointsHistoryPage() {
           </div>
         </div>
 
-        {/* Ledger Table */}
+        {/* Ledger Table / Mobile Cards */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="overflow-x-auto no-scrollbar">
+          {/* Mobile Card View (md:hidden) */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {filteredHistory.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs">
+                No points transactions found matching your criteria.
+              </div>
+            ) : (
+              filteredHistory.map((item) => (
+                <div key={item.id} className="p-4 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ClubBadge code={item.club?.code} name={item.club?.name} className="w-5 h-5 shrink-0" />
+                      <span className="font-bold text-slate-900 text-sm truncate">{item.club?.name}</span>
+                    </div>
+                    <span className="font-mono font-black text-navy-950 text-sm shrink-0 bg-slate-100 px-2 py-0.5 rounded">
+                      +{Number(item.points).toFixed(2)} pts
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-700 font-semibold">
+                      <SportIcon name={item.sport?.name} className="w-3.5 h-3.5 text-blue-600" />
+                      <span>{item.sport?.name}</span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {item.match?.round || 'Championship Match'}
+                    </span>
+                  </div>
+
+                  {item.reason && (
+                    <p className="text-xs text-slate-600 font-medium line-clamp-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                      {item.reason}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100/60 text-xs">
+                    <span className="text-slate-400 font-mono text-[11px]">
+                      {new Date(item.recordedAt).toLocaleDateString()} {new Date(item.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <button
+                      onClick={() => setSelectedTx(item)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Inspect</span>
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200">
                 <tr>
