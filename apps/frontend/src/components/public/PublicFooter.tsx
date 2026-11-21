@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Trophy,
   MapPin,
   Calendar,
   Mail,
@@ -21,8 +20,12 @@ export default function PublicFooter() {
           {/* Col 1: Brand & Description (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 flex items-center justify-center shadow-lg text-white">
-                <Trophy className="w-5 h-5 fill-white text-white drop-shadow-xs" />
+              <div className="w-9 h-9 rounded-xl bg-navy-800/90 border border-amber-400/40 flex items-center justify-center p-1 shadow-md shadow-amber-500/10 shrink-0">
+                <img
+                  src="/logo.png"
+                  alt="APL Season 9"
+                  className="w-full h-full object-contain filter drop-shadow"
+                />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-black text-base tracking-tight text-white uppercase">
