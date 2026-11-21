@@ -67,7 +67,13 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-[#faf8ff]/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#e2e7ff]/60">
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-colors ${
+        mobileMenuOpen
+          ? 'bg-white shadow-2xl'
+          : 'bg-[#faf8ff]/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]'
+      } border-b border-[#e2e7ff]/60`}
+    >
       <div className="h-16 sm:h-20 max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-12 flex items-center justify-between gap-3">
         {/* Brand Crest & Title */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -155,7 +161,7 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
 
       {/* Full-Height Solid Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="xl:hidden fixed inset-x-0 top-16 sm:top-20 bottom-0 z-50 bg-white flex flex-col justify-between border-t border-slate-200/80 shadow-2xl overflow-y-auto overscroll-contain animate-in fade-in duration-150">
+        <div className="xl:hidden w-full bg-white border-t border-slate-200/80 shadow-2xl h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-5rem)] flex flex-col justify-between overflow-y-auto overscroll-contain">
           <div className="p-4 space-y-2 flex-1">
             {/* Live Championship Header Pill */}
             <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-manrope mb-3">
