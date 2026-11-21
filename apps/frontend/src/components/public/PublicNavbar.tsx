@@ -138,12 +138,12 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
             <span>Log In</span>
           </Link>
 
-          {/* Mobile hamburger button */}
+          {/* Mobile hamburger / close button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={`xl:hidden p-2 rounded-xl transition-colors shrink-0 ${
               mobileMenuOpen
-                ? 'bg-[#000f3f] text-white shadow-xs'
+                ? 'bg-slate-100 hover:bg-slate-200 text-navy-950 shadow-2xs'
                 : 'text-[#000f3f] hover:bg-[#e2e7ff]'
             }`}
             aria-label="Toggle navigation menu"
@@ -153,78 +153,76 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Drawer Backdrop */}
+      {/* Full-Height Solid Mobile Drawer */}
       {mobileMenuOpen && (
-        <div
-          className="xl:hidden fixed inset-0 top-16 sm:top-20 z-40 bg-navy-950/60 backdrop-blur-xs overscroll-none touch-none animate-in fade-in duration-150"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+        <div className="xl:hidden fixed inset-x-0 top-16 sm:top-20 bottom-0 z-50 bg-white flex flex-col justify-between border-t border-slate-200/80 shadow-2xl overflow-y-auto overscroll-contain animate-in fade-in duration-150">
+          <div className="p-4 space-y-2 flex-1">
+            {/* Live Championship Header Pill */}
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-manrope mb-3">
+              <span className="font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>APL Season 9 Championship</span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                LIVE
+              </span>
+            </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="xl:hidden fixed top-16 sm:top-20 left-0 right-0 z-50 bg-white/98 backdrop-blur-2xl border-b border-[#e2e7ff] shadow-2xl p-4 max-h-[calc(100vh-4.5rem)] overflow-y-auto animate-in slide-in-from-top-2 duration-200 space-y-2">
-          {/* Tournament Live Pill */}
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-manrope mb-1">
-            <span className="font-extrabold uppercase tracking-wider text-[#000f3f] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Season 9 Championship</span>
-            </span>
-            <span className="flex items-center gap-1 font-bold text-emerald-600 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              LIVE
-            </span>
-          </div>
-
-          {navItems.map((item) => {
-            const active = isItemActive(item);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between p-3 rounded-xl transition-all font-manrope ${
-                  active
-                    ? 'bg-[#000f3f] text-white shadow-md shadow-[#000f3f]/15'
-                    : 'bg-white hover:bg-[#f2f3ff] text-slate-700 hover:text-[#000f3f] border border-slate-200/80'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+            {/* Navigation Links */}
+            <div className="space-y-1">
+              {navItems.map((item) => {
+                const active = isItemActive(item);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-3.5 py-3 rounded-xl transition-all font-manrope ${
                       active
-                        ? 'bg-white/10 text-amber-400'
-                        : 'bg-[#dae2fd]/50 text-[#0051d5]'
+                        ? 'bg-blue-50 text-blue-950 font-bold border border-blue-200/90 shadow-2xs'
+                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className={`block text-xs uppercase tracking-wider font-extrabold leading-tight ${active ? 'text-white' : 'text-[#000f3f]'}`}>
-                      {item.label}
-                    </span>
-                    <span className={`block text-[11px] truncate mt-0.5 ${active ? 'text-white/70' : 'text-slate-400 font-medium'}`}>
-                      {item.subtitle}
-                    </span>
-                  </div>
-                </div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          active
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className={`block text-xs uppercase tracking-wider font-extrabold leading-tight ${active ? 'text-blue-950 font-black' : 'text-slate-900'}`}>
+                          {item.label}
+                        </span>
+                        <span className={`block text-[11px] truncate mt-0.5 font-sans ${active ? 'text-blue-700 font-medium' : 'text-slate-400 font-normal'}`}>
+                          {item.subtitle}
+                        </span>
+                      </div>
+                    </div>
 
-                <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-amber-400 translate-x-0.5' : 'text-slate-300'}`} />
-              </Link>
-            );
-          })}
+                    <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-blue-600 translate-x-0.5' : 'text-slate-300'}`} />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
 
-          <div className="pt-3 border-t border-[#e2e7ff] space-y-2">
+          {/* Bottom Portal Action Area */}
+          <div className="p-4 border-t border-slate-100 bg-slate-50/80 space-y-2.5 shrink-0 pb-6">
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider text-white bg-[#0051d5] hover:bg-[#000f3f] transition-all font-manrope shadow-md shadow-blue-500/20 active:scale-[0.99]"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.99] transition-all font-manrope shadow-md shadow-blue-600/20"
             >
               <LogIn className="w-4 h-4" />
               <span>Sign In to Official Portal</span>
             </Link>
-            <div className="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-0.5 font-medium">
+            <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 font-medium">
               <span className="font-semibold text-slate-500">APL Season 9 • NexCore</span>
               <span className="text-slate-400">Admin • Referee • Athlete</span>
             </div>
