@@ -460,40 +460,105 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto no-scrollbar">
+                {/* Mobile Card View (md:hidden) */}
+                <div className="md:hidden divide-y divide-slate-100">
+                  {standings.map((st) => (
+                    <div key={st.id} className="p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span
+                            className={`w-7 h-7 rounded-full inline-flex items-center justify-center font-mono font-black text-xs shrink-0 ${
+                              st.rank === 1
+                                ? 'bg-amber-400 text-navy-950 font-extrabold'
+                                : st.rank === 2
+                                ? 'bg-slate-200 text-slate-800'
+                                : st.rank === 3
+                                ? 'bg-amber-200 text-amber-900'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            #{st.rank}
+                          </span>
+                          <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
+                            <ClubBadge code={st.club.code} name={st.club.name} className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-extrabold text-sm text-[#000f3f] block truncate">{st.club.name}</span>
+                            <span className="text-[10px] font-mono text-slate-400">{st.club.code}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0 bg-blue-50/60 px-2.5 py-1 rounded-lg border border-blue-100">
+                          <span className="font-mono text-sm font-black text-[#000f3f] whitespace-nowrap block">
+                            {st.totalPoints.toFixed(2)}
+                          </span>
+                          <span className="text-[9px] text-blue-600 font-bold block uppercase tracking-wider">pts</span>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-slate-600 flex items-center justify-between pt-1 border-t border-slate-100">
+                        <span>Captain: <strong className="text-slate-800">{st.club.captainName || '—'}</strong></span>
+                        <span className="text-slate-400">VC: {st.club.viceCaptainName || '—'}</span>
+                      </div>
+
+                      {/* Sports Mini-Pills */}
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {sports.map((sp) => {
+                          const pts = st.sportBreakdown?.[sp.id] || 0;
+                          return (
+                            <span
+                              key={sp.id}
+                              className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold flex items-center gap-1 border ${
+                                pts > 0
+                                  ? 'bg-slate-100 border-slate-200 text-navy-950 font-bold'
+                                  : 'bg-slate-50 border-slate-100 text-slate-300'
+                              }`}
+                            >
+                              <span>{sp.name.slice(0, 4)}:</span>
+                              <span>{pts.toFixed(1)}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table View (hidden md:block) */}
+                <div className="hidden md:block overflow-x-auto no-scrollbar">
                   <table className="w-full text-xs text-left">
                     <thead className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                       <tr>
-                        <th className="py-3.5 px-4">Rank</th>
-                        <th className="py-3.5 px-4">House</th>
-                        <th className="py-3.5 px-4">Leadership</th>
+                        <th className="py-3.5 px-4 whitespace-nowrap">Rank</th>
+                        <th className="py-3.5 px-4 whitespace-nowrap">House</th>
+                        <th className="py-3.5 px-4 whitespace-nowrap">Leadership</th>
                         {sports.map((sp) => (
-                          <th key={sp.id} className="py-3.5 px-3 text-right">
+                          <th key={sp.id} className="py-3.5 px-3 text-right whitespace-nowrap">
                             <span className="truncate max-w-[70px] inline-block">{sp.name}</span>
                           </th>
                         ))}
-                        <th className="py-3.5 px-4 text-right">Total Points</th>
+                        <th className="py-3.5 px-4 text-right whitespace-nowrap">Total Points</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-sans">
                       {standings.map((st) => (
                         <tr key={st.id} className="hover:bg-slate-50/70 transition">
-                          <td className="py-3.5 px-4 font-mono font-black text-sm">
+                          <td className="py-3.5 px-4 font-mono font-black text-sm whitespace-nowrap">
                             <span
                               className={`w-7 h-7 rounded-full inline-flex items-center justify-center ${
                                 st.rank === 1
-                                  ? 'bg-amber-400 text-navy-950 font-extrabold'
-                                  : st.rank === 2
-                                  ? 'bg-slate-200 text-slate-800'
-                                  : st.rank === 3
-                                  ? 'bg-amber-200 text-amber-900'
-                                  : 'bg-slate-100 text-slate-600'
+                                ? 'bg-amber-400 text-navy-950 font-extrabold'
+                                : st.rank === 2
+                                ? 'bg-slate-200 text-slate-800'
+                                : st.rank === 3
+                                ? 'bg-amber-200 text-amber-900'
+                                : 'bg-slate-100 text-slate-600'
                               }`}
                             >
                               #{st.rank}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3.5 px-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
                                 <ClubBadge code={st.club.code} name={st.club.name} className="w-5 h-5" />
@@ -504,14 +569,14 @@ export default function LeaderboardPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="py-3.5 px-4 text-slate-600">
+                          <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap">
                             <span className="font-bold text-slate-800 block">{st.club.captainName || '—'}</span>
                             <span className="text-[10px] text-slate-400">Vice: {st.club.viceCaptainName || '—'}</span>
                           </td>
                           {sports.map((sp) => {
                             const pts = st.sportBreakdown?.[sp.id] || 0;
                             return (
-                              <td key={sp.id} className="py-3.5 px-3 text-right font-mono font-bold text-slate-700">
+                              <td key={sp.id} className="py-3.5 px-3 text-right font-mono font-bold text-slate-700 whitespace-nowrap">
                                 {pts > 0 ? (
                                   <span className="text-navy-950 font-black">{pts.toFixed(2)}</span>
                                 ) : (
@@ -520,8 +585,8 @@ export default function LeaderboardPage() {
                               </td>
                             );
                           })}
-                          <td className="py-3.5 px-4 text-right">
-                            <span className="font-mono text-base font-black text-[#000f3f]">
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                            <span className="font-mono text-base font-black text-[#000f3f] whitespace-nowrap">
                               {st.totalPoints.toFixed(2)}
                             </span>
                             <span className="text-[10px] text-slate-400 font-bold block">pts</span>

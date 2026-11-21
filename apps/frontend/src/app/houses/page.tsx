@@ -653,10 +653,10 @@ export default function HousesPage() {
                         </div>
 
                         <div className="text-right shrink-0">
-                          <span className="block font-manrope text-xs font-black text-amber-400">
+                          <span className="block font-manrope text-xs font-black text-amber-400 whitespace-nowrap">
                             {h.points} PTS
                           </span>
-                          <span className="text-[9px] uppercase font-bold text-white/50">
+                          <span className="text-[9px] uppercase font-bold text-white/50 whitespace-nowrap">
                             Rank #{h.rank}
                           </span>
                         </div>
@@ -769,7 +769,7 @@ export default function HousesPage() {
                     <div className="relative z-10 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <span
-                          className="px-3.5 py-1.5 rounded-full text-xs uppercase font-black tracking-widest flex items-center gap-2 font-manrope shadow-md"
+                          className="px-3.5 py-1.5 rounded-full text-xs uppercase font-black tracking-widest flex items-center gap-2 font-manrope shadow-md whitespace-nowrap shrink-0"
                           style={{ backgroundColor: house.accentColor, color: '#ffffff' }}
                         >
                           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
@@ -976,23 +976,85 @@ export default function HousesPage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-[#e2e7ff] overflow-hidden">
-              <div className="overflow-x-auto no-scrollbar">
+              {/* Mobile Card View (md:hidden) - Eliminates horizontal scrolling on mobile */}
+              <div className="md:hidden divide-y divide-[#e2e7ff]">
+                {houses.map((h) => (
+                  <div key={h.id} className="p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className="w-9 h-9 rounded-xl flex items-center justify-center font-manrope font-black text-xs text-white shrink-0 shadow-xs"
+                          style={{ backgroundColor: h.accentColor }}
+                        >
+                          {h.code.charAt(0)}
+                        </span>
+                        <div className="min-w-0">
+                          <strong className="font-manrope text-sm font-extrabold uppercase text-[#000f3f] block truncate">
+                            {h.name}
+                          </strong>
+                          <span className="text-[10px] text-[#45464f] font-mono">{h.code}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-manrope font-black text-base text-[#0051d5]">
+                          #{h.rank}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-md bg-[#dae2fd] text-[#000f3f] font-mono font-bold text-xs whitespace-nowrap inline-flex items-center gap-1 shadow-2xs">
+                          <span>{h.points}</span>
+                          <span className="text-[10px] text-[#000f3f]/70 font-semibold">PTS</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs p-2.5 bg-[#faf8ff] rounded-xl border border-[#e2e7ff]/70">
+                      <div>
+                        <span className="text-[10px] font-bold text-[#45464f] uppercase tracking-wider block">Athletes</span>
+                        <span className="font-mono font-bold text-[#000f3f] text-xs">{h.squadSize} Registered</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-[#45464f] uppercase tracking-wider block">Dominant Fortress</span>
+                        <span className="font-semibold text-[#000f3f] text-xs truncate block">{h.fortress}</span>
+                      </div>
+                      <div className="col-span-2 pt-1 border-t border-[#e2e7ff]/50 flex items-center justify-between text-[11px]">
+                        <span className="text-[#45464f]">Captain: <strong className="text-[#000f3f]">{h.captain.name}</strong></span>
+                        <span className="text-[#45464f]">VC: <strong className="text-[#000f3f]">{h.captain.viceCaptain}</strong></span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedHouse(h);
+                        setRosterSearch('');
+                      }}
+                      className="w-full py-2 rounded-lg bg-[#f2f3ff] hover:bg-[#000f3f] hover:text-white text-[#000f3f] text-xs uppercase font-extrabold font-manrope transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
+                    >
+                      <span>Inspect Full Roster ({h.squadSize})</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (hidden md:block) */}
+              <div className="hidden md:block overflow-x-auto no-scrollbar">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-[#000f3f] text-white text-xs uppercase font-extrabold font-manrope">
-                      <th className="py-4 px-6">House Dynasty</th>
-                      <th className="py-4 px-4 text-center">Current Rank</th>
-                      <th className="py-4 px-4 text-center">Approved Points</th>
-                      <th className="py-4 px-4 text-center">Athletes</th>
-                      <th className="py-4 px-6">Dominant Fortress</th>
-                      <th className="py-4 px-6">Captain &amp; Leadership</th>
-                      <th className="py-4 px-4 text-right">Roster Access</th>
+                      <th className="py-4 px-6 whitespace-nowrap">House Dynasty</th>
+                      <th className="py-4 px-4 text-center whitespace-nowrap">Current Rank</th>
+                      <th className="py-4 px-4 text-center whitespace-nowrap">Approved Points</th>
+                      <th className="py-4 px-4 text-center whitespace-nowrap">Athletes</th>
+                      <th className="py-4 px-6 whitespace-nowrap">Dominant Fortress</th>
+                      <th className="py-4 px-6 whitespace-nowrap">Captain &amp; Leadership</th>
+                      <th className="py-4 px-4 text-right whitespace-nowrap">Roster Access</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs divide-y divide-[#e2e7ff]">
                     {houses.map((h) => (
                       <tr key={h.id} className="hover:bg-[#faf8ff] transition-colors">
-                        <td className="py-4 px-6">
+                        <td className="py-4 px-6 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <span
                               className="w-8 h-8 rounded-lg flex items-center justify-center font-manrope font-black text-xs text-white shrink-0 shadow-xs"
@@ -1008,30 +1070,31 @@ export default function HousesPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-center font-manrope font-black text-base text-[#0051d5]">
+                        <td className="py-4 px-4 text-center font-manrope font-black text-base text-[#0051d5] whitespace-nowrap">
                           #{h.rank}
                         </td>
-                        <td className="py-4 px-4 text-center font-manrope font-black text-sm text-[#000f3f]">
-                          <span className="px-2.5 py-1 rounded-md bg-[#dae2fd] text-[#000f3f] font-mono">
-                            {h.points} PTS
+                        <td className="py-4 px-4 text-center font-manrope font-black text-sm text-[#000f3f] whitespace-nowrap">
+                          <span className="px-3 py-1 rounded-md bg-[#dae2fd] text-[#000f3f] font-mono whitespace-nowrap inline-flex items-center gap-1 shadow-2xs">
+                            <span>{h.points}</span>
+                            <span className="text-[10px] text-[#000f3f]/70 font-semibold">PTS</span>
                           </span>
                         </td>
-                        <td className="py-4 px-4 text-center font-mono font-bold text-sm text-[#45464f]">
+                        <td className="py-4 px-4 text-center font-mono font-bold text-sm text-[#45464f] whitespace-nowrap">
                           {h.squadSize}
                         </td>
-                        <td className="py-4 px-6 font-semibold text-[#000f3f]">{h.fortress}</td>
-                        <td className="py-4 px-6">
+                        <td className="py-4 px-6 font-semibold text-[#000f3f] whitespace-nowrap">{h.fortress}</td>
+                        <td className="py-4 px-6 whitespace-nowrap">
                           <span className="font-bold text-[#000f3f] block">{h.captain.name}</span>
                           <span className="text-[10px] text-[#45464f]">VC: {h.captain.viceCaptain}</span>
                         </td>
-                        <td className="py-4 px-4 text-right">
+                        <td className="py-4 px-4 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => {
                               setSelectedHouse(h);
                               setRosterSearch('');
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-[#f2f3ff] hover:bg-[#000f3f] hover:text-white text-[#000f3f] text-[11px] uppercase font-extrabold font-manrope transition-colors cursor-pointer shadow-2xs"
+                            className="px-3 py-1.5 rounded-lg bg-[#f2f3ff] hover:bg-[#000f3f] hover:text-white text-[#000f3f] text-[11px] uppercase font-extrabold font-manrope transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
                           >
                             Inspect ({h.squadSize})
                           </button>
