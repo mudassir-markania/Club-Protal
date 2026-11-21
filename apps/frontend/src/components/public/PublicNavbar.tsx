@@ -3,7 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, LogIn } from 'lucide-react';
+import {
+  Menu,
+  X,
+  LogIn,
+  Home,
+  Calendar,
+  Trophy,
+  Shield,
+  Medal,
+  ChevronRight,
+  Sparkles,
+} from 'lucide-react';
 
 interface PublicNavbarProps {
   onRefresh?: () => void;
@@ -35,11 +46,11 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
   }, [mobileMenuOpen]);
 
   const navItems = [
-    { label: 'Home', href: '/', key: 'home' },
-    { label: 'Schedule', href: '/schedule', key: 'schedule' },
-    { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard' },
-    { label: 'Houses', href: '/houses', key: 'houses' },
-    { label: 'Sports', href: '/sports', key: 'sports' },
+    { label: 'Home', href: '/', key: 'home', icon: Home, subtitle: 'Championship Hub & Overview' },
+    { label: 'Schedule', href: '/schedule', key: 'schedule', icon: Calendar, subtitle: 'Fixtures, Timings & Results' },
+    { label: 'Leaderboard', href: '/leaderboard', key: 'leaderboard', icon: Trophy, subtitle: 'House Standings & Total Points' },
+    { label: 'Houses', href: '/houses', key: 'houses', icon: Shield, subtitle: 'The 5 Dynasties & Rosters' },
+    { label: 'Sports', href: '/sports', key: 'sports', icon: Medal, subtitle: '6 Sanctioned Disciplines' },
   ];
 
   const isItemActive = (item: (typeof navItems)[0]) => {
@@ -119,7 +130,9 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
           {/* Unified Role-Based Login CTA */}
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg border border-[#000f3f]/20 hover:border-[#000f3f] bg-white hover:bg-[#000f3f] text-[#000f3f] hover:text-white text-xs uppercase tracking-wider font-extrabold transition-all duration-150 shadow-xs font-manrope group shrink-0"
+            className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg border border-[#000f3f]/20 hover:border-[#000f3f] bg-white hover:bg-[#000f3f] text-[#000f3f] hover:text-white text-xs uppercase tracking-wider font-extrabold transition-all duration-150 shadow-xs font-manrope group shrink-0 ${
+              mobileMenuOpen ? 'hidden sm:inline-flex' : ''
+            }`}
           >
             <LogIn className="w-3.5 h-3.5 text-[#0051d5] group-hover:text-white transition-colors" />
             <span>Log In</span>
@@ -128,7 +141,11 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
           {/* Mobile hamburger button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden p-1.5 sm:p-2 rounded-lg text-[#000f3f] hover:bg-[#e2e7ff] shrink-0"
+            className={`xl:hidden p-2 rounded-xl transition-colors shrink-0 ${
+              mobileMenuOpen
+                ? 'bg-[#000f3f] text-white shadow-xs'
+                : 'text-[#000f3f] hover:bg-[#e2e7ff]'
+            }`}
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
@@ -136,35 +153,81 @@ export default function PublicNavbar({ activeOverride }: PublicNavbarProps) {
         </div>
       </div>
 
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          className="xl:hidden fixed inset-0 top-16 sm:top-20 z-40 bg-navy-950/60 backdrop-blur-xs overscroll-none touch-none animate-in fade-in duration-150"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-white/98 backdrop-blur-xl border-b border-[#c6c5d0] px-4 py-4 space-y-2 animate-in slide-in-from-top-2">
+        <div className="xl:hidden fixed top-16 sm:top-20 left-0 right-0 z-50 bg-white/98 backdrop-blur-2xl border-b border-[#e2e7ff] shadow-2xl p-4 max-h-[calc(100vh-4.5rem)] overflow-y-auto animate-in slide-in-from-top-2 duration-200 space-y-2">
+          {/* Tournament Live Pill */}
+          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-manrope mb-1">
+            <span className="font-extrabold uppercase tracking-wider text-[#000f3f] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Season 9 Championship</span>
+            </span>
+            <span className="flex items-center gap-1 font-bold text-emerald-600 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              LIVE
+            </span>
+          </div>
+
           {navItems.map((item) => {
             const active = isItemActive(item);
+            const Icon = item.icon;
             return (
               <Link
                 key={item.key}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-4 py-2.5 rounded-lg text-sm uppercase tracking-wider font-bold transition-all font-manrope ${
+                className={`flex items-center justify-between p-3 rounded-xl transition-all font-manrope ${
                   active
-                    ? 'bg-[#000f3f] text-white'
-                    : 'text-[#45464f] hover:bg-[#f2f3ff] hover:text-[#000f3f]'
+                    ? 'bg-[#000f3f] text-white shadow-md shadow-[#000f3f]/15'
+                    : 'bg-white hover:bg-[#f2f3ff] text-slate-700 hover:text-[#000f3f] border border-slate-200/80'
                 }`}
               >
-                {item.label}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                      active
+                        ? 'bg-white/10 text-amber-400'
+                        : 'bg-[#dae2fd]/50 text-[#0051d5]'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className={`block text-xs uppercase tracking-wider font-extrabold leading-tight ${active ? 'text-white' : 'text-[#000f3f]'}`}>
+                      {item.label}
+                    </span>
+                    <span className={`block text-[11px] truncate mt-0.5 ${active ? 'text-white/70' : 'text-slate-400 font-medium'}`}>
+                      {item.subtitle}
+                    </span>
+                  </div>
+                </div>
+
+                <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-amber-400 translate-x-0.5' : 'text-slate-300'}`} />
               </Link>
             );
           })}
-          <div className="pt-2 border-t border-[#e2e7ff]">
+
+          <div className="pt-3 border-t border-[#e2e7ff] space-y-2">
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider text-white bg-[#000f3f] hover:bg-[#0051d5] transition-all font-manrope shadow-sm"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider text-white bg-[#0051d5] hover:bg-[#000f3f] transition-all font-manrope shadow-md shadow-blue-500/20 active:scale-[0.99]"
             >
               <LogIn className="w-4 h-4" />
-              <span>Log In</span>
+              <span>Sign In to Official Portal</span>
             </Link>
+            <div className="flex items-center justify-between text-[10px] text-slate-400 px-1 pt-0.5 font-medium">
+              <span className="font-semibold text-slate-500">APL Season 9 • NexCore</span>
+              <span className="text-slate-400">Admin • Referee • Athlete</span>
+            </div>
           </div>
         </div>
       )}
