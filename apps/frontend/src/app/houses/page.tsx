@@ -976,7 +976,7 @@ export default function HousesPage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-[#e2e7ff] overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-[#000f3f] text-white text-xs uppercase font-extrabold font-manrope">

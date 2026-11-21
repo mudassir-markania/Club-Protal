@@ -460,7 +460,7 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-xs text-left">
                     <thead className="bg-slate-50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                       <tr>
@@ -789,7 +789,7 @@ export default function LeaderboardPage() {
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-xs text-left">
                     <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                       <tr>

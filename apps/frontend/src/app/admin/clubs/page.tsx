@@ -429,16 +429,119 @@ Delete the club and its players?`
         {/* Tab 1: The 5 Houses */}
         {activeTab === 'HOUSES' && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            {/* Mobile Card List View (md:hidden) - Completely eliminates side-scrolling */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {filteredClubs.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  No houses found.
+                </div>
+              ) : (
+                filteredClubs.map((club, idx) => (
+                  <div key={club.id} className="p-4 space-y-3">
+                    {/* Top: Rank, Badge, Name, Total Points */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                            idx === 0
+                              ? 'bg-amber-400 text-navy-950 font-black'
+                              : idx === 1
+                              ? 'bg-slate-200 text-slate-800'
+                              : idx === 2
+                              ? 'bg-amber-100 text-amber-900'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          #{idx + 1}
+                        </span>
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                          <ClubBadge code={club.code} name={club.name} className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900 text-sm block truncate">{club.name}</span>
+                          <span className="text-[11px] text-slate-400">House Official</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-black text-navy-950 font-mono bg-slate-100 px-2.5 py-1 rounded-md block">
+                          {Number(club.totalPoints || 0).toFixed(2)} pts
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Middle: Captain / Vice Captain */}
+                    <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50/80 rounded-xl border border-slate-100 text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Captain</span>
+                        <span className="font-semibold text-slate-800 truncate block">{club.captainName || 'Not assigned'}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Vice Captain</span>
+                        <span className="font-semibold text-slate-800 truncate block">{club.viceCaptainName || 'None'}</span>
+                      </div>
+                    </div>
+
+                    {/* House Teams Tags & Status */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        {getHouseTeams(club).length > 0 ? (
+                          getHouseTeams(club).map((t: any) => (
+                            <span
+                              key={t.id || t._id}
+                              className="px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-[11px] font-semibold border border-blue-200 shadow-2xs"
+                            >
+                              {t.name}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-slate-400">No teams</span>
+                        )}
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                        {club.status}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100/60">
+                      <button
+                        onClick={() => handleOpenView(club)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-blue-600" />
+                        <span>View</span>
+                      </button>
+                      <button
+                        onClick={() => handleOpenEdit(club)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(club.id, club.name)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View (hidden md:block) */}
+            <div className="hidden md:block overflow-x-auto no-scrollbar">
+              <table className="w-full text-left text-xs table-auto">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Rank</th>
+                    <th className="py-3 px-3 text-center w-12">Rank</th>
                     <th className="py-3 px-4">House Name</th>
                     <th className="py-3 px-4">Captain / Vice</th>
                     <th className="py-3 px-4 text-center">House Teams</th>
                     <th className="py-3 px-4 text-right">Total Points</th>
-                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-center">Status</th>
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -452,9 +555,9 @@ Delete the club and its players?`
                   ) : (
                     filteredClubs.map((club, idx) => (
                       <tr key={club.id} className="hover:bg-slate-50/80 transition">
-                        <td className="py-3.5 px-4 font-bold text-slate-700">
+                        <td className="py-3.5 px-3 text-center font-bold text-slate-700">
                           <span
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center text-xs font-bold ${
                               idx === 0
                                 ? 'bg-amber-400 text-navy-950 font-black'
                                 : idx === 1
@@ -505,7 +608,7 @@ Delete the club and its players?`
                             {Number(club.totalPoints || 0).toFixed(2)} pts
                           </span>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 text-center">
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             {club.status}
                           </span>
@@ -557,14 +660,59 @@ Delete the club and its players?`
                 </span>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+
+            {/* Mobile Card List View (md:hidden) */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {filteredCricketTeams.map((ct) => (
+                <div key={ct.id} className="p-4 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-bold text-slate-900 text-sm">{ct.name}</div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                      {ct.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <ClubBadge code={ct.club?.code} name={ct.club?.name} className="w-4 h-4" />
+                      <span className="font-extrabold text-blue-700">{ct.club?.name}</span>
+                    </div>
+                    <div className="text-slate-600 font-medium text-[11px]">
+                      Capt: {ct.captainName ||
+                        (String(ct.id).endsWith('-b') ||
+                        String(ct._id).endsWith('-b') ||
+                        (ct.name && /\s+B$/i.test(ct.name))
+                          ? ct.club?.viceCaptainName
+                          : ct.club?.captainName) ||
+                        'Assigned per fixture'}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100/60 text-xs">
+                    <span className="text-[11px] text-slate-500">
+                      Credits <strong>{ct.club?.name}</strong>
+                    </span>
+                    <button
+                      onClick={() => handleOpenEditTeam(ct)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg text-xs font-semibold border border-slate-200 transition"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Edit Team</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View (hidden md:block) */}
+            <div className="hidden md:block overflow-x-auto no-scrollbar">
+              <table className="w-full text-left text-xs table-auto">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
                   <tr>
                     <th className="py-3 px-4">House Team Name</th>
                     <th className="py-3 px-4">Parent House</th>
                     <th className="py-3 px-4">Captain</th>
-                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-center">Status</th>
                     <th className="py-3 px-4 text-right">Points Rollup Target</th>
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
@@ -590,7 +738,7 @@ Delete the club and its players?`
                             : ct.club?.captainName) ||
                           'Assigned per fixture'}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 text-center">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           {ct.status}
                         </span>

@@ -190,7 +190,7 @@ export default function ReportsPage() {
             </button>
           </div>
 
-          <div className="overflow-x-auto max-h-96">
+          <div className="overflow-x-auto max-h-96 no-scrollbar">
             {!previewData ? (
               <div className="py-12 text-center text-slate-400 text-xs">
                 Select any report above to view its live table preview and columns.

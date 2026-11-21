@@ -77,7 +77,7 @@ export default function HomePointsTable() {
                 <span className="text-xs sm:text-sm uppercase tracking-wider font-bold font-manrope">Overall Championship Table</span>
                 <span className="text-[11px] text-[#dce1ff] uppercase font-semibold font-manrope">Updated live</span>
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-[#e2e7ff] text-[#45464f] text-[11px] uppercase font-bold font-manrope">

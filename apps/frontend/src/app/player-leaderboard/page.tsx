@@ -307,7 +307,7 @@ export default function PlayerLeaderboardPage() {
               No athlete records found matching your active filter.
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               <table className="w-full text-xs text-left">
                 <thead className="bg-[#0D1017] text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/[0.08]">
                   <tr>

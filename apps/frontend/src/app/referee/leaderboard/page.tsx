@@ -85,7 +85,7 @@ export default function RefereeLeaderboardPage() {
             <span className="text-xs text-slate-500 font-medium">5 Houses</span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                 <tr>
@@ -122,7 +122,7 @@ export default function RefereeLeaderboardPage() {
             <h3 className="font-bold text-sm text-navy-950">Points Breakdown per Sport</h3>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                 <tr>

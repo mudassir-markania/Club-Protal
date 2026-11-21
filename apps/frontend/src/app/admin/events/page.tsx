@@ -203,7 +203,7 @@ export default function EventStandingsPage() {
             ) : standings.length === 0 ? (
               <p className="p-8 text-center text-xs text-slate-400">No matches scheduled for this event yet.</p>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
                     <tr>
