@@ -176,7 +176,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     { name: 'Club Management', href: '/admin/clubs', icon: Shield },
     { name: 'Sports & Scoring', href: '/admin/sports', icon: Medal },
     { name: 'Player Roster', href: '/admin/players', icon: Users },
-    { name: 'Referee Management', href: '/admin/referees', icon: UserCheck },
     { name: 'Matches & Fixtures', href: '/admin/matches', icon: Calendar },
     { name: 'Points History', href: '/admin/points-history', icon: History },
     { name: 'House Leaderboard', href: '/admin/leaderboard', icon: Trophy },
