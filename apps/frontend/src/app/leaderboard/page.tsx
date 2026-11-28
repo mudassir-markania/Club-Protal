@@ -20,6 +20,8 @@ import {
   Search,
   Filter,
   Users,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 import { ClubBadge, SportIcon } from '@/components/ui/icons';
 
@@ -30,6 +32,7 @@ export default function LeaderboardPage() {
 
   // Data states
   const [loading, setLoading] = useState(true);
+  const [pointsLocked, setPointsLocked] = useState(false);
   const [standings, setStandings] = useState<any[]>([]);
   const [sports, setSports] = useState<any[]>([]);
   const [championClub, setChampionClub] = useState<any | null>(null);
@@ -56,6 +59,9 @@ export default function LeaderboardPage() {
         setStandings(lbData.standings || []);
         setSports(lbData.sports || []);
         setChampionClub(lbData.championClub || null);
+        if (lbData.pointsLocked) {
+          setPointsLocked(true);
+        }
       }
 
       if (awRes.ok) {
@@ -191,9 +197,11 @@ export default function LeaderboardPage() {
                       Approved PTS
                     </span>
                     <span className="block font-manrope text-2xl sm:text-3xl font-black text-amber-400">
-                      {Number.isInteger(totalPointsCount) ? totalPointsCount : totalPointsCount.toFixed(1)}
+                      {pointsLocked ? '🔒' : Number.isInteger(totalPointsCount) ? totalPointsCount : totalPointsCount.toFixed(1)}
                     </span>
-                    <span className="text-[10px] text-amber-200/70 font-medium">Verified Engine</span>
+                    <span className="text-[10px] text-amber-200/70 font-medium">
+                      {pointsLocked ? 'Locked for Final' : 'Verified Engine'}
+                    </span>
                   </div>
 
                   <div className="p-3 sm:p-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
@@ -282,10 +290,14 @@ export default function LeaderboardPage() {
 
                       <div className="text-right shrink-0">
                         <span className="block font-manrope text-xl font-black text-amber-400">
-                          {standings[0]?.totalPoints ? standings[0].totalPoints.toFixed(0) : 31} PTS
+                          {pointsLocked
+                            ? '🔒 LOCKED'
+                            : standings[0]?.totalPoints != null
+                            ? standings[0].totalPoints.toFixed(0) + ' PTS'
+                            : '31 PTS'}
                         </span>
                         <span className="text-[9px] uppercase font-bold text-emerald-400">
-                          Leading Table
+                          {pointsLocked ? 'Reveal Soon' : 'Leading Table'}
                         </span>
                       </div>
                     </div>
@@ -351,6 +363,27 @@ export default function LeaderboardPage() {
 
         {/* CONTENT CONTAINER */}
         <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-10 space-y-10">
+          {pointsLocked && (
+            <div className="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 text-navy-950 p-5 rounded-2xl border-2 border-yellow-200 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-navy-950 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-manrope text-base font-black uppercase tracking-wide">
+                    Final Day Suspense Freeze Active
+                  </h3>
+                  <p className="text-xs text-navy-900 font-medium">
+                    Points and house standings are locked for the Grand Reveal ceremony. Individual match results continue to be officiated in real time.
+                  </p>
+                </div>
+              </div>
+              <span className="px-3.5 py-1.5 rounded-full bg-navy-950 text-amber-300 font-mono text-xs font-black uppercase tracking-wider self-start sm:self-auto shrink-0 shadow-sm">
+                🔒 Reveal Pending
+              </span>
+            </div>
+          )}
+
           {/* 1. OVERALL STANDINGS TAB */}
           {activeTab === 'OVERALL' && (
             <div className="space-y-10">
@@ -387,9 +420,9 @@ export default function LeaderboardPage() {
                         </div>
                         <div className="pt-3 border-t border-slate-100">
                           <span className="font-mono text-2xl font-black text-[#000f3f]">
-                            {standings[1].totalPoints.toFixed(2)}
+                            {pointsLocked ? '🔒' : standings[1].totalPoints != null ? standings[1].totalPoints.toFixed(2) : '0.00'}
                           </span>
-                          <span className="text-[10px] text-slate-400 block font-bold uppercase">Points</span>
+                          <span className="text-[10px] text-slate-400 block font-bold uppercase">{pointsLocked ? 'Hidden' : 'Points'}</span>
                         </div>
                       </div>
                     )}
@@ -415,9 +448,9 @@ export default function LeaderboardPage() {
                         </div>
                         <div className="pt-3 border-t border-amber-200">
                           <span className="font-mono text-3xl font-black text-[#000f3f]">
-                            {standings[0].totalPoints.toFixed(2)}
+                            {pointsLocked ? '🔒 LOCKED' : standings[0].totalPoints != null ? standings[0].totalPoints.toFixed(2) : '0.00'}
                           </span>
-                          <span className="text-[11px] text-amber-700 block font-bold uppercase">Approved Points</span>
+                          <span className="text-[11px] text-amber-700 block font-bold uppercase">{pointsLocked ? 'Final Reveal Pending' : 'Approved Points'}</span>
                         </div>
                       </div>
                     )}
@@ -437,9 +470,9 @@ export default function LeaderboardPage() {
                         </div>
                         <div className="pt-3 border-t border-slate-100">
                           <span className="font-mono text-2xl font-black text-[#000f3f]">
-                            {standings[2].totalPoints.toFixed(2)}
+                            {pointsLocked ? '🔒' : standings[2].totalPoints != null ? standings[2].totalPoints.toFixed(2) : '0.00'}
                           </span>
-                          <span className="text-[10px] text-slate-400 block font-bold uppercase">Points</span>
+                          <span className="text-[10px] text-slate-400 block font-bold uppercase">{pointsLocked ? 'Hidden' : 'Points'}</span>
                         </div>
                       </div>
                     )}
@@ -490,9 +523,11 @@ export default function LeaderboardPage() {
 
                         <div className="text-right shrink-0 bg-blue-50/60 px-2.5 py-1 rounded-lg border border-blue-100">
                           <span className="font-mono text-sm font-black text-[#000f3f] whitespace-nowrap block">
-                            {st.totalPoints.toFixed(2)}
+                            {pointsLocked ? '🔒' : st.totalPoints != null ? st.totalPoints.toFixed(2) : '0.00'}
                           </span>
-                          <span className="text-[9px] text-blue-600 font-bold block uppercase tracking-wider">pts</span>
+                          <span className="text-[9px] text-blue-600 font-bold block uppercase tracking-wider">
+                            {pointsLocked ? 'Locked' : 'pts'}
+                          </span>
                         </div>
                       </div>
 
@@ -504,18 +539,18 @@ export default function LeaderboardPage() {
                       {/* Sports Mini-Pills */}
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {sports.map((sp) => {
-                          const pts = st.sportBreakdown?.[sp.id] || 0;
+                          const pts = st.sportBreakdown?.[sp.id];
                           return (
                             <span
                               key={sp.id}
                               className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold flex items-center gap-1 border ${
-                                pts > 0
+                                !pointsLocked && pts && pts > 0
                                   ? 'bg-slate-100 border-slate-200 text-navy-950 font-bold'
                                   : 'bg-slate-50 border-slate-100 text-slate-300'
                               }`}
                             >
                               <span>{sp.name.slice(0, 4)}:</span>
-                              <span>{pts.toFixed(1)}</span>
+                              <span>{pointsLocked ? '🔒' : pts != null ? pts.toFixed(1) : '0.0'}</span>
                             </span>
                           );
                         })}
@@ -546,16 +581,18 @@ export default function LeaderboardPage() {
                           <td className="py-3.5 px-4 font-mono font-black text-sm whitespace-nowrap">
                             <span
                               className={`w-7 h-7 rounded-full inline-flex items-center justify-center ${
-                                st.rank === 1
-                                ? 'bg-amber-400 text-navy-950 font-extrabold'
-                                : st.rank === 2
-                                ? 'bg-slate-200 text-slate-800'
-                                : st.rank === 3
-                                ? 'bg-amber-200 text-amber-900'
-                                : 'bg-slate-100 text-slate-600'
+                                pointsLocked
+                                  ? 'bg-slate-100 text-slate-400 font-bold'
+                                  : st.rank === 1
+                                  ? 'bg-amber-400 text-navy-950 font-extrabold'
+                                  : st.rank === 2
+                                  ? 'bg-slate-200 text-slate-800'
+                                  : st.rank === 3
+                                  ? 'bg-amber-200 text-amber-900'
+                                  : 'bg-slate-100 text-slate-600'
                               }`}
                             >
-                              #{st.rank}
+                              {pointsLocked ? '🔒' : `#${st.rank}`}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
@@ -574,10 +611,12 @@ export default function LeaderboardPage() {
                             <span className="text-[10px] text-slate-400">Vice: {st.club.viceCaptainName || '—'}</span>
                           </td>
                           {sports.map((sp) => {
-                            const pts = st.sportBreakdown?.[sp.id] || 0;
+                            const pts = st.sportBreakdown?.[sp.id];
                             return (
                               <td key={sp.id} className="py-3.5 px-3 text-right font-mono font-bold text-slate-700 whitespace-nowrap">
-                                {pts > 0 ? (
+                                {pointsLocked ? (
+                                  <span className="text-slate-400">🔒</span>
+                                ) : pts != null && pts > 0 ? (
                                   <span className="text-navy-950 font-black">{pts.toFixed(2)}</span>
                                 ) : (
                                   <span className="text-slate-300">0.00</span>
@@ -587,9 +626,9 @@ export default function LeaderboardPage() {
                           })}
                           <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             <span className="font-mono text-base font-black text-[#000f3f] whitespace-nowrap">
-                              {st.totalPoints.toFixed(2)}
+                              {pointsLocked ? '🔒 Locked' : st.totalPoints != null ? st.totalPoints.toFixed(2) : '0.00'}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-bold block">pts</span>
+                            {!pointsLocked && <span className="text-[10px] text-slate-400 font-bold block">pts</span>}
                           </td>
                         </tr>
                       ))}
@@ -652,15 +691,21 @@ export default function LeaderboardPage() {
                           return (
                             <div key={st.id} className="py-3 flex items-center justify-between text-xs">
                               <div className="flex items-center gap-3">
-                                <span className="font-mono font-black text-xs text-slate-400 w-5">#{idx + 1}</span>
+                                <span className="font-mono font-black text-xs text-slate-400 w-5">
+                                  {pointsLocked ? '🔒' : `#${idx + 1}`}
+                                </span>
                                 <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
                                   <ClubBadge code={st.club.code} name={st.club.name} className="w-4 h-4" />
                                 </div>
                                 <span className="font-bold text-sm text-[#000f3f]">{st.club.name}</span>
                               </div>
                               <div className="text-right">
-                                <span className="font-mono font-black text-base text-navy-950">{pts.toFixed(2)}</span>
-                                <span className="text-[10px] text-slate-400 block font-bold">pts</span>
+                                <span className="font-mono font-black text-base text-navy-950">
+                                  {pointsLocked ? '🔒' : pts.toFixed(2)}
+                                </span>
+                                <span className="text-[10px] text-slate-400 block font-bold">
+                                  {pointsLocked ? 'Locked' : 'pts'}
+                                </span>
                               </div>
                             </div>
                           );
@@ -712,7 +757,7 @@ export default function LeaderboardPage() {
                           {aw.sportName}
                         </span>
                         <span className="font-mono text-sm font-black text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-lg">
-                          +{aw.points} pts
+                          {pointsLocked ? '🔒 Approved Winner' : `+${aw.points} pts`}
                         </span>
                       </div>
 
@@ -817,7 +862,9 @@ export default function LeaderboardPage() {
                                 {p.isWinner && <Trophy className="w-3.5 h-3.5 text-amber-500" />}
                                 <span>{p.teamName || p.cricketTeam?.name || p.club?.name}</span>
                               </div>
-                              <span style={{ whiteSpace: 'nowrap', display: 'inline-flex', flexShrink: 0 }} className="inline-flex items-center font-mono font-black text-navy-950 whitespace-nowrap shrink-0">{p.score || 0}&nbsp;pts</span>
+                              <span style={{ whiteSpace: 'nowrap', display: 'inline-flex', flexShrink: 0 }} className="inline-flex items-center font-mono font-black text-navy-950 whitespace-nowrap shrink-0">
+                                {pointsLocked ? '🔒 Final' : `${p.score || 0} pts`}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -853,39 +900,47 @@ export default function LeaderboardPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto no-scrollbar">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                      <tr>
-                        <th className="py-3 px-4">House</th>
-                        <th className="py-3 px-4">Sport</th>
-                        <th className="py-3 px-4">Audit Reason</th>
-                        <th className="py-3 px-4 text-right">Points</th>
-                        <th className="py-3 px-4 text-right">Approved Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {filteredHistory.map((h) => (
-                        <tr key={h.id} className="hover:bg-slate-50/70 transition">
-                          <td className="py-3 px-4 font-bold text-navy-950 flex items-center gap-2">
-                            <ClubBadge code={h.club?.code} name={h.club?.name} className="w-4 h-4" />
-                            <span>{h.club?.name}</span>
-                          </td>
-                          <td className="py-3 px-4 text-slate-600">{h.sport?.name || 'General'}</td>
-                          <td className="py-3 px-4 text-slate-700 font-medium">{h.reason}</td>
-                          <td className="py-3 px-4 text-right font-mono font-black text-navy-950">
-                            +{parseFloat(h.points).toFixed(2)} pts
-                          </td>
-                          <td className="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">
-                            {new Date(h.recordedAt).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {filteredHistory.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 text-xs">
+                  {pointsLocked
+                    ? '🔒 Points history ledger is frozen for the Final Day Grand Reveal ceremony.'
+                    : 'No approved points history records found.'}
                 </div>
-              </div>
+              ) : (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                  <div className="overflow-x-auto no-scrollbar">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">House</th>
+                          <th className="py-3 px-4">Sport</th>
+                          <th className="py-3 px-4">Audit Reason</th>
+                          <th className="py-3 px-4 text-right">Points</th>
+                          <th className="py-3 px-4 text-right">Approved Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredHistory.map((h) => (
+                          <tr key={h.id} className="hover:bg-slate-50/70 transition">
+                            <td className="py-3 px-4 font-bold text-navy-950 flex items-center gap-2">
+                              <ClubBadge code={h.club?.code} name={h.club?.name} className="w-4 h-4" />
+                              <span>{h.club?.name}</span>
+                            </td>
+                            <td className="py-3 px-4 text-slate-600">{h.sport?.name || 'General'}</td>
+                            <td className="py-3 px-4 text-slate-700 font-medium">{h.reason}</td>
+                            <td className="py-3 px-4 text-right font-mono font-black text-navy-950">
+                              +{parseFloat(h.points).toFixed(2)} pts
+                            </td>
+                            <td className="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">
+                              {new Date(h.recordedAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

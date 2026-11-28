@@ -27,11 +27,12 @@ export interface PublicMatch {
 
 export interface HouseStanding {
   id: string;
-  rank: number;
-  points: number;
+  rank: number | null;
+  points: number | null;
   club: { id: string; name: string; code?: string };
   sportBreakdown: Record<string, number>;
   transactionsCount?: number;
+  locked?: boolean;
 }
 
 /** Start time of a match as a local Date. */
@@ -190,8 +191,13 @@ export const usePublicSchedule = (pollMs = 60000) =>
 
 /** Live overall house standings (refreshes every minute). */
 export const useHouseStandings = (pollMs = 60000) =>
-  usePolled<{ standings: HouseStanding[]; sports: { id: string; name: string }[] }>(
+  usePolled<{ standings: HouseStanding[]; sports: { id: string; name: string }[]; pointsLocked?: boolean; championshipStatus?: string }>(
     '/api/leaderboard?type=overall',
-    (j) => ({ standings: Array.isArray(j.standings) ? j.standings : [], sports: Array.isArray(j.sports) ? j.sports : [] }),
+    (j) => ({
+      standings: Array.isArray(j.standings) ? j.standings : [],
+      sports: Array.isArray(j.sports) ? j.sports : [],
+      pointsLocked: Boolean(j.pointsLocked),
+      championshipStatus: j.championshipStatus,
+    }),
     pollMs
   );

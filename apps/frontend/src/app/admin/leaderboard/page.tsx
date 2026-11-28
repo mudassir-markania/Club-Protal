@@ -29,6 +29,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [recalculating, setRecalculating] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [togglingLock, setTogglingLock] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,6 +46,25 @@ export default function LeaderboardPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTogglePointsLock = async () => {
+    setTogglingLock(true);
+    try {
+      const res = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'TOGGLE_LOCK' }),
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error);
+      setMessage(resData.message);
+      fetchLeaderboard();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setTogglingLock(false);
     }
   };
 
@@ -98,6 +118,7 @@ export default function LeaderboardPage() {
   const championshipStatus = data?.championshipStatus || 'ACTIVE';
   const championClub = data?.championClub;
   const isClosed = championshipStatus === 'CLOSED';
+  const pointsLocked = Boolean(data?.pointsLocked);
   const leadingHouse = data?.leadingClub || standings[0]?.club;
 
   return (
@@ -134,6 +155,19 @@ export default function LeaderboardPage() {
             </Link>
 
             <button
+              onClick={handleTogglePointsLock}
+              disabled={togglingLock}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-lg shadow-sm transition disabled:opacity-70 cursor-pointer ${
+                pointsLocked
+                  ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+              }`}
+            >
+              {pointsLocked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+              {pointsLocked ? 'Unlock Public Points' : 'Lock Points (Final Day)'}
+            </button>
+
+            <button
               onClick={handleToggleChampionship}
               disabled={closing}
               className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold rounded-lg shadow-sm transition ${
@@ -156,6 +190,32 @@ export default function LeaderboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Final Day Freeze Active Status Banner */}
+        {pointsLocked && (
+          <div className="p-4 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 text-navy-950 rounded-2xl border-2 border-yellow-200 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-navy-950 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-extrabold text-sm uppercase tracking-wide">
+                  Final Day Points Freeze is Active
+                </div>
+                <div className="text-xs text-navy-900 font-medium">
+                  Scores, podium, and sport totals are masked on public leaderboard pages for suspense. You see the live calculated points below.
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleTogglePointsLock}
+              disabled={togglingLock}
+              className="px-4 py-2 bg-navy-950 text-white hover:bg-navy-900 text-xs font-black rounded-xl shrink-0 transition shadow-sm cursor-pointer"
+            >
+              Unlock Points Now
+            </button>
+          </div>
+        )}
 
         {/* Success Alert */}
         {message && (

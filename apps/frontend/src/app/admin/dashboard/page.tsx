@@ -28,11 +28,15 @@ import {
   X,
   Send,
   Eye,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 import { ClubBadge, MedalBadge, SportIcon } from '@/components/ui/icons';
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [pointsLocked, setPointsLocked] = useState(false);
+  const [togglingLock, setTogglingLock] = useState(false);
   const [clubs, setClubs] = useState<any[]>([]);
   const [sports, setSports] = useState<any[]>([]);
   const [matches, setMatches] = useState<any[]>([]);
@@ -76,10 +80,34 @@ export default function AdminDashboardPage() {
       setLeaderboard(leadData.standings || []);
       setChampionshipStatus(leadData.championshipStatus || 'ACTIVE');
       setChampionClub(leadData.championClub || null);
+      setPointsLocked(Boolean(leadData.pointsLocked));
     } catch (err) {
       console.error('Failed to load dashboard data', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTogglePointsLock = async () => {
+    setTogglingLock(true);
+    try {
+      const res = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'TOGGLE_LOCK' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setPointsLocked(Boolean(data.pointsLocked));
+      setAlertMsg({
+        type: 'success',
+        text: data.message || (data.pointsLocked ? 'Points locked for public.' : 'Points unlocked.'),
+      });
+      fetchDashboardData();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setTogglingLock(false);
     }
   };
 
@@ -210,7 +238,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Quick Primary Actions */}
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
               <button
                 onClick={fetchDashboardData}
                 className="p-2.5 bg-navy-800/80 hover:bg-navy-700 text-navy-300 hover:text-white rounded-xl border border-navy-700 transition"
@@ -218,6 +246,21 @@ export default function AdminDashboardPage() {
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
+
+              <button
+                onClick={handleTogglePointsLock}
+                disabled={togglingLock}
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 font-extrabold text-xs rounded-xl shadow-md transition disabled:opacity-60 cursor-pointer ${
+                  pointsLocked
+                    ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                }`}
+                title={pointsLocked ? 'Points are hidden from the public. Click to unlock.' : 'Freeze points for final day grand reveal'}
+              >
+                {pointsLocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                <span>{pointsLocked ? 'Unlock Public Points' : 'Lock Points (Final Day)'}</span>
+              </button>
+
               <Link
                 href="/admin/matches"
                 className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-navy-950 font-extrabold text-xs rounded-xl shadow-md transition"
@@ -228,6 +271,32 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Final Day Freeze Active Status Banner */}
+        {pointsLocked && (
+          <div className="p-4 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 text-navy-950 rounded-2xl border-2 border-yellow-200 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-navy-950 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-extrabold text-sm uppercase tracking-wide">
+                  Final Day Points Freeze is Active
+                </div>
+                <div className="text-xs text-navy-900 font-medium">
+                  Public scores, house ranks, and points audit logs are masked for the Grand Reveal ceremony. Full calculations remain visible here for tournament officials.
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleTogglePointsLock}
+              disabled={togglingLock}
+              className="px-4 py-2 bg-navy-950 text-white hover:bg-navy-900 text-xs font-black rounded-xl shrink-0 transition shadow-sm cursor-pointer"
+            >
+              Unlock Points Now
+            </button>
+          </div>
+        )}
 
         {/* 4 Essential Quick Workflow Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

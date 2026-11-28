@@ -1,8 +1,10 @@
 import { NextResponse } from '@/http/next-server';
 import { db } from '@/lib/db';
+import { getPointsLockState } from '@/lib/points-lock';
 
 export async function GET() {
   try {
+    const { pointsLocked, hidePoints } = await getPointsLockState();
     // 1. Fetch Sports
     const sports = await db.sport.findMany({
       where: { status: 'ACTIVE' },
@@ -33,7 +35,7 @@ export async function GET() {
       where: { key: 'HOUSE_CHAMPION_CLUB_ID' },
     });
     let championClub = null;
-    if (championSetting?.value) {
+    if (championSetting?.value && !hidePoints) {
       championClub = clubs.find((c) => c.id === championSetting.value) || null;
     }
 
@@ -42,16 +44,20 @@ export async function GET() {
       include: { sport: true },
     });
 
-    const standings = clubs.map((club, idx) => {
+    const displayClubs = hidePoints ? [...clubs].sort((a, b) => a.name.localeCompare(b.name)) : clubs;
+
+    const standings = displayClubs.map((club, idx) => {
       const clubPoints = allApprovedPoints.filter((h) => h.clubId === club.id);
       const sportBreakdown: Record<string, number> = {};
 
-      for (const sp of sports) {
-        const pts = clubPoints
-          .filter((h) => h.sportId === sp.id)
-          .reduce((sum, h) => sum + Number(h.points), 0);
-        sportBreakdown[sp.id] = Number(pts.toFixed(2));
-        sportBreakdown[sp.name] = Number(pts.toFixed(2));
+      if (!hidePoints) {
+        for (const sp of sports) {
+          const pts = clubPoints
+            .filter((h) => h.sportId === sp.id)
+            .reduce((sum, h) => sum + Number(h.points), 0);
+          sportBreakdown[sp.id] = Number(pts.toFixed(2));
+          sportBreakdown[sp.name] = Number(pts.toFixed(2));
+        }
       }
 
       return {
@@ -60,11 +66,12 @@ export async function GET() {
         code: club.code,
         color: club.color,
         captainName: club.captainName,
-        rank: idx + 1,
-        totalPoints: Number(club.totalPoints.toFixed(2)),
+        rank: hidePoints ? null : idx + 1,
+        totalPoints: hidePoints ? null : Number(club.totalPoints.toFixed(2)),
         sportBreakdown,
         cricketTeams: club.cricketTeams || [],
         matchesPlayed: clubPoints.length,
+        pointsLocked: Boolean(pointsLocked),
       };
     });
 
@@ -143,6 +150,7 @@ export async function GET() {
       cricketTeams,
       approvedMatches,
       upcomingMatches,
+      pointsLocked: Boolean(pointsLocked),
     });
   } catch (error: any) {
     console.error('Public overview API error:', error);

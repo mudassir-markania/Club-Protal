@@ -388,6 +388,7 @@ export default function HomePage() {
   // Dynamic Houses from Admin Backend
   const [houses, setHouses] = useState<HouseItem[]>(INITIAL_HOUSES_DATA);
   const [selectedHouse, setSelectedHouse] = useState<HouseItem | null>(null);
+  const [pointsLocked, setPointsLocked] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -403,6 +404,9 @@ export default function HomePage() {
         if (lbRes.ok) {
           const lbJson = await lbRes.json();
           standingsData = lbJson.standings || [];
+          if (lbJson.pointsLocked) {
+            setPointsLocked(true);
+          }
         }
 
         let playersData: any[] = [];
@@ -822,9 +826,15 @@ export default function HomePage() {
                                 </span>
                               </div>
                             </div>
-                            <span className="px-2.5 py-0.5 rounded bg-white/10 text-white font-extrabold text-xs font-manrope whitespace-nowrap">
-                              {h.points} PTS
-                            </span>
+                            {pointsLocked ? (
+                              <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-extrabold text-[11px] font-manrope whitespace-nowrap border border-amber-400/40">
+                                🔒 LOCKED
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 rounded bg-white/10 text-white font-extrabold text-xs font-manrope whitespace-nowrap">
+                                {h.points} PTS
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -970,9 +980,15 @@ export default function HomePage() {
                         </div>
                         <div className="flex justify-between items-center pt-1 border-t border-[#e2e7ff]">
                           <span className="text-[#45464f]">Total Points</span>
-                          <span className={`font-manrope text-base font-extrabold ${h.textColor}`}>
-                            {h.points} PTS
-                          </span>
+                          {pointsLocked ? (
+                            <span className="font-manrope text-xs font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">
+                              🔒 Locked
+                            </span>
+                          ) : (
+                            <span className={`font-manrope text-base font-extrabold ${h.textColor}`}>
+                              {h.points} PTS
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -1228,7 +1244,7 @@ export default function HomePage() {
                   Total Points
                 </span>
                 <p className={`font-manrope text-2xl font-black ${selectedHouse.textColor}`}>
-                  {selectedHouse.points}
+                  {pointsLocked ? '🔒' : selectedHouse.points}
                 </p>
               </div>
               <div>

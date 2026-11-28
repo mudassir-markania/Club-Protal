@@ -20,6 +20,7 @@ import {
   Search,
   Sparkles,
   Award,
+  Lock,
 } from 'lucide-react';
 
 interface HouseAthlete {
@@ -33,14 +34,14 @@ interface HouseAthlete {
 
 interface DynamicHouse {
   id: string;
-  rank: number;
+  rank: number | null;
   name: string;
   code: string;
   accentColor: string;
   badgeBg: string;
   textColor: string;
   lightBg: string;
-  points: number;
+  points: number | null;
   mascot: string;
   squadSize: number;
   fortress: string;
@@ -323,6 +324,7 @@ const INITIAL_FALLBACK_HOUSES: DynamicHouse[] = [
 
 export default function HousesPage() {
   const [houses, setHouses] = useState<DynamicHouse[]>(INITIAL_FALLBACK_HOUSES);
+  const [pointsLocked, setPointsLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedHouse, setSelectedHouse] = useState<DynamicHouse | null>(null);
   usePreventScroll(!!selectedHouse);
@@ -351,6 +353,11 @@ export default function HousesPage() {
         const lbData = await lbRes.json();
         const playersData = playersRes.ok ? await playersRes.json() : [];
 
+        const isLocked = Boolean(lbData.pointsLocked);
+        if (!cancelled) {
+          setPointsLocked(isLocked);
+        }
+
         // Standings from approved points engine
         const standingsList: any[] = Array.isArray(lbData.standings) ? lbData.standings : [];
         const rawClubs: any[] = Array.isArray(clubsData) ? clubsData : [];
@@ -370,9 +377,13 @@ export default function HousesPage() {
             (s) => (s.club?.id || s.club?._id) === clubId || s.club?.name === club.name
           );
 
-          const points = typeof standing?.points === 'number' ? standing.points : club.totalPoints || 0;
-          const rank = standing?.rank || club.currentRank || 99;
-          const sportBreakdown = standing?.sportBreakdown || {};
+          const points = isLocked
+            ? null
+            : typeof standing?.points === 'number'
+            ? standing.points
+            : club.totalPoints || 0;
+          const rank = isLocked ? null : standing?.rank || club.currentRank || 99;
+          const sportBreakdown = isLocked ? {} : standing?.sportBreakdown || {};
 
           // Filter registered players belonging to this house
           const housePlayers = allPlayers.filter(
@@ -436,7 +447,11 @@ export default function HousesPage() {
             mascot: lore.mascot,
             squadSize: housePlayers.length > 0 ? housePlayers.length : lore.code === 'YEL' ? 18 : 19,
             fortress,
-            streak: points > 0 ? `${points} Championship PTS` : lore.streak,
+            streak: isLocked
+              ? 'Final Day Contender'
+              : points && points > 0
+              ? `${points} Championship PTS`
+              : lore.streak,
             motto: lore.motto,
             battleChant: lore.battleChant,
             captain: {
@@ -451,16 +466,20 @@ export default function HousesPage() {
           };
         });
 
-        // Sort by approved points descending, then rank ascending
-        dynamicList.sort((a, b) => {
-          if (b.points !== a.points) return b.points - a.points;
-          return a.rank - b.rank;
-        });
+        if (!isLocked) {
+          // Sort by approved points descending, then rank ascending
+          dynamicList.sort((a, b) => {
+            const bp = b.points ?? 0;
+            const ap = a.points ?? 0;
+            if (bp !== ap) return bp - ap;
+            return (a.rank ?? 99) - (b.rank ?? 99);
+          });
 
-        // Re-assign 1-based ranks
-        dynamicList.forEach((h, idx) => {
-          h.rank = idx + 1;
-        });
+          // Re-assign 1-based ranks
+          dynamicList.forEach((h, idx) => {
+            h.rank = idx + 1;
+          });
+        }
 
         if (!cancelled && dynamicList.length > 0) {
           setHouses(dynamicList);
@@ -654,10 +673,10 @@ export default function HousesPage() {
 
                         <div className="text-right shrink-0">
                           <span className="block font-manrope text-xs font-black text-amber-400 whitespace-nowrap">
-                            {h.points} PTS
+                            {pointsLocked ? '🔒 LOCKED' : `${h.points} PTS`}
                           </span>
                           <span className="text-[9px] uppercase font-bold text-white/50 whitespace-nowrap">
-                            Rank #{h.rank}
+                            {pointsLocked ? 'Frozen' : `Rank #${h.rank}`}
                           </span>
                         </div>
                       </button>
@@ -705,7 +724,7 @@ export default function HousesPage() {
                     style={{ backgroundColor: h.accentColor }}
                   />
                   <span>{h.name}</span>
-                  <span className="text-[10px] opacity-70">#{h.rank}</span>
+                  <span className="text-[10px] opacity-70">{pointsLocked ? '🔒' : `#${h.rank}`}</span>
                 </button>
               ))}
             </div>
@@ -736,6 +755,28 @@ export default function HousesPage() {
         {/* 3. EDITORIAL HOUSE SHOWCASE CARDS (DYNAMIC 5 HOUSES)     */}
         {/* ======================================================== */}
         <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-12 flex flex-col gap-10">
+          {/* Final Day Freeze Banner */}
+          {pointsLocked && (
+            <div className="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 text-navy-950 p-5 rounded-2xl border-2 border-yellow-200 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-navy-950 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-manrope text-base font-black uppercase tracking-wide">
+                    Final Day Suspense Freeze Active
+                  </h3>
+                  <p className="text-xs text-navy-900 font-medium">
+                    All house standings, points, and rank tables are locked until the Grand Championship Reveal ceremony today!
+                  </p>
+                </div>
+              </div>
+              <span className="px-3.5 py-1.5 rounded-full bg-navy-950 text-amber-300 font-mono text-xs font-black uppercase tracking-wider self-start sm:self-auto shrink-0 shadow-sm">
+                🔒 Reveal Pending
+              </span>
+            </div>
+          )}
+
           {filteredHouses.length === 0 ? (
             <div className="py-20 text-center bg-white rounded-2xl border border-[#e2e7ff] p-8">
               <Shield className="w-12 h-12 text-[#c5c6d0] mx-auto mb-3" />
@@ -773,11 +814,11 @@ export default function HousesPage() {
                           style={{ backgroundColor: house.accentColor, color: '#ffffff' }}
                         >
                           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                          Rank #{house.rank} • {house.points} PTS
+                          {pointsLocked ? '🔒 Rank & Points Frozen' : `Rank #${house.rank} • ${house.points} PTS`}
                         </span>
                       </div>
                       <span className="font-manrope text-5xl font-black text-white/20 select-none">
-                        0{house.rank}
+                        {pointsLocked ? '🔒' : `0${house.rank}`}
                       </span>
                     </div>
 
@@ -998,11 +1039,11 @@ export default function HousesPage() {
 
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="font-manrope font-black text-base text-[#0051d5]">
-                          #{h.rank}
+                          {pointsLocked ? '🔒' : `#${h.rank}`}
                         </span>
                         <span className="px-2.5 py-1 rounded-md bg-[#dae2fd] text-[#000f3f] font-mono font-bold text-xs whitespace-nowrap inline-flex items-center gap-1 shadow-2xs">
-                          <span>{h.points}</span>
-                          <span className="text-[10px] text-[#000f3f]/70 font-semibold">PTS</span>
+                          <span>{pointsLocked ? '🔒 LOCKED' : h.points}</span>
+                          {!pointsLocked && <span className="text-[10px] text-[#000f3f]/70 font-semibold">PTS</span>}
                         </span>
                       </div>
                     </div>
@@ -1071,12 +1112,12 @@ export default function HousesPage() {
                           </div>
                         </td>
                         <td className="py-4 px-4 text-center font-manrope font-black text-base text-[#0051d5] whitespace-nowrap">
-                          #{h.rank}
+                          {pointsLocked ? '🔒' : `#${h.rank}`}
                         </td>
                         <td className="py-4 px-4 text-center font-manrope font-black text-sm text-[#000f3f] whitespace-nowrap">
                           <span className="px-3 py-1 rounded-md bg-[#dae2fd] text-[#000f3f] font-mono whitespace-nowrap inline-flex items-center gap-1 shadow-2xs">
-                            <span>{h.points}</span>
-                            <span className="text-[10px] text-[#000f3f]/70 font-semibold">PTS</span>
+                            <span>{pointsLocked ? '🔒 LOCKED' : h.points}</span>
+                            {!pointsLocked && <span className="text-[10px] text-[#000f3f]/70 font-semibold">PTS</span>}
                           </span>
                         </td>
                         <td className="py-4 px-4 text-center font-mono font-bold text-sm text-[#45464f] whitespace-nowrap">
@@ -1150,7 +1191,9 @@ export default function HousesPage() {
                   {selectedHouse.name} Varsity Roster
                 </h3>
                 <span className="text-xs text-[#0051d5] font-extrabold font-manrope uppercase mt-0.5 block">
-                  Rank #{selectedHouse.rank} • {selectedHouse.points} Championship Points • {selectedHouse.squadSize} Athletes
+                  {pointsLocked
+                    ? `🔒 Points Locked for Final Day • ${selectedHouse.squadSize} Athletes`
+                    : `Rank #${selectedHouse.rank} • ${selectedHouse.points} Championship Points • ${selectedHouse.squadSize} Athletes`}
                 </span>
               </div>
             </div>

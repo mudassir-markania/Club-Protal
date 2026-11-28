@@ -1,8 +1,14 @@
 import { NextResponse } from '@/http/next-server';
 import { db } from '@/lib/db';
+import { getPointsLockState } from '@/lib/points-lock';
 
 export async function GET(req: Request) {
   try {
+    const { hidePoints } = await getPointsLockState();
+    if (hidePoints) {
+      return NextResponse.json([]);
+    }
+
     const { searchParams } = new URL(req.url);
     const clubId = searchParams.get('clubId');
     const sportId = searchParams.get('sportId');

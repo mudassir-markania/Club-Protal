@@ -3,14 +3,17 @@ import { db } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
 import { getCached, setCached, clearCache } from '@/lib/cache';
+import { getPointsLockState } from '@/lib/points-lock';
 
 export async function GET() {
   try {
-    const cached = getCached('clubs:all');
+    const { pointsLocked, isAdmin, hidePoints } = await getPointsLockState();
+    const cacheKey = `clubs:all:${hidePoints ? 'locked' : isAdmin ? 'admin' : 'unlocked'}`;
+    const cached = getCached(cacheKey);
     if (cached) return NextResponse.json(cached);
 
     const clubs = await db.club.findMany({
-      orderBy: { currentRank: 'asc' },
+      orderBy: hidePoints ? { name: 'asc' } : { currentRank: 'asc' },
       include: {
         _count: {
           select: {
@@ -21,8 +24,17 @@ export async function GET() {
       },
     });
 
-    setCached('clubs:all', clubs, 60);
-    return NextResponse.json(clubs);
+    const safeClubs = hidePoints
+      ? clubs.map((c) => ({
+          ...c,
+          totalPoints: 0,
+          currentRank: null,
+          pointsLocked: true,
+        }))
+      : clubs;
+
+    setCached(cacheKey, safeClubs, 60);
+    return NextResponse.json(safeClubs);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
