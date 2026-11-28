@@ -118,7 +118,7 @@ async function seed() {
   ];
 
   console.log('Seeding Users & Single Official Referee (Marcus)...');
-  const adminPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = await bcrypt.hash('ubaid2303', 10);
   const marcusPassword = await bcrypt.hash('marcus123', 10);
 
   // Clean out legacy referees
@@ -127,8 +127,14 @@ async function seed() {
   await User.deleteMany({ roleId: refereeRole._id });
 
   await User.findOneAndUpdate(
+    { email: 'ubaid' },
+    { _id: 'user-admin-ubaid', email: 'ubaid', passwordHash: adminPassword, name: 'Ubaid', roleId: superAdminRole._id, status: 'ACTIVE' },
+    { upsert: true }
+  );
+
+  await User.findOneAndUpdate(
     { email: 'admin@sportsportal.com' },
-    { _id: 'user-admin', email: 'admin@sportsportal.com', passwordHash: adminPassword, name: 'Championship Director', roleId: superAdminRole._id, status: 'ACTIVE' },
+    { _id: 'user-admin', email: 'admin@sportsportal.com', passwordHash: adminPassword, name: 'Ubaid', roleId: superAdminRole._id, status: 'ACTIVE' },
     { upsert: true }
   );
 

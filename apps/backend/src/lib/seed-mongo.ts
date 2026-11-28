@@ -188,7 +188,7 @@ export async function seedMongoDatabase() {
   }
 
   console.log('6. Seeding Users & Single Official Referee (Marcus)...');
-  const adminPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = await bcrypt.hash('ubaid2303', 10);
   const marcusPassword = await bcrypt.hash('marcus123', 10);
 
   // Remove any legacy referees or referee users to ensure only ONE referee exists
@@ -197,12 +197,24 @@ export async function seedMongoDatabase() {
   if (db.user) await db.user.deleteMany({ roleId: refereeRole.id });
 
   await db.user.upsert({
+    where: { email: 'ubaid' },
+    update: { passwordHash: adminPassword, name: 'Ubaid' },
+    create: {
+      email: 'ubaid',
+      passwordHash: adminPassword,
+      name: 'Ubaid',
+      roleId: superAdminRole.id,
+      status: 'ACTIVE',
+    },
+  });
+
+  await db.user.upsert({
     where: { email: 'admin@sportsportal.com' },
-    update: { passwordHash: adminPassword },
+    update: { passwordHash: adminPassword, name: 'Ubaid' },
     create: {
       email: 'admin@sportsportal.com',
       passwordHash: adminPassword,
-      name: 'Championship Director',
+      name: 'Ubaid',
       roleId: superAdminRole.id,
       status: 'ACTIVE',
     },

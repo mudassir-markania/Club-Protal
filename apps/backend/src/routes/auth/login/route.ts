@@ -16,8 +16,10 @@ export async function POST(req: Request) {
 
     // Support both direct email and common username aliases
     const searchEmails = [cleanInput];
-    if (['admin', 'director', 'superadmin', 'administrator'].includes(cleanInput)) {
-      searchEmails.push('admin@sportsportal.com');
+    if (['admin', 'director', 'superadmin', 'administrator', 'ubaid', 'ubaid@gmail.com'].includes(cleanInput)) {
+      searchEmails.push('ubaid', 'ubaid@gmail.com', 'admin@sportsportal.com');
+    } else if (cleanInput.includes('ubaid')) {
+      searchEmails.push('ubaid', 'ubaid@gmail.com');
     } else if (['marcus', 'ref.marcus', 'referee.marcus', 'marcus@gmail.com'].includes(cleanInput)) {
       searchEmails.push('marcus@gmail.com');
     }

@@ -33,8 +33,8 @@ if (fs.existsSync(envPath)) {
 }
 
 const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/apexarena';
-const ADMIN_EMAIL = 'admin@sportsportal.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_EMAIL = 'ubaid';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ubaid2303';
 
 async function main() {
   await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 10000 });
