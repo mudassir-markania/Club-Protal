@@ -77,17 +77,10 @@ export default function RefereeDashboardPage() {
 
       let currentUser = meData.user;
 
-      // If not logged in as referee, auto-authenticate as default referee Marcus
-      if (!meData.authenticated || meData.user?.role !== 'REFEREE') {
-        const loginRes = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'marcus@gmail.com', password: 'marcus123' }),
-        });
-        if (loginRes.ok) {
-          const loginData = await loginRes.json();
-          currentUser = loginData.user;
-        }
+      // If not logged in as referee or admin, redirect to official login
+      if (!meData.authenticated || (meData.user?.role !== 'REFEREE' && meData.user?.role !== 'SUPER_ADMIN' && meData.user?.role !== 'ADMIN')) {
+        window.location.href = '/login';
+        return;
       }
 
       setUser(currentUser);

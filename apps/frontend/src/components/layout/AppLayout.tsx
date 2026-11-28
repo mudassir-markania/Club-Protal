@@ -75,43 +75,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       if (data.authenticated) {
         setUser(data.user);
       } else {
-        // Fallback for seamless demo
-        if (pathname?.startsWith('/referee')) {
-          setUser({
-            id: 'ref-marcus-default',
-            name: 'Marcus Sterling',
-            email: 'marcus@gmail.com',
-            role: 'REFEREE',
-            refereeId: 'ca701ecb-f512-45a3-b651-600b4d45f965',
-            referee: { refereeCode: 'REF-001', name: 'Marcus Sterling' },
-          });
-        } else {
-          setUser({
-            id: 'admin-default',
-            name: 'Tournament Director',
-            email: 'admin@sportsportal.com',
-            role: 'SUPER_ADMIN',
-          });
-        }
+        setUser(null);
       }
     } catch (err) {
-      if (pathname?.startsWith('/referee')) {
-        setUser({
-          id: 'ref-marcus-default',
-          name: 'Marcus Sterling',
-          email: 'marcus@gmail.com',
-          role: 'REFEREE',
-          refereeId: 'ca701ecb-f512-45a3-b651-600b4d45f965',
-          referee: { refereeCode: 'REF-001', name: 'Marcus Sterling' },
-        });
-      } else {
-        setUser({
-          id: 'admin-default',
-          name: 'Tournament Director',
-          email: 'admin@sportsportal.com',
-          role: 'SUPER_ADMIN',
-        });
-      }
+      setUser(null);
     } finally {
       setLoading(false);
     }
